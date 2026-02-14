@@ -1,0 +1,27 @@
+api:
+  enabled: false
+
+portal:
+  enabled: false
+
+ui:
+  enabled: false
+
+es:
+  enabled: false
+
+gateway:
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  image:
+    repository: graviteeio/apim-gateway
+    tag: latest
+  services:
+    sync:
+      kubernetes:
+        enabled: true
+  dbLess: true
+  reporters:
+    elasticsearch:
+      enabled: false

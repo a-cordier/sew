@@ -1,0 +1,224 @@
+package installer
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/a-cordier/sew/internal/registry"
+	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart/loader"
+	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/cli/values"
+	"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v3/pkg/release"
+	"helm.sh/helm/v3/pkg/repo"
+	"helm.sh/helm/v3/pkg/storage/driver"
+)
+
+// HelmInstaller installs Helm charts (upgrade --install).
+type HelmInstaller struct {
+	home string // sew home directory (absolute), set by AddRepos
+}
+
+// AddRepos adds the given Helm repositories and downloads their indexes.
+// Must be called with an absolute home path before Install for chart resolution to use these repos.
+func (h *HelmInstaller) AddRepos(repos []registry.Repo, home string) error {
+	if home == "" {
+		if d, err := os.UserHomeDir(); err == nil {
+			home = filepath.Join(d, ".sew")
+		}
+	}
+	absHome, err := filepath.Abs(home)
+	if err != nil {
+		return fmt.Errorf("resolving home path: %w", err)
+	}
+	h.home = absHome
+
+	helmRepoConfig := filepath.Join(absHome, "helm", "repositories.yaml")
+	// Helm repo package writes index to HELM_CACHE_HOME/repository; downloader reads from RepositoryCache.
+	// So we use the same base: helm/repository under home.
+	helmRepoCache := filepath.Join(absHome, "helm", "repository")
+
+	if err := os.MkdirAll(filepath.Dir(helmRepoConfig), 0o755); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(helmRepoCache, 0o755); err != nil {
+		return err
+	}
+	// So that repo.DownloadIndexFile writes to helmRepoCache (helmpath.CachePath("repository") = HELM_CACHE_HOME/repository)
+	os.Setenv("HELM_CACHE_HOME", filepath.Join(absHome, "helm"))
+
+	var f *repo.File
+	if _, err := os.Stat(helmRepoConfig); err == nil {
+		f, err = repo.LoadFile(helmRepoConfig)
+		if err != nil {
+			return fmt.Errorf("loading repositories file: %w", err)
+		}
+	}
+	if f == nil {
+		f = repo.NewFile()
+	}
+
+	settings := cli.New()
+	settings.RepositoryConfig = helmRepoConfig
+	settings.RepositoryCache = helmRepoCache
+	os.Setenv("HELM_REPOSITORY_CONFIG", helmRepoConfig)
+	os.Setenv("HELM_CONFIG_HOME", filepath.Join(absHome, "helm"))
+
+	getters := getter.All(settings)
+	for _, r := range repos {
+		entry := &repo.Entry{Name: r.Name, URL: r.URL}
+		chartRepo, err := repo.NewChartRepository(entry, getters)
+		if err != nil {
+			return fmt.Errorf("adding repo %q: %w", r.Name, err)
+		}
+		// Always download index so it lives in our cache (required for LocateChart)
+		if _, err := chartRepo.DownloadIndexFile(); err != nil {
+			return fmt.Errorf("downloading index for %q: %w", r.Name, err)
+		}
+		if !f.Has(r.Name) {
+			f.Update(entry)
+		}
+	}
+
+	return f.WriteFile(helmRepoConfig, 0o644)
+}
+
+// isReleaseUninstalled returns true if the last release in history is uninstalled.
+func isReleaseUninstalled(versions []*release.Release) bool {
+	return len(versions) > 0 && versions[len(versions)-1].Info.Status == release.StatusUninstalled
+}
+
+// Install runs helm upgrade --install for the component: install if release does not exist, else upgrade.
+func (h *HelmInstaller) Install(ctx context.Context, comp registry.Component, dir string) error {
+	if comp.Helm == nil {
+		return fmt.Errorf("component %q has no helm spec", comp.Name)
+	}
+	home := h.home
+	if home == "" {
+		if d, err := os.UserHomeDir(); err == nil {
+			home = filepath.Join(d, ".sew")
+		}
+	}
+
+	absHome, _ := filepath.Abs(home)
+	helmRepoConfig := filepath.Join(absHome, "helm", "repositories.yaml")
+	helmRepoCache := filepath.Join(absHome, "helm", "repository")
+
+	os.Setenv("HELM_CACHE_HOME", filepath.Join(absHome, "helm"))
+	os.Setenv("HELM_REPOSITORY_CONFIG", helmRepoConfig)
+	os.Setenv("HELM_CONFIG_HOME", filepath.Join(absHome, "helm"))
+
+	settings := cli.New()
+	settings.RepositoryConfig = helmRepoConfig
+	settings.RepositoryCache = helmRepoCache
+
+	namespace := comp.Namespace
+	if namespace == "" {
+		namespace = "default"
+	}
+	settings.SetNamespace(namespace)
+
+	actionConfig := new(action.Configuration)
+	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {}); err != nil {
+		return fmt.Errorf("initializing helm: %w", err)
+	}
+
+	// Merge values from files (paths relative to dir)
+	valueOpts := &values.Options{
+		ValueFiles: make([]string, 0, len(comp.Helm.Values)),
+	}
+	for _, v := range comp.Helm.Values {
+		valueOpts.ValueFiles = append(valueOpts.ValueFiles, filepath.Join(dir, v))
+	}
+	vals, err := valueOpts.MergeValues(getter.All(settings))
+	if err != nil {
+		return fmt.Errorf("merging values: %w", err)
+	}
+
+	// Check if release exists (same logic as helm upgrade --install)
+	histClient := action.NewHistory(actionConfig)
+	histClient.Max = 1
+	versions, histErr := histClient.Run(comp.Name)
+	useInstall := histErr == driver.ErrReleaseNotFound || isReleaseUninstalled(versions)
+	if histErr != nil && !useInstall {
+		return fmt.Errorf("checking release history: %w", histErr)
+	}
+
+	if useInstall {
+		instClient := action.NewInstall(actionConfig)
+		instClient.ReleaseName = comp.Name
+		instClient.Namespace = namespace
+		instClient.CreateNamespace = true
+		instClient.ChartPathOptions = action.ChartPathOptions{}
+		if comp.Helm.Version != "" {
+			instClient.ChartPathOptions.Version = comp.Helm.Version
+		}
+		chartPath, err := instClient.ChartPathOptions.LocateChart(comp.Helm.Chart, settings)
+		if err != nil {
+			return fmt.Errorf("locating chart %q: %w", comp.Helm.Chart, err)
+		}
+		ch, err := loader.Load(chartPath)
+		if err != nil {
+			return fmt.Errorf("loading chart: %w", err)
+		}
+		_, err = instClient.RunWithContext(ctx, ch, vals)
+		if err != nil {
+			return fmt.Errorf("running install: %w", err)
+		}
+		return nil
+	}
+
+	upgradeClient := action.NewUpgrade(actionConfig)
+	upgradeClient.Namespace = namespace
+	if comp.Helm.Version != "" {
+		upgradeClient.Version = comp.Helm.Version
+		upgradeClient.ChartPathOptions.Version = comp.Helm.Version
+	}
+	chartPath, err := upgradeClient.ChartPathOptions.LocateChart(comp.Helm.Chart, settings)
+	if err != nil {
+		return fmt.Errorf("locating chart %q: %w", comp.Helm.Chart, err)
+	}
+	ch, err := loader.Load(chartPath)
+	if err != nil {
+		return fmt.Errorf("loading chart: %w", err)
+	}
+	_, err = upgradeClient.RunWithContext(ctx, comp.Name, ch, vals)
+	if err != nil {
+		return fmt.Errorf("running upgrade: %w", err)
+	}
+	return nil
+}
+
+// Uninstall runs helm uninstall for the component.
+func (h *HelmInstaller) Uninstall(ctx context.Context, comp registry.Component) error {
+	home := h.home
+	if home == "" {
+		if d, err := os.UserHomeDir(); err == nil {
+			home = filepath.Join(d, ".sew")
+		}
+	}
+	absHome, _ := filepath.Abs(home)
+	helmRepoCache := filepath.Join(absHome, "helm", "repository")
+	os.Setenv("HELM_CACHE_HOME", filepath.Join(absHome, "helm"))
+	settings := cli.New()
+	settings.RepositoryConfig = filepath.Join(absHome, "helm", "repositories.yaml")
+	settings.RepositoryCache = helmRepoCache
+
+	namespace := comp.Namespace
+	if namespace == "" {
+		namespace = "default"
+	}
+	settings.SetNamespace(namespace)
+
+	actionConfig := new(action.Configuration)
+	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), func(string, ...interface{}) {}); err != nil {
+		return fmt.Errorf("initializing helm: %w", err)
+	}
+
+	client := action.NewUninstall(actionConfig)
+	_, err := client.Run(comp.Name)
+	return err
+}

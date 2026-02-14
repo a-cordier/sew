@@ -1,0 +1,21 @@
+repos:
+  - name: graviteeio
+    url: https://helm.gravitee.io
+
+components:
+  - name: apim
+    type: helm
+    namespace: gravitee
+    helm:
+      chart: graviteeio/apim
+      # version: "4.11.0"
+      values:
+        - values-apim.yaml
+
+  - name: gko
+    type: helm
+    namespace: gravitee
+    helm:
+      chart: graviteeio/gko
+      values:
+        - values-gko.yaml
