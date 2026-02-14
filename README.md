@@ -5,7 +5,7 @@
 ## Concepts
 
 - **Registry** — A tree of context directories, either on the filesystem (`file:///path`) or over HTTP. The binary does not ship a registry; you use your own or a remote one.
-- **Context** — A path inside the registry following `org/product/variant` (e.g. `gravitee.io/apim/db-less`). Each context has a `context.yaml` that lists Helm repos and components (charts + values).
+- **Context** — A path inside the registry following `org/product/variant` (e.g. `gravitee.io/apim/db-less`). Each context has a `context.yaml` that lists Helm repos and components (charts + values). If you omit the variant (e.g. `gravitee.io/apim`), sew looks for a `.default` file to pick one automatically (see [Default variant resolution](#default-variant-resolution)).
 - **Config** — Your `config.yaml` sets the registry URL, the context to use, the Kind cluster definition, and optional overrides per component.
 
 ## Commands
@@ -91,3 +91,31 @@ components:
 ```
 
 File paths in `values` are relative to the context directory. `type` defaults to `helm` if omitted.
+
+## Default variant resolution
+
+A context path usually includes the variant (`org/product/variant`), but you can also point to the product level and let sew pick the default variant automatically.
+
+When the resolved path has no `context.yaml`, sew looks for a **`.default`** file in the same directory. This plain-text dotfile contains a single line — the name of the variant to use. sew then appends that variant to the path and resolves again.
+
+```
+registry/gravitee.io/apim/
+├── .default          # contains "db-less"
+├── db-less/
+│   ├── context.yaml
+│   ├── values-apim.yaml
+│   └── values-gko.yaml
+└── standard/         # another variant
+    ├── context.yaml
+    └── ...
+```
+
+With the tree above, setting `context: gravitee.io/apim` in your config is equivalent to `context: gravitee.io/apim/db-less` — sew reads `.default`, finds `db-less`, and resolves `gravitee.io/apim/db-less`.
+
+To create a default for your own product, add a `.default` file next to the variant directories:
+
+```bash
+echo "db-less" > registry/gravitee.io/apim/.default
+```
+
+If neither `context.yaml` nor `.default` is found at the given path, sew returns an error.

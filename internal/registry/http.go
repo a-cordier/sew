@@ -39,6 +39,14 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*Resolv
 		return nil, fmt.Errorf("fetching context: %w", err)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotFound {
+		// context.yaml not found – try the .default fallback.
+		variant, defaultErr := r.fetchDefault(ctx, client, baseURL, contextPath)
+		if defaultErr != nil {
+			return nil, fmt.Errorf("fetching context: %s", resp.Status)
+		}
+		return r.Resolve(ctx, contextPath+"/"+variant)
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("fetching context: %s", resp.Status)
 	}
@@ -110,4 +118,32 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*Resolv
 		Components: parsed.Components,
 		Dir:        cacheDir,
 	}, nil
+}
+
+// fetchDefault fetches {baseURL}/{contextPath}/.default and returns the
+// trimmed variant name. It returns an error if the file does not exist,
+// the server returns a non-200 status, or the file content is empty.
+func (r *HTTPResolver) fetchDefault(ctx context.Context, client *http.Client, baseURL, contextPath string) (string, error) {
+	u := baseURL + "/" + contextPath + "/.default"
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return "", fmt.Errorf("building request for .default: %w", err)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("fetching .default: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("fetching .default: %s", resp.Status)
+	}
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("reading .default: %w", err)
+	}
+	name := strings.TrimSpace(string(data))
+	if name == "" {
+		return "", fmt.Errorf("empty .default file at %s", u)
+	}
+	return name, nil
 }
