@@ -6,7 +6,7 @@
 
 - **Registry** — A tree of context directories, either on the filesystem (`file:///path`) or over HTTP. The binary does not ship a registry; you use your own or a remote one.
 - **Context** — A path inside the registry following `org/product/variant` (e.g. `gravitee.io/apim/db-less`). Each context has a `context.yaml` that lists Helm repos and components (charts + values). If you omit the variant (e.g. `gravitee.io/apim`), sew looks for a `.default` file to pick one automatically (see [Default variant resolution](#default-variant-resolution)).
-- **Config** — Your `config.yaml` sets the registry URL, the context to use, the Kind cluster definition, and optional overrides per component.
+- **Config** — Your `sew.yaml` sets the registry URL, the context to use, the Kind cluster definition, and optional overrides per component.
 
 ## Commands
 
@@ -17,12 +17,12 @@
 
 ### Global flags
 
-- `--config <path>` — Config file to use (default: `./config.yaml` or `~/.sew/config.yaml`).
+- `--config <path>` — Config file to use (default: `./sew.yaml` or `~/.sew/sew.yaml`).
 - `--context <path>` — Context path (e.g. `gravitee.io/apim/db-less`). Overrides the value from the config file.
 
 ## Quick start
 
-1. **Config** — Create a `config.yaml` (or use the one in this repo) with at least:
+1. **Config** — Create a `sew.yaml` (or use the one in this repo) with at least:
    - `registry`: e.g. `file://./registry` for the local test registry, or an HTTP URL.
    - `context`: e.g. `gravitee.io/apim/db-less`.
    - `kind`: Kind cluster spec (name, nodes, port mappings).

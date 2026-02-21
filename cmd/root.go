@@ -32,7 +32,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "path to config file (default: ./config.yaml or ~/.sew/config.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "path to config file (default: ./sew.yaml or ~/.sew/sew.yaml)")
 	rootCmd.PersistentFlags().StringVar(&contextPath, "context", "", "context path to use (overrides config file)")
 }
 
@@ -43,15 +43,15 @@ func Execute() error {
 
 // resolveConfig loads the configuration from the first available path:
 // 1. Explicit --config flag
-// 2. ./config.yaml in the current directory
-// 3. ~/.sew/config.yaml in the user's home directory
+// 2. ./sew.yaml in the current directory
+// 3. ~/.sew/sew.yaml in the user's home directory
 func resolveConfig(explicit string) (*config.Config, error) {
 	if explicit != "" {
 		return config.Load(explicit)
 	}
 
-	if _, err := os.Stat("config.yaml"); err == nil {
-		return config.Load("config.yaml")
+	if _, err := os.Stat("sew.yaml"); err == nil {
+		return config.Load("sew.yaml")
 	}
 
 	home, err := os.UserHomeDir()
@@ -59,10 +59,10 @@ func resolveConfig(explicit string) (*config.Config, error) {
 		return nil, fmt.Errorf("could not determine home directory: %w", err)
 	}
 
-	defaultPath := filepath.Join(home, ".sew", "config.yaml")
+	defaultPath := filepath.Join(home, ".sew", "sew.yaml")
 	if _, err := os.Stat(defaultPath); err == nil {
 		return config.Load(defaultPath)
 	}
 
-	return nil, fmt.Errorf("no config file found (tried ./config.yaml and %s)", defaultPath)
+	return nil, fmt.Errorf("no config file found (tried ./sew.yaml and %s)", defaultPath)
 }
