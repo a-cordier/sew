@@ -1,7 +1,6 @@
 home: .sew
-# Registry root (file:// for local directory, or HTTP URL)
 registry: https://a-cordier.github.io/sew
-context: gravitee.io/apim
+context: gravitee.io/apim/dbless
 
 kind:
   apiVersion: kind.x-k8s.io/v1alpha4

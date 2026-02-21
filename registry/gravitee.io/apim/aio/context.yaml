@@ -1,14 +1,30 @@
 repos:
   - name: graviteeio
     url: https://helm.gravitee.io
+  - name: elastic
+    url: https://helm.elastic.co
 
 components:
+  - name: mongodb
+    type: manifest
+    namespace: gravitee
+    manifest:
+      files:
+        - mongodb.yaml
+
+  - name: elasticsearch
+    type: helm
+    namespace: gravitee
+    helm:
+      chart: elastic/elasticsearch
+      values:
+        - values-elasticsearch.yaml
+
   - name: apim
     type: helm
     namespace: gravitee
     helm:
       chart: graviteeio/apim
-      # version: "4.11.0"
       values:
         - values-apim.yaml
 
