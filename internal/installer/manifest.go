@@ -8,8 +8,10 @@ import (
 	"strings"
 
 	"github.com/a-cordier/sew/internal/registry"
+	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/discovery/cached/memory"
 	"k8s.io/client-go/dynamic"
@@ -27,7 +29,6 @@ const (
 // ManifestInstaller installs components from plain Kubernetes manifest files.
 type ManifestInstaller struct{}
 
-// getConfig returns rest.Config from in-cluster config or default kubeconfig.
 func getConfig() (*rest.Config, error) {
 	config, err := rest.InClusterConfig()
 	if err == nil {
@@ -38,7 +39,6 @@ func getConfig() (*rest.Config, error) {
 	return kubeconfig.ClientConfig()
 }
 
-// Install reads manifest files from dir and applies them to the cluster.
 func (m *ManifestInstaller) Install(ctx context.Context, comp registry.Component, dir string) error {
 	if comp.Manifest == nil {
 		return fmt.Errorf("component %q has no manifest spec", comp.Name)
@@ -64,6 +64,12 @@ func (m *ManifestInstaller) Install(ctx context.Context, comp registry.Component
 	namespace := comp.Namespace
 	if namespace == "" {
 		namespace = "default"
+	}
+	if namespace != "default" {
+		_, err := clientset.CoreV1().Namespaces().Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: namespace}}, metav1.CreateOptions{})
+		if err != nil && !apierrors.IsAlreadyExists(err) {
+			return fmt.Errorf("create namespace %q: %w", namespace, err)
+		}
 	}
 
 	for _, f := range comp.Manifest.Files {
@@ -100,7 +106,7 @@ func (m *ManifestInstaller) Install(ctx context.Context, comp registry.Component
 			} else {
 				ri = dynClient.Resource(gvr)
 			}
-			_, err = ri.Apply(ctx, obj.GetName(), obj, v1.ApplyOptions{FieldManager: fieldManager})
+			_, err = ri.Apply(ctx, obj.GetName(), obj, metav1.ApplyOptions{FieldManager: fieldManager})
 			if err != nil {
 				return fmt.Errorf("apply %s %s: %w", gvk.Kind, obj.GetName(), err)
 			}
