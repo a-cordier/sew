@@ -1,36 +1,49 @@
 package registry
 
-// Repo represents a Helm chart repository.
+// Repo is a Helm chart repository.
 type Repo struct {
 	Name string `yaml:"name"`
 	URL  string `yaml:"url"`
 }
 
-// HelmSpec holds the Helm-specific configuration for a component.
+// HelmSpec is the Helm configuration for a component.
 type HelmSpec struct {
 	Chart   string   `yaml:"chart"`
 	Version string   `yaml:"version,omitempty"`
 	Values  []string `yaml:"values,omitempty"`
 }
 
-// ManifestSpec holds the manifest-specific configuration for a component.
-// Files can be local paths or URLs.
+// ManifestSpec is the manifest configuration for a component.
 type ManifestSpec struct {
 	Files []string `yaml:"files"`
 }
 
-// Component represents a single installable unit.
-// The Type field determines which installer handles it
-// and which nested spec is populated.
-type Component struct {
-	Name      string `yaml:"name"`
-	Type      string `yaml:"type,omitempty"`      // "helm" (default), "manifest", "kustomize", ...
-	Namespace string `yaml:"namespace,omitempty"`
+// Conditions describes the state a required component must be in.
+type Conditions struct {
+	Ready bool `yaml:"ready,omitempty"`
+}
 
-	// Installer-specific specs -- only one is populated per component.
-	Helm     *HelmSpec     `yaml:"helm,omitempty"`
-	Manifest *ManifestSpec `yaml:"manifest,omitempty"`
-	// Kustomize *KustomizeSpec `yaml:"kustomize,omitempty"` // future
+// Selector is a Kubernetes label selector for pod readiness.
+type Selector struct {
+	MatchLabels map[string]string `yaml:"matchLabels,omitempty"`
+}
+
+// Requirement references another component that must be satisfied before installation.
+type Requirement struct {
+	Component  string     `yaml:"component"`
+	Conditions Conditions `yaml:"conditions,omitempty"`
+	Selector   *Selector  `yaml:"selector,omitempty"`
+	Timeout    string     `yaml:"timeout,omitempty"`
+}
+
+// Component is a single installable unit (Helm chart, manifest, etc.).
+type Component struct {
+	Name      string        `yaml:"name"`
+	Type      string        `yaml:"type,omitempty"`
+	Namespace string        `yaml:"namespace,omitempty"`
+	Requires  []Requirement `yaml:"requires,omitempty"`
+	Helm      *HelmSpec     `yaml:"helm,omitempty"`
+	Manifest  *ManifestSpec `yaml:"manifest,omitempty"`
 }
 
 // EffectiveType returns the component type, defaulting to "helm".
@@ -41,19 +54,16 @@ func (c *Component) EffectiveType() string {
 	return c.Type
 }
 
-// Context is the parsed content of a context.yaml file within the registry.
+// Context is the parsed content of a context.yaml file.
 type Context struct {
 	Includes   []string    `yaml:"includes,omitempty"`
 	Repos      []Repo      `yaml:"repos,omitempty"`
 	Components []Component `yaml:"components"`
 }
 
-// ResolvedContext is a fully resolved context with all referenced files
-// available in a local directory.
+// ResolvedContext is a context with all referenced files available in Dir.
 type ResolvedContext struct {
 	Repos      []Repo
 	Components []Component
-	// Dir is the local directory containing fetched files.
-	// All relative file paths in Components are relative to this dir.
-	Dir string
+	Dir        string
 }

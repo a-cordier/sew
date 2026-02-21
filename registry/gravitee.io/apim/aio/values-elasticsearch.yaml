@@ -5,9 +5,9 @@ replicas: 1
 minimumMasterNodes: 1
 esJavaOpts: "-Xmx256m -Xms256m"
 
+createCert: false
+
 extraEnvs:
-  - name: discovery.type
-    value: single-node
   - name: xpack.security.enabled
     value: "false"
 
@@ -23,3 +23,8 @@ resources:
 
 persistence:
   enabled: false
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule

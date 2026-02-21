@@ -23,6 +23,21 @@ components:
   - name: apim
     type: helm
     namespace: gravitee
+    requires:
+      - component: mongodb
+        conditions:
+          ready: true
+        selector:
+          matchLabels:
+            app: mongodb
+        timeout: 15m
+      - component: elasticsearch
+        conditions:
+          ready: true
+        selector:
+          matchLabels:
+            app: elasticsearch-master
+        timeout: 15m
     helm:
       chart: graviteeio/apim
       values:

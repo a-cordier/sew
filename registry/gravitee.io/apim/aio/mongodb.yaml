@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,6 +14,10 @@ spec:
       labels:
         app: mongodb
     spec:
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
       containers:
         - name: mongodb
           image: mongo:7
@@ -28,7 +31,6 @@ spec:
             limits:
               cpu: "1"
               memory: 1Gi
-          # No auth for local/dev; persistence can be added via volumeMounts if needed
 ---
 apiVersion: v1
 kind: Service
