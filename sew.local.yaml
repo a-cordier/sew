@@ -1,6 +1,5 @@
 home: .sew
-# Registry root (file:// for local directory, or HTTP URL)
-registry: https://a-cordier.github.io/sew
+registry: file://./registry
 context: gravitee.io/apim
 
 kind:
