@@ -1,4 +1,4 @@
-# sew
+<p align="center"><img src="logo.svg" alt="sew" width="140"/></p>
 
 **sew** spins up local Kubernetes clusters and deploys ready-to-use applications from a **registry** and **context**. You point it at a context (e.g. `gravitee.io/apim/db-less`), and it creates a Kind cluster and installs the components defined there (Helm charts, and in the future manifests or Kustomize).
 
