@@ -28,10 +28,3 @@ components:
       values:
         - values-apim.yaml
 
-  - name: gko
-    type: helm
-    namespace: gravitee
-    helm:
-      chart: graviteeio/gko
-      values:
-        - values-gko.yaml
