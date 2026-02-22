@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/a-cordier/sew/internal/kind"
-	sewlog "github.com/a-cordier/sew/internal/log"
+	"github.com/a-cordier/sew/internal/logger"
 	"github.com/a-cordier/sew/internal/registry"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +15,7 @@ import (
 var downCmd = &cobra.Command{
 	Use:   "down",
 	Short: "Delete the cluster defined in the config",
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(_ *cobra.Command, _ []string) error {
 		if cfg.Registry != "" && cfg.Context != "" {
 			registryURL := cfg.Registry
 			if strings.HasPrefix(registryURL, "file://") {
@@ -32,7 +32,7 @@ var downCmd = &cobra.Command{
 			cfg.Kind.MergeWithContext(resolved.Kind)
 		}
 
-		return sewlog.WithSpinner(
+		return logger.WithSpinner(
 			fmt.Sprintf("Deleting cluster %q", cfg.Kind.Name),
 			func() error {
 				return kind.Delete(cfg.Kind.Name)

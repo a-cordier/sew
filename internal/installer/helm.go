@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/a-cordier/sew/api"
+	"github.com/a-cordier/sew/core"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
@@ -24,11 +24,13 @@ type HelmInstaller struct {
 
 // AddRepos adds the given Helm repositories and downloads their indexes.
 // Must be called with an absolute home path before Install for chart resolution to use these repos.
-func (h *HelmInstaller) AddRepos(repos []api.Repo, home string) error {
+func (h *HelmInstaller) AddRepos(repos []core.Repo, home string) error {
 	if home == "" {
-		if d, err := os.UserHomeDir(); err == nil {
-			home = filepath.Join(d, ".sew")
+		d, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("determining home directory: %w", err)
 		}
+		home = filepath.Join(d, ".sew")
 	}
 	absHome, err := filepath.Abs(home)
 	if err != nil {
@@ -92,18 +94,23 @@ func isReleaseUninstalled(versions []*release.Release) bool {
 }
 
 // Install runs helm upgrade --install for the component: install if release does not exist, else upgrade.
-func (h *HelmInstaller) Install(ctx context.Context, comp api.Component, dir string) error {
+func (h *HelmInstaller) Install(ctx context.Context, comp core.Component, dir string) error {
 	if comp.Helm == nil {
 		return fmt.Errorf("component %q has no helm spec", comp.Name)
 	}
 	home := h.home
 	if home == "" {
-		if d, err := os.UserHomeDir(); err == nil {
-			home = filepath.Join(d, ".sew")
+		d, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("determining home directory: %w", err)
 		}
+		home = filepath.Join(d, ".sew")
 	}
 
-	absHome, _ := filepath.Abs(home)
+	absHome, err := filepath.Abs(home)
+	if err != nil {
+		return fmt.Errorf("resolving home path: %w", err)
+	}
 	helmRepoConfig := filepath.Join(absHome, "helm", "repositories.yaml")
 	helmRepoCache := filepath.Join(absHome, "helm", "repository")
 
@@ -122,7 +129,7 @@ func (h *HelmInstaller) Install(ctx context.Context, comp api.Component, dir str
 	settings.SetNamespace(namespace)
 
 	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {}); err != nil {
+	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), func(_ string, _ ...interface{}) {}); err != nil {
 		return fmt.Errorf("initializing helm: %w", err)
 	}
 
@@ -193,14 +200,19 @@ func (h *HelmInstaller) Install(ctx context.Context, comp api.Component, dir str
 }
 
 // Uninstall runs helm uninstall for the component.
-func (h *HelmInstaller) Uninstall(ctx context.Context, comp api.Component) error {
+func (h *HelmInstaller) Uninstall(_ context.Context, comp core.Component) error {
 	home := h.home
 	if home == "" {
-		if d, err := os.UserHomeDir(); err == nil {
-			home = filepath.Join(d, ".sew")
+		d, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("determining home directory: %w", err)
 		}
+		home = filepath.Join(d, ".sew")
 	}
-	absHome, _ := filepath.Abs(home)
+	absHome, err := filepath.Abs(home)
+	if err != nil {
+		return fmt.Errorf("resolving home path: %w", err)
+	}
 	helmRepoCache := filepath.Join(absHome, "helm", "repository")
 	os.Setenv("HELM_CACHE_HOME", filepath.Join(absHome, "helm"))
 	settings := cli.New()
@@ -219,6 +231,6 @@ func (h *HelmInstaller) Uninstall(ctx context.Context, comp api.Component) error
 	}
 
 	client := action.NewUninstall(actionConfig)
-	_, err := client.Run(comp.Name)
+	_, err = client.Run(comp.Name)
 	return err
 }

@@ -1,4 +1,4 @@
-package api
+package core
 
 import (
 	"sort"
@@ -73,9 +73,8 @@ type Mount struct {
 }
 
 // RawYAML returns the KindConfig serialized as YAML.
-func (k *KindConfig) RawYAML() []byte {
-	data, _ := yaml.Marshal(k)
-	return data
+func (k *KindConfig) RawYAML() ([]byte, error) {
+	return yaml.Marshal(k)
 }
 
 // MergeWithContext merges context Kind requirements into the config. Context

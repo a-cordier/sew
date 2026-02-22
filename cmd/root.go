@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/a-cordier/sew/api"
+	"github.com/a-cordier/sew/core"
 	"github.com/a-cordier/sew/internal/config"
 	"github.com/spf13/cobra"
 )
@@ -13,13 +13,13 @@ import (
 var (
 	cfgFile     string
 	contextPath string
-	cfg         *api.Config
+	cfg         *core.Config
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "sew",
 	Short: "Spin up local Kubernetes clusters and deploy ready-to-use applications",
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+	PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
 		var err error
 		cfg, err = resolveConfig(cfgFile)
 		if err != nil {
@@ -46,7 +46,7 @@ func Execute() error {
 // 1. Explicit --config flag
 // 2. ./sew.yaml in the current directory
 // 3. ~/.sew/sew.yaml in the user's home directory
-func resolveConfig(explicit string) (*api.Config, error) {
+func resolveConfig(explicit string) (*core.Config, error) {
 	if explicit != "" {
 		return config.Load(explicit)
 	}

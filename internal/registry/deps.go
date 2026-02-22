@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/a-cordier/sew/api"
+	"github.com/a-cordier/sew/core"
 )
 
-func Validate(components []api.Component) error {
-	nameToComp := make(map[string]api.Component)
+func Validate(components []core.Component) error {
+	nameToComp := make(map[string]core.Component)
 	for _, c := range components {
 		nameToComp[c.Name] = c
 	}
@@ -23,8 +23,8 @@ func Validate(components []api.Component) error {
 	return err
 }
 
-func TopoSort(components []api.Component) ([]api.Component, error) {
-	nameToComp := make(map[string]api.Component)
+func TopoSort(components []core.Component) ([]core.Component, error) {
+	nameToComp := make(map[string]core.Component)
 	for _, c := range components {
 		nameToComp[c.Name] = c
 	}
@@ -48,7 +48,7 @@ func TopoSort(components []api.Component) ([]api.Component, error) {
 		}
 	}
 
-	var order []api.Component
+	var order []core.Component
 	for len(queue) > 0 {
 		name := queue[0]
 		queue = queue[1:]

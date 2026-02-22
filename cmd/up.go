@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/a-cordier/sew/api"
+	"github.com/a-cordier/sew/core"
 	"github.com/a-cordier/sew/internal/installer"
 	"github.com/a-cordier/sew/internal/kind"
 	"github.com/a-cordier/sew/internal/registry"
-	sewlog "github.com/a-cordier/sew/internal/log"
+	"github.com/a-cordier/sew/internal/logger"
 	"github.com/spf13/cobra"
 	"k8s.io/klog/v2"
 )
@@ -27,11 +27,14 @@ func init() {
 	rootCmd.AddCommand(upCmd)
 }
 
-func runUp(cmd *cobra.Command, args []string) error {
+func runUp(_ *cobra.Command, _ []string) error {
 	// Resolve home to absolute path
 	home := cfg.Home
 	if !filepath.IsAbs(home) {
-		cwd, _ := os.Getwd()
+		cwd, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("getting working directory: %w", err)
+		}
 		home = filepath.Join(cwd, home)
 	}
 	if err := os.MkdirAll(home, 0o755); err != nil {
@@ -45,7 +48,7 @@ func runUp(cmd *cobra.Command, args []string) error {
 	defer logFile.Close()
 	klog.SetOutput(logFile)
 
-	var resolved *api.ResolvedContext
+	var resolved *core.ResolvedContext
 	if cfg.Registry != "" && cfg.Context != "" {
 		registryURL := cfg.Registry
 		if strings.HasPrefix(registryURL, "file://") {
@@ -63,9 +66,13 @@ func runUp(cmd *cobra.Command, args []string) error {
 		cfg.Kind.MergeWithContext(resolved.Kind)
 	}
 
-	if err := sewlog.WithSpinner(
+	kindConfig, err := cfg.Kind.RawYAML()
+	if err != nil {
+		return fmt.Errorf("serializing kind config: %w", err)
+	}
+	if err := logger.WithSpinner(
 		fmt.Sprintf("Creating cluster %q", cfg.Kind.Name),
-		func() error { return kind.Create(cfg.Kind.Name, cfg.Kind.RawYAML()) },
+		func() error { return kind.Create(cfg.Kind.Name, kindConfig) },
 	); err != nil {
 		return err
 	}
@@ -88,7 +95,7 @@ func runUp(cmd *cobra.Command, args []string) error {
 	if len(resolved.Repos) > 0 {
 		helmInst, _ := installer.ForType("helm")
 		if hi, ok := helmInst.(*installer.HelmInstaller); ok {
-			if err := sewlog.WithSpinner("Adding Helm repositories", func() error {
+			if err := logger.WithSpinner("Adding Helm repositories", func() error {
 				return hi.AddRepos(resolved.Repos, home)
 			}); err != nil {
 				return err
@@ -96,7 +103,7 @@ func runUp(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	compByName := make(map[string]api.Component)
+	compByName := make(map[string]core.Component)
 	for _, c := range resolved.Components {
 		compByName[c.Name] = c
 	}
@@ -121,7 +128,7 @@ func runUp(cmd *cobra.Command, args []string) error {
 				if req.Selector != nil && len(req.Selector.MatchLabels) > 0 {
 					matchLabels = req.Selector.MatchLabels
 				}
-				if err := sewlog.WithSpinner(fmt.Sprintf("Waiting for %q to be ready", req.Component), func() error {
+				if err := logger.WithSpinner(fmt.Sprintf("Waiting for %q to be ready", req.Component), func() error {
 					return installer.WaitForReady(ctx, req.Component, depNamespace, timeout, matchLabels)
 				}); err != nil {
 					return fmt.Errorf("requirement %q not ready: %w", req.Component, err)
@@ -133,7 +140,7 @@ func runUp(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("component %q: %w", comp.Name, err)
 		}
 		comp := comp
-		if err := sewlog.WithSpinner(fmt.Sprintf("Installing %q", comp.Name), func() error {
+		if err := logger.WithSpinner(fmt.Sprintf("Installing %q", comp.Name), func() error {
 			return inst.Install(ctx, comp, resolved.Dir)
 		}); err != nil {
 			return err

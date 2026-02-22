@@ -3,13 +3,13 @@ package registry
 import (
 	"path/filepath"
 
-	"github.com/a-cordier/sew/api"
+	"github.com/a-cordier/sew/core"
 )
 
 // ApplyOverrides applies user overrides from config onto the resolved context.
 // Override values file paths are resolved relative to configDir.
 // Mutates resolved.Components in place.
-func ApplyOverrides(resolved *api.ResolvedContext, overrides map[string]api.ComponentOverride, configDir string) {
+func ApplyOverrides(resolved *core.ResolvedContext, overrides map[string]core.ComponentOverride, configDir string) {
 	if overrides == nil {
 		return
 	}

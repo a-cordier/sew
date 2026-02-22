@@ -5,18 +5,18 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/a-cordier/sew/api"
+	"github.com/a-cordier/sew/core"
 
 	"gopkg.in/yaml.v3"
 )
 
-func Load(path string) (*api.Config, error) {
+func Load(path string) (*core.Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("reading config file %s: %w", path, err)
 	}
 
-	var cfg api.Config
+	var cfg core.Config
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("parsing config file %s: %w", path, err)
 	}

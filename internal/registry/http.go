@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/a-cordier/sew/api"
+	"github.com/a-cordier/sew/core"
 	"gopkg.in/yaml.v3"
 )
 
@@ -23,7 +23,7 @@ type HTTPResolver struct {
 // Resolve fetches {BaseURL}/{contextPath}/context.yaml, downloads referenced
 // values files to a local cache directory, and returns a ResolvedContext
 // whose Dir points to that cache.
-func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*api.ResolvedContext, error) {
+func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.ResolvedContext, error) {
 	baseURL := strings.TrimSuffix(r.BaseURL, "/")
 	contextURL := baseURL + "/" + contextPath + "/context.yaml"
 
@@ -55,14 +55,17 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*api.Re
 		return nil, fmt.Errorf("reading context: %w", err)
 	}
 
-	var parsed api.Context
+	var parsed core.Context
 	if err := yaml.Unmarshal(data, &parsed); err != nil {
 		return nil, fmt.Errorf("parsing context.yaml: %w", err)
 	}
 
 	cacheRoot := r.CacheRoot
 	if cacheRoot == "" {
-		home, _ := os.UserHomeDir()
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return nil, fmt.Errorf("determining home directory: %w", err)
+		}
 		cacheRoot = filepath.Join(home, ".sew", "cache")
 	}
 	cacheDir := filepath.Join(cacheRoot, contextPath)
@@ -112,7 +115,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*api.Re
 		}
 	}
 
-	return &api.ResolvedContext{
+	return &core.ResolvedContext{
 		Repos:      parsed.Repos,
 		Components: parsed.Components,
 		Dir:        cacheDir,

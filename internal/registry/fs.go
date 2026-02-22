@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/a-cordier/sew/api"
+	"github.com/a-cordier/sew/core"
 	"gopkg.in/yaml.v3"
 )
 
@@ -24,7 +24,7 @@ type FSResolver struct {
 // If context.yaml does not exist, Resolve looks for a .default file
 // containing the name of a default variant sub-directory. When found,
 // it appends the variant to contextPath and resolves again.
-func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*api.ResolvedContext, error) {
+func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*core.ResolvedContext, error) {
 	dir := filepath.Join(r.Root, contextPath)
 	data, err := os.ReadFile(filepath.Join(dir, "context.yaml"))
 	if err != nil {
@@ -42,12 +42,12 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*api.Reso
 		return r.Resolve(ctx, filepath.Join(contextPath, name))
 	}
 
-	var ctxFile api.Context
+	var ctxFile core.Context
 	if err := yaml.Unmarshal(data, &ctxFile); err != nil {
 		return nil, fmt.Errorf("parsing context.yaml: %w", err)
 	}
 
-	return &api.ResolvedContext{
+	return &core.ResolvedContext{
 		Repos:      ctxFile.Repos,
 		Components: ctxFile.Components,
 		Dir:        dir,
