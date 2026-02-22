@@ -21,6 +21,7 @@ func Load(path string) (*api.Config, error) {
 		return nil, fmt.Errorf("parsing config file %s: %w", path, err)
 	}
 
+	cfg.Kind.ApplyDefaults()
 	cfg.Dir = filepath.Dir(path)
 	return &cfg, nil
 }

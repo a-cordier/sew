@@ -51,5 +51,6 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*api.Reso
 		Repos:      ctxFile.Repos,
 		Components: ctxFile.Components,
 		Dir:        dir,
+		Kind:       ctxFile.Kind,
 	}, nil
 }

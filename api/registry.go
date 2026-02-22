@@ -52,11 +52,24 @@ func (c *Component) EffectiveType() string {
 	return c.Type
 }
 
+// ContextKindConfig declares Kind cluster requirements from a context (e.g. name, extra port mappings).
+type ContextKindConfig struct {
+	Name               string         `yaml:"name,omitempty"`
+	ExtraPortMappings  []PortMapping  `yaml:"extraPortMappings,omitempty"`
+	Nodes              []ContextKindNode `yaml:"nodes,omitempty"`
+}
+
+// ContextKindNode is a node entry under context kind (for port mappings under nodes[0]).
+type ContextKindNode struct {
+	ExtraPortMappings []PortMapping `yaml:"extraPortMappings,omitempty"`
+}
+
 // Context is the parsed content of a context.yaml file.
 type Context struct {
-	Includes   []string    `yaml:"includes,omitempty"`
-	Repos      []Repo      `yaml:"repos,omitempty"`
-	Components []Component `yaml:"components"`
+	Kind       *ContextKindConfig `yaml:"kind,omitempty"`
+	Includes   []string           `yaml:"includes,omitempty"`
+	Repos      []Repo             `yaml:"repos,omitempty"`
+	Components []Component        `yaml:"components"`
 }
 
 // ResolvedContext is a fully resolved context with all referenced files in Dir.
@@ -64,6 +77,7 @@ type ResolvedContext struct {
 	Repos      []Repo
 	Components []Component
 	Dir        string
+	Kind       *ContextKindConfig
 }
 
 // Resolver resolves a context path against a registry into a ResolvedContext.

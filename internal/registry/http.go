@@ -116,6 +116,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*api.Re
 		Repos:      parsed.Repos,
 		Components: parsed.Components,
 		Dir:        cacheDir,
+		Kind:       parsed.Kind,
 	}, nil
 }
 

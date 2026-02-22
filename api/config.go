@@ -1,6 +1,8 @@
 package api
 
 import (
+	"sort"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -24,11 +26,32 @@ type HelmOverride struct {
 	Values  []string `yaml:"values,omitempty"`
 }
 
+const (
+	KindDefaultAPIVersion = "kind.x-k8s.io/v1alpha4"
+	KindDefaultKind       = "Cluster"
+	KindDefaultName       = "sew"
+)
+
 type KindConfig struct {
 	APIVersion string     `yaml:"apiVersion"`
 	Kind       string     `yaml:"kind"`
 	Name       string     `yaml:"name"`
 	Nodes      []KindNode `yaml:"nodes"`
+}
+
+func (k *KindConfig) ApplyDefaults() {
+	if k.APIVersion == "" {
+		k.APIVersion = KindDefaultAPIVersion
+	}
+	if k.Kind == "" {
+		k.Kind = KindDefaultKind
+	}
+	if k.Name == "" {
+		k.Name = KindDefaultName
+	}
+	if len(k.Nodes) == 0 {
+		k.Nodes = []KindNode{{Role: "control-plane"}}
+	}
 }
 
 type KindNode struct {
@@ -54,3 +77,49 @@ func (k *KindConfig) RawYAML() []byte {
 	data, _ := yaml.Marshal(k)
 	return data
 }
+
+// MergeWithContext merges context Kind requirements into the config. Context
+// provides the base (e.g. name, extra port mappings); user config overrides. On
+// conflict (same containerPort), user wins. When sew.yaml does not set a custom
+// cluster name (still the default "sew"), the context's kind.name is used.
+func (k *KindConfig) MergeWithContext(ctx *ContextKindConfig) {
+	if ctx == nil {
+		return
+	}
+	if ctx.Name != "" && k.Name == KindDefaultName {
+		k.Name = ctx.Name
+	}
+	if len(k.Nodes) == 0 {
+		return
+	}
+	contextPorts := ctx.ExtraPortMappings
+	if len(ctx.Nodes) > 0 && len(ctx.Nodes[0].ExtraPortMappings) > 0 {
+		contextPorts = mergePortMappings(contextPorts, ctx.Nodes[0].ExtraPortMappings)
+	}
+	node := &k.Nodes[0]
+	node.ExtraPortMappings = mergePortMappings(contextPorts, node.ExtraPortMappings)
+}
+
+func mergePortMappings(base, override []PortMapping) []PortMapping {
+	byPort := make(map[int32]PortMapping)
+	for _, p := range base {
+		byPort[p.ContainerPort] = p
+	}
+	for _, p := range override {
+		byPort[p.ContainerPort] = p
+	}
+	if len(byPort) == 0 {
+		return nil
+	}
+	ports := make([]int32, 0, len(byPort))
+	for cp := range byPort {
+		ports = append(ports, cp)
+	}
+	sort.Slice(ports, func(i, j int) bool { return ports[i] < ports[j] })
+	out := make([]PortMapping, 0, len(ports))
+	for _, cp := range ports {
+		out = append(out, byPort[cp])
+	}
+	return out
+}
+
