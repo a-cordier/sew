@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/a-cordier/sew/internal/registry"
+	"github.com/a-cordier/sew/api"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
@@ -24,7 +24,7 @@ type HelmInstaller struct {
 
 // AddRepos adds the given Helm repositories and downloads their indexes.
 // Must be called with an absolute home path before Install for chart resolution to use these repos.
-func (h *HelmInstaller) AddRepos(repos []registry.Repo, home string) error {
+func (h *HelmInstaller) AddRepos(repos []api.Repo, home string) error {
 	if home == "" {
 		if d, err := os.UserHomeDir(); err == nil {
 			home = filepath.Join(d, ".sew")
@@ -92,7 +92,7 @@ func isReleaseUninstalled(versions []*release.Release) bool {
 }
 
 // Install runs helm upgrade --install for the component: install if release does not exist, else upgrade.
-func (h *HelmInstaller) Install(ctx context.Context, comp registry.Component, dir string) error {
+func (h *HelmInstaller) Install(ctx context.Context, comp api.Component, dir string) error {
 	if comp.Helm == nil {
 		return fmt.Errorf("component %q has no helm spec", comp.Name)
 	}
@@ -193,7 +193,7 @@ func (h *HelmInstaller) Install(ctx context.Context, comp registry.Component, di
 }
 
 // Uninstall runs helm uninstall for the component.
-func (h *HelmInstaller) Uninstall(ctx context.Context, comp registry.Component) error {
+func (h *HelmInstaller) Uninstall(ctx context.Context, comp api.Component) error {
 	home := h.home
 	if home == "" {
 		if d, err := os.UserHomeDir(); err == nil {

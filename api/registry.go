@@ -1,34 +1,33 @@
-package registry
+package api
 
-// Repo is a Helm chart repository.
+import (
+	"context"
+)
+
 type Repo struct {
 	Name string `yaml:"name"`
 	URL  string `yaml:"url"`
 }
 
-// HelmSpec is the Helm configuration for a component.
 type HelmSpec struct {
 	Chart   string   `yaml:"chart"`
 	Version string   `yaml:"version,omitempty"`
 	Values  []string `yaml:"values,omitempty"`
 }
 
-// ManifestSpec is the manifest configuration for a component.
 type ManifestSpec struct {
 	Files []string `yaml:"files"`
 }
 
-// Conditions describes the state a required component must be in.
 type Conditions struct {
 	Ready bool `yaml:"ready,omitempty"`
 }
 
-// Selector is a Kubernetes label selector for pod readiness.
 type Selector struct {
 	MatchLabels map[string]string `yaml:"matchLabels,omitempty"`
 }
 
-// Requirement references another component that must be satisfied before installation.
+// Requirement declares a dependency on another component.
 type Requirement struct {
 	Component  string     `yaml:"component"`
 	Conditions Conditions `yaml:"conditions,omitempty"`
@@ -36,7 +35,6 @@ type Requirement struct {
 	Timeout    string     `yaml:"timeout,omitempty"`
 }
 
-// Component is a single installable unit (Helm chart, manifest, etc.).
 type Component struct {
 	Name      string        `yaml:"name"`
 	Type      string        `yaml:"type,omitempty"`
@@ -46,7 +44,7 @@ type Component struct {
 	Manifest  *ManifestSpec `yaml:"manifest,omitempty"`
 }
 
-// EffectiveType returns the component type, defaulting to "helm".
+// EffectiveType returns Type, defaulting to "helm".
 func (c *Component) EffectiveType() string {
 	if c.Type == "" {
 		return "helm"
@@ -61,9 +59,14 @@ type Context struct {
 	Components []Component `yaml:"components"`
 }
 
-// ResolvedContext is a context with all referenced files available in Dir.
+// ResolvedContext is a fully resolved context with all referenced files in Dir.
 type ResolvedContext struct {
 	Repos      []Repo
 	Components []Component
 	Dir        string
+}
+
+// Resolver resolves a context path against a registry into a ResolvedContext.
+type Resolver interface {
+	Resolve(ctx context.Context, contextPath string) (*ResolvedContext, error)
 }

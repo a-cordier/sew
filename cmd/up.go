@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-cordier/sew/api"
 	"github.com/a-cordier/sew/internal/installer"
 	"github.com/a-cordier/sew/internal/kind"
 	"github.com/a-cordier/sew/internal/registry"
@@ -86,7 +87,7 @@ func runUp(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	compByName := make(map[string]registry.Component)
+	compByName := make(map[string]api.Component)
 	for _, c := range resolved.Components {
 		compByName[c.Name] = c
 	}

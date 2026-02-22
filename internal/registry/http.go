@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/a-cordier/sew/api"
 	"gopkg.in/yaml.v3"
 )
 
@@ -22,7 +23,7 @@ type HTTPResolver struct {
 // Resolve fetches {BaseURL}/{contextPath}/context.yaml, downloads referenced
 // values files to a local cache directory, and returns a ResolvedContext
 // whose Dir points to that cache.
-func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*ResolvedContext, error) {
+func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*api.ResolvedContext, error) {
 	baseURL := strings.TrimSuffix(r.BaseURL, "/")
 	contextURL := baseURL + "/" + contextPath + "/context.yaml"
 
@@ -40,7 +41,6 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*Resolv
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusNotFound {
-		// context.yaml not found – try the .default fallback.
 		variant, defaultErr := r.fetchDefault(ctx, client, baseURL, contextPath)
 		if defaultErr != nil {
 			return nil, fmt.Errorf("fetching context: %s", resp.Status)
@@ -55,7 +55,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*Resolv
 		return nil, fmt.Errorf("reading context: %w", err)
 	}
 
-	var parsed Context
+	var parsed api.Context
 	if err := yaml.Unmarshal(data, &parsed); err != nil {
 		return nil, fmt.Errorf("parsing context.yaml: %w", err)
 	}
@@ -70,7 +70,6 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*Resolv
 		return nil, fmt.Errorf("creating cache dir: %w", err)
 	}
 
-	// Download each referenced values file
 	seen := make(map[string]bool)
 	for _, comp := range parsed.Components {
 		if comp.Helm == nil {
@@ -113,7 +112,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*Resolv
 		}
 	}
 
-	return &ResolvedContext{
+	return &api.ResolvedContext{
 		Repos:      parsed.Repos,
 		Components: parsed.Components,
 		Dir:        cacheDir,

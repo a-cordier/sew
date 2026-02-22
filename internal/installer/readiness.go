@@ -13,7 +13,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// WaitForReady waits until all pods for the release in the namespace are Ready or timeout.
 func WaitForReady(ctx context.Context, releaseName, namespace string, timeout time.Duration, matchLabels map[string]string) error {
 	config, err := getKubeConfig()
 	if err != nil {

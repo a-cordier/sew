@@ -5,14 +5,15 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/a-cordier/sew/api"
 	"github.com/a-cordier/sew/internal/config"
 	"github.com/spf13/cobra"
 )
 
 var (
-	cfgFile   string
+	cfgFile     string
 	contextPath string
-	cfg       *config.Config
+	cfg         *api.Config
 )
 
 var rootCmd = &cobra.Command{
@@ -45,7 +46,7 @@ func Execute() error {
 // 1. Explicit --config flag
 // 2. ./sew.yaml in the current directory
 // 3. ~/.sew/sew.yaml in the user's home directory
-func resolveConfig(explicit string) (*config.Config, error) {
+func resolveConfig(explicit string) (*api.Config, error) {
 	if explicit != "" {
 		return config.Load(explicit)
 	}

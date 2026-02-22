@@ -7,8 +7,6 @@ import (
 	"github.com/fatih/color"
 )
 
-// WithSpinner runs fn while displaying a terminal spinner with the given message.
-// On success it prints the message with elapsed time in blue.
 func WithSpinner(message string, fn func() error) error {
 	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 	s.Suffix = " " + message

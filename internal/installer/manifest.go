@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/a-cordier/sew/internal/registry"
+	"github.com/a-cordier/sew/api"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -39,7 +39,7 @@ func getConfig() (*rest.Config, error) {
 	return kubeconfig.ClientConfig()
 }
 
-func (m *ManifestInstaller) Install(ctx context.Context, comp registry.Component, dir string) error {
+func (m *ManifestInstaller) Install(ctx context.Context, comp api.Component, dir string) error {
 	if comp.Manifest == nil {
 		return fmt.Errorf("component %q has no manifest spec", comp.Name)
 	}
@@ -139,7 +139,7 @@ func splitYAMLDocuments(data []byte) []string {
 }
 
 // Uninstall re-reads manifest files and deletes the resources.
-func (m *ManifestInstaller) Uninstall(ctx context.Context, comp registry.Component) error {
+func (m *ManifestInstaller) Uninstall(ctx context.Context, comp api.Component) error {
 	if comp.Manifest == nil || len(comp.Manifest.Files) == 0 {
 		return nil
 	}

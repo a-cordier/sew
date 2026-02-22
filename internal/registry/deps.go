@@ -3,11 +3,12 @@ package registry
 import (
 	"errors"
 	"fmt"
+
+	"github.com/a-cordier/sew/api"
 )
 
-// Validate checks that all required components exist and that there are no cycles.
-func Validate(components []Component) error {
-	nameToComp := make(map[string]Component)
+func Validate(components []api.Component) error {
+	nameToComp := make(map[string]api.Component)
 	for _, c := range components {
 		nameToComp[c.Name] = c
 	}
@@ -22,9 +23,8 @@ func Validate(components []Component) error {
 	return err
 }
 
-// TopoSort returns components in install order (dependencies first).
-func TopoSort(components []Component) ([]Component, error) {
-	nameToComp := make(map[string]Component)
+func TopoSort(components []api.Component) ([]api.Component, error) {
+	nameToComp := make(map[string]api.Component)
 	for _, c := range components {
 		nameToComp[c.Name] = c
 	}
@@ -48,7 +48,7 @@ func TopoSort(components []Component) ([]Component, error) {
 		}
 	}
 
-	var order []Component
+	var order []api.Component
 	for len(queue) > 0 {
 		name := queue[0]
 		queue = queue[1:]
