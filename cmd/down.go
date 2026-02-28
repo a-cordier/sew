@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/a-cordier/sew/internal/cache"
 	"github.com/a-cordier/sew/internal/kind"
 	"github.com/a-cordier/sew/internal/logger"
 	"github.com/a-cordier/sew/internal/registry"
@@ -51,12 +52,25 @@ var downCmd = &cobra.Command{
 		klog.SetOutput(logFile)
 		logger.SetLogFile(logPath)
 
-		return logger.WithSpinner(
+		if err := logger.WithSpinner(
 			fmt.Sprintf("Deleting cluster %q", cfg.Kind.Name),
 			func() error {
 				return kind.Delete(cfg.Kind.Name)
 			},
-		)
+		); err != nil {
+			return err
+		}
+
+		if cfg.Images.Mirrors != nil {
+			ctx := context.Background()
+			if err := logger.WithSpinner("Stopping image mirror proxies", func() error {
+				return cache.StopProxies(ctx, cfg.Images.Mirrors)
+			}); err != nil {
+				return err
+			}
+		}
+
+		return nil
 	},
 }
 

@@ -10,10 +10,20 @@ type Config struct {
 	Registry  string                      `yaml:"registry"`
 	Context   string                      `yaml:"context"`
 	Kind      KindConfig                  `yaml:"kind"`
+	Images    ImagesConfig                `yaml:"images,omitempty"`
 	Overrides map[string]ComponentOverride `yaml:"overrides,omitempty"`
 
 	// Dir is set by Load to resolve relative paths in overrides.
 	Dir string `yaml:"-"`
+}
+
+type ImagesConfig struct {
+	Mirrors *MirrorsConfig `yaml:"mirrors,omitempty"`
+}
+
+type MirrorsConfig struct {
+	Data      string   `yaml:"data,omitempty"`
+	Upstreams []string `yaml:"upstreams,omitempty"`
 }
 
 type ComponentOverride struct {
@@ -32,10 +42,11 @@ const (
 )
 
 type KindConfig struct {
-	APIVersion string     `yaml:"apiVersion"`
-	Kind       string     `yaml:"kind"`
-	Name       string     `yaml:"name"`
-	Nodes      []KindNode `yaml:"nodes"`
+	APIVersion              string     `yaml:"apiVersion"`
+	Kind                    string     `yaml:"kind"`
+	Name                    string     `yaml:"name"`
+	Nodes                   []KindNode `yaml:"nodes"`
+	ContainerdConfigPatches []string   `yaml:"containerdConfigPatches,omitempty"`
 }
 
 func (k *KindConfig) ApplyDefaults() {

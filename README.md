@@ -118,3 +118,70 @@ echo "db-less" > registry/gravitee.io/apim/.default
 ```
 
 If neither `context.yaml` nor `.default` is found at the given path, sew returns an error.
+
+## Image mirrors
+
+sew can run local pull-through mirror proxies for container registries. When enabled, images pulled inside the Kind cluster are cached on the host — subsequent cluster recreations reuse the cached layers instead of downloading from the internet.
+
+### How it works
+
+Each upstream registry gets its own `registry:2` container running as a pull-through cache, bound to a local port (5000, 5001, …). The Kind node's containerd is configured with `hosts.toml` files that redirect pulls through these local mirrors. The mirror containers use a `restart: unless-stopped` policy, so they survive `sew down` and keep their cache across cluster lifecycles.
+
+### Enabling mirrors
+
+Add an `images.mirrors` section to your `sew.yaml`:
+
+```yaml
+# Mirror docker.io only (always implicit)
+images:
+  mirrors: {}
+```
+
+```yaml
+# Mirror docker.io + a private registry
+images:
+  mirrors:
+    upstreams:
+    - acme.example.com
+```
+
+`docker.io` is always included — you don't need to list it explicitly.
+
+### Options
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `upstreams` | *(none)* | Additional registries to mirror (on top of `docker.io`) |
+| `data` | `$SEW_HOME/mirrors` | Directory for cached layers and containerd host configs |
+
+### Using images from a private registry
+
+Combine mirrors with component overrides to pull images from a private registry through the local cache. Create a values file with the private image coordinates:
+
+```yaml
+# values-private.yaml
+gateway:
+  image:
+    repository: acme.example.com/my-gateway
+    tag: 1.0.0
+```
+
+Then reference it in your `sew.yaml`:
+
+```yaml
+registry: https://my-registry.example.com
+context: org/product/variant
+
+images:
+  mirrors:
+    upstreams:
+    - acme.example.com
+
+overrides:
+  apim:
+    helm:
+      values:
+      - values-private.yaml
+```
+
+The mirror proxy caches layers from `acme.example.com` locally, and the override swaps the image without modifying the upstream context.

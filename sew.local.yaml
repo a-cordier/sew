@@ -1,2 +1,5 @@
 registry: file://./registry
 context: gravitee.io/apim/aio
+
+images:
+  mirrors: {}

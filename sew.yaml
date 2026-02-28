@@ -1,6 +1,9 @@
 registry: https://a-cordier.github.io/sew
 context: gravitee.io/apim
 
+images:
+  mirrors: {}
+
 kind:
   name: sew
   nodes:

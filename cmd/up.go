@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/cache"
 	"github.com/a-cordier/sew/internal/installer"
 	"github.com/a-cordier/sew/internal/kind"
-	"github.com/a-cordier/sew/internal/registry"
 	"github.com/a-cordier/sew/internal/logger"
+	"github.com/a-cordier/sew/internal/registry"
 	"github.com/spf13/cobra"
 	"k8s.io/klog/v2"
 )
@@ -65,6 +66,24 @@ func runUp(_ *cobra.Command, _ []string) error {
 	klog.LogToStderr(false)
 	klog.SetOutput(logFile)
 
+	ctx := context.Background()
+
+	if cfg.Images.Mirrors != nil {
+		if err := logger.WithSpinner("Starting image mirror proxies", func() error {
+			return cache.EnsureProxies(ctx, cfg.Images.Mirrors, sewHome)
+		}); err != nil {
+			return err
+		}
+		mirrors, err := cache.PrepareMirrors(cfg.Images.Mirrors, sewHome)
+		if err != nil {
+			return fmt.Errorf("preparing image mirrors: %w", err)
+		}
+		cfg.Kind.ContainerdConfigPatches = append(cfg.Kind.ContainerdConfigPatches, mirrors.Patch)
+		for i := range cfg.Kind.Nodes {
+			cfg.Kind.Nodes[i].ExtraMounts = append(cfg.Kind.Nodes[i].ExtraMounts, mirrors.Mounts...)
+		}
+	}
+
 	kindConfig, err := cfg.Kind.RawYAML()
 	if err != nil {
 		return fmt.Errorf("serializing kind config: %w", err)
@@ -74,6 +93,14 @@ func runUp(_ *cobra.Command, _ []string) error {
 		func() error { return kind.Create(cfg.Kind.Name, kindConfig) },
 	); err != nil {
 		return err
+	}
+
+	if cfg.Images.Mirrors != nil {
+		if err := logger.WithSpinner("Connecting image mirrors to Kind network", func() error {
+			return cache.ConnectToKindNetwork(ctx, cfg.Kind.Name, cfg.Images.Mirrors)
+		}); err != nil {
+			return err
+		}
 	}
 
 	if cfg.Registry == "" || cfg.Context == "" {
@@ -108,7 +135,6 @@ func runUp(_ *cobra.Command, _ []string) error {
 	}
 
 	const defaultReadyTimeout = 5 * time.Minute
-	ctx := context.Background()
 	for _, comp := range sorted {
 		for _, req := range comp.Requires {
 			if req.Conditions.Ready {
