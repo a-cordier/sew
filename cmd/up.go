@@ -107,7 +107,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 		return nil
 	}
 
-	registry.ApplyOverrides(resolved, cfg.Overrides, cfg.Dir)
+	registry.MergeComponents(resolved, cfg.Components, cfg.Dir)
 
 	if err := registry.Validate(resolved.Components); err != nil {
 		return fmt.Errorf("validating components: %w", err)

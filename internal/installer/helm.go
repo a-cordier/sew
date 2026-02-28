@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/a-cordier/sew/core"
+	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
@@ -116,13 +117,33 @@ func (h *HelmInstaller) Install(ctx context.Context, comp core.Component, dir st
 		return fmt.Errorf("initializing helm: %w", err)
 	}
 
-	// Merge values from files (paths relative to dir)
 	valueOpts := &values.Options{
-		ValueFiles: make([]string, 0, len(comp.Helm.Values)),
+		ValueFiles: make([]string, 0, len(comp.Helm.ValueFiles)),
 	}
-	for _, v := range comp.Helm.Values {
+	for _, v := range comp.Helm.ValueFiles {
 		valueOpts.ValueFiles = append(valueOpts.ValueFiles, filepath.Join(dir, v))
 	}
+
+	// Inline values are serialized to a temp file appended last so they
+	// take highest precedence in the Helm merge order.
+	if len(comp.Helm.Values) > 0 {
+		data, err := yaml.Marshal(comp.Helm.Values)
+		if err != nil {
+			return fmt.Errorf("serializing inline values: %w", err)
+		}
+		tmp, err := os.CreateTemp("", "sew-values-*.yaml")
+		if err != nil {
+			return fmt.Errorf("creating temp values file: %w", err)
+		}
+		defer os.Remove(tmp.Name())
+		if _, err := tmp.Write(data); err != nil {
+			tmp.Close()
+			return fmt.Errorf("writing temp values file: %w", err)
+		}
+		tmp.Close()
+		valueOpts.ValueFiles = append(valueOpts.ValueFiles, tmp.Name())
+	}
+
 	vals, err := valueOpts.MergeValues(getter.All(settings))
 	if err != nil {
 		return fmt.Errorf("merging values: %w", err)

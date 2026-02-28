@@ -69,7 +69,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.R
 	seen := make(map[string]bool)
 	for _, comp := range parsed.Components {
 		if comp.Helm != nil {
-			for _, v := range comp.Helm.Values {
+			for _, v := range comp.Helm.ValueFiles {
 				if !seen[v] {
 					seen[v] = true
 					filesToFetch = append(filesToFetch, v)

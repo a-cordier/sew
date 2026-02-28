@@ -2,18 +2,19 @@ package core
 
 import (
 	"sort"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	Registry  string                      `yaml:"registry"`
-	Context   string                      `yaml:"context"`
-	Kind      KindConfig                  `yaml:"kind"`
-	Images    ImagesConfig                `yaml:"images,omitempty"`
-	Overrides map[string]ComponentOverride `yaml:"overrides,omitempty"`
+	Registry   string      `yaml:"registry"`
+	Context    string      `yaml:"context"`
+	Kind       KindConfig  `yaml:"kind"`
+	Images     ImagesConfig `yaml:"images,omitempty"`
+	Components []Component `yaml:"components,omitempty"`
 
-	// Dir is set by Load to resolve relative paths in overrides.
+	// Dir is set by Load to resolve relative paths in component value files.
 	Dir string `yaml:"-"`
 }
 
@@ -24,15 +25,6 @@ type ImagesConfig struct {
 type MirrorsConfig struct {
 	Data      string   `yaml:"data,omitempty"`
 	Upstreams []string `yaml:"upstreams,omitempty"`
-}
-
-type ComponentOverride struct {
-	Helm *HelmOverride `yaml:"helm,omitempty"`
-}
-
-type HelmOverride struct {
-	Version string   `yaml:"version,omitempty"`
-	Values  []string `yaml:"values,omitempty"`
 }
 
 const (

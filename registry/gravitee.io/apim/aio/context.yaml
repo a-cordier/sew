@@ -33,7 +33,7 @@ components:
     namespace: gravitee
     helm:
       chart: elastic/elasticsearch
-      values:
+      valueFiles:
         - values-elasticsearch.yaml
 
   - name: tls-server
@@ -64,6 +64,6 @@ components:
       - component: tls-server
     helm:
       chart: graviteeio/apim
-      values:
+      valueFiles:
         - values-apim.yaml
 

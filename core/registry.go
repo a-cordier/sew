@@ -10,9 +10,10 @@ type Repo struct {
 }
 
 type HelmSpec struct {
-	Chart   string   `yaml:"chart"`
-	Version string   `yaml:"version,omitempty"`
-	Values  []string `yaml:"values,omitempty"`
+	Chart      string                 `yaml:"chart"`
+	Version    string                 `yaml:"version,omitempty"`
+	ValueFiles []string               `yaml:"valueFiles,omitempty"`
+	Values     map[string]interface{} `yaml:"values,omitempty"`
 }
 
 type ManifestSpec struct {
