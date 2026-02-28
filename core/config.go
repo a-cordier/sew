@@ -2,7 +2,6 @@ package core
 
 import (
 	"sort"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -57,10 +56,11 @@ func (k *KindConfig) ApplyDefaults() {
 }
 
 type KindNode struct {
-	Role              string            `yaml:"role"`
-	ExtraPortMappings []PortMapping     `yaml:"extraPortMappings,omitempty"`
-	ExtraMounts       []Mount           `yaml:"extraMounts,omitempty"`
-	Labels            map[string]string `yaml:"labels,omitempty"`
+	Role                 string            `yaml:"role"`
+	ExtraPortMappings    []PortMapping     `yaml:"extraPortMappings,omitempty"`
+	ExtraMounts          []Mount           `yaml:"extraMounts,omitempty"`
+	Labels               map[string]string `yaml:"labels,omitempty"`
+	KubeadmConfigPatches []string          `yaml:"kubeadmConfigPatches,omitempty"`
 }
 
 type PortMapping struct {

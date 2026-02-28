@@ -94,6 +94,9 @@ func runUp(_ *cobra.Command, _ []string) error {
 	); err != nil {
 		return err
 	}
+	if err := kind.RemoveControlPlaneTaint(cfg.Kind.Name); err != nil {
+		return err
+	}
 
 	if cfg.Images.Mirrors != nil {
 		if err := logger.WithSpinner("Connecting image mirrors to Kind network", func() error {

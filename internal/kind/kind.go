@@ -2,6 +2,8 @@ package kind
 
 import (
 	"fmt"
+	"os/exec"
+	"strings"
 
 	"sigs.k8s.io/kind/pkg/cluster"
 )
@@ -22,6 +24,25 @@ func Create(name string, rawConfig []byte) error {
 		name,
 		cluster.CreateWithRawConfig(rawConfig),
 	)
+}
+
+// RemoveControlPlaneTaint removes the NoSchedule taint from control-plane
+// nodes so that workloads can be scheduled on single-node clusters.
+// Silently succeeds when the taint is already absent.
+func RemoveControlPlaneTaint(name string) error {
+	out, err := exec.Command(
+		"docker", "exec", "--privileged", name+"-control-plane",
+		"kubectl", "--kubeconfig=/etc/kubernetes/admin.conf",
+		"taint", "nodes", "--all",
+		"node-role.kubernetes.io/control-plane-",
+	).CombinedOutput()
+	if err != nil {
+		if strings.Contains(string(out), "not found") {
+			return nil
+		}
+		return fmt.Errorf("removing control-plane taint: %s: %w", string(out), err)
+	}
+	return nil
 }
 
 func Delete(name string) error {
