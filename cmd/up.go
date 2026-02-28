@@ -32,13 +32,6 @@ func runUp(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to create home directory %s: %w", sewHome, err)
 	}
 
-	logFile, err := os.OpenFile(filepath.Join(sewHome, "sew.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
-	if err != nil {
-		return fmt.Errorf("opening log file: %w", err)
-	}
-	defer logFile.Close()
-	klog.SetOutput(logFile)
-
 	var resolved *core.ResolvedContext
 	if cfg.Registry != "" && cfg.Context != "" {
 		registryURL := cfg.Registry
@@ -56,6 +49,21 @@ func runUp(_ *cobra.Command, _ []string) error {
 		}
 		cfg.Kind.MergeWithContext(resolved.Kind)
 	}
+
+	logDir := filepath.Join(sewHome, "logs")
+	if cfg.Context != "" {
+		logDir = filepath.Join(logDir, cfg.Context)
+	}
+	if err := os.MkdirAll(logDir, 0o755); err != nil {
+		return fmt.Errorf("creating log directory %s: %w", logDir, err)
+	}
+	logFile, err := os.OpenFile(filepath.Join(logDir, "install.log"), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
+	if err != nil {
+		return fmt.Errorf("opening log file: %w", err)
+	}
+	defer logFile.Close()
+	klog.LogToStderr(false)
+	klog.SetOutput(logFile)
 
 	kindConfig, err := cfg.Kind.RawYAML()
 	if err != nil {

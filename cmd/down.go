@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/a-cordier/sew/internal/logger"
 	"github.com/a-cordier/sew/internal/registry"
 	"github.com/spf13/cobra"
+	"k8s.io/klog/v2"
 )
 
 var downCmd = &cobra.Command{
@@ -31,6 +33,23 @@ var downCmd = &cobra.Command{
 			}
 			cfg.Kind.MergeWithContext(resolved.Kind)
 		}
+
+		logDir := filepath.Join(sewHome, "logs")
+		if cfg.Context != "" {
+			logDir = filepath.Join(logDir, cfg.Context)
+		}
+		if err := os.MkdirAll(logDir, 0o755); err != nil {
+			return fmt.Errorf("creating log directory %s: %w", logDir, err)
+		}
+		logPath := filepath.Join(logDir, "delete.log")
+		logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
+		if err != nil {
+			return fmt.Errorf("opening log file: %w", err)
+		}
+		defer logFile.Close()
+		klog.LogToStderr(false)
+		klog.SetOutput(logFile)
+		logger.SetLogFile(logPath)
 
 		return logger.WithSpinner(
 			fmt.Sprintf("Deleting cluster %q", cfg.Kind.Name),
