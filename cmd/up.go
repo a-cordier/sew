@@ -111,6 +111,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 	}
 
 	registry.MergeComponents(resolved, cfg.Components, cfg.Dir)
+	resolved.Repos = registry.MergeRepos(resolved.Repos, cfg.Repos)
 
 	if err := registry.Validate(resolved.Components); err != nil {
 		return fmt.Errorf("validating components: %w", err)

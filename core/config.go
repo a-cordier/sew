@@ -11,7 +11,8 @@ type Config struct {
 	Context    string      `yaml:"context"`
 	Kind       KindConfig  `yaml:"kind"`
 	Images     ImagesConfig `yaml:"images,omitempty"`
-	Components []Component `yaml:"components,omitempty"`
+	Repos      []Repo       `yaml:"repos,omitempty"`
+	Components []Component  `yaml:"components,omitempty"`
 
 	// Dir is set by Load to resolve relative paths in component value files.
 	Dir string `yaml:"-"`

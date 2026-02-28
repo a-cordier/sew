@@ -25,6 +25,8 @@ func MergeComponents(resolved *core.ResolvedContext, components []core.Component
 	for _, patch := range components {
 		comp, ok := byName[patch.Name]
 		if !ok {
+			resolveValueFilePaths(&patch, configDir)
+			resolved.Components = append(resolved.Components, patch)
 			continue
 		}
 		if patch.Helm == nil || comp.Helm == nil {
@@ -36,13 +38,8 @@ func MergeComponents(resolved *core.ResolvedContext, components []core.Component
 		if patch.Helm.Version != "" {
 			comp.Helm.Version = patch.Helm.Version
 		}
-		for _, v := range patch.Helm.ValueFiles {
-			path := v
-			if !filepath.IsAbs(path) && configDir != "" {
-				path = filepath.Join(configDir, v)
-			}
-			comp.Helm.ValueFiles = append(comp.Helm.ValueFiles, path)
-		}
+		resolveValueFilePaths(&patch, configDir)
+		comp.Helm.ValueFiles = append(comp.Helm.ValueFiles, patch.Helm.ValueFiles...)
 		if len(patch.Helm.Values) > 0 {
 			if comp.Helm.Values == nil {
 				comp.Helm.Values = make(map[string]interface{})
@@ -52,4 +49,44 @@ func MergeComponents(resolved *core.ResolvedContext, components []core.Component
 			}
 		}
 	}
+}
+
+// resolveValueFilePaths resolves relative value file paths in a component's
+// HelmSpec to absolute paths based on configDir.
+func resolveValueFilePaths(c *core.Component, configDir string) {
+	if c.Helm == nil || configDir == "" {
+		return
+	}
+	for i, v := range c.Helm.ValueFiles {
+		if !filepath.IsAbs(v) {
+			c.Helm.ValueFiles[i] = filepath.Join(configDir, v)
+		}
+	}
+}
+
+// MergeRepos merges local repos into context repos, deduplicating by name.
+// When both lists contain a repo with the same name, the local entry wins.
+func MergeRepos(contextRepos, localRepos []core.Repo) []core.Repo {
+	if len(localRepos) == 0 {
+		return contextRepos
+	}
+	localByName := make(map[string]core.Repo, len(localRepos))
+	for _, r := range localRepos {
+		localByName[r.Name] = r
+	}
+	out := make([]core.Repo, 0, len(contextRepos)+len(localRepos))
+	for _, r := range contextRepos {
+		if local, ok := localByName[r.Name]; ok {
+			out = append(out, local)
+			delete(localByName, r.Name)
+		} else {
+			out = append(out, r)
+		}
+	}
+	for _, r := range localRepos {
+		if _, ok := localByName[r.Name]; ok {
+			out = append(out, r)
+		}
+	}
+	return out
 }
