@@ -1,3 +1,2 @@
-home: .sew
 registry: file://./registry
 context: gravitee.io/apim/aio

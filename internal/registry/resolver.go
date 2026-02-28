@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"path/filepath"
 	"strings"
 
 	"github.com/a-cordier/sew/core"
@@ -8,10 +9,13 @@ import (
 
 // NewResolver builds the appropriate Resolver from the registry URL.
 // A "file://" prefix selects the filesystem resolver; anything else
-// is treated as an HTTP registry.
-func NewResolver(registry string) core.Resolver {
+// is treated as an HTTP registry with cache rooted under sewHome.
+func NewResolver(registry string, sewHome string) core.Resolver {
 	if strings.HasPrefix(registry, "file://") {
 		return &FSResolver{Root: strings.TrimPrefix(registry, "file://")}
 	}
-	return &HTTPResolver{BaseURL: registry}
+	return &HTTPResolver{
+		BaseURL:   registry,
+		CacheRoot: filepath.Join(sewHome, "cache"),
+	}
 }

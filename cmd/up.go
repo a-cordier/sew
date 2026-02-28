@@ -28,20 +28,11 @@ func init() {
 }
 
 func runUp(_ *cobra.Command, _ []string) error {
-	// Resolve home to absolute path
-	home := cfg.Home
-	if !filepath.IsAbs(home) {
-		cwd, err := os.Getwd()
-		if err != nil {
-			return fmt.Errorf("getting working directory: %w", err)
-		}
-		home = filepath.Join(cwd, home)
-	}
-	if err := os.MkdirAll(home, 0o755); err != nil {
-		return fmt.Errorf("failed to create home directory %s: %w", home, err)
+	if err := os.MkdirAll(sewHome, 0o755); err != nil {
+		return fmt.Errorf("failed to create home directory %s: %w", sewHome, err)
 	}
 
-	logFile, err := os.OpenFile(filepath.Join(home, "sew.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	logFile, err := os.OpenFile(filepath.Join(sewHome, "sew.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return fmt.Errorf("opening log file: %w", err)
 	}
@@ -57,7 +48,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 				registryURL = "file://" + abs
 			}
 		}
-		resolver := registry.NewResolver(registryURL)
+		resolver := registry.NewResolver(registryURL, sewHome)
 		var resolveErr error
 		resolved, resolveErr = resolver.Resolve(context.Background(), cfg.Context)
 		if resolveErr != nil {
@@ -96,7 +87,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 		helmInst, _ := installer.ForType("helm")
 		if hi, ok := helmInst.(*installer.HelmInstaller); ok {
 			if err := logger.WithSpinner("Adding Helm repositories", func() error {
-				return hi.AddRepos(resolved.Repos, home)
+				return hi.AddRepos(resolved.Repos, sewHome)
 			}); err != nil {
 				return err
 			}

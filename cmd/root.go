@@ -10,16 +10,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// DefaultConfigData holds the embedded sew.yaml from the project root,
+// set by main before Execute().
+var DefaultConfigData []byte
+
 var (
 	cfgFile     string
 	contextPath string
 	cfg         *core.Config
+	sewHome     string
 )
 
 var rootCmd = &cobra.Command{
 	Use:   "sew",
 	Short: "Spin up local Kubernetes clusters and deploy ready-to-use applications",
 	PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
+		sewHome = os.Getenv("SEW_HOME")
+		if sewHome == "" {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				return fmt.Errorf("determining user home directory: %w", err)
+			}
+			sewHome = filepath.Join(home, ".sew")
+		}
 		var err error
 		cfg, err = resolveConfig(cfgFile)
 		if err != nil {
@@ -42,28 +55,50 @@ func Execute() error {
 	return rootCmd.Execute()
 }
 
-// resolveConfig loads the configuration from the first available path:
-// 1. Explicit --config flag
-// 2. ./sew.yaml in the current directory
-// 3. ~/.sew/sew.yaml in the user's home directory
+// resolveConfig loads the configuration using layered merging:
+//  1. Load $sewHome/sew.yaml as the base config (if it exists).
+//  2. If --config is given, load and merge on top; otherwise if ./sew.yaml
+//     exists, load and merge on top.
+//  3. Apply embedded defaults to fill any remaining gaps.
 func resolveConfig(explicit string) (*core.Config, error) {
-	if explicit != "" {
-		return config.Load(explicit)
+	basePath := filepath.Join(sewHome, "sew.yaml")
+	var base *core.Config
+	if fileExists(basePath) {
+		var err error
+		base, err = config.Load(basePath)
+		if err != nil {
+			return nil, fmt.Errorf("loading base config %s: %w", basePath, err)
+		}
+	} else {
+		base = &core.Config{}
+		base.Kind.ApplyDefaults()
 	}
 
-	if _, err := os.Stat("sew.yaml"); err == nil {
-		return config.Load("sew.yaml")
+	var projectCfg *core.Config
+	switch {
+	case explicit != "":
+		var err error
+		projectCfg, err = config.Load(explicit)
+		if err != nil {
+			return nil, err
+		}
+	case fileExists("sew.yaml"):
+		var err error
+		projectCfg, err = config.Load("sew.yaml")
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return nil, fmt.Errorf("could not determine home directory: %w", err)
+	if projectCfg != nil {
+		config.Merge(base, projectCfg)
 	}
 
-	defaultPath := filepath.Join(home, ".sew", "sew.yaml")
-	if _, err := os.Stat(defaultPath); err == nil {
-		return config.Load(defaultPath)
-	}
+	config.ApplyDefaults(base, DefaultConfigData)
+	return base, nil
+}
 
-	return nil, fmt.Errorf("no config file found (tried ./sew.yaml and %s)", defaultPath)
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }

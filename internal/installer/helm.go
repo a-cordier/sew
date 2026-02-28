@@ -26,22 +26,14 @@ type HelmInstaller struct {
 // Must be called with an absolute home path before Install for chart resolution to use these repos.
 func (h *HelmInstaller) AddRepos(repos []core.Repo, home string) error {
 	if home == "" {
-		d, err := os.UserHomeDir()
-		if err != nil {
-			return fmt.Errorf("determining home directory: %w", err)
-		}
-		home = filepath.Join(d, ".sew")
+		return fmt.Errorf("home directory must be set")
 	}
-	absHome, err := filepath.Abs(home)
-	if err != nil {
-		return fmt.Errorf("resolving home path: %w", err)
-	}
-	h.home = absHome
+	h.home = home
 
-	helmRepoConfig := filepath.Join(absHome, "helm", "repositories.yaml")
+	helmRepoConfig := filepath.Join(home, "helm", "repositories.yaml")
 	// Helm repo package writes index to HELM_CACHE_HOME/repository; downloader reads from RepositoryCache.
 	// So we use the same base: helm/repository under home.
-	helmRepoCache := filepath.Join(absHome, "helm", "repository")
+	helmRepoCache := filepath.Join(home, "helm", "repository")
 
 	if err := os.MkdirAll(filepath.Dir(helmRepoConfig), 0o755); err != nil {
 		return err
@@ -50,7 +42,7 @@ func (h *HelmInstaller) AddRepos(repos []core.Repo, home string) error {
 		return err
 	}
 	// So that repo.DownloadIndexFile writes to helmRepoCache (helmpath.CachePath("repository") = HELM_CACHE_HOME/repository)
-	os.Setenv("HELM_CACHE_HOME", filepath.Join(absHome, "helm"))
+	os.Setenv("HELM_CACHE_HOME", filepath.Join(home, "helm"))
 
 	var f *repo.File
 	if _, err := os.Stat(helmRepoConfig); err == nil {
@@ -67,7 +59,7 @@ func (h *HelmInstaller) AddRepos(repos []core.Repo, home string) error {
 	settings.RepositoryConfig = helmRepoConfig
 	settings.RepositoryCache = helmRepoCache
 	os.Setenv("HELM_REPOSITORY_CONFIG", helmRepoConfig)
-	os.Setenv("HELM_CONFIG_HOME", filepath.Join(absHome, "helm"))
+	os.Setenv("HELM_CONFIG_HOME", filepath.Join(home, "helm"))
 
 	getters := getter.All(settings)
 	for _, r := range repos {
@@ -98,25 +90,16 @@ func (h *HelmInstaller) Install(ctx context.Context, comp core.Component, dir st
 	if comp.Helm == nil {
 		return fmt.Errorf("component %q has no helm spec", comp.Name)
 	}
-	home := h.home
-	if home == "" {
-		d, err := os.UserHomeDir()
-		if err != nil {
-			return fmt.Errorf("determining home directory: %w", err)
-		}
-		home = filepath.Join(d, ".sew")
+	if h.home == "" {
+		return fmt.Errorf("home directory must be set (call AddRepos first)")
 	}
 
-	absHome, err := filepath.Abs(home)
-	if err != nil {
-		return fmt.Errorf("resolving home path: %w", err)
-	}
-	helmRepoConfig := filepath.Join(absHome, "helm", "repositories.yaml")
-	helmRepoCache := filepath.Join(absHome, "helm", "repository")
+	helmRepoConfig := filepath.Join(h.home, "helm", "repositories.yaml")
+	helmRepoCache := filepath.Join(h.home, "helm", "repository")
 
-	os.Setenv("HELM_CACHE_HOME", filepath.Join(absHome, "helm"))
+	os.Setenv("HELM_CACHE_HOME", filepath.Join(h.home, "helm"))
 	os.Setenv("HELM_REPOSITORY_CONFIG", helmRepoConfig)
-	os.Setenv("HELM_CONFIG_HOME", filepath.Join(absHome, "helm"))
+	os.Setenv("HELM_CONFIG_HOME", filepath.Join(h.home, "helm"))
 
 	settings := cli.New()
 	settings.RepositoryConfig = helmRepoConfig
@@ -201,22 +184,14 @@ func (h *HelmInstaller) Install(ctx context.Context, comp core.Component, dir st
 
 // Uninstall runs helm uninstall for the component.
 func (h *HelmInstaller) Uninstall(_ context.Context, comp core.Component) error {
-	home := h.home
-	if home == "" {
-		d, err := os.UserHomeDir()
-		if err != nil {
-			return fmt.Errorf("determining home directory: %w", err)
-		}
-		home = filepath.Join(d, ".sew")
+	if h.home == "" {
+		return fmt.Errorf("home directory must be set (call AddRepos first)")
 	}
-	absHome, err := filepath.Abs(home)
-	if err != nil {
-		return fmt.Errorf("resolving home path: %w", err)
-	}
-	helmRepoCache := filepath.Join(absHome, "helm", "repository")
-	os.Setenv("HELM_CACHE_HOME", filepath.Join(absHome, "helm"))
+
+	helmRepoCache := filepath.Join(h.home, "helm", "repository")
+	os.Setenv("HELM_CACHE_HOME", filepath.Join(h.home, "helm"))
 	settings := cli.New()
-	settings.RepositoryConfig = filepath.Join(absHome, "helm", "repositories.yaml")
+	settings.RepositoryConfig = filepath.Join(h.home, "helm", "repositories.yaml")
 	settings.RepositoryCache = helmRepoCache
 
 	namespace := comp.Namespace
@@ -231,6 +206,6 @@ func (h *HelmInstaller) Uninstall(_ context.Context, comp core.Component) error 
 	}
 
 	client := action.NewUninstall(actionConfig)
-	_, err = client.Run(comp.Name)
+	_, err := client.Run(comp.Name)
 	return err
 }

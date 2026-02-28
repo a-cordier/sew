@@ -16,7 +16,7 @@ import (
 // HTTPResolver resolves contexts by fetching files from an HTTP registry.
 type HTTPResolver struct {
 	BaseURL    string
-	CacheRoot  string // default ~/.sew/cache
+	CacheRoot  string
 	HTTPClient *http.Client
 }
 
@@ -60,15 +60,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.R
 		return nil, fmt.Errorf("parsing context.yaml: %w", err)
 	}
 
-	cacheRoot := r.CacheRoot
-	if cacheRoot == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return nil, fmt.Errorf("determining home directory: %w", err)
-		}
-		cacheRoot = filepath.Join(home, ".sew", "cache")
-	}
-	cacheDir := filepath.Join(cacheRoot, contextPath)
+	cacheDir := filepath.Join(r.CacheRoot, contextPath)
 	if err := os.MkdirAll(cacheDir, 0o755); err != nil {
 		return nil, fmt.Errorf("creating cache dir: %w", err)
 	}

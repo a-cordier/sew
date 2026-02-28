@@ -1,4 +1,7 @@
-home: .sew
 registry: https://a-cordier.github.io/sew
-context: gravitee.io/apim/dbless
+context: gravitee.io/apim
 
+kind:
+  name: sew
+  nodes:
+  - role: control-plane

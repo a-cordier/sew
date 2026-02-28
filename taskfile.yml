@@ -2,6 +2,6 @@ version: "3"
 
 tasks:
   lint:
-    desc: Run revive linter
+    desc: Run linter
     cmds:
       - go tool revive -config .revive.toml -formatter friendly ./...

@@ -24,7 +24,7 @@ var downCmd = &cobra.Command{
 					registryURL = "file://" + abs
 				}
 			}
-			resolver := registry.NewResolver(registryURL)
+			resolver := registry.NewResolver(registryURL, sewHome)
 			resolved, err := resolver.Resolve(context.Background(), cfg.Context)
 			if err != nil {
 				return fmt.Errorf("resolving context %q: %w", cfg.Context, err)

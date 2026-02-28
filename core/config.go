@@ -7,7 +7,6 @@ import (
 )
 
 type Config struct {
-	Home      string                      `yaml:"home"`
 	Registry  string                      `yaml:"registry"`
 	Context   string                      `yaml:"context"`
 	Kind      KindConfig                  `yaml:"kind"`
@@ -97,6 +96,27 @@ func (k *KindConfig) MergeWithContext(ctx *ContextKindConfig) {
 	}
 	node := &k.Nodes[0]
 	node.ExtraPortMappings = mergePortMappings(contextPorts, node.ExtraPortMappings)
+}
+
+// MergeWithDefaults fills zero-value Kind fields from the embedded defaults,
+// preserving any user-specified values. Default port mappings are used as a
+// base; user mappings override on the same containerPort.
+func (k *KindConfig) MergeWithDefaults(defaults *KindConfig) {
+	if defaults == nil {
+		return
+	}
+	if k.Name == KindDefaultName && defaults.Name != "" {
+		k.Name = defaults.Name
+	}
+	if len(k.Nodes) == 0 && len(defaults.Nodes) > 0 {
+		k.Nodes = make([]KindNode, len(defaults.Nodes))
+		copy(k.Nodes, defaults.Nodes)
+		return
+	}
+	if len(k.Nodes) > 0 && len(defaults.Nodes) > 0 {
+		node := &k.Nodes[0]
+		node.ExtraPortMappings = mergePortMappings(defaults.Nodes[0].ExtraPortMappings, node.ExtraPortMappings)
+	}
 }
 
 func mergePortMappings(base, override []PortMapping) []PortMapping {
