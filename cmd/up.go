@@ -10,10 +10,12 @@ import (
 
 	"github.com/a-cordier/sew/core"
 	"github.com/a-cordier/sew/internal/cache"
+	"github.com/a-cordier/sew/internal/cloudprovider"
 	"github.com/a-cordier/sew/internal/installer"
 	"github.com/a-cordier/sew/internal/kind"
 	"github.com/a-cordier/sew/internal/logger"
 	"github.com/a-cordier/sew/internal/registry"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"k8s.io/klog/v2"
 )
@@ -49,6 +51,15 @@ func runUp(_ *cobra.Command, _ []string) error {
 			return fmt.Errorf("resolving context %q: %w", cfg.Context, resolveErr)
 		}
 		cfg.Kind.MergeWithContext(resolved.Kind)
+		cfg.Features = core.MergeFeatures(resolved.Features, cfg.Features)
+	}
+
+	featWarnings, err := core.ResolveFeatureDependencies(&cfg.Features)
+	if err != nil {
+		return fmt.Errorf("validating feature dependencies: %w", err)
+	}
+	for _, w := range featWarnings {
+		color.Yellow("  ⚠ %s", w)
 	}
 
 	logDir := filepath.Join(sewHome, "logs")
@@ -108,6 +119,14 @@ func runUp(_ *cobra.Command, _ []string) error {
 
 	if cfg.Registry == "" || cfg.Context == "" {
 		return nil
+	}
+
+	if cfg.Features.Gateway != nil && cfg.Features.Gateway.Enabled {
+		if err := logger.WithSpinner("Installing Gateway API CRDs", func() error {
+			return cloudprovider.InstallGatewayCRDs(ctx, cfg.Kind.Name, cfg.Features.Gateway.Channel)
+		}); err != nil {
+			return err
+		}
 	}
 
 	registry.MergeComponents(resolved, cfg.Components, cfg.Dir)
@@ -173,6 +192,19 @@ func runUp(_ *cobra.Command, _ []string) error {
 			return inst.Install(ctx, comp, resolved.Dir)
 		}); err != nil {
 			return err
+		}
+	}
+
+	if cfg.Features.LoadBalancer != nil && cfg.Features.LoadBalancer.Enabled {
+		if err := logger.WithSpinner("Provisioning load balancers", func() error {
+			return cloudprovider.EnsureLBs(ctx, cfg.Kind.Name)
+		}); err != nil {
+			return err
+		}
+		if cloudprovider.NeedsTunnels() {
+			if err := cloudprovider.SetupLBTunnels(cfg.Kind.Name); err != nil {
+				return err
+			}
 		}
 	}
 

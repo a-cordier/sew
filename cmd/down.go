@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/a-cordier/sew/core"
 	"github.com/a-cordier/sew/internal/cache"
+	"github.com/a-cordier/sew/internal/cloudprovider"
 	"github.com/a-cordier/sew/internal/kind"
 	"github.com/a-cordier/sew/internal/logger"
 	"github.com/a-cordier/sew/internal/registry"
@@ -33,6 +35,7 @@ var downCmd = &cobra.Command{
 				return fmt.Errorf("resolving context %q: %w", cfg.Context, err)
 			}
 			cfg.Kind.MergeWithContext(resolved.Kind)
+			cfg.Features = core.MergeFeatures(resolved.Features, cfg.Features)
 		}
 
 		logDir := filepath.Join(sewHome, "logs")
@@ -51,6 +54,16 @@ var downCmd = &cobra.Command{
 		klog.LogToStderr(false)
 		klog.SetOutput(logFile)
 		logger.SetLogFile(logPath)
+
+		if cloudprovider.NeedsTunnels() {
+			cloudprovider.CleanupLBTunnels(cfg.Kind.Name)
+		}
+
+		if err := logger.WithSpinner("Cleaning up load balancer containers", func() error {
+			return cloudprovider.CleanupLBs(cfg.Kind.Name)
+		}); err != nil {
+			return err
+		}
 
 		if err := logger.WithSpinner(
 			fmt.Sprintf("Deleting cluster %q", cfg.Kind.Name),

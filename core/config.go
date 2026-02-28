@@ -1,21 +1,106 @@
 package core
 
 import (
+	"fmt"
 	"sort"
 
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	Registry   string      `yaml:"registry"`
-	Context    string      `yaml:"context"`
-	Kind       KindConfig  `yaml:"kind"`
-	Images     ImagesConfig `yaml:"images,omitempty"`
-	Repos      []Repo       `yaml:"repos,omitempty"`
-	Components []Component  `yaml:"components,omitempty"`
+	Registry   string         `yaml:"registry"`
+	Context    string         `yaml:"context"`
+	Kind       KindConfig     `yaml:"kind"`
+	Features   FeaturesConfig `yaml:"features,omitempty"`
+	Images     ImagesConfig   `yaml:"images,omitempty"`
+	Repos      []Repo         `yaml:"repos,omitempty"`
+	Components []Component    `yaml:"components,omitempty"`
 
 	// Dir is set by Load to resolve relative paths in component value files.
 	Dir string `yaml:"-"`
+}
+
+type GatewayChannel string
+
+const (
+	GatewayChannelStandard     GatewayChannel = "standard"
+	GatewayChannelExperimental GatewayChannel = "experimental"
+
+	LocalDNSDefaultDomain = "sew.local"
+	LocalDNSDefaultPort   = 5353
+)
+
+type LoadBalancerConfig struct {
+	Enabled bool `yaml:"enabled"`
+}
+
+type GatewayConfig struct {
+	Enabled bool           `yaml:"enabled"`
+	Channel GatewayChannel `yaml:"channel,omitempty"`
+}
+
+type LocalDNSConfig struct {
+	Enabled bool   `yaml:"enabled"`
+	Domain  string `yaml:"domain,omitempty"`
+	Port    int    `yaml:"port,omitempty"`
+}
+
+// FeaturesConfig groups optional networking features. Pointer semantics: a
+// non-nil sub-config means the user explicitly set the feature; nil means
+// "use the context default."
+type FeaturesConfig struct {
+	LoadBalancer *LoadBalancerConfig `yaml:"load-balancer,omitempty"`
+	Gateway      *GatewayConfig     `yaml:"gateway,omitempty"`
+	LocalDNS     *LocalDNSConfig    `yaml:"local-dns,omitempty"`
+}
+
+// MergeFeatures merges context defaults (base) with user overrides. For each
+// feature key, a non-nil override replaces the base; otherwise the base stands.
+func MergeFeatures(base, override FeaturesConfig) FeaturesConfig {
+	result := base
+	if override.LoadBalancer != nil {
+		result.LoadBalancer = override.LoadBalancer
+	}
+	if override.Gateway != nil {
+		result.Gateway = override.Gateway
+	}
+	if override.LocalDNS != nil {
+		result.LocalDNS = override.LocalDNS
+	}
+	return result
+}
+
+// ResolveFeatureDependencies validates inter-feature constraints and
+// auto-enables implied features. It mutates f in place (e.g. enabling
+// load-balancer when gateway requires it, filling defaults for DNS and gateway
+// channel). It returns warnings for non-fatal issues and an error for conflicts.
+func ResolveFeatureDependencies(f *FeaturesConfig) (warnings []string, err error) {
+	gwEnabled := f.Gateway != nil && f.Gateway.Enabled
+	if gwEnabled {
+		if f.LoadBalancer == nil {
+			f.LoadBalancer = &LoadBalancerConfig{Enabled: true}
+		} else if !f.LoadBalancer.Enabled {
+			return nil, fmt.Errorf("gateway requires load-balancer, but load-balancer is explicitly disabled")
+		}
+		if f.Gateway.Channel == "" {
+			f.Gateway.Channel = GatewayChannelStandard
+		}
+	}
+
+	dnsEnabled := f.LocalDNS != nil && f.LocalDNS.Enabled
+	if dnsEnabled && !gwEnabled {
+		warnings = append(warnings, "local-dns is enabled but gateway is not; DNS will run but have nothing to resolve")
+	}
+	if dnsEnabled {
+		if f.LocalDNS.Domain == "" {
+			f.LocalDNS.Domain = LocalDNSDefaultDomain
+		}
+		if f.LocalDNS.Port == 0 {
+			f.LocalDNS.Port = LocalDNSDefaultPort
+		}
+	}
+
+	return warnings, nil
 }
 
 type ImagesConfig struct {

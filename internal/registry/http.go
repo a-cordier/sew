@@ -123,6 +123,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.R
 		Components: parsed.Components,
 		Dir:        cacheDir,
 		Kind:       parsed.Kind,
+		Features:   parsed.Features,
 	}, nil
 }
 

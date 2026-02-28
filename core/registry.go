@@ -68,6 +68,7 @@ type ContextKindNode struct {
 // Context is the parsed content of a context.yaml file.
 type Context struct {
 	Kind       *ContextKindConfig `yaml:"kind,omitempty"`
+	Features   FeaturesConfig     `yaml:"features,omitempty"`
 	Includes   []string           `yaml:"includes,omitempty"`
 	Repos      []Repo             `yaml:"repos,omitempty"`
 	Components []Component        `yaml:"components"`
@@ -79,6 +80,7 @@ type ResolvedContext struct {
 	Components []Component
 	Dir        string
 	Kind       *ContextKindConfig
+	Features   FeaturesConfig
 }
 
 // Resolver resolves a context path against a registry into a ResolvedContext.

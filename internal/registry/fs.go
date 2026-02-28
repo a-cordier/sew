@@ -52,5 +52,6 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*core.Res
 		Components: ctxFile.Components,
 		Dir:        dir,
 		Kind:       ctxFile.Kind,
+		Features:   ctxFile.Features,
 	}, nil
 }
