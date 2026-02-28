@@ -8,6 +8,7 @@ import (
 
 // MergeComponents merges user-level component customizations into the resolved
 // context. Components are matched by name. For each match the merge applies:
+//   - requires: user requirements are appended (deduplicated by component name)
 //   - helm.chart: user wins if non-empty
 //   - helm.version: user wins if non-empty
 //   - helm.valueFiles: user files are appended (higher precedence in Helm)
@@ -28,6 +29,17 @@ func MergeComponents(resolved *core.ResolvedContext, components []core.Component
 			resolveValueFilePaths(&patch, configDir)
 			resolved.Components = append(resolved.Components, patch)
 			continue
+		}
+		if len(patch.Requires) > 0 {
+			existing := make(map[string]bool, len(comp.Requires))
+			for _, r := range comp.Requires {
+				existing[r.Component] = true
+			}
+			for _, r := range patch.Requires {
+				if !existing[r.Component] {
+					comp.Requires = append(comp.Requires, r)
+				}
+			}
 		}
 		if patch.Helm == nil || comp.Helm == nil {
 			continue
