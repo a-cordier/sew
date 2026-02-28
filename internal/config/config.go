@@ -38,6 +38,9 @@ func Merge(base, override *core.Config) {
 	if override.Dir != "" {
 		base.Dir = override.Dir
 	}
+	if len(override.Repos) > 0 {
+		base.Repos = override.Repos
+	}
 	if len(override.Components) > 0 {
 		base.Components = override.Components
 	}
