@@ -6,7 +6,7 @@
 
 - **Registry** — A tree of context directories, either on the filesystem (`file:///path`) or over HTTP. The binary does not ship a registry; you use your own or a remote one.
 - **Context** — A path inside the registry following `org/product/variant` (e.g. `gravitee.io/apim/db-less`). Each context has a `context.yaml` that lists Helm repos and components (charts + values). If you omit the variant (e.g. `gravitee.io/apim`), sew looks for a `.default` file to pick one automatically (see [Default variant resolution](#default-variant-resolution)).
-- **Config** — Your `sew.yaml` sets the registry URL, the context to use, the Kind cluster definition, and optional overrides per component.
+- **Config** — Configuration is layered. A **user-level** config at `$SEW_HOME/sew.yaml` (default `~/.sew/sew.yaml`) provides base settings; a **project-level** `./sew.yaml` (or `--config`) is merged on top. Each layer sets the registry URL, the context to use, the Kind cluster definition, and optional overrides per component. Set the `SEW_HOME` environment variable to change the user-level config location.
 
 ## Commands
 
@@ -17,7 +17,7 @@
 
 ### Global flags
 
-- `--config <path>` — Config file to use (default: `./sew.yaml` or `~/.sew/sew.yaml`).
+- `--config <path>` — Project-level config file to merge on top of the user-level base (`$SEW_HOME/sew.yaml`). Defaults to `./sew.yaml` when present.
 - `--context <path>` — Context path (e.g. `gravitee.io/apim/db-less`). Overrides the value from the config file.
 
 ## Quick start
@@ -45,7 +45,6 @@
 ## Config format
 
 ```yaml
-home: .sew
 registry: file://./registry   # or https://...
 context: gravitee.io/apim/db-less
 
