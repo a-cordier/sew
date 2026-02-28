@@ -65,45 +65,56 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.R
 		return nil, fmt.Errorf("creating cache dir: %w", err)
 	}
 
+	var filesToFetch []string
 	seen := make(map[string]bool)
 	for _, comp := range parsed.Components {
-		if comp.Helm == nil {
-			continue
+		if comp.Helm != nil {
+			for _, v := range comp.Helm.Values {
+				if !seen[v] {
+					seen[v] = true
+					filesToFetch = append(filesToFetch, v)
+				}
+			}
 		}
-		for _, v := range comp.Helm.Values {
-			if seen[v] {
-				continue
+		if comp.Manifest != nil {
+			for _, f := range comp.Manifest.Files {
+				if !seen[f] {
+					seen[f] = true
+					filesToFetch = append(filesToFetch, f)
+				}
 			}
-			seen[v] = true
-			u := baseURL + "/" + contextPath + "/" + v
-			req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
-			if err != nil {
-				return nil, fmt.Errorf("building request for %s: %w", v, err)
-			}
-			resp, err := client.Do(req)
-			if err != nil {
-				return nil, fmt.Errorf("fetching %s: %w", v, err)
-			}
-			if resp.StatusCode != http.StatusOK {
-				resp.Body.Close()
-				return nil, fmt.Errorf("fetching %s: %s", v, resp.Status)
-			}
-			outPath := filepath.Join(cacheDir, v)
-			if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
-				resp.Body.Close()
-				return nil, err
-			}
-			out, err := os.Create(outPath)
-			if err != nil {
-				resp.Body.Close()
-				return nil, err
-			}
-			_, err = io.Copy(out, resp.Body)
-			out.Close()
+		}
+	}
+
+	for _, f := range filesToFetch {
+		u := baseURL + "/" + contextPath + "/" + f
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+		if err != nil {
+			return nil, fmt.Errorf("building request for %s: %w", f, err)
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf("fetching %s: %w", f, err)
+		}
+		if resp.StatusCode != http.StatusOK {
 			resp.Body.Close()
-			if err != nil {
-				return nil, fmt.Errorf("writing %s: %w", v, err)
-			}
+			return nil, fmt.Errorf("fetching %s: %s", f, resp.Status)
+		}
+		outPath := filepath.Join(cacheDir, f)
+		if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
+			resp.Body.Close()
+			return nil, err
+		}
+		out, err := os.Create(outPath)
+		if err != nil {
+			resp.Body.Close()
+			return nil, err
+		}
+		_, err = io.Copy(out, resp.Body)
+		out.Close()
+		resp.Body.Close()
+		if err != nil {
+			return nil, fmt.Errorf("writing %s: %w", f, err)
 		}
 	}
 
