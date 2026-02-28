@@ -6,7 +6,7 @@
 
 - **Registry** — A tree of context directories, either on the filesystem (`file:///path`) or over HTTP. The binary does not ship a registry; you use your own or a remote one.
 - **Context** — A path inside the registry following `org/product/variant` (e.g. `gravitee.io/apim/db-less`). Each context has a `context.yaml` that lists Helm repos and components (charts + values). If you omit the variant (e.g. `gravitee.io/apim`), sew looks for a `.default` file to pick one automatically (see [Default variant resolution](#default-variant-resolution)).
-- **Config** — Configuration is layered. A **user-level** config at `$SEW_HOME/sew.yaml` (default `~/.sew/sew.yaml`) provides base settings; a **project-level** `./sew.yaml` (or `--config`) is merged on top. Each layer sets the registry URL, the context to use, the Kind cluster definition, and optional overrides per component. Set the `SEW_HOME` environment variable to change the user-level config location.
+- **Config** — Configuration is layered. A **user-level** config at `$SEW_HOME/sew.yaml` (default `~/.sew/sew.yaml`) provides base settings; a **project-level** `./sew.yaml` (or `--config`) is merged on top. Each layer sets the registry URL, the context to use, the Kind cluster definition, and optional local components and repos. Set the `SEW_HOME` environment variable to change the user-level config location.
 
 ## Commands
 
@@ -58,16 +58,87 @@ kind:
     - containerPort: 443
       hostPort: 443
 
-# Optional: override component values (e.g. chart version, extra values files)
-# overrides:
-#   apim:
-#     helm:
-#       version: "4.10.0"
-#       values:
-#         - ./my-overrides.yaml
+# Optional: add Helm repos required by local components
+repos:
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+
+# Optional: override context components or add new ones
+components:
+  - name: apim          # matches a context component → merged
+    helm:
+      version: "4.10.0"
+      valueFiles:
+        - ./my-overrides.yaml
+  - name: redis          # no match in context → added as a new component
+    namespace: gravitee
+    helm:
+      chart: bitnami/redis
+      values:
+        architecture: standalone
 ```
 
-Override paths under `overrides.*.helm.values` are resolved relative to the directory containing the config file.
+Value file paths under `components.*.helm.valueFiles` are resolved relative to the directory containing the config file.
+
+## Local components
+
+Beyond overriding fields on components defined by the context, you can declare entirely new components and Helm repos in your `sew.yaml`. This is useful when you need supporting services (databases, caches, message brokers, …) that are not part of the upstream context.
+
+### Adding a component
+
+List the component under `components`. If its `name` does not match any component from the context, sew appends it as a new component and installs it alongside the context ones:
+
+```yaml
+components:
+  - name: redis
+    namespace: gravitee
+    helm:
+      chart: bitnami/redis
+      values:
+        architecture: standalone
+```
+
+### Adding Helm repos
+
+If the new component's chart comes from a repo that the context does not declare, add it under `repos`:
+
+```yaml
+repos:
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+```
+
+Local repos are merged with context repos. When both lists contain a repo with the same name, the local entry wins.
+
+### Adding dependencies between components
+
+You can make a context component wait for a local component (or vice-versa) by adding `requires` entries. Requirements are deduplicated by component name:
+
+```yaml
+components:
+  - name: apim
+    requires:
+      - component: redis
+        conditions:
+          ready: true
+        selector:
+          matchLabels:
+            app.kubernetes.io/instance: redis
+```
+
+### Merge rules
+
+When a local component matches a context component by name, the following merge rules apply:
+
+| Field | Behaviour |
+|-------|-----------|
+| `requires` | Local requirements are appended (deduplicated by component name) |
+| `helm.chart` | Local wins if non-empty |
+| `helm.version` | Local wins if non-empty |
+| `helm.valueFiles` | Local files are appended (higher precedence in Helm) |
+| `helm.values` | Local values are merged on top of context values |
+
+When there is no name match, the component is added to the deployment as-is.
 
 ## Context format
 
@@ -156,7 +227,7 @@ images:
 
 ### Using images from a private registry
 
-Combine mirrors with component overrides to pull images from a private registry through the local cache. Create a values file with the private image coordinates:
+Combine mirrors with local component overrides to pull images from a private registry through the local cache. Create a values file with the private image coordinates:
 
 ```yaml
 # values-private.yaml
@@ -177,11 +248,11 @@ images:
     upstreams:
     - acme.example.com
 
-overrides:
-  apim:
+components:
+  - name: apim
     helm:
-      values:
+      valueFiles:
       - values-private.yaml
 ```
 
-The mirror proxy caches layers from `acme.example.com` locally, and the override swaps the image without modifying the upstream context.
+The mirror proxy caches layers from `acme.example.com` locally, and the component override swaps the image without modifying the upstream context.
