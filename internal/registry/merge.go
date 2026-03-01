@@ -42,24 +42,31 @@ func MergeComponents(resolved *core.ResolvedContext, components []core.Component
 				}
 			}
 		}
-		if patch.Helm == nil || comp.Helm == nil {
-			continue
-		}
-		if patch.Helm.Chart != "" {
-			comp.Helm.Chart = patch.Helm.Chart
-		}
-		if patch.Helm.Version != "" {
-			comp.Helm.Version = patch.Helm.Version
-		}
-		resolveValueFilePaths(&patch, configDir)
-		comp.Helm.ValueFiles = append(comp.Helm.ValueFiles, patch.Helm.ValueFiles...)
-		if len(patch.Helm.Values) > 0 {
-			if comp.Helm.Values == nil {
-				comp.Helm.Values = make(map[string]interface{})
+		if patch.Helm != nil && comp.Helm != nil {
+			if patch.Helm.Chart != "" {
+				comp.Helm.Chart = patch.Helm.Chart
 			}
-			for k, v := range patch.Helm.Values {
-				comp.Helm.Values[k] = v
+			if patch.Helm.Version != "" {
+				comp.Helm.Version = patch.Helm.Version
 			}
+			resolveValueFilePaths(&patch, configDir)
+			comp.Helm.ValueFiles = append(comp.Helm.ValueFiles, patch.Helm.ValueFiles...)
+			if len(patch.Helm.Values) > 0 {
+				if comp.Helm.Values == nil {
+					comp.Helm.Values = make(map[string]interface{})
+				}
+				for k, v := range patch.Helm.Values {
+					comp.Helm.Values[k] = v
+				}
+			}
+		}
+		if patch.K8s != nil {
+			if comp.K8s == nil {
+				comp.K8s = &core.K8sSpec{}
+			}
+			resolveManifestFilePaths(&patch, configDir)
+			comp.K8s.ManifestFiles = append(comp.K8s.ManifestFiles, patch.K8s.ManifestFiles...)
+			comp.K8s.Manifests = append(comp.K8s.Manifests, patch.K8s.Manifests...)
 		}
 	}
 }
@@ -81,12 +88,12 @@ func resolveValueFilePaths(c *core.Component, configDir string) {
 // paths based on configDir. This allows user configs to reference manifest
 // files relative to their own location rather than the registry context dir.
 func resolveManifestFilePaths(c *core.Component, configDir string) {
-	if c.Manifest == nil || configDir == "" {
+	if c.K8s == nil || configDir == "" {
 		return
 	}
-	for i, f := range c.Manifest.Files {
+	for i, f := range c.K8s.ManifestFiles {
 		if !filepath.IsAbs(f) {
-			c.Manifest.Files[i] = filepath.Join(configDir, f)
+			c.K8s.ManifestFiles[i] = filepath.Join(configDir, f)
 		}
 	}
 }

@@ -76,8 +76,8 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.R
 				}
 			}
 		}
-		if comp.Manifest != nil {
-			for _, f := range comp.Manifest.Files {
+		if comp.K8s != nil {
+			for _, f := range comp.K8s.ManifestFiles {
 				if !seen[f] {
 					seen[f] = true
 					filesToFetch = append(filesToFetch, f)

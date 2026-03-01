@@ -8,7 +8,7 @@ import (
 
 var installers = map[string]core.Installer{
 	"helm":     &HelmInstaller{},
-	"manifest": &ManifestInstaller{},
+	"k8s": &ManifestInstaller{},
 }
 
 func ForType(componentType string) (core.Installer, error) {

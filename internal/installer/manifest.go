@@ -40,11 +40,11 @@ func getConfig() (*rest.Config, error) {
 }
 
 func (m *ManifestInstaller) Install(ctx context.Context, comp core.Component, dir string) error {
-	if comp.Manifest == nil {
-		return fmt.Errorf("component %q has no manifest spec", comp.Name)
+	if comp.K8s == nil {
+		return fmt.Errorf("component %q has no k8s spec", comp.Name)
 	}
-	if len(comp.Manifest.Files) == 0 {
-		return fmt.Errorf("component %q has no manifest files", comp.Name)
+	if len(comp.K8s.ManifestFiles) == 0 && len(comp.K8s.Manifests) == 0 {
+		return fmt.Errorf("component %q has no manifest files or inline manifests", comp.Name)
 	}
 
 	config, err := getConfig()
@@ -72,7 +72,7 @@ func (m *ManifestInstaller) Install(ctx context.Context, comp core.Component, di
 		}
 	}
 
-	for _, f := range comp.Manifest.Files {
+	for _, f := range comp.K8s.ManifestFiles {
 		path := filepath.Join(dir, f)
 		data, err := os.ReadFile(path)
 		if err != nil {
@@ -88,29 +88,50 @@ func (m *ManifestInstaller) Install(ctx context.Context, comp core.Component, di
 			if err := yaml.Unmarshal([]byte(doc), &obj.Object); err != nil {
 				return fmt.Errorf("decoding manifest in %q: %w", path, err)
 			}
-			gvk := obj.GroupVersionKind()
-			if gvk.Kind == "" {
-				continue
-			}
-			mapping, err := discoveryMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-			if err != nil {
-				return fmt.Errorf("mapping %s: %w", gvk, err)
-			}
-			if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
-				obj.SetNamespace(namespace)
-			}
-			gvr := mapping.Resource
-			var ri dynamic.ResourceInterface
-			if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
-				ri = dynClient.Resource(gvr).Namespace(obj.GetNamespace())
-			} else {
-				ri = dynClient.Resource(gvr)
-			}
-			_, err = ri.Apply(ctx, obj.GetName(), obj, metav1.ApplyOptions{FieldManager: fieldManager})
-			if err != nil {
-				return fmt.Errorf("apply %s %s: %w", gvk.Kind, obj.GetName(), err)
+			if err := m.applyObject(ctx, obj, namespace, discoveryMapper, dynClient); err != nil {
+				return err
 			}
 		}
+	}
+
+	for i, manifest := range comp.K8s.Manifests {
+		obj := &unstructured.Unstructured{Object: manifest}
+		if err := m.applyObject(ctx, obj, namespace, discoveryMapper, dynClient); err != nil {
+			return fmt.Errorf("inline manifest [%d]: %w", i, err)
+		}
+	}
+
+	return nil
+}
+
+func (m *ManifestInstaller) applyObject(
+	ctx context.Context,
+	obj *unstructured.Unstructured,
+	namespace string,
+	discoveryMapper meta.RESTMapper,
+	dynClient dynamic.Interface,
+) error {
+	gvk := obj.GroupVersionKind()
+	if gvk.Kind == "" {
+		return nil
+	}
+	mapping, err := discoveryMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		return fmt.Errorf("mapping %s: %w", gvk, err)
+	}
+	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+		obj.SetNamespace(namespace)
+	}
+	gvr := mapping.Resource
+	var ri dynamic.ResourceInterface
+	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+		ri = dynClient.Resource(gvr).Namespace(obj.GetNamespace())
+	} else {
+		ri = dynClient.Resource(gvr)
+	}
+	_, err = ri.Apply(ctx, obj.GetName(), obj, metav1.ApplyOptions{FieldManager: fieldManager})
+	if err != nil {
+		return fmt.Errorf("apply %s %s: %w", gvk.Kind, obj.GetName(), err)
 	}
 	return nil
 }
@@ -140,7 +161,7 @@ func splitYAMLDocuments(data []byte) []string {
 
 // Uninstall re-reads manifest files and deletes the resources.
 func (m *ManifestInstaller) Uninstall(_ context.Context, comp core.Component) error {
-	if comp.Manifest == nil || len(comp.Manifest.Files) == 0 {
+	if comp.K8s == nil || (len(comp.K8s.ManifestFiles) == 0 && len(comp.K8s.Manifests) == 0) {
 		return nil
 	}
 	// Resolve dir: we don't have it in Uninstall. We need resolved.Dir in cmd.

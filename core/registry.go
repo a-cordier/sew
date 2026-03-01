@@ -16,8 +16,9 @@ type HelmSpec struct {
 	Values     map[string]interface{} `yaml:"values,omitempty"`
 }
 
-type ManifestSpec struct {
-	Files []string `yaml:"files"`
+type K8sSpec struct {
+	ManifestFiles []string                 `yaml:"manifestFiles,omitempty"`
+	Manifests     []map[string]interface{} `yaml:"manifests,omitempty"`
 }
 
 type Conditions struct {
@@ -42,7 +43,7 @@ type Component struct {
 	Namespace string        `yaml:"namespace,omitempty"`
 	Requires  []Requirement `yaml:"requires,omitempty"`
 	Helm      *HelmSpec     `yaml:"helm,omitempty"`
-	Manifest  *ManifestSpec `yaml:"manifest,omitempty"`
+	K8s       *K8sSpec      `yaml:"k8s,omitempty"`
 }
 
 // EffectiveType returns Type, defaulting to "helm".
