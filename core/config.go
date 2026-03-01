@@ -165,10 +165,15 @@ func (k *KindConfig) RawYAML() ([]byte, error) {
 	return yaml.Marshal(k)
 }
 
-// MergeWithContext merges context Kind requirements into the config. Context
-// provides the base (e.g. name, extra port mappings); user config overrides. On
-// conflict (same containerPort), user wins. When sew.yaml does not set a custom
-// cluster name (still the default "sew"), the context's kind.name is used.
+// MergeWithContext merges context Kind requirements into the config. When
+// sew.yaml does not set a custom cluster name (still the default "sew"), the
+// context's kind.name is used.
+//
+// Port mappings use full-replacement semantics: if the user defines any
+// extraPortMappings on the node, those are kept as-is and all context ports
+// are ignored. If the user defines none, the context ports are used. Within
+// the context itself, top-level and per-node port mappings are merged by
+// containerPort (per-node wins on conflict) before being applied.
 func (k *KindConfig) MergeWithContext(ctx *ContextKindConfig) {
 	if ctx == nil {
 		return
@@ -184,12 +189,17 @@ func (k *KindConfig) MergeWithContext(ctx *ContextKindConfig) {
 		contextPorts = mergePortMappings(contextPorts, ctx.Nodes[0].ExtraPortMappings)
 	}
 	node := &k.Nodes[0]
-	node.ExtraPortMappings = mergePortMappings(contextPorts, node.ExtraPortMappings)
+	if len(node.ExtraPortMappings) == 0 {
+		node.ExtraPortMappings = contextPorts
+	}
 }
 
 // MergeWithDefaults fills zero-value Kind fields from the embedded defaults,
-// preserving any user-specified values. Default port mappings are used as a
-// base; user mappings override on the same containerPort.
+// preserving any user-specified values.
+//
+// Port mappings use full-replacement semantics: if the user defines any
+// extraPortMappings on the node, those are kept as-is and the default port
+// mappings are ignored. If the user defines none, the defaults are used.
 func (k *KindConfig) MergeWithDefaults(defaults *KindConfig) {
 	if defaults == nil {
 		return
@@ -204,10 +214,15 @@ func (k *KindConfig) MergeWithDefaults(defaults *KindConfig) {
 	}
 	if len(k.Nodes) > 0 && len(defaults.Nodes) > 0 {
 		node := &k.Nodes[0]
-		node.ExtraPortMappings = mergePortMappings(defaults.Nodes[0].ExtraPortMappings, node.ExtraPortMappings)
+		if len(node.ExtraPortMappings) == 0 {
+			node.ExtraPortMappings = defaults.Nodes[0].ExtraPortMappings
+		}
 	}
 }
 
+// mergePortMappings combines two port-mapping slices keyed by containerPort,
+// with override taking precedence on conflict. It is used internally to
+// reconcile top-level and per-node port mappings within a single context file.
 func mergePortMappings(base, override []PortMapping) []PortMapping {
 	byPort := make(map[int32]PortMapping)
 	for _, p := range base {
