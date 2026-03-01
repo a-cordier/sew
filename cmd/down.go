@@ -5,16 +5,21 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/a-cordier/sew/core"
 	"github.com/a-cordier/sew/internal/cache"
 	"github.com/a-cordier/sew/internal/cloudprovider"
+	"github.com/a-cordier/sew/internal/dns"
 	"github.com/a-cordier/sew/internal/kind"
 	"github.com/a-cordier/sew/internal/logger"
 	"github.com/a-cordier/sew/internal/registry"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"k8s.io/klog/v2"
+	kindcluster "sigs.k8s.io/kind/pkg/cluster"
 )
 
 var downCmd = &cobra.Command{
@@ -55,8 +60,11 @@ var downCmd = &cobra.Command{
 		klog.SetOutput(logFile)
 		logger.SetLogFile(logPath)
 
-		if cloudprovider.NeedsTunnels() {
-			cloudprovider.CleanupLBTunnels(cfg.Kind.Name)
+		dnsDir := filepath.Join(sewHome, "dns")
+		if err := dns.RemoveRecordFile(dnsDir, cfg.Kind.Name); err != nil {
+			color.Yellow("  ⚠ failed to remove DNS record file: %v", err)
+		} else {
+			color.Blue("  ✓ Removed DNS records for cluster %q", cfg.Kind.Name)
 		}
 
 		if err := logger.WithSpinner("Cleaning up load balancer containers", func() error {
@@ -83,10 +91,39 @@ var downCmd = &cobra.Command{
 			}
 		}
 
+		stopCPKIfNoKindClusters()
+
 		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(downCmd)
+}
+
+func stopCPKIfNoKindClusters() {
+	provider := kindcluster.NewProvider()
+	clusters, err := provider.List()
+	if err != nil || len(clusters) > 0 {
+		return
+	}
+
+	pidPath := filepath.Join(sewHome, "pids", "cpk.pid")
+	data, err := os.ReadFile(pidPath)
+	if err != nil {
+		return
+	}
+	pid, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	if err != nil {
+		return
+	}
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		return
+	}
+	if proc.Signal(syscall.Signal(0)) == nil {
+		_ = proc.Signal(syscall.SIGTERM)
+		color.Blue("  ✓ Stopped cloud provider controller (pid %d)", pid)
+	}
+	_ = os.Remove(pidPath)
 }

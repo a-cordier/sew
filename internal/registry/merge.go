@@ -27,6 +27,7 @@ func MergeComponents(resolved *core.ResolvedContext, components []core.Component
 		comp, ok := byName[patch.Name]
 		if !ok {
 			resolveValueFilePaths(&patch, configDir)
+			resolveManifestFilePaths(&patch, configDir)
 			resolved.Components = append(resolved.Components, patch)
 			continue
 		}
@@ -72,6 +73,20 @@ func resolveValueFilePaths(c *core.Component, configDir string) {
 	for i, v := range c.Helm.ValueFiles {
 		if !filepath.IsAbs(v) {
 			c.Helm.ValueFiles[i] = filepath.Join(configDir, v)
+		}
+	}
+}
+
+// resolveManifestFilePaths resolves relative manifest file paths to absolute
+// paths based on configDir. This allows user configs to reference manifest
+// files relative to their own location rather than the registry context dir.
+func resolveManifestFilePaths(c *core.Component, configDir string) {
+	if c.Manifest == nil || configDir == "" {
+		return
+	}
+	for i, f := range c.Manifest.Files {
+		if !filepath.IsAbs(f) {
+			c.Manifest.Files[i] = filepath.Join(configDir, f)
 		}
 	}
 }

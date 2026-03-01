@@ -9,6 +9,7 @@ package cloudprovider
 import (
 	"context"
 	"fmt"
+	"net"
 	"runtime"
 	"strings"
 
@@ -31,16 +32,16 @@ import (
 )
 
 func init() {
-	configurePlatformDefaults()
+	ConfigurePlatformDefaults()
 }
 
-// configurePlatformDefaults sets CPK's global config based on the host OS.
+// ConfigurePlatformDefaults sets CPK's global config based on the host OS.
 // On macOS (and Windows), Docker runs in a VM so container IPs are not
 // directly reachable. Portmap mode enables port publishing on LB containers
 // without creating CPK's internal tunnel manager (we handle tunnels ourselves
 // with proper privilege escalation). On Linux, containers share the host
 // network bridge so direct access works without any of this.
-func configurePlatformDefaults() {
+func ConfigurePlatformDefaults() {
 	switch runtime.GOOS {
 	case "darwin", "windows":
 		cpkconfig.DefaultConfig.LoadBalancerConnectivity = cpkconfig.Portmap
@@ -128,11 +129,14 @@ func SetupLBTunnels(clusterName string) error {
 	for _, name := range names {
 		ipv4, _, err := container.IPs(name)
 		if err != nil {
-			return fmt.Errorf("getting IP for container %s: %w", name, err)
+			klog.V(2).Infof("skipping tunnel for %s: %v", name, err)
+			continue
 		}
-		if ipv4 != "" {
-			ifconfigCmds = append(ifconfigCmds, fmt.Sprintf("ifconfig lo0 alias %s netmask 255.255.255.255", ipv4))
+		if ipv4 == "" || net.ParseIP(ipv4) == nil {
+			klog.V(2).Infof("skipping tunnel for %s: invalid IP %q", name, ipv4)
+			continue
 		}
+		ifconfigCmds = append(ifconfigCmds, fmt.Sprintf("ifconfig lo0 alias %s netmask 255.255.255.255", ipv4))
 	}
 
 	if len(ifconfigCmds) > 0 {
@@ -217,6 +221,24 @@ func InstallGatewayCRDs(ctx context.Context, clusterName string, channel core.Ga
 		return fmt.Errorf("creating Gateway API CRD manager: %w", err)
 	}
 	return mgr.InstallCRDs(ctx, cpkconfig.GatewayReleaseChannel(channel))
+}
+
+// ListLBIPs returns a map of LB container name to its IPv4 address for the
+// given cluster. Containers without an IP are omitted.
+func ListLBIPs(clusterName string) (map[string]string, error) {
+	names, err := lbContainerNames(clusterName)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[string]string, len(names))
+	for _, name := range names {
+		ipv4, _, err := container.IPs(name)
+		if err != nil || ipv4 == "" {
+			continue
+		}
+		result[name] = ipv4
+	}
+	return result, nil
 }
 
 func lbContainerNames(clusterName string) ([]string, error) {

@@ -4,13 +4,17 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/a-cordier/sew/core"
 	"github.com/a-cordier/sew/internal/cache"
 	"github.com/a-cordier/sew/internal/cloudprovider"
+	"github.com/a-cordier/sew/internal/dns"
 	"github.com/a-cordier/sew/internal/installer"
 	"github.com/a-cordier/sew/internal/kind"
 	"github.com/a-cordier/sew/internal/logger"
@@ -121,10 +125,11 @@ func runUp(_ *cobra.Command, _ []string) error {
 		return nil
 	}
 
-	if cfg.Features.Gateway != nil && cfg.Features.Gateway.Enabled {
-		if err := logger.WithSpinner("Installing Gateway API CRDs", func() error {
-			return cloudprovider.InstallGatewayCRDs(ctx, cfg.Kind.Name, cfg.Features.Gateway.Channel)
-		}); err != nil {
+	gatewayEnabled := cfg.Features.Gateway != nil && cfg.Features.Gateway.Enabled
+	lbEnabled := cfg.Features.LB != nil && cfg.Features.LB.Enabled
+
+	if gatewayEnabled {
+		if err := ensureCPKController(cfg); err != nil {
 			return err
 		}
 	}
@@ -139,7 +144,6 @@ func runUp(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return fmt.Errorf("resolving dependencies: %w", err)
 	}
-
 
 	if len(resolved.Repos) > 0 {
 		helmInst, _ := installer.ForType("helm")
@@ -195,18 +199,216 @@ func runUp(_ *cobra.Command, _ []string) error {
 		}
 	}
 
-	if cfg.Features.LoadBalancer != nil && cfg.Features.LoadBalancer.Enabled {
+	if !gatewayEnabled && lbEnabled {
 		if err := logger.WithSpinner("Provisioning load balancers", func() error {
 			return cloudprovider.EnsureLBs(ctx, cfg.Kind.Name)
 		}); err != nil {
 			return err
 		}
-		if cloudprovider.NeedsTunnels() {
-			if err := cloudprovider.SetupLBTunnels(cfg.Kind.Name); err != nil {
-				return err
-			}
+	}
+
+	if cfg.Features.DNS != nil && cfg.Features.DNS.Enabled {
+		if err := setupDNSRecords(ctx, cfg); err != nil {
+			return err
+		}
+	}
+
+	if !gatewayEnabled && lbEnabled && cloudprovider.NeedsTunnels() {
+		if err := cloudprovider.SetupLBTunnels(cfg.Kind.Name); err != nil {
+			color.Yellow("  ⚠ tunnel setup failed: %v", err)
+			color.Yellow("  Services may not be reachable by container IP from the host.")
 		}
 	}
 
 	return nil
+}
+
+// The CPK controller is restarted fresh on each sew up, so it discovers the
+// cluster immediately. 90s gives time for the CCM to start, informers to
+// sync, and the gateway controller to reconcile and set status.addresses.
+const gatewayPollTimeout = 90 * time.Second
+
+func setupDNSRecords(ctx context.Context, cfg *core.Config) error {
+	dnsDir := filepath.Join(sewHome, "dns")
+
+	if err := logger.WithSpinner("Collecting DNS records from cluster", func() error {
+		return dns.IntrospectCluster(ctx, cfg.Kind.Name, dnsDir, gatewayPollTimeout)
+	}); err != nil {
+		return err
+	}
+
+	if err := ensureDNSServer(cfg); err != nil {
+		color.Yellow("  ⚠ failed to start DNS server: %v", err)
+	}
+
+	if !dns.ResolverConfigured(cfg.Features.DNS.Domain, cfg.Features.DNS.Port) {
+		fmt.Println()
+		color.Yellow("  DNS server is running but OS-level routing is not configured.")
+		color.Yellow("  Run \"sew setup dns\" once to enable automatic DNS resolution.")
+	}
+
+	return nil
+}
+
+func ensureCPKController(_ *core.Config) error {
+	pidDir := filepath.Join(sewHome, "pids")
+	pidPath := filepath.Join(pidDir, "cpk.pid")
+
+	// Kill any stale controller so the new one immediately discovers the
+	// current cluster on its first poll iteration (no 30-second wait).
+	// SIGKILL avoids triggering CPK's cleanup which would delete containers.
+	killProcess(pidPath)
+
+	if err := os.MkdirAll(pidDir, 0o755); err != nil {
+		return fmt.Errorf("creating pid directory: %w", err)
+	}
+
+	sewBin, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("finding sew executable: %w", err)
+	}
+
+	var cmdArgs []string
+	if cfgFile != "" {
+		cmdArgs = append(cmdArgs, "--config", cfgFile)
+	}
+	cmdArgs = append(cmdArgs, "cpk", "serve")
+
+	// On macOS, CPK needs root for loopback aliases and tunnels.
+	if cloudprovider.NeedsTunnels() {
+		fullCmd := sewBin
+		for _, a := range cmdArgs {
+			fullCmd += " " + a
+		}
+		cmd := exec.Command("sudo", "-p",
+			"\n  sew needs administrator privileges for network routing.\n  Password: ",
+			"sh", "-c", fullCmd+" &")
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("starting cloud provider controller: %w", err)
+		}
+
+		// sudo spawns the background process; find its PID.
+		time.Sleep(500 * time.Millisecond)
+		pidCmd := exec.Command("pgrep", "-f", "sew.*cpk serve")
+		out, err := pidCmd.Output()
+		if err == nil {
+			lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+			if len(lines) > 0 {
+				if err := os.WriteFile(pidPath, []byte(lines[0]+"\n"), 0o644); err != nil {
+					return fmt.Errorf("writing CPK PID file: %w", err)
+				}
+				color.Blue("  ✓ Cloud provider controller started (pid %s)", lines[0])
+			}
+		}
+		return nil
+	}
+
+	cmd := exec.Command(sewBin, cmdArgs...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	cmd.Stdout = nil
+	cmd.Stderr = nil
+	cmd.Stdin = nil
+
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("starting cloud provider controller: %w", err)
+	}
+
+	pid := cmd.Process.Pid
+	if err := os.WriteFile(pidPath, []byte(strconv.Itoa(pid)+"\n"), 0o644); err != nil {
+		return fmt.Errorf("writing CPK PID file: %w", err)
+	}
+
+	if err := cmd.Process.Release(); err != nil {
+		return fmt.Errorf("releasing CPK process: %w", err)
+	}
+
+	color.Blue("  ✓ Cloud provider controller started (pid %d)", pid)
+	return nil
+}
+
+func killProcess(pidPath string) {
+	data, err := os.ReadFile(pidPath)
+	if err != nil {
+		return
+	}
+	pid, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	if err != nil {
+		return
+	}
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		return
+	}
+	_ = proc.Signal(syscall.SIGKILL)
+	_, _ = proc.Wait()
+	_ = os.Remove(pidPath)
+}
+
+func ensureDNSServer(cfg *core.Config) error {
+	pidDir := filepath.Join(sewHome, "pids")
+	pidPath := filepath.Join(pidDir, "dns.pid")
+
+	if isProcessAlive(pidPath) {
+		return nil
+	}
+
+	if err := os.MkdirAll(pidDir, 0o755); err != nil {
+		return fmt.Errorf("creating pid directory: %w", err)
+	}
+
+	domain := cfg.Features.DNS.Domain
+	port := cfg.Features.DNS.Port
+	dnsDir := filepath.Join(sewHome, "dns")
+	addr := fmt.Sprintf("127.0.0.1:%d", port)
+
+	sewBin, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("finding sew executable: %w", err)
+	}
+
+	cmd := exec.Command(sewBin, "dns", "serve",
+		"--dir", dnsDir,
+		"--domain", domain,
+		"--addr", addr,
+	)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+	cmd.Stdout = nil
+	cmd.Stderr = nil
+	cmd.Stdin = nil
+
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("starting DNS server: %w", err)
+	}
+
+	pid := cmd.Process.Pid
+	if err := os.WriteFile(pidPath, []byte(strconv.Itoa(pid)+"\n"), 0o644); err != nil {
+		return fmt.Errorf("writing DNS PID file: %w", err)
+	}
+
+	if err := cmd.Process.Release(); err != nil {
+		return fmt.Errorf("releasing DNS server process: %w", err)
+	}
+
+	color.Blue("  ✓ DNS server started (pid %d, %s)", pid, addr)
+	return nil
+}
+
+func isProcessAlive(pidPath string) bool {
+	data, err := os.ReadFile(pidPath)
+	if err != nil {
+		return false
+	}
+	pid, err := strconv.Atoi(strings.TrimSpace(string(data)))
+	if err != nil {
+		return false
+	}
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		return false
+	}
+	return proc.Signal(syscall.Signal(0)) == nil
 }

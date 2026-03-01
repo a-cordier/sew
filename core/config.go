@@ -26,11 +26,11 @@ const (
 	GatewayChannelStandard     GatewayChannel = "standard"
 	GatewayChannelExperimental GatewayChannel = "experimental"
 
-	LocalDNSDefaultDomain = "sew.local"
-	LocalDNSDefaultPort   = 5353
+	DNSDefaultDomain = "sew.local"
+	DNSDefaultPort   = 15353
 )
 
-type LoadBalancerConfig struct {
+type LBConfig struct {
 	Enabled bool `yaml:"enabled"`
 }
 
@@ -39,7 +39,7 @@ type GatewayConfig struct {
 	Channel GatewayChannel `yaml:"channel,omitempty"`
 }
 
-type LocalDNSConfig struct {
+type DNSConfig struct {
 	Enabled bool   `yaml:"enabled"`
 	Domain  string `yaml:"domain,omitempty"`
 	Port    int    `yaml:"port,omitempty"`
@@ -49,54 +49,54 @@ type LocalDNSConfig struct {
 // non-nil sub-config means the user explicitly set the feature; nil means
 // "use the context default."
 type FeaturesConfig struct {
-	LoadBalancer *LoadBalancerConfig `yaml:"load-balancer,omitempty"`
+	LB *LBConfig `yaml:"lb,omitempty"`
 	Gateway      *GatewayConfig     `yaml:"gateway,omitempty"`
-	LocalDNS     *LocalDNSConfig    `yaml:"local-dns,omitempty"`
+	DNS          *DNSConfig         `yaml:"dns,omitempty"`
 }
 
 // MergeFeatures merges context defaults (base) with user overrides. For each
 // feature key, a non-nil override replaces the base; otherwise the base stands.
 func MergeFeatures(base, override FeaturesConfig) FeaturesConfig {
 	result := base
-	if override.LoadBalancer != nil {
-		result.LoadBalancer = override.LoadBalancer
+	if override.LB != nil {
+		result.LB = override.LB
 	}
 	if override.Gateway != nil {
 		result.Gateway = override.Gateway
 	}
-	if override.LocalDNS != nil {
-		result.LocalDNS = override.LocalDNS
+	if override.DNS != nil {
+		result.DNS = override.DNS
 	}
 	return result
 }
 
 // ResolveFeatureDependencies validates inter-feature constraints and
 // auto-enables implied features. It mutates f in place (e.g. enabling
-// load-balancer when gateway requires it, filling defaults for DNS and gateway
+// lb when gateway requires it, filling defaults for DNS and gateway
 // channel). It returns warnings for non-fatal issues and an error for conflicts.
 func ResolveFeatureDependencies(f *FeaturesConfig) (warnings []string, err error) {
 	gwEnabled := f.Gateway != nil && f.Gateway.Enabled
 	if gwEnabled {
-		if f.LoadBalancer == nil {
-			f.LoadBalancer = &LoadBalancerConfig{Enabled: true}
-		} else if !f.LoadBalancer.Enabled {
-			return nil, fmt.Errorf("gateway requires load-balancer, but load-balancer is explicitly disabled")
+		if f.LB == nil {
+			f.LB = &LBConfig{Enabled: true}
+		} else if !f.LB.Enabled {
+			return nil, fmt.Errorf("gateway requires lb, but lb is explicitly disabled")
 		}
 		if f.Gateway.Channel == "" {
 			f.Gateway.Channel = GatewayChannelStandard
 		}
 	}
 
-	dnsEnabled := f.LocalDNS != nil && f.LocalDNS.Enabled
+	dnsEnabled := f.DNS != nil && f.DNS.Enabled
 	if dnsEnabled && !gwEnabled {
-		warnings = append(warnings, "local-dns is enabled but gateway is not; DNS will run but have nothing to resolve")
+		warnings = append(warnings, "dns is enabled but gateway is not; DNS will run but have nothing to resolve")
 	}
 	if dnsEnabled {
-		if f.LocalDNS.Domain == "" {
-			f.LocalDNS.Domain = LocalDNSDefaultDomain
+		if f.DNS.Domain == "" {
+			f.DNS.Domain = DNSDefaultDomain
 		}
-		if f.LocalDNS.Port == 0 {
-			f.LocalDNS.Port = LocalDNSDefaultPort
+		if f.DNS.Port == 0 {
+			f.DNS.Port = DNSDefaultPort
 		}
 	}
 
