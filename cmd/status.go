@@ -27,6 +27,10 @@ func init() {
 }
 
 func runStatus(_ *cobra.Command, _ []string) error {
+	if _, err := resolveContextConfig(); err != nil {
+		return err
+	}
+
 	bold := color.New(color.Bold)
 
 	bold.Println("Cluster")

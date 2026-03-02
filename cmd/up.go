@@ -39,23 +39,9 @@ func runUp(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("failed to create home directory %s: %w", sewHome, err)
 	}
 
-	var resolved *core.ResolvedContext
-	if cfg.Registry != "" && cfg.Context != "" {
-		registryURL := cfg.Registry
-		if strings.HasPrefix(registryURL, "file://") {
-			path := strings.TrimPrefix(registryURL, "file://")
-			if abs, err := filepath.Abs(path); err == nil {
-				registryURL = "file://" + abs
-			}
-		}
-		resolver := registry.NewResolver(registryURL, sewHome)
-		var resolveErr error
-		resolved, resolveErr = resolver.Resolve(context.Background(), cfg.Context)
-		if resolveErr != nil {
-			return fmt.Errorf("resolving context %q: %w", cfg.Context, resolveErr)
-		}
-		cfg.Kind.MergeWithContext(resolved.Kind)
-		cfg.Features = core.MergeFeatures(resolved.Features, cfg.Features)
+	resolved, err := resolveContextConfig()
+	if err != nil {
+		return err
 	}
 
 	featWarnings, err := core.ResolveFeatureDependencies(&cfg.Features)

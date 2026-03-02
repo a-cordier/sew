@@ -51,6 +51,10 @@ func init() {
 }
 
 func runSetupDNS(_ *cobra.Command, _ []string) error {
+	if _, err := resolveContextConfig(); err != nil {
+		return err
+	}
+
 	domain := core.DNSDefaultDomain
 	port := core.DNSDefaultPort
 
@@ -78,6 +82,10 @@ func runSetupDNS(_ *cobra.Command, _ []string) error {
 }
 
 func runTeardownDNS(_ *cobra.Command, _ []string) error {
+	if _, err := resolveContextConfig(); err != nil {
+		return err
+	}
+
 	domain := core.DNSDefaultDomain
 	if cfg.Features.DNS != nil && cfg.Features.DNS.Domain != "" {
 		domain = cfg.Features.DNS.Domain

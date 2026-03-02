@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/a-cordier/sew/core"
 	"github.com/a-cordier/sew/internal/dns"
-	"github.com/a-cordier/sew/internal/registry"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -37,21 +35,8 @@ func init() {
 const refreshPollTimeout = 30 * time.Second
 
 func runDNSRefresh(_ *cobra.Command, _ []string) error {
-	if cfg.Registry != "" && cfg.Context != "" {
-		registryURL := cfg.Registry
-		if strings.HasPrefix(registryURL, "file://") {
-			path := strings.TrimPrefix(registryURL, "file://")
-			if abs, err := filepath.Abs(path); err == nil {
-				registryURL = "file://" + abs
-			}
-		}
-		resolver := registry.NewResolver(registryURL, sewHome)
-		resolved, err := resolver.Resolve(context.Background(), cfg.Context)
-		if err != nil {
-			return fmt.Errorf("resolving context %q: %w", cfg.Context, err)
-		}
-		cfg.Kind.MergeWithContext(resolved.Kind)
-		cfg.Features = core.MergeFeatures(resolved.Features, cfg.Features)
+	if _, err := resolveContextConfig(); err != nil {
+		return err
 	}
 
 	dnsDir := filepath.Join(sewHome, "dns")
