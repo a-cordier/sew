@@ -17,16 +17,19 @@ type FSResolver struct {
 	Root string // absolute path to the registry root
 }
 
-// Resolve reads {Root}/{contextPath}/context.yaml and returns a
+// Resolve reads {Root}/{contextPath}/sew.yaml and returns a
 // ResolvedContext whose Dir points to the context directory on disk.
 // Values files are already local, so no downloads are needed.
 //
-// If context.yaml does not exist, Resolve looks for a .default file
-// containing the name of a default variant sub-directory. When found,
-// it appends the variant to contextPath and resolves again.
+// For backward compatibility, if sew.yaml does not exist, Resolve
+// falls back to context.yaml. If neither exists, it looks for a
+// .default file containing the name of a default variant
+// sub-directory. When found, it appends the variant to contextPath
+// and resolves again.
 func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*core.ResolvedContext, error) {
 	dir := filepath.Join(r.Root, contextPath)
-	data, err := os.ReadFile(filepath.Join(dir, "context.yaml"))
+
+	data, err := r.readContextFile(dir)
 	if err != nil {
 		if !errors.Is(err, os.ErrNotExist) {
 			return nil, fmt.Errorf("reading context file: %w", err)
@@ -44,7 +47,7 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*core.Res
 
 	var ctxFile core.Context
 	if err := yaml.Unmarshal(data, &ctxFile); err != nil {
-		return nil, fmt.Errorf("parsing context.yaml: %w", err)
+		return nil, fmt.Errorf("parsing context file: %w", err)
 	}
 
 	return &core.ResolvedContext{
@@ -54,4 +57,14 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*core.Res
 		Kind:       ctxFile.Kind,
 		Features:   ctxFile.Features,
 	}, nil
+}
+
+// readContextFile tries sew.yaml first, falling back to context.yaml
+// for backward compatibility.
+func (r *FSResolver) readContextFile(dir string) ([]byte, error) {
+	data, err := os.ReadFile(filepath.Join(dir, "sew.yaml"))
+	if err != nil && errors.Is(err, os.ErrNotExist) {
+		return os.ReadFile(filepath.Join(dir, "context.yaml"))
+	}
+	return data, err
 }

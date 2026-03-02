@@ -5,7 +5,7 @@
 ## Concepts
 
 - **Registry** — A tree of context directories, either on the filesystem (`file:///path`) or over HTTP. The binary does not ship a registry; you use your own or a remote one.
-- **Context** — A path inside the registry following `org/product/variant` (e.g. `gravitee.io/apim/db-less`). Each context has a `context.yaml` that lists Helm repos and components (charts + values). If you omit the variant (e.g. `gravitee.io/apim`), sew looks for a `.default` file to pick one automatically (see [Default variant resolution](#default-variant-resolution)).
+- **Context** — A path inside the registry following `org/product/variant` (e.g. `gravitee.io/apim/db-less`). Each context has a `sew.yaml` that lists Helm repos and components (charts + values). If you omit the variant (e.g. `gravitee.io/apim`), sew looks for a `.default` file to pick one automatically (see [Default variant resolution](#default-variant-resolution)).
 - **Config** — Configuration is layered. A **user-level** config at `$SEW_HOME/sew.yaml` (default `~/.sew/sew.yaml`) provides base settings; a **project-level** `./sew.yaml` (or `--config`) is merged on top. Each layer sets the registry URL, the context to use, the Kind cluster definition, and optional local components and repos. Set the `SEW_HOME` environment variable to change the user-level config location.
 
 ## Commands
@@ -145,7 +145,7 @@ When there is no name match, the component is added to the deployment as-is.
 
 ## Context format
 
-A context lives at `{registry}/{context_path}/` and must contain `context.yaml`:
+A context lives at `{registry}/{context_path}/` and must contain `sew.yaml`:
 
 ```yaml
 repos:
@@ -169,17 +169,17 @@ File paths in `values` are relative to the context directory. `type` defaults to
 
 A context path usually includes the variant (`org/product/variant`), but you can also point to the product level and let sew pick the default variant automatically.
 
-When the resolved path has no `context.yaml`, sew looks for a **`.default`** file in the same directory. This plain-text dotfile contains a single line — the name of the variant to use. sew then appends that variant to the path and resolves again.
+When the resolved path has no `sew.yaml`, sew looks for a **`.default`** file in the same directory. This plain-text dotfile contains a single line — the name of the variant to use. sew then appends that variant to the path and resolves again.
 
 ```
 registry/gravitee.io/apim/
 ├── .default          # contains "db-less"
 ├── db-less/
-│   ├── context.yaml
+│   ├── sew.yaml
 │   ├── values-apim.yaml
 │   └── values-gko.yaml
 └── standard/         # another variant
-    ├── context.yaml
+    ├── sew.yaml
     └── ...
 ```
 
@@ -191,7 +191,7 @@ To create a default for your own product, add a `.default` file next to the vari
 echo "db-less" > registry/gravitee.io/apim/.default
 ```
 
-If neither `context.yaml` nor `.default` is found at the given path, sew returns an error.
+If neither `sew.yaml` nor `.default` is found at the given path, sew returns an error.
 
 ## Image mirrors
 
