@@ -17,6 +17,7 @@ import (
 type HTTPResolver struct {
 	BaseURL    string
 	CacheRoot  string
+	SewHome    string
 	HTTPClient *http.Client
 }
 
@@ -27,6 +28,11 @@ type HTTPResolver struct {
 // For backward compatibility, if sew.yaml returns 404, Resolve falls
 // back to context.yaml before trying the .default variant lookup.
 func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.ResolvedContext, error) {
+	ctx, err := withVisited(ctx, contextRef{Registry: r.BaseURL, Context: contextPath})
+	if err != nil {
+		return nil, err
+	}
+
 	baseURL := strings.TrimSuffix(r.BaseURL, "/")
 	client := r.HTTPClient
 	if client == nil {
@@ -48,7 +54,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.R
 		return nil, fmt.Errorf("fetching context: %d", status)
 	}
 
-	var parsed core.Context
+	var parsed core.Config
 	if err := yaml.Unmarshal(data, &parsed); err != nil {
 		return nil, fmt.Errorf("parsing context file: %w", err)
 	}
@@ -109,6 +115,10 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.R
 		if err != nil {
 			return nil, fmt.Errorf("writing %s: %w", f, err)
 		}
+	}
+
+	if parsed.Context != "" {
+		return resolveWithParent(ctx, parsed, cacheDir, r.BaseURL, r.SewHome)
 	}
 
 	return &core.ResolvedContext{

@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"sort"
 
 	"gopkg.in/yaml.v3"
 )
@@ -172,26 +171,20 @@ func (k *KindConfig) RawYAML() ([]byte, error) {
 //
 // Port mappings use full-replacement semantics: if the user defines any
 // extraPortMappings on the node, those are kept as-is and all context ports
-// are ignored. If the user defines none, the context ports are used. Within
-// the context itself, top-level and per-node port mappings are merged by
-// containerPort (per-node wins on conflict) before being applied.
-func (k *KindConfig) MergeWithContext(ctx *ContextKindConfig) {
+// are ignored. If the user defines none, the context ports are used.
+func (k *KindConfig) MergeWithContext(ctx *KindConfig) {
 	if ctx == nil {
 		return
 	}
 	if ctx.Name != "" && k.Name == KindDefaultName {
 		k.Name = ctx.Name
 	}
-	if len(k.Nodes) == 0 {
+	if len(k.Nodes) == 0 || len(ctx.Nodes) == 0 {
 		return
-	}
-	contextPorts := ctx.ExtraPortMappings
-	if len(ctx.Nodes) > 0 && len(ctx.Nodes[0].ExtraPortMappings) > 0 {
-		contextPorts = mergePortMappings(contextPorts, ctx.Nodes[0].ExtraPortMappings)
 	}
 	node := &k.Nodes[0]
 	if len(node.ExtraPortMappings) == 0 {
-		node.ExtraPortMappings = contextPorts
+		node.ExtraPortMappings = ctx.Nodes[0].ExtraPortMappings
 	}
 }
 
@@ -221,29 +214,4 @@ func (k *KindConfig) MergeWithDefaults(defaults *KindConfig) {
 	}
 }
 
-// mergePortMappings combines two port-mapping slices keyed by containerPort,
-// with override taking precedence on conflict. It is used internally to
-// reconcile top-level and per-node port mappings within a single context file.
-func mergePortMappings(base, override []PortMapping) []PortMapping {
-	byPort := make(map[int32]PortMapping)
-	for _, p := range base {
-		byPort[p.ContainerPort] = p
-	}
-	for _, p := range override {
-		byPort[p.ContainerPort] = p
-	}
-	if len(byPort) == 0 {
-		return nil
-	}
-	ports := make([]int32, 0, len(byPort))
-	for cp := range byPort {
-		ports = append(ports, cp)
-	}
-	sort.Slice(ports, func(i, j int) bool { return ports[i] < ports[j] })
-	out := make([]PortMapping, 0, len(ports))
-	for _, cp := range ports {
-		out = append(out, byPort[cp])
-	}
-	return out
-}
 

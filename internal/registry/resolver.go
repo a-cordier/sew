@@ -12,10 +12,14 @@ import (
 // is treated as an HTTP registry with cache rooted under sewHome.
 func NewResolver(registry string, sewHome string) core.Resolver {
 	if strings.HasPrefix(registry, "file://") {
-		return &FSResolver{Root: strings.TrimPrefix(registry, "file://")}
+		return &FSResolver{
+			Root:    strings.TrimPrefix(registry, "file://"),
+			SewHome: sewHome,
+		}
 	}
 	return &HTTPResolver{
 		BaseURL:   registry,
 		CacheRoot: filepath.Join(sewHome, "cache"),
+		SewHome:   sewHome,
 	}
 }

@@ -14,12 +14,16 @@ import (
 
 // FSResolver resolves contexts from a local filesystem directory.
 type FSResolver struct {
-	Root string // absolute path to the registry root
+	Root    string // absolute path to the registry root
+	SewHome string
 }
 
 // Resolve reads {Root}/{contextPath}/sew.yaml and returns a
 // ResolvedContext whose Dir points to the context directory on disk.
 // Values files are already local, so no downloads are needed.
+//
+// If the parsed config declares a parent context (via the context field),
+// the parent is resolved first and the child's overrides are merged on top.
 //
 // For backward compatibility, if sew.yaml does not exist, Resolve
 // falls back to context.yaml. If neither exists, it looks for a
@@ -27,6 +31,12 @@ type FSResolver struct {
 // sub-directory. When found, it appends the variant to contextPath
 // and resolves again.
 func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*core.ResolvedContext, error) {
+	selfRegistry := "file://" + r.Root
+	ctx, err := withVisited(ctx, contextRef{Registry: selfRegistry, Context: contextPath})
+	if err != nil {
+		return nil, err
+	}
+
 	dir := filepath.Join(r.Root, contextPath)
 
 	data, err := r.readContextFile(dir)
@@ -45,17 +55,21 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*core.Res
 		return r.Resolve(ctx, filepath.Join(contextPath, name))
 	}
 
-	var ctxFile core.Context
-	if err := yaml.Unmarshal(data, &ctxFile); err != nil {
+	var ctxCfg core.Config
+	if err := yaml.Unmarshal(data, &ctxCfg); err != nil {
 		return nil, fmt.Errorf("parsing context file: %w", err)
 	}
 
+	if ctxCfg.Context != "" {
+		return resolveWithParent(ctx, ctxCfg, dir, selfRegistry, r.SewHome)
+	}
+
 	return &core.ResolvedContext{
-		Repos:      ctxFile.Repos,
-		Components: ctxFile.Components,
+		Repos:      ctxCfg.Repos,
+		Components: ctxCfg.Components,
 		Dir:        dir,
-		Kind:       ctxFile.Kind,
-		Features:   ctxFile.Features,
+		Kind:       ctxCfg.Kind,
+		Features:   ctxCfg.Features,
 	}, nil
 }
 

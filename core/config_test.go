@@ -170,11 +170,14 @@ func TestMergeWithContext_UserPortsReplaceContext(t *testing.T) {
 			},
 		}},
 	}
-	ctx := &ContextKindConfig{
-		ExtraPortMappings: []PortMapping{
-			{ContainerPort: 80, HostPort: 80},
-			{ContainerPort: 443, HostPort: 443},
-		},
+	ctx := &KindConfig{
+		Nodes: []KindNode{{
+			Role: "control-plane",
+			ExtraPortMappings: []PortMapping{
+				{ContainerPort: 80, HostPort: 80},
+				{ContainerPort: 443, HostPort: 443},
+			},
+		}},
 	}
 	k.MergeWithContext(ctx)
 
@@ -191,11 +194,14 @@ func TestMergeWithContext_NoUserPortsFallsBackToContext(t *testing.T) {
 		Name:  KindDefaultName,
 		Nodes: []KindNode{{Role: "control-plane"}},
 	}
-	ctx := &ContextKindConfig{
-		ExtraPortMappings: []PortMapping{
-			{ContainerPort: 80, HostPort: 80},
-			{ContainerPort: 443, HostPort: 443},
-		},
+	ctx := &KindConfig{
+		Nodes: []KindNode{{
+			Role: "control-plane",
+			ExtraPortMappings: []PortMapping{
+				{ContainerPort: 80, HostPort: 80},
+				{ContainerPort: 443, HostPort: 443},
+			},
+		}},
 	}
 	k.MergeWithContext(ctx)
 
@@ -280,8 +286,11 @@ func TestMergeWithContext_NilContextIsNoOp(t *testing.T) {
 
 func TestMergeWithContext_NoUserNodesIsNoOp(t *testing.T) {
 	k := KindConfig{Name: KindDefaultName}
-	ctx := &ContextKindConfig{
-		ExtraPortMappings: []PortMapping{{ContainerPort: 80, HostPort: 80}},
+	ctx := &KindConfig{
+		Nodes: []KindNode{{
+			Role:              "control-plane",
+			ExtraPortMappings: []PortMapping{{ContainerPort: 80, HostPort: 80}},
+		}},
 	}
 	k.MergeWithContext(ctx)
 
@@ -290,18 +299,16 @@ func TestMergeWithContext_NoUserNodesIsNoOp(t *testing.T) {
 	}
 }
 
-func TestMergeWithContext_ContextTopLevelAndNodePortsMergedWhenUserHasNone(t *testing.T) {
+func TestMergeWithContext_ContextNodePortsAppliedWhenUserHasNone(t *testing.T) {
 	k := KindConfig{
 		Name:  KindDefaultName,
 		Nodes: []KindNode{{Role: "control-plane"}},
 	}
-	ctx := &ContextKindConfig{
-		ExtraPortMappings: []PortMapping{
-			{ContainerPort: 80, HostPort: 80},
-			{ContainerPort: 443, HostPort: 443},
-		},
-		Nodes: []ContextKindNode{{
+	ctx := &KindConfig{
+		Nodes: []KindNode{{
+			Role: "control-plane",
 			ExtraPortMappings: []PortMapping{
+				{ContainerPort: 80, HostPort: 80},
 				{ContainerPort: 443, HostPort: 8443, Protocol: "TCP"},
 				{ContainerPort: 8080, HostPort: 8080},
 			},
@@ -310,24 +317,24 @@ func TestMergeWithContext_ContextTopLevelAndNodePortsMergedWhenUserHasNone(t *te
 	k.MergeWithContext(ctx)
 
 	if len(k.Nodes[0].ExtraPortMappings) != 3 {
-		t.Fatalf("expected 3 merged port mappings (80, 443 overridden, 8080), got %d", len(k.Nodes[0].ExtraPortMappings))
+		t.Fatalf("expected 3 port mappings, got %d", len(k.Nodes[0].ExtraPortMappings))
 	}
 	portMap := make(map[int32]PortMapping)
 	for _, p := range k.Nodes[0].ExtraPortMappings {
 		portMap[p.ContainerPort] = p
 	}
 	if p, ok := portMap[443]; !ok || p.HostPort != 8443 {
-		t.Fatal("expected node-level port 443 to override top-level (hostPort 8443)")
+		t.Fatal("expected port 443 with hostPort 8443")
 	}
 	if _, ok := portMap[80]; !ok {
-		t.Fatal("expected top-level port 80 to be present")
+		t.Fatal("expected port 80 to be present")
 	}
 	if _, ok := portMap[8080]; !ok {
-		t.Fatal("expected node-level port 8080 to be present")
+		t.Fatal("expected port 8080 to be present")
 	}
 }
 
-func TestMergeWithContext_UserPortsReplaceContextEvenWithNodePorts(t *testing.T) {
+func TestMergeWithContext_UserPortsReplaceContextNodePorts(t *testing.T) {
 	k := KindConfig{
 		Name: KindDefaultName,
 		Nodes: []KindNode{{
@@ -335,10 +342,13 @@ func TestMergeWithContext_UserPortsReplaceContextEvenWithNodePorts(t *testing.T)
 			ExtraPortMappings: []PortMapping{{ContainerPort: 9090, HostPort: 9090}},
 		}},
 	}
-	ctx := &ContextKindConfig{
-		ExtraPortMappings: []PortMapping{{ContainerPort: 80, HostPort: 80}},
-		Nodes: []ContextKindNode{{
-			ExtraPortMappings: []PortMapping{{ContainerPort: 443, HostPort: 443}},
+	ctx := &KindConfig{
+		Nodes: []KindNode{{
+			Role: "control-plane",
+			ExtraPortMappings: []PortMapping{
+				{ContainerPort: 80, HostPort: 80},
+				{ContainerPort: 443, HostPort: 443},
+			},
 		}},
 	}
 	k.MergeWithContext(ctx)
@@ -356,7 +366,7 @@ func TestMergeWithContext_ContextNameOverridesDefault(t *testing.T) {
 		Name:  KindDefaultName,
 		Nodes: []KindNode{{Role: "control-plane"}},
 	}
-	ctx := &ContextKindConfig{Name: "my-cluster"}
+	ctx := &KindConfig{Name: "my-cluster"}
 	k.MergeWithContext(ctx)
 
 	if k.Name != "my-cluster" {
@@ -369,7 +379,7 @@ func TestMergeWithContext_CustomNameNotOverriddenByContext(t *testing.T) {
 		Name:  "user-cluster",
 		Nodes: []KindNode{{Role: "control-plane"}},
 	}
-	ctx := &ContextKindConfig{Name: "ctx-cluster"}
+	ctx := &KindConfig{Name: "ctx-cluster"}
 	k.MergeWithContext(ctx)
 
 	if k.Name != "user-cluster" {

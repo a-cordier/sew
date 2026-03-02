@@ -21,6 +21,7 @@
 ### Global flags
 
 - `--config <path>` — Project-level config file to merge on top of the user-level base (`$SEW_HOME/sew.yaml`). Defaults to `./sew.yaml` when present.
+- `--registry <url>` — Registry URL (e.g. `file://./registry` or `https://…`). Overrides the value from the config file.
 - `--context <path>` — Context path (e.g. `gravitee.io/apim/db-less`). Overrides the value from the config file.
 
 ## Quick start
@@ -164,6 +165,49 @@ components:
 ```
 
 File paths in `values` are relative to the context directory. `type` defaults to `helm` if omitted.
+
+## Context composition
+
+A context can inherit from another context by declaring `context` (and optionally `registry`) in its `sew.yaml`. The parent context is resolved first, then the child's overrides are merged on top using the same merge rules as user-level overrides.
+
+```yaml
+# registry/org/product/custom/sew.yaml
+context: org/product/base
+
+kind:
+  name: custom-cluster
+
+components:
+  - name: app
+    helm:
+      values:
+        debug: true
+  - name: extra
+    helm:
+      chart: extra/chart
+```
+
+This says: start from the `org/product/base` context, override the cluster name, tweak the `app` component's values, and add an `extra` component.
+
+### Same-registry and cross-registry
+
+When only `context` is set, the parent is resolved from the same registry. To inherit from a context in a different registry, set `registry` as well:
+
+```yaml
+registry: https://other-registry.example.com
+context: org/product/base
+
+components:
+  - name: addon
+    helm:
+      chart: addon/chart
+```
+
+Relative `file://` paths are resolved relative to the child context's directory (e.g. `file://../..` navigates up from the child).
+
+### Multi-level composition
+
+Composition chains work to arbitrary depth (grandparent → parent → child). Cycle detection prevents infinite loops — sew tracks visited `(registry, context)` pairs and errors if a cycle is found.
 
 ## Default variant resolution
 

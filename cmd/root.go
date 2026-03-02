@@ -18,10 +18,11 @@ import (
 var DefaultConfigData []byte
 
 var (
-	cfgFile     string
-	contextPath string
-	cfg         *core.Config
-	sewHome     string
+	cfgFile      string
+	registryURL  string
+	contextPath  string
+	cfg          *core.Config
+	sewHome      string
 )
 
 var rootCmd = &cobra.Command{
@@ -41,6 +42,9 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("failed to load config: %w", err)
 		}
+		if registryURL != "" {
+			cfg.Registry = registryURL
+		}
 		if contextPath != "" {
 			cfg.Context = contextPath
 		}
@@ -50,6 +54,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "path to config file (default: ./sew.yaml or ~/.sew/sew.yaml)")
+	rootCmd.PersistentFlags().StringVar(&registryURL, "registry", "", "registry URL to use (overrides config file)")
 	rootCmd.PersistentFlags().StringVar(&contextPath, "context", "", "context path to use (overrides config file)")
 }
 
@@ -113,19 +118,19 @@ func resolveContextConfig() (*core.ResolvedContext, error) {
 	if cfg.Registry == "" || cfg.Context == "" {
 		return nil, nil
 	}
-	registryURL := cfg.Registry
-	if strings.HasPrefix(registryURL, "file://") {
-		path := strings.TrimPrefix(registryURL, "file://")
+	regURL := cfg.Registry
+	if strings.HasPrefix(regURL, "file://") {
+		path := strings.TrimPrefix(regURL, "file://")
 		if abs, err := filepath.Abs(path); err == nil {
-			registryURL = "file://" + abs
+			regURL = "file://" + abs
 		}
 	}
-	resolver := registry.NewResolver(registryURL, sewHome)
+	resolver := registry.NewResolver(regURL, sewHome)
 	resolved, err := resolver.Resolve(context.Background(), cfg.Context)
 	if err != nil {
 		return nil, fmt.Errorf("resolving context %q: %w", cfg.Context, err)
 	}
-	cfg.Kind.MergeWithContext(resolved.Kind)
+	cfg.Kind.MergeWithContext(&resolved.Kind)
 	cfg.Features = core.MergeFeatures(resolved.Features, cfg.Features)
 	return resolved, nil
 }
