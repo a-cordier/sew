@@ -6,10 +6,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-cordier/sew/core"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
@@ -31,39 +33,62 @@ var (
 
 const defaultPollInterval = 2 * time.Second
 
-// IntrospectCluster queries the named Kind cluster for Gateway and HTTPRoute
-// resources, maps HTTPRoute hostnames to Gateway addresses, and writes the
-// result as a record file to recordDir/<clusterName>.json.
+// IntrospectCluster queries the named Kind cluster for DNS-relevant services
+// and writes the result as a record file to recordDir/<clusterName>.json.
 //
-// Gateway .status.addresses may not be populated immediately after deployment;
-// this function polls until at least one Gateway has an address or the timeout
-// expires.
-func IntrospectCluster(ctx context.Context, clusterName, recordDir string, pollTimeout time.Duration) error {
+// When introspectGateway is true, Gateway API resources (Gateways + HTTPRoutes)
+// are polled and their hostname→IP mappings are included.
+//
+// Explicit dnsRecords (from features.dns.records) are resolved by looking up
+// each declared service's LoadBalancer ingress IP.
+func IntrospectCluster(ctx context.Context, clusterName, recordDir string, pollTimeout time.Duration, introspectGateway bool, dnsRecords []core.DNSRecord) error {
 	restCfg, err := introspectRESTConfig(clusterName)
 	if err != nil {
 		return err
 	}
 
-	dynClient, err := dynamic.NewForConfig(restCfg)
-	if err != nil {
-		return fmt.Errorf("creating dynamic client: %w", err)
+	records := make(map[string]string)
+
+	if introspectGateway {
+		dynClient, err := dynamic.NewForConfig(restCfg)
+		if err != nil {
+			return fmt.Errorf("creating dynamic client: %w", err)
+		}
+
+		gwAddrs, err := pollGatewayAddresses(ctx, dynClient, pollTimeout)
+		if err != nil {
+			return err
+		}
+
+		if len(gwAddrs) > 0 {
+			gwRecords, err := buildRecords(ctx, dynClient, gwAddrs)
+			if err != nil {
+				return err
+			}
+			for k, v := range gwRecords {
+				records[k] = v
+			}
+		} else {
+			klog.Info("no Gateways with addresses found")
+		}
 	}
 
-	gwAddrs, err := pollGatewayAddresses(ctx, dynClient, pollTimeout)
-	if err != nil {
-		return err
-	}
-	if len(gwAddrs) == 0 {
-		klog.Info("no Gateways with addresses found; skipping DNS record file")
-		return nil
+	if len(dnsRecords) > 0 {
+		clientset, err := kubernetes.NewForConfig(restCfg)
+		if err != nil {
+			return fmt.Errorf("creating kubernetes client: %w", err)
+		}
+		svcRecords, err := resolveServiceRecords(ctx, clientset, dnsRecords)
+		if err != nil {
+			return err
+		}
+		for k, v := range svcRecords {
+			records[k] = v
+		}
 	}
 
-	records, err := buildRecords(ctx, dynClient, gwAddrs)
-	if err != nil {
-		return err
-	}
 	if len(records) == 0 {
-		klog.Info("no HTTPRoute hostnames found; skipping DNS record file")
+		klog.Info("no DNS records found; skipping DNS record file")
 		return nil
 	}
 
@@ -151,6 +176,27 @@ func extractGatewayIP(gw *unstructured.Unstructured) string {
 		}
 	}
 	return ""
+}
+
+// resolveServiceRecords looks up each declared DNS record's service and returns
+// a hostname→IP map for those with a LoadBalancer ingress IP assigned.
+func resolveServiceRecords(ctx context.Context, client kubernetes.Interface, dnsRecords []core.DNSRecord) (map[string]string, error) {
+	records := make(map[string]string)
+	for _, r := range dnsRecords {
+		svc, err := client.CoreV1().Services(r.Namespace).Get(ctx, r.Service, metav1.GetOptions{})
+		if err != nil {
+			klog.Warningf("DNS record %q: service %s/%s not found: %v", r.Hostname, r.Namespace, r.Service, err)
+			continue
+		}
+		if len(svc.Status.LoadBalancer.Ingress) == 0 || svc.Status.LoadBalancer.Ingress[0].IP == "" {
+			klog.Warningf("DNS record %q: service %s/%s has no LoadBalancer IP yet", r.Hostname, r.Namespace, r.Service)
+			continue
+		}
+		ip := svc.Status.LoadBalancer.Ingress[0].IP
+		records[strings.ToLower(r.Hostname)] = ip
+		klog.V(2).Infof("DNS record %s → %s (service %s/%s)", r.Hostname, ip, r.Namespace, r.Service)
+	}
+	return records, nil
 }
 
 // buildRecords lists all HTTPRoutes and maps their hostnames to Gateway IPs

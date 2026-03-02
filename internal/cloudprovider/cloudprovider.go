@@ -202,7 +202,7 @@ func CleanupLBs(clusterName string) error {
 	for _, name := range names {
 		klog.V(2).Infof("removing LB container %s", name)
 		if err := container.Delete(name); err != nil {
-			return fmt.Errorf("deleting LB container %s: %w", name, err)
+			klog.Warningf("deleting LB container %s (may already be removed): %v", name, err)
 		}
 	}
 	return nil

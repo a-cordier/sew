@@ -66,15 +66,15 @@ func TestResolveFeatureDependencies_GatewayAutoEnablesLB(t *testing.T) {
 	}
 }
 
-func TestResolveFeatureDependencies_GatewayDefaultsChannelToStandard(t *testing.T) {
+func TestResolveFeatureDependencies_GatewayDoesNotDefaultChannel(t *testing.T) {
 	f := FeaturesConfig{
 		Gateway: &GatewayConfig{Enabled: true},
 	}
 	if _, err := ResolveFeatureDependencies(&f); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if f.Gateway.Channel != GatewayChannelStandard {
-		t.Fatalf("expected channel %q, got %q", GatewayChannelStandard, f.Gateway.Channel)
+	if f.Gateway.Channel != "" {
+		t.Fatalf("expected channel to remain empty, got %q", f.Gateway.Channel)
 	}
 }
 
@@ -101,7 +101,7 @@ func TestResolveFeatureDependencies_GatewayWithLBDisabledErrors(t *testing.T) {
 	}
 }
 
-func TestResolveFeatureDependencies_DNSWithoutGatewayWarns(t *testing.T) {
+func TestResolveFeatureDependencies_DNSWithoutGatewayNoWarning(t *testing.T) {
 	f := FeaturesConfig{
 		DNS:     &DNSConfig{Enabled: true},
 	}
@@ -109,8 +109,8 @@ func TestResolveFeatureDependencies_DNSWithoutGatewayWarns(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(warnings) != 1 {
-		t.Fatalf("expected 1 warning, got %d", len(warnings))
+	if len(warnings) != 0 {
+		t.Fatalf("expected no warnings, got %d: %v", len(warnings), warnings)
 	}
 }
 

@@ -109,8 +109,17 @@ func (h *dnsHandler) ServeDNS(w mdns.ResponseWriter, r *mdns.Msg) {
 	q := r.Question[0]
 	qname := strings.ToLower(q.Name)
 
-	if q.Qtype == mdns.TypeA && mdns.IsSubDomain(h.domain, qname) {
-		h.handleLocal(w, r, qname)
+	if mdns.IsSubDomain(h.domain, qname) {
+		if q.Qtype == mdns.TypeA {
+			h.handleLocal(w, r, qname)
+			return
+		}
+		// Return immediate empty response for non-A queries (e.g. AAAA)
+		// on local hostnames to avoid forwarding to upstream and timing out.
+		msg := new(mdns.Msg)
+		msg.SetReply(r)
+		msg.Authoritative = true
+		_ = w.WriteMsg(msg)
 		return
 	}
 

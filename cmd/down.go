@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -92,6 +93,7 @@ var downCmd = &cobra.Command{
 		}
 
 		stopCPKIfNoKindClusters()
+		stopDNSIfNoRecords()
 
 		return nil
 	},
@@ -101,14 +103,19 @@ func init() {
 	rootCmd.AddCommand(downCmd)
 }
 
-func stopCPKIfNoKindClusters() {
-	provider := kindcluster.NewProvider()
-	clusters, err := provider.List()
-	if err != nil || len(clusters) > 0 {
+func stopDNSIfNoRecords() {
+	dnsDir := filepath.Join(sewHome, "dns")
+	entries, err := os.ReadDir(dnsDir)
+	if err != nil {
 		return
 	}
+	for _, e := range entries {
+		if strings.HasSuffix(e.Name(), ".json") {
+			return
+		}
+	}
 
-	pidPath := filepath.Join(sewHome, "pids", "cpk.pid")
+	pidPath := filepath.Join(sewHome, "pids", "dns.pid")
 	data, err := os.ReadFile(pidPath)
 	if err != nil {
 		return
@@ -123,7 +130,43 @@ func stopCPKIfNoKindClusters() {
 	}
 	if proc.Signal(syscall.Signal(0)) == nil {
 		_ = proc.Signal(syscall.SIGTERM)
-		color.Blue("  ✓ Stopped cloud provider controller (pid %d)", pid)
+		color.Blue("  ✓ Stopped DNS server (pid %d)", pid)
 	}
+	_ = os.Remove(pidPath)
+}
+
+func stopCPKIfNoKindClusters() {
+	provider := kindcluster.NewProvider()
+	clusters, err := provider.List()
+	if err != nil || len(clusters) > 0 {
+		return
+	}
+
+	pidPath := filepath.Join(sewHome, "pids", "cpk.pid")
+
+	if cloudprovider.NeedsTunnels() {
+		// On macOS, CPK runs as root -- use sudo to terminate it.
+		if err := exec.Command("sudo", "-n", "pkill", "-f", "sew.*cpk serve").Run(); err == nil {
+			color.Blue("  ✓ Stopped cloud provider controller")
+		}
+	} else {
+		data, err := os.ReadFile(pidPath)
+		if err != nil {
+			return
+		}
+		pid, err := strconv.Atoi(strings.TrimSpace(string(data)))
+		if err != nil {
+			return
+		}
+		proc, err := os.FindProcess(pid)
+		if err != nil {
+			return
+		}
+		if proc.Signal(syscall.Signal(0)) == nil {
+			_ = proc.Signal(syscall.SIGTERM)
+			color.Blue("  ✓ Stopped cloud provider controller (pid %d)", pid)
+		}
+	}
+
 	_ = os.Remove(pidPath)
 }

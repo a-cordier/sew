@@ -13,6 +13,7 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v3/pkg/registry"
 	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/repo"
 	"helm.sh/helm/v3/pkg/storage/driver"
@@ -117,6 +118,15 @@ func (h *HelmInstaller) Install(ctx context.Context, comp core.Component, dir st
 		return fmt.Errorf("initializing helm: %w", err)
 	}
 
+	registryClient, err := registry.NewClient(
+		registry.ClientOptEnableCache(true),
+		registry.ClientOptCredentialsFile(settings.RegistryConfig),
+	)
+	if err != nil {
+		return fmt.Errorf("creating registry client: %w", err)
+	}
+	actionConfig.RegistryClient = registryClient
+
 	valueOpts := &values.Options{
 		ValueFiles: make([]string, 0, len(comp.Helm.ValueFiles)),
 	}
@@ -160,6 +170,7 @@ func (h *HelmInstaller) Install(ctx context.Context, comp core.Component, dir st
 
 	if useInstall {
 		instClient := action.NewInstall(actionConfig)
+		instClient.SetRegistryClient(registryClient)
 		instClient.ReleaseName = comp.Name
 		instClient.Namespace = namespace
 		instClient.CreateNamespace = true
@@ -183,6 +194,7 @@ func (h *HelmInstaller) Install(ctx context.Context, comp core.Component, dir st
 	}
 
 	upgradeClient := action.NewUpgrade(actionConfig)
+	upgradeClient.SetRegistryClient(registryClient)
 	upgradeClient.Namespace = namespace
 	if comp.Helm.Version != "" {
 		upgradeClient.Version = comp.Helm.Version

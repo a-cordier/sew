@@ -1,5 +1,36 @@
 registry: file://./registry
-context: gravitee.io/apim/aio
+context: gravitee.io/apim/dbless
 
-images:
+features:
+  lb:
+    enabled: true
+  gateway:
+    enabled: true
+  dns:
+    enabled: true
+
+images: 
   mirrors: {}
+
+components:
+  - name: routing
+    type: k8s
+    namespace: gravitee
+    k8s:
+      manifests:
+        - apiVersion: gateway.networking.k8s.io/v1
+          kind: HTTPRoute
+          metadata:
+            name: apim-gateway
+          spec:
+            parentRefs:
+              - name: sew-gateway
+                namespace: default
+            hostnames:
+              - gateway.sew.local
+            rules:
+              - backendRefs:
+                  - name: apim-gateway
+                    port: 82
+    requires:
+      - component: apim

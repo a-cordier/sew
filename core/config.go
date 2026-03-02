@@ -39,10 +39,17 @@ type GatewayConfig struct {
 	Channel GatewayChannel `yaml:"channel,omitempty"`
 }
 
+type DNSRecord struct {
+	Hostname  string `yaml:"hostname"`
+	Service   string `yaml:"service"`
+	Namespace string `yaml:"namespace"`
+}
+
 type DNSConfig struct {
-	Enabled bool   `yaml:"enabled"`
-	Domain  string `yaml:"domain,omitempty"`
-	Port    int    `yaml:"port,omitempty"`
+	Enabled bool        `yaml:"enabled"`
+	Domain  string      `yaml:"domain,omitempty"`
+	Port    int         `yaml:"port,omitempty"`
+	Records []DNSRecord `yaml:"records,omitempty"`
 }
 
 // FeaturesConfig groups optional networking features. Pointer semantics: a
@@ -72,8 +79,8 @@ func MergeFeatures(base, override FeaturesConfig) FeaturesConfig {
 
 // ResolveFeatureDependencies validates inter-feature constraints and
 // auto-enables implied features. It mutates f in place (e.g. enabling
-// lb when gateway requires it, filling defaults for DNS and gateway
-// channel). It returns warnings for non-fatal issues and an error for conflicts.
+// lb when gateway requires it, filling defaults for DNS).
+// It returns warnings for non-fatal issues and an error for conflicts.
 func ResolveFeatureDependencies(f *FeaturesConfig) (warnings []string, err error) {
 	gwEnabled := f.Gateway != nil && f.Gateway.Enabled
 	if gwEnabled {
@@ -82,15 +89,9 @@ func ResolveFeatureDependencies(f *FeaturesConfig) (warnings []string, err error
 		} else if !f.LB.Enabled {
 			return nil, fmt.Errorf("gateway requires lb, but lb is explicitly disabled")
 		}
-		if f.Gateway.Channel == "" {
-			f.Gateway.Channel = GatewayChannelStandard
-		}
 	}
 
 	dnsEnabled := f.DNS != nil && f.DNS.Enabled
-	if dnsEnabled && !gwEnabled {
-		warnings = append(warnings, "dns is enabled but gateway is not; DNS will run but have nothing to resolve")
-	}
 	if dnsEnabled {
 		if f.DNS.Domain == "" {
 			f.DNS.Domain = DNSDefaultDomain

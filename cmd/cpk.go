@@ -45,11 +45,7 @@ func runCPKServe(_ *cobra.Command, _ []string) error {
 		config.DefaultConfig.ControlPlaneConnectivity = config.Portmap
 	}
 
-	channel := config.Standard
-	if cfg.Features.Gateway != nil && cfg.Features.Gateway.Channel != "" {
-		channel = config.GatewayReleaseChannel(cfg.Features.Gateway.Channel)
-	}
-	config.DefaultConfig.GatewayReleaseChannel = channel
+	config.DefaultConfig.GatewayReleaseChannel = config.Standard
 
 	option, err := cluster.DetectNodeProvider()
 	if err != nil {

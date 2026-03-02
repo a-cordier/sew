@@ -22,10 +22,10 @@ repos:
 
 components:
   - name: mongodb
-    type: manifest
+    type: k8s
     namespace: gravitee
-    manifest:
-      files:
+    k8s:
+      manifestFiles:
         - mongodb.yaml
 
   - name: elasticsearch
@@ -37,10 +37,10 @@ components:
         - values-elasticsearch.yaml
 
   - name: tls-server
-    type: manifest
+    type: k8s
     namespace: gravitee
-    manifest:
-      files:
+    k8s:
+      manifestFiles:
         - tls-server.yaml
 
   - name: apim

@@ -10,6 +10,10 @@ ui:
 es:
   enabled: false
 
+ratelimit:
+  type: 
+    none
+
 gateway:
   replicaCount: 1
   autoscaling:
@@ -17,6 +21,8 @@ gateway:
   image:
     repository: graviteeio/apim-gateway
     tag: latest
+  ingress:
+    enabled: false
   services:
     sync:
       kubernetes:

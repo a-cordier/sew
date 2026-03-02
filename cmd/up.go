@@ -128,7 +128,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 	gatewayEnabled := cfg.Features.Gateway != nil && cfg.Features.Gateway.Enabled
 	lbEnabled := cfg.Features.LB != nil && cfg.Features.LB.Enabled
 
-	if gatewayEnabled {
+	if lbEnabled {
 		if err := ensureCPKController(cfg); err != nil {
 			return err
 		}
@@ -136,6 +136,10 @@ func runUp(_ *cobra.Command, _ []string) error {
 
 	registry.MergeComponents(resolved, cfg.Components, cfg.Dir)
 	resolved.Repos = registry.MergeRepos(resolved.Repos, cfg.Repos)
+
+	if gatewayEnabled {
+		injectGatewayComponents(resolved)
+	}
 
 	if err := registry.Validate(resolved.Components); err != nil {
 		return fmt.Errorf("validating components: %w", err)
@@ -145,14 +149,12 @@ func runUp(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolving dependencies: %w", err)
 	}
 
-	if len(resolved.Repos) > 0 {
-		helmInst, _ := installer.ForType("helm")
-		if hi, ok := helmInst.(*installer.HelmInstaller); ok {
-			if err := logger.WithSpinner("Adding Helm repositories", func() error {
-				return hi.AddRepos(resolved.Repos, sewHome)
-			}); err != nil {
-				return err
-			}
+	helmInst, _ := installer.ForType("helm")
+	if hi, ok := helmInst.(*installer.HelmInstaller); ok {
+		if err := logger.WithSpinner("Initializing Helm", func() error {
+			return hi.AddRepos(resolved.Repos, sewHome)
+		}); err != nil {
+			return err
 		}
 	}
 
@@ -199,28 +201,45 @@ func runUp(_ *cobra.Command, _ []string) error {
 		}
 	}
 
-	if !gatewayEnabled && lbEnabled {
-		if err := logger.WithSpinner("Provisioning load balancers", func() error {
-			return cloudprovider.EnsureLBs(ctx, cfg.Kind.Name)
-		}); err != nil {
-			return err
-		}
-	}
-
 	if cfg.Features.DNS != nil && cfg.Features.DNS.Enabled {
 		if err := setupDNSRecords(ctx, cfg); err != nil {
 			return err
 		}
 	}
 
-	if !gatewayEnabled && lbEnabled && cloudprovider.NeedsTunnels() {
-		if err := cloudprovider.SetupLBTunnels(cfg.Kind.Name); err != nil {
-			color.Yellow("  ⚠ tunnel setup failed: %v", err)
-			color.Yellow("  Services may not be reachable by container IP from the host.")
-		}
-	}
-
 	return nil
+}
+
+// injectGatewayComponents prepends the shared sew-gateway Gateway resource to
+// the resolved component list so the topo-sort places it before any
+// user-defined HTTPRoutes. CPK's gateway controller (cloud-provider-kind)
+// handles provisioning the Envoy data-plane container automatically.
+func injectGatewayComponents(resolved *core.ResolvedContext) {
+	sewGW := core.Component{
+		Name: "sew-gateway",
+		Type: "k8s",
+		K8s: &core.K8sSpec{
+			Manifests: []map[string]interface{}{
+				{
+					"apiVersion": "gateway.networking.k8s.io/v1",
+					"kind":       "Gateway",
+					"metadata":   map[string]interface{}{"name": "sew-gateway"},
+					"spec": map[string]interface{}{
+						"gatewayClassName": "cloud-provider-kind",
+						"listeners": []map[string]interface{}{
+							{
+								"name": "http", "protocol": "HTTP", "port": 80,
+								"allowedRoutes": map[string]interface{}{
+									"namespaces": map[string]interface{}{"from": "All"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	resolved.Components = append([]core.Component{sewGW}, resolved.Components...)
 }
 
 // The CPK controller is restarted fresh on each sew up, so it discovers the
@@ -230,9 +249,16 @@ const gatewayPollTimeout = 90 * time.Second
 
 func setupDNSRecords(ctx context.Context, cfg *core.Config) error {
 	dnsDir := filepath.Join(sewHome, "dns")
+	var dnsRecords []core.DNSRecord
+	if cfg.Features.DNS.Records != nil {
+		dnsRecords = cfg.Features.DNS.Records
+	}
 
+	// Always introspect Gateways when DNS is enabled. Gateway API resources
+	// may come from sew's own sew-gateway (features.gateway) or from
+	// user-installed controllers (e.g. GKO). Both set status.addresses.
 	if err := logger.WithSpinner("Collecting DNS records from cluster", func() error {
-		return dns.IntrospectCluster(ctx, cfg.Kind.Name, dnsDir, gatewayPollTimeout)
+		return dns.IntrospectCluster(ctx, cfg.Kind.Name, dnsDir, gatewayPollTimeout, true, dnsRecords)
 	}); err != nil {
 		return err
 	}
@@ -256,8 +282,15 @@ func ensureCPKController(_ *core.Config) error {
 
 	// Kill any stale controller so the new one immediately discovers the
 	// current cluster on its first poll iteration (no 30-second wait).
-	// SIGKILL avoids triggering CPK's cleanup which would delete containers.
-	killProcess(pidPath)
+	if cloudprovider.NeedsTunnels() {
+		// On macOS, CPK runs as root (via sudo). A non-root process cannot
+		// signal a root process, so killProcess (which uses os.Signal) is
+		// ineffective. Use sudo pkill to kill ALL root-owned CPK processes
+		// accumulated from prior sew up invocations.
+		_ = exec.Command("sudo", "-n", "pkill", "-f", "sew.*cpk serve").Run()
+	} else {
+		killProcess(pidPath)
+	}
 
 	if err := os.MkdirAll(pidDir, 0o755); err != nil {
 		return fmt.Errorf("creating pid directory: %w", err)
@@ -348,21 +381,30 @@ func killProcess(pidPath string) {
 	_ = os.Remove(pidPath)
 }
 
-func ensureDNSServer(cfg *core.Config) error {
+func dnsServerParams(cfg *core.Config) (domain string, port int, dir string) {
+	domain = core.DNSDefaultDomain
+	port = core.DNSDefaultPort
+	dir = filepath.Join(sewHome, "dns")
+	if cfg.Features.DNS != nil {
+		if cfg.Features.DNS.Domain != "" {
+			domain = cfg.Features.DNS.Domain
+		}
+		if cfg.Features.DNS.Port != 0 {
+			port = cfg.Features.DNS.Port
+		}
+	}
+	return
+}
+
+// startDNSServer launches a new DNS server process and writes its PID file.
+func startDNSServer(domain string, port int, dir string) error {
 	pidDir := filepath.Join(sewHome, "pids")
 	pidPath := filepath.Join(pidDir, "dns.pid")
-
-	if isProcessAlive(pidPath) {
-		return nil
-	}
 
 	if err := os.MkdirAll(pidDir, 0o755); err != nil {
 		return fmt.Errorf("creating pid directory: %w", err)
 	}
 
-	domain := cfg.Features.DNS.Domain
-	port := cfg.Features.DNS.Port
-	dnsDir := filepath.Join(sewHome, "dns")
 	addr := fmt.Sprintf("127.0.0.1:%d", port)
 
 	sewBin, err := os.Executable()
@@ -371,7 +413,7 @@ func ensureDNSServer(cfg *core.Config) error {
 	}
 
 	cmd := exec.Command(sewBin, "dns", "serve",
-		"--dir", dnsDir,
+		"--dir", dir,
 		"--domain", domain,
 		"--addr", addr,
 	)
@@ -395,6 +437,25 @@ func ensureDNSServer(cfg *core.Config) error {
 
 	color.Blue("  ✓ DNS server started (pid %d, %s)", pid, addr)
 	return nil
+}
+
+func ensureDNSServer(cfg *core.Config) error {
+	pidPath := filepath.Join(sewHome, "pids", "dns.pid")
+	killProcess(pidPath)
+	domain, port, dir := dnsServerParams(cfg)
+	return startDNSServer(domain, port, dir)
+}
+
+// ensureDNSServerRunning starts the DNS server only if it is not already alive.
+// Used by "sew dns refresh" to restart a server that exited early (e.g. because
+// no record files existed at initial startup).
+func ensureDNSServerRunning(cfg *core.Config) error {
+	pidPath := filepath.Join(sewHome, "pids", "dns.pid")
+	if isProcessAlive(pidPath) {
+		return nil
+	}
+	domain, port, dir := dnsServerParams(cfg)
+	return startDNSServer(domain, port, dir)
 }
 
 func isProcessAlive(pidPath string) bool {
