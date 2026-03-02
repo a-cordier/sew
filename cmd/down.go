@@ -131,7 +131,13 @@ func stopCPKIfNoKindClusters() {
 
 	if cloudprovider.NeedsTunnels() {
 		// On macOS, CPK runs as root -- use sudo to terminate it.
-		if err := exec.Command("sudo", "-n", "pkill", "-f", "sew.*cpk serve").Run(); err == nil {
+		cmd := exec.Command("sudo", "-p",
+			"\n  sew needs administrator privileges to stop the cloud provider controller.\n  Password: ",
+			"pkill", "-f", "sew.*cpk serve")
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err == nil {
 			color.Blue("  ✓ Stopped cloud provider controller")
 		}
 	} else {

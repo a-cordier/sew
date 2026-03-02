@@ -115,7 +115,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 	lbEnabled := cfg.Features.LB != nil && cfg.Features.LB.Enabled
 
 	if lbEnabled {
-		if err := ensureCPKController(cfg); err != nil {
+		if err := ensureCPKController(cfg, gatewayEnabled); err != nil {
 			return err
 		}
 	}
@@ -240,11 +240,9 @@ func setupDNSRecords(ctx context.Context, cfg *core.Config) error {
 		dnsRecords = cfg.Features.DNS.Records
 	}
 
-	// Always introspect Gateways when DNS is enabled. Gateway API resources
-	// may come from sew's own sew-gateway (features.gateway) or from
-	// user-installed controllers (e.g. GKO). Both set status.addresses.
+	introspectGateway := cfg.Features.Gateway != nil && cfg.Features.Gateway.Enabled
 	if err := logger.WithSpinner("Collecting DNS records from cluster", func() error {
-		return dns.IntrospectCluster(ctx, cfg.Kind.Name, dnsDir, gatewayPollTimeout, true, dnsRecords)
+		return dns.IntrospectCluster(ctx, cfg.Kind.Name, dnsDir, gatewayPollTimeout, introspectGateway, dnsRecords)
 	}); err != nil {
 		return err
 	}
@@ -262,7 +260,7 @@ func setupDNSRecords(ctx context.Context, cfg *core.Config) error {
 	return nil
 }
 
-func ensureCPKController(_ *core.Config) error {
+func ensureCPKController(_ *core.Config, gatewayEnabled bool) error {
 	pidDir := filepath.Join(sewHome, "pids")
 	pidPath := filepath.Join(pidDir, "cpk.pid")
 
@@ -273,7 +271,13 @@ func ensureCPKController(_ *core.Config) error {
 		// signal a root process, so killProcess (which uses os.Signal) is
 		// ineffective. Use sudo pkill to kill ALL root-owned CPK processes
 		// accumulated from prior sew start invocations.
-		_ = exec.Command("sudo", "-n", "pkill", "-f", "sew.*cpk serve").Run()
+		cmd := exec.Command("sudo", "-p",
+			"\n  sew needs administrator privileges for network routing.\n  Password: ",
+			"pkill", "-f", "sew.*cpk serve")
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		_ = cmd.Run()
 	} else {
 		killProcess(pidPath)
 	}
@@ -292,6 +296,9 @@ func ensureCPKController(_ *core.Config) error {
 		cmdArgs = append(cmdArgs, "--config", cfgFile)
 	}
 	cmdArgs = append(cmdArgs, "cpk", "serve")
+	if gatewayEnabled {
+		cmdArgs = append(cmdArgs, "--enable-gateway")
+	}
 
 	// On macOS, CPK needs root for loopback aliases and tunnels.
 	if cloudprovider.NeedsTunnels() {

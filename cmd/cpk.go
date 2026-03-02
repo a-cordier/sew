@@ -13,6 +13,8 @@ import (
 	"sigs.k8s.io/kind/pkg/cluster"
 )
 
+var enableGateway bool
+
 var cpkCmd = &cobra.Command{
 	Use:    "cpk",
 	Short:  "Manage the cloud-provider-kind controller",
@@ -26,26 +28,29 @@ var cpkServeCmd = &cobra.Command{
 Kind clusters, reconciles LoadBalancer services and Gateway API resources
 (creating Docker proxy/envoy containers as needed).
 
-This command is started automatically by "sew start" when the gateway feature
+This command is started automatically by "sew start" when the lb feature
 is enabled. It does not need to be invoked directly.`,
 	RunE: runCPKServe,
 }
 
 func init() {
+	cpkServeCmd.Flags().BoolVar(&enableGateway, "enable-gateway", false,
+		"register the cloud-provider-kind GatewayClass and handle Gateway API resources")
 	cpkCmd.AddCommand(cpkServeCmd)
 	rootCmd.AddCommand(cpkCmd)
 }
 
 func runCPKServe(_ *cobra.Command, _ []string) error {
-	// Override the Portmap default set by cloudprovider.init(). The CPK
-	// controller runs as a privileged background process and can handle
-	// loopback aliases + userspace tunnels directly (Tunnel mode).
 	if runtime.GOOS != "linux" {
 		config.DefaultConfig.LoadBalancerConnectivity = config.Tunnel
 		config.DefaultConfig.ControlPlaneConnectivity = config.Portmap
 	}
 
-	config.DefaultConfig.GatewayReleaseChannel = config.Standard
+	if enableGateway {
+		config.DefaultConfig.GatewayReleaseChannel = config.Standard
+	} else {
+		config.DefaultConfig.GatewayReleaseChannel = config.Disabled
+	}
 
 	option, err := cluster.DetectNodeProvider()
 	if err != nil {
@@ -56,8 +61,6 @@ func runCPKServe(_ *cobra.Command, _ []string) error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	// Redirect stdout/stderr to /dev/null for background operation;
-	// CPK logs via klog which writes to the log file set up by the caller.
 	os.Stdout = nil
 	os.Stderr = nil
 
