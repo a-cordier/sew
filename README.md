@@ -12,11 +12,11 @@
 
 | Command | Description |
 |--------|-------------|
-| `sew start` | Create the Kind cluster (if missing) and install the context: add Helm repos, then install each component (Helm upgrade --install). If no registry/context is configured, only creates the cluster. |
-| `sew stop` | Delete the Kind cluster defined in the config. |
+| `sew create` | Create the Kind cluster (if missing) and install the context: add Helm repos, then install each component (Helm upgrade --install). If no registry/context is configured, only creates the cluster. |
+| `sew delete` | Delete the Kind cluster defined in the config. |
 | `sew setup dns` | One-time OS-level DNS routing so `*.sew.local` queries reach the local DNS server. Requires sudo. |
 | `sew teardown dns` | Remove the OS-level DNS routing created by `sew setup dns`. |
-| `sew refresh dns` | Re-collect DNS records from the running cluster (picks up Gateways and Services created after `sew start`). |
+| `sew refresh dns` | Re-collect DNS records from the running cluster (picks up Gateways and Services created after `sew create`). |
 
 ### Global flags
 
@@ -33,17 +33,17 @@
 
 2. **Run** — From the `sew` directory (or with `--config` pointing to this config):
    ```bash
-   go run . start
+   go run . create
    ```
    Or build and run:
    ```bash
    go build -o sew .
-   ./sew start
+   ./sew create
    ```
 
 3. **Tear down**:
    ```bash
-   ./sew stop
+   ./sew delete
    ```
 
 ## Config format
@@ -243,7 +243,7 @@ sew can run local pull-through mirror proxies for container registries. When ena
 
 ### How it works
 
-Each upstream registry gets its own `registry:2` container running as a pull-through cache, bound to a local port (5000, 5001, …). The Kind node's containerd is configured with `hosts.toml` files that redirect pulls through these local mirrors. The mirror containers use a `restart: unless-stopped` policy, so they survive `sew stop` and keep their cache across cluster lifecycles.
+Each upstream registry gets its own `registry:2` container running as a pull-through cache, bound to a local port (5000, 5001, …). The Kind node's containerd is configured with `hosts.toml` files that redirect pulls through these local mirrors. The mirror containers use a `restart: unless-stopped` policy, so they survive `sew delete` and keep their cache across cluster lifecycles.
 
 ### Enabling mirrors
 
@@ -306,7 +306,7 @@ The mirror proxy caches layers from `acme.example.com` locally, and the componen
 
 ## DNS
 
-sew can run a local DNS server that lets you reach services inside the Kind cluster by hostname (e.g. `api.sew.local`) instead of looking up IPs manually. When enabled, `sew start` collects DNS records from the cluster, starts a background DNS server, and keeps it running across cluster lifecycles.
+sew can run a local DNS server that lets you reach services inside the Kind cluster by hostname (e.g. `api.sew.local`) instead of looking up IPs manually. When enabled, `sew create` collects DNS records from the cluster, starts a background DNS server, and keeps it running across cluster lifecycles.
 
 ### How it works
 
@@ -330,7 +330,7 @@ features:
     enabled: true
 ```
 
-On the next `sew start`, sew will collect records, start the DNS server, and print a reminder if OS routing is not yet configured.
+On the next `sew create`, sew will collect records, start the DNS server, and print a reminder if OS routing is not yet configured.
 
 ### One-time OS setup
 
@@ -351,11 +351,11 @@ To undo:
 sew teardown dns
 ```
 
-After setup, `sew start` and `sew stop` run without sudo.
+After setup, `sew create` and `sew delete` run without sudo.
 
 ### Refreshing records
 
-If you deploy additional Gateways or LoadBalancer Services after `sew start`, their hostnames won't be in the DNS automatically. Re-collect them with:
+If you deploy additional Gateways or LoadBalancer Services after `sew create`, their hostnames won't be in the DNS automatically. Re-collect them with:
 
 ```bash
 sew refresh dns
@@ -377,7 +377,7 @@ features:
         namespace: gravitee
 ```
 
-Each record resolves `hostname` to the external IP assigned to the named Service. Static records are collected alongside Gateway-derived ones during `sew start` and `sew refresh dns`.
+Each record resolves `hostname` to the external IP assigned to the named Service. Static records are collected alongside Gateway-derived ones during `sew create` and `sew refresh dns`.
 
 ### Options
 

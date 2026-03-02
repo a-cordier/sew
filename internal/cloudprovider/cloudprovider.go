@@ -1,9 +1,9 @@
 // Package cloudprovider wraps cloud-provider-kind (CPK) to provide one-shot
 // load balancer provisioning and Gateway API CRD installation for Kind clusters.
 //
-// During "sew start", EnsureLBs scans the cluster for Services of type LoadBalancer
+// During "sew create", EnsureLBs scans the cluster for Services of type LoadBalancer
 // and creates Docker proxy containers (envoy) for each. These containers persist
-// independently after sew exits. CleanupLBs removes them during "sew stop".
+// independently after sew exits. CleanupLBs removes them during "sew delete".
 package cloudprovider
 
 import (

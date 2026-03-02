@@ -33,7 +33,7 @@ var dnsServeCmd = &cobra.Command{
 record files. The server watches the record directory for changes, hot-reloads
 records, and shuts itself down automatically when all record files are removed.
 
-This command is typically started as a background process by "sew start" and does
+This command is typically started as a background process by "sew create" and does
 not need to be invoked directly.`,
 	RunE: runDNSServe,
 }

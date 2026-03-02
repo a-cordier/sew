@@ -25,7 +25,7 @@ import (
 )
 
 var upCmd = &cobra.Command{
-	Use:   "start",
+	Use:   "create",
 	Short: "Create the cluster and install the context",
 	RunE:  runUp,
 }
@@ -228,7 +228,7 @@ func injectGatewayComponents(resolved *core.ResolvedContext) {
 	resolved.Components = append([]core.Component{sewGW}, resolved.Components...)
 }
 
-// The CPK controller is restarted fresh on each sew start, so it discovers the
+// The CPK controller is restarted fresh on each sew create, so it discovers the
 // cluster immediately. 90s gives time for the CCM to start, informers to
 // sync, and the gateway controller to reconcile and set status.addresses.
 const gatewayPollTimeout = 90 * time.Second
@@ -270,7 +270,7 @@ func ensureCPKController(_ *core.Config, gatewayEnabled bool) error {
 		// On macOS, CPK runs as root (via sudo). A non-root process cannot
 		// signal a root process, so killProcess (which uses os.Signal) is
 		// ineffective. Use sudo pkill to kill ALL root-owned CPK processes
-		// accumulated from prior sew start invocations.
+		// accumulated from prior sew create invocations.
 		cmd := exec.Command("sudo", "-p",
 			"\n  sew needs administrator privileges for network routing.\n  Password: ",
 			"pkill", "-f", "sew.*cpk serve")

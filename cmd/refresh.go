@@ -22,7 +22,7 @@ var refreshDNSCmd = &cobra.Command{
 	Use:   "dns",
 	Short: "Re-collect DNS records from the cluster",
 	Long: `Re-run DNS introspection against the current Kind cluster. This picks up
-Gateways and LoadBalancer services that were created after "sew start" finished.
+Gateways and LoadBalancer services that were created after "sew create" finished.
 The running DNS server hot-reloads the updated record files automatically.`,
 	RunE: runDNSRefresh,
 }
