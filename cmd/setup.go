@@ -24,7 +24,7 @@ On macOS, this creates a per-domain resolver file in /etc/resolver/.
 On Linux, this configures systemd-resolved on the loopback interface.
 
 This is a one-time operation that requires administrator privileges.
-After setup, "sew up" and "sew down" run without sudo.`,
+After setup, "sew start" and "sew stop" run without sudo.`,
 	RunE: runSetupDNS,
 }
 

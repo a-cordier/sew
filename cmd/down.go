@@ -24,7 +24,7 @@ import (
 )
 
 var downCmd = &cobra.Command{
-	Use:   "down",
+	Use:   "stop",
 	Short: "Delete the cluster defined in the config",
 	RunE: func(_ *cobra.Command, _ []string) error {
 		if cfg.Registry != "" && cfg.Context != "" {

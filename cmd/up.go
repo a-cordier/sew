@@ -25,7 +25,7 @@ import (
 )
 
 var upCmd = &cobra.Command{
-	Use:   "up",
+	Use:   "start",
 	Short: "Create the cluster and install the context",
 	RunE:  runUp,
 }
@@ -242,7 +242,7 @@ func injectGatewayComponents(resolved *core.ResolvedContext) {
 	resolved.Components = append([]core.Component{sewGW}, resolved.Components...)
 }
 
-// The CPK controller is restarted fresh on each sew up, so it discovers the
+// The CPK controller is restarted fresh on each sew start, so it discovers the
 // cluster immediately. 90s gives time for the CCM to start, informers to
 // sync, and the gateway controller to reconcile and set status.addresses.
 const gatewayPollTimeout = 90 * time.Second
@@ -286,7 +286,7 @@ func ensureCPKController(_ *core.Config) error {
 		// On macOS, CPK runs as root (via sudo). A non-root process cannot
 		// signal a root process, so killProcess (which uses os.Signal) is
 		// ineffective. Use sudo pkill to kill ALL root-owned CPK processes
-		// accumulated from prior sew up invocations.
+		// accumulated from prior sew start invocations.
 		_ = exec.Command("sudo", "-n", "pkill", "-f", "sew.*cpk serve").Run()
 	} else {
 		killProcess(pidPath)
@@ -447,7 +447,7 @@ func ensureDNSServer(cfg *core.Config) error {
 }
 
 // ensureDNSServerRunning starts the DNS server only if it is not already alive.
-// Used by "sew dns refresh" to restart a server that exited early (e.g. because
+// Used by "sew refresh dns" to restart a server that exited early (e.g. because
 // no record files existed at initial startup).
 func ensureDNSServerRunning(cfg *core.Config) error {
 	pidPath := filepath.Join(sewHome, "pids", "dns.pid")
