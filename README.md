@@ -130,12 +130,39 @@ components:
             app.kubernetes.io/instance: redis
 ```
 
+### Component readiness
+
+You can make sew wait for a component to become ready after installation by setting `conditions.ready: true`. This is useful when downstream components or features (e.g. DNS record collection) depend on the component being fully available.
+
+```yaml
+components:
+  - name: apim
+    conditions:
+      ready: true
+```
+
+By default, sew waits for all pods matching the Helm release to be ready. You can narrow the check to specific pods with a label selector, and control the timeout with a Go duration string:
+
+```yaml
+components:
+  - name: apim
+    conditions:
+      ready: true
+    selector:
+      matchLabels:
+        app.kubernetes.io/component: gateway
+    timeout: 10m
+```
+
 ### Merge rules
 
 When a local component matches a context component by name, the following merge rules apply:
 
 | Field | Behaviour |
 |-------|-----------|
+| `conditions` | Local wins if `conditions.ready` is true |
+| `selector` | Local wins if non-nil |
+| `timeout` | Local wins if non-empty |
 | `requires` | Local requirements are appended (deduplicated by component name) |
 | `helm.chart` | Local wins if non-empty |
 | `helm.version` | Local wins if non-empty |
