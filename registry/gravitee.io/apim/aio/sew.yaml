@@ -23,6 +23,11 @@ kind:
       - containerPort: 30084
         hostPort: 30084
 
+mirrors:
+  upstreams:
+    - docker.elastic.co
+    - docker.io
+
 repos:
   - name: graviteeio
     url: https://helm.gravitee.io
