@@ -1,3 +1,12 @@
+images:
+  preload:
+    refs:
+      - mongo:7
+      - graviteeio/apim-gateway:latest
+      - graviteeio/apim-management-api:latest
+      - graviteeio/apim-management-ui:latest
+      - graviteeio/apim-portal-ui:latest
+
 kind:
   name: gio-apim
   nodes:

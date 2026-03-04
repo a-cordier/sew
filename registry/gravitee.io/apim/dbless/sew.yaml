@@ -1,3 +1,8 @@
+images:
+  preload:
+    refs:
+      - graviteeio/apim-gateway:latest
+
 kind:
   name: gio-dbless
   nodes:

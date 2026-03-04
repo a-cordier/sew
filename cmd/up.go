@@ -35,6 +35,8 @@ func init() {
 }
 
 func runUp(_ *cobra.Command, _ []string) error {
+	start := time.Now()
+
 	if err := os.MkdirAll(sewHome, 0o755); err != nil {
 		return fmt.Errorf("failed to create home directory %s: %w", sewHome, err)
 	}
@@ -69,19 +71,47 @@ func runUp(_ *cobra.Command, _ []string) error {
 
 	ctx := context.Background()
 
+	preloadRefs := getPreloadRefs(cfg)
+
+	if len(preloadRefs) > 0 {
+		if err := logger.WithSpinner("Pulling images for preload", func() error {
+			return cache.PullImages(ctx, preloadRefs)
+		}); err != nil {
+			return err
+		}
+		if err := logger.WithSpinner("Starting preload registry", func() error {
+			return cache.EnsurePreloadRegistry(ctx)
+		}); err != nil {
+			return err
+		}
+		if err := logger.WithSpinner("Pushing images to preload registry", func() error {
+			return cache.PushImages(ctx, preloadRefs)
+		}); err != nil {
+			return err
+		}
+	}
+
 	if cfg.Images.Mirrors != nil {
 		if err := logger.WithSpinner("Starting image mirror proxies", func() error {
 			return cache.EnsureProxies(ctx, cfg.Images.Mirrors, sewHome)
 		}); err != nil {
 			return err
 		}
-		mirrors, err := cache.PrepareMirrors(cfg.Images.Mirrors, sewHome)
+	}
+
+	var preloadUpstreams []string
+	if len(preloadRefs) > 0 {
+		preloadUpstreams = cache.PreloadUpstreams(preloadRefs)
+	}
+
+	if cfg.Images.Mirrors != nil || len(preloadUpstreams) > 0 {
+		hostsCfg, err := cache.PrepareContainerdHosts(cfg.Images.Mirrors, preloadUpstreams, sewHome)
 		if err != nil {
-			return fmt.Errorf("preparing image mirrors: %w", err)
+			return fmt.Errorf("preparing containerd hosts config: %w", err)
 		}
-		cfg.Kind.ContainerdConfigPatches = append(cfg.Kind.ContainerdConfigPatches, mirrors.Patch)
+		cfg.Kind.ContainerdConfigPatches = append(cfg.Kind.ContainerdConfigPatches, hostsCfg.Patch)
 		for i := range cfg.Kind.Nodes {
-			cfg.Kind.Nodes[i].ExtraMounts = append(cfg.Kind.Nodes[i].ExtraMounts, mirrors.Mounts...)
+			cfg.Kind.Nodes[i].ExtraMounts = append(cfg.Kind.Nodes[i].ExtraMounts, hostsCfg.Mounts...)
 		}
 	}
 
@@ -102,6 +132,14 @@ func runUp(_ *cobra.Command, _ []string) error {
 	if cfg.Images.Mirrors != nil {
 		if err := logger.WithSpinner("Connecting image mirrors to Kind network", func() error {
 			return cache.ConnectToKindNetwork(ctx, cfg.Kind.Name, cfg.Images.Mirrors)
+		}); err != nil {
+			return err
+		}
+	}
+
+	if len(preloadRefs) > 0 {
+		if err := logger.WithSpinner("Connecting preload registry to Kind network", func() error {
+			return cache.ConnectPreloadToKindNetwork(ctx)
 		}); err != nil {
 			return err
 		}
@@ -193,7 +231,17 @@ func runUp(_ *cobra.Command, _ []string) error {
 		}
 	}
 
+	fmt.Println()
+	color.Blue("  Total: %s", time.Since(start).Round(time.Millisecond))
+
 	return nil
+}
+
+func getPreloadRefs(cfg *core.Config) []string {
+	if cfg.Images.Preload == nil {
+		return nil
+	}
+	return cfg.Images.Preload.Refs
 }
 
 // injectGatewayComponents prepends the shared sew-gateway Gateway resource to

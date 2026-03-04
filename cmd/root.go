@@ -132,5 +132,6 @@ func resolveContextConfig() (*core.ResolvedContext, error) {
 	}
 	cfg.Kind.MergeWithContext(&resolved.Kind)
 	cfg.Features = core.MergeFeatures(resolved.Features, cfg.Features)
+	cfg.Images = core.MergeImages(resolved.Images, cfg.Images)
 	return resolved, nil
 }

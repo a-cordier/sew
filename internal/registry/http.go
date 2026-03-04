@@ -127,6 +127,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.R
 		Dir:        cacheDir,
 		Kind:       parsed.Kind,
 		Features:   parsed.Features,
+		Images:     parsed.Images,
 	}, nil
 }
 

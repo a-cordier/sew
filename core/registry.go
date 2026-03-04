@@ -61,6 +61,7 @@ type ResolvedContext struct {
 	Dir        string
 	Kind       KindConfig
 	Features   FeaturesConfig
+	Images     ImagesConfig
 }
 
 // Resolver resolves a context path against a registry into a ResolvedContext.

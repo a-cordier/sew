@@ -217,6 +217,7 @@ When a child context inherits from a parent, each top-level field is merged as f
 - **`components`** — Matched by name using the same rules as user-level overrides (see [Merge rules](#merge-rules)): `helm.chart` and `helm.version` child wins, `helm.valueFiles` appended, `helm.values` shallow-merged, `requires` appended and deduplicated. Unmatched components are appended.
 - **`repos`** — Deduplicated by name; child entry wins on conflict.
 - **`features`** — Each feature block (`lb`, `gateway`, `dns`) is replaced as a whole if the child defines it; otherwise inherited from parent.
+- **`images`** — `preload`: when both sides define it, `refs` are deduplicated (union); when only one side defines it, that side's config is used as-is. `mirrors` from the child wins when set; otherwise inherited from parent.
 
 ## Default variant resolution
 
@@ -312,6 +313,74 @@ components:
 ```
 
 The mirror proxy caches layers from `acme.example.com` locally, and the component override swaps the image without modifying the upstream context.
+
+## Image preloading
+
+As an alternative (or complement) to mirror proxies, sew can preload images via a local registry. This is especially useful on CI systems with Docker Layer Caching (DLC), where pulled image layers persist across runs without any filesystem-based cache.
+
+### How it works
+
+1. **`docker pull`** — Before the Kind cluster is created, sew pulls each image listed in `images.preload.refs` on the host Docker daemon. DLC caches these layers, so subsequent CI runs skip the network pull entirely.
+2. **Local preload registry** — A plain `registry:2` container (`sew-preload`) is started. Pre-pulled images are re-tagged and pushed to this local registry.
+3. **Containerd `hosts.toml`** — For each upstream registry referenced by the preloaded images, sew generates a containerd host configuration that directs Kind nodes to check the preload registry first. If the image is found there, no network pull occurs. If not, containerd falls back to upstream (or to a mirror proxy if configured).
+
+### Enabling preloading
+
+Add an `images.preload` block with a `refs` list to your `sew.yaml`:
+
+```yaml
+images:
+  preload:
+    refs:
+      - graviteeio/apim-gateway:latest
+      - graviteeio/apim-management-api:latest
+      - mongo:7
+```
+
+Context authors can ship the image list directly in the context `sew.yaml`, so users don't need to maintain it:
+
+```yaml
+# registry/org/product/variant/sew.yaml
+images:
+  preload:
+    refs:
+      - graviteeio/apim-gateway:latest
+      - graviteeio/apim-management-api:latest
+      - mongo:7
+
+components:
+  - name: app
+    helm:
+      chart: app/chart
+```
+
+Users can add extra images in their own `sew.yaml` — refs from the context and the user config are merged (deduplicated union):
+
+```yaml
+# sew.yaml (user)
+registry: https://my-registry.example.com
+context: org/product/variant
+
+images:
+  preload:
+    refs:
+      - my-registry.io/my-sidecar:v1.2
+```
+
+### Combining preload and mirrors
+
+Both strategies can be enabled simultaneously. Preloading handles the known images (fast, DLC-friendly), while mirrors transparently cache any additional images pulled at runtime:
+
+```yaml
+images:
+  preload:
+    refs:
+      - graviteeio/apim-gateway:latest
+      - mongo:7
+  mirrors:
+    upstreams:
+      - docker.elastic.co
+```
 
 ## DNS
 

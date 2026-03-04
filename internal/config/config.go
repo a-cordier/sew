@@ -44,9 +44,7 @@ func Merge(base, override *core.Config) {
 	if len(override.Components) > 0 {
 		base.Components = override.Components
 	}
-	if override.Images.Mirrors != nil {
-		base.Images = override.Images
-	}
+	base.Images = core.MergeImages(base.Images, override.Images)
 	base.Features = core.MergeFeatures(base.Features, override.Features)
 	override.Kind.MergeWithDefaults(&base.Kind)
 	base.Kind = override.Kind

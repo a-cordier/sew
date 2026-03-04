@@ -70,6 +70,7 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*core.Res
 		Dir:        dir,
 		Kind:       ctxCfg.Kind,
 		Features:   ctxCfg.Features,
+		Images:     ctxCfg.Images,
 	}, nil
 }
 

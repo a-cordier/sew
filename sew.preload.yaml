@@ -10,10 +10,10 @@ features:
     enabled: true
 
 images:
-  mirrors:
-    upstreams:
-      - docker.io
-
+  preload:
+    refs:
+      - graviteeio/apim-gateway:latest
+      - graviteeio/kubernetes-operator:latest
 
 components:
   - name: routing

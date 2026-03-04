@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"time"
 	"strings"
 	"syscall"
 
@@ -25,6 +26,8 @@ var downCmd = &cobra.Command{
 	Use:   "delete",
 	Short: "Delete the cluster defined in the config",
 	RunE: func(_ *cobra.Command, _ []string) error {
+		start := time.Now()
+
 		if _, err := resolveContextConfig(); err != nil {
 			return err
 		}
@@ -77,8 +80,20 @@ var downCmd = &cobra.Command{
 			}
 		}
 
+		if cfg.Images.Preload != nil && len(cfg.Images.Preload.Refs) > 0 {
+			ctx := context.Background()
+			if err := logger.WithSpinner("Stopping preload registry", func() error {
+				return cache.StopPreloadRegistry(ctx)
+			}); err != nil {
+				return err
+			}
+		}
+
 		stopCPKIfNoKindClusters()
 		stopDNSIfNoRecords()
+
+		fmt.Println()
+		color.Blue("  Total: %s", time.Since(start).Round(time.Millisecond))
 
 		return nil
 	},

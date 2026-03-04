@@ -1,0 +1,278 @@
+package cache
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"strings"
+	"sync"
+
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/client"
+	"github.com/docker/go-connections/nat"
+)
+
+const (
+	pullWorkers          = 4
+	preloadContainerName = "sew-preload"
+	preloadPort          = "5100"
+)
+
+// PreloadRegistryHost returns the hostname:port of the preload registry as
+// seen from within the Kind Docker network (container name based).
+func PreloadRegistryHost() string {
+	return preloadContainerName + ":5000"
+}
+
+// PullImages pulls all images in parallel using the Docker daemon on the host.
+// When running on CI with Docker Layer Caching (DLC), already-cached layers
+// make subsequent pulls effectively free.
+func PullImages(ctx context.Context, images []string) error {
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return fmt.Errorf("creating docker client: %w", err)
+	}
+	defer cli.Close()
+
+	var (
+		wg   sync.WaitGroup
+		mu   sync.Mutex
+		errs []error
+		sem  = make(chan struct{}, pullWorkers)
+	)
+
+	for _, img := range images {
+		wg.Add(1)
+		go func(ref string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			rc, err := cli.ImagePull(ctx, ref, image.PullOptions{})
+			if err != nil {
+				mu.Lock()
+				errs = append(errs, fmt.Errorf("pulling %s: %w", ref, err))
+				mu.Unlock()
+				return
+			}
+			_, _ = io.Copy(io.Discard, rc)
+			rc.Close()
+		}(img)
+	}
+
+	wg.Wait()
+
+	if len(errs) > 0 {
+		return fmt.Errorf("failed to pull %d image(s): %v", len(errs), errs[0])
+	}
+	return nil
+}
+
+// EnsurePreloadRegistry starts a plain registry:2 container for receiving
+// pre-pushed images. Unlike mirror proxies, this registry has no
+// proxy.remoteurl -- it only serves images that have been explicitly pushed.
+func EnsurePreloadRegistry(ctx context.Context) error {
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return fmt.Errorf("creating docker client: %w", err)
+	}
+	defer cli.Close()
+
+	running, err := isContainerRunning(ctx, cli, preloadContainerName)
+	if err != nil {
+		return fmt.Errorf("inspecting preload registry: %w", err)
+	}
+	if running {
+		return nil
+	}
+
+	if err := forceRemove(ctx, cli, preloadContainerName); err != nil {
+		return fmt.Errorf("removing stale preload registry: %w", err)
+	}
+
+	rc, err := cli.ImagePull(ctx, registryImage, image.PullOptions{})
+	if err != nil {
+		return fmt.Errorf("pulling %s: %w", registryImage, err)
+	}
+	_, _ = io.Copy(io.Discard, rc)
+	rc.Close()
+
+	resp, err := cli.ContainerCreate(ctx,
+		&container.Config{
+			Image:        registryImage,
+			ExposedPorts: nat.PortSet{internalPort: struct{}{}},
+			Labels: map[string]string{
+				"sew.role": "preload-registry",
+			},
+		},
+		&container.HostConfig{
+			PortBindings: nat.PortMap{
+				internalPort: []nat.PortBinding{
+					{HostIP: "127.0.0.1", HostPort: preloadPort},
+				},
+			},
+			RestartPolicy: container.RestartPolicy{Name: "unless-stopped"},
+		},
+		nil, nil, preloadContainerName,
+	)
+	if err != nil {
+		return fmt.Errorf("creating preload registry: %w", err)
+	}
+
+	if err := cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
+		return fmt.Errorf("starting preload registry: %w", err)
+	}
+	return nil
+}
+
+// PushImages re-tags each pre-pulled image and pushes it to the local preload
+// registry. The re-tagging strips the source registry host so that containerd
+// mirror resolution finds the image at the expected path.
+func PushImages(ctx context.Context, images []string) error {
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return fmt.Errorf("creating docker client: %w", err)
+	}
+	defer cli.Close()
+
+	localReg := "localhost:" + preloadPort
+
+	var (
+		wg   sync.WaitGroup
+		mu   sync.Mutex
+		errs []error
+		sem  = make(chan struct{}, pullWorkers)
+	)
+
+	for _, img := range images {
+		wg.Add(1)
+		go func(ref string) {
+			defer wg.Done()
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			localRef := localReg + "/" + stripRegistryHost(ref)
+
+			if err := cli.ImageTag(ctx, ref, localRef); err != nil {
+				mu.Lock()
+				errs = append(errs, fmt.Errorf("tagging %s as %s: %w", ref, localRef, err))
+				mu.Unlock()
+				return
+			}
+
+			rc, err := cli.ImagePush(ctx, localRef, image.PushOptions{RegistryAuth: "e30="})
+			if err != nil {
+				mu.Lock()
+				errs = append(errs, fmt.Errorf("pushing %s: %w", localRef, err))
+				mu.Unlock()
+				return
+			}
+			_, _ = io.Copy(io.Discard, rc)
+			rc.Close()
+		}(img)
+	}
+
+	wg.Wait()
+
+	if len(errs) > 0 {
+		return fmt.Errorf("failed to push %d image(s): %v", len(errs), errs[0])
+	}
+	return nil
+}
+
+// PreloadUpstreams returns the deduplicated set of registry hosts referenced by
+// the given image list. Used to generate containerd hosts.toml entries.
+func PreloadUpstreams(images []string) []string {
+	seen := make(map[string]bool)
+	var upstreams []string
+	for _, img := range images {
+		host := registryHost(img)
+		if !seen[host] {
+			seen[host] = true
+			upstreams = append(upstreams, host)
+		}
+	}
+	return upstreams
+}
+
+// ConnectPreloadToKindNetwork connects the preload registry container to the
+// Kind Docker network so that Kind nodes can resolve it by container name.
+func ConnectPreloadToKindNetwork(ctx context.Context) error {
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return fmt.Errorf("creating docker client: %w", err)
+	}
+	defer cli.Close()
+
+	netID, err := findKindNetwork(ctx, cli)
+	if err != nil {
+		return err
+	}
+
+	inspect, err := cli.NetworkInspect(ctx, netID, network.InspectOptions{})
+	if err != nil {
+		return fmt.Errorf("inspecting kind network: %w", err)
+	}
+	for _, ep := range inspect.Containers {
+		if ep.Name == preloadContainerName {
+			return nil
+		}
+	}
+
+	return cli.NetworkConnect(ctx, netID, preloadContainerName, nil)
+}
+
+// StopPreloadRegistry stops and removes the preload registry container.
+func StopPreloadRegistry(ctx context.Context) error {
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return fmt.Errorf("creating docker client: %w", err)
+	}
+	defer cli.Close()
+	return forceRemove(ctx, cli, preloadContainerName)
+}
+
+// stripRegistryHost removes the registry hostname from an image reference,
+// returning just the path and tag (e.g. "graviteeio/apim-gateway:latest").
+// Docker Hub images (implicit or explicit docker.io) have just their path
+// returned. For other registries the first component is stripped.
+func stripRegistryHost(ref string) string {
+	path, tag := ref, ""
+	if i := strings.LastIndex(path, ":"); i > strings.LastIndex(path, "/") {
+		tag = path[i:]
+		path = path[:i]
+	}
+
+	parts := strings.SplitN(path, "/", 2)
+	if len(parts) == 1 {
+		return "library/" + parts[0] + tag
+	}
+	if isRegistryHost(parts[0]) {
+		return parts[1] + tag
+	}
+	return path + tag
+}
+
+// registryHost extracts the registry hostname from an image reference.
+// Returns "docker.io" for Docker Hub images.
+func registryHost(ref string) string {
+	path := ref
+	if i := strings.LastIndex(path, ":"); i > strings.LastIndex(path, "/") {
+		path = path[:i]
+	}
+
+	parts := strings.SplitN(path, "/", 2)
+	if len(parts) == 1 {
+		return "docker.io"
+	}
+	if isRegistryHost(parts[0]) {
+		return parts[0]
+	}
+	return "docker.io"
+}
+
+func isRegistryHost(s string) bool {
+	return strings.Contains(s, ".") || strings.Contains(s, ":") || s == "localhost"
+}

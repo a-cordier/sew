@@ -272,6 +272,107 @@ func TestMergeWithDefaults_NoUserPortsFallsBackToDefaults(t *testing.T) {
 	}
 }
 
+func TestMergeImages_BothEmpty(t *testing.T) {
+	result := MergeImages(ImagesConfig{}, ImagesConfig{})
+	if result.Preload != nil {
+		t.Fatal("expected Preload to be nil")
+	}
+	if result.Mirrors != nil {
+		t.Fatal("expected Mirrors to be nil")
+	}
+}
+
+func TestMergeImages_BasePreloadPreserved(t *testing.T) {
+	base := ImagesConfig{
+		Preload: &PreloadConfig{Refs: []string{"img-a", "img-b"}},
+	}
+	result := MergeImages(base, ImagesConfig{})
+	if result.Preload == nil {
+		t.Fatal("expected Preload preserved from base")
+	}
+	if len(result.Preload.Refs) != 2 || result.Preload.Refs[0] != "img-a" || result.Preload.Refs[1] != "img-b" {
+		t.Fatalf("expected base refs preserved, got %v", result.Preload.Refs)
+	}
+}
+
+func TestMergeImages_OverrideRefsAppended(t *testing.T) {
+	base := ImagesConfig{
+		Preload: &PreloadConfig{Refs: []string{"img-a", "img-b"}},
+	}
+	override := ImagesConfig{
+		Preload: &PreloadConfig{Refs: []string{"img-c"}},
+	}
+	result := MergeImages(base, override)
+	if len(result.Preload.Refs) != 3 {
+		t.Fatalf("expected 3 refs, got %d: %v", len(result.Preload.Refs), result.Preload.Refs)
+	}
+}
+
+func TestMergeImages_RefsDeduplicated(t *testing.T) {
+	base := ImagesConfig{
+		Preload: &PreloadConfig{Refs: []string{"img-a", "img-b"}},
+	}
+	override := ImagesConfig{
+		Preload: &PreloadConfig{Refs: []string{"img-b", "img-c"}},
+	}
+	result := MergeImages(base, override)
+	if len(result.Preload.Refs) != 3 {
+		t.Fatalf("expected 3 refs (deduped), got %d: %v", len(result.Preload.Refs), result.Preload.Refs)
+	}
+	expected := []string{"img-a", "img-b", "img-c"}
+	for i, v := range expected {
+		if result.Preload.Refs[i] != v {
+			t.Fatalf("expected ref[%d]=%q, got %q", i, v, result.Preload.Refs[i])
+		}
+	}
+}
+
+func TestMergeImages_PreloadFromEitherSide(t *testing.T) {
+	base := ImagesConfig{Preload: &PreloadConfig{Refs: []string{"img-a"}}}
+	result := MergeImages(base, ImagesConfig{})
+	if result.Preload == nil {
+		t.Fatal("expected Preload preserved from base")
+	}
+
+	result = MergeImages(ImagesConfig{}, ImagesConfig{Preload: &PreloadConfig{Refs: []string{"img-b"}}})
+	if result.Preload == nil || result.Preload.Refs[0] != "img-b" {
+		t.Fatal("expected Preload from override")
+	}
+}
+
+func TestMergeImages_MirrorsOverrideWins(t *testing.T) {
+	base := ImagesConfig{
+		Mirrors: &MirrorsConfig{Upstreams: []string{"docker.io"}},
+	}
+	override := ImagesConfig{
+		Mirrors: &MirrorsConfig{Upstreams: []string{"ghcr.io"}},
+	}
+	result := MergeImages(base, override)
+	if len(result.Mirrors.Upstreams) != 1 || result.Mirrors.Upstreams[0] != "ghcr.io" {
+		t.Fatalf("expected override mirrors to win, got %v", result.Mirrors.Upstreams)
+	}
+}
+
+func TestMergeImages_NilMirrorsOverrideKeepsBase(t *testing.T) {
+	base := ImagesConfig{
+		Mirrors: &MirrorsConfig{Upstreams: []string{"docker.io"}},
+	}
+	result := MergeImages(base, ImagesConfig{})
+	if result.Mirrors == nil || result.Mirrors.Upstreams[0] != "docker.io" {
+		t.Fatal("expected base mirrors preserved when override is nil")
+	}
+}
+
+func TestMergeImages_NilBasePreloadOverrideWins(t *testing.T) {
+	override := ImagesConfig{
+		Preload: &PreloadConfig{Refs: []string{"img-x"}},
+	}
+	result := MergeImages(ImagesConfig{}, override)
+	if result.Preload == nil || len(result.Preload.Refs) != 1 || result.Preload.Refs[0] != "img-x" {
+		t.Fatalf("expected override preload to be used, got %v", result.Preload)
+	}
+}
+
 func TestMergeWithContext_NilContextIsNoOp(t *testing.T) {
 	k := KindConfig{
 		Name:  KindDefaultName,

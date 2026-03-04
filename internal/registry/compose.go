@@ -63,6 +63,7 @@ func resolveWithParent(ctx context.Context, childCfg core.Config, childDir, self
 	parent.Repos = MergeRepos(parent.Repos, childCfg.Repos)
 	parent.Features = core.MergeFeatures(parent.Features, childCfg.Features)
 	parent.Kind = mergeKind(parent.Kind, childCfg.Kind)
+	parent.Images = core.MergeImages(parent.Images, childCfg.Images)
 
 	return parent, nil
 }

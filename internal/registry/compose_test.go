@@ -569,6 +569,85 @@ func TestResolveRegistryURL_HTTPPassthrough(t *testing.T) {
 	}
 }
 
+func TestFSResolver_ParentComposition_ImagesMerge(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "parent", "sew.yaml"), `
+images:
+  preload:
+    refs:
+      - img-a
+      - img-b
+
+components:
+  - name: app
+    helm:
+      chart: app/chart
+`)
+
+	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
+context: parent
+
+images:
+  preload:
+    refs:
+      - img-b
+      - img-c
+
+components: []
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "child")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if resolved.Images.Preload == nil {
+		t.Fatal("expected Preload inherited from parent")
+	}
+	if len(resolved.Images.Preload.Refs) != 3 {
+		t.Fatalf("expected 3 refs (deduped union), got %d: %v", len(resolved.Images.Preload.Refs), resolved.Images.Preload.Refs)
+	}
+	expected := map[string]bool{"img-a": true, "img-b": true, "img-c": true}
+	for _, ref := range resolved.Images.Preload.Refs {
+		if !expected[ref] {
+			t.Fatalf("unexpected ref %q", ref)
+		}
+	}
+}
+
+func TestFSResolver_NoParent_ImagesPreserved(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "standalone", "sew.yaml"), `
+images:
+  preload:
+    refs:
+      - my-image:latest
+
+components:
+  - name: app
+    helm:
+      chart: app/chart
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "standalone")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if resolved.Images.Preload == nil {
+		t.Fatal("expected Preload to be non-nil")
+	}
+	if len(resolved.Images.Preload.Refs) != 1 || resolved.Images.Preload.Refs[0] != "my-image:latest" {
+		t.Fatalf("expected [my-image:latest], got %v", resolved.Images.Preload.Refs)
+	}
+}
+
 func TestFSResolver_ContextYAMLFallback(t *testing.T) {
 	root := t.TempDir()
 	sewHome := t.TempDir()
