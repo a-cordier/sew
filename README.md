@@ -209,6 +209,15 @@ Relative `file://` paths are resolved relative to the child context's directory 
 
 Composition chains work to arbitrary depth (grandparent → parent → child). Cycle detection prevents infinite loops — sew tracks visited `(registry, context)` pairs and errors if a cycle is found.
 
+### Merge semantics
+
+When a child context inherits from a parent, each top-level field is merged as follows:
+
+- **`kind`** — Scalar fields (`name`, `apiVersion`, `kind`): child wins if set. `nodes`: child replaces the entire list; however, if the child's first node has no `extraPortMappings`, it inherits the parent's. `containerdConfigPatches`: child replaces entirely.
+- **`components`** — Matched by name using the same rules as user-level overrides (see [Merge rules](#merge-rules)): `helm.chart` and `helm.version` child wins, `helm.valueFiles` appended, `helm.values` shallow-merged, `requires` appended and deduplicated. Unmatched components are appended.
+- **`repos`** — Deduplicated by name; child entry wins on conflict.
+- **`features`** — Each feature block (`lb`, `gateway`, `dns`) is replaced as a whole if the child defines it; otherwise inherited from parent.
+
 ## Default variant resolution
 
 A context path usually includes the variant (`org/product/variant`), but you can also point to the product level and let sew pick the default variant automatically.
