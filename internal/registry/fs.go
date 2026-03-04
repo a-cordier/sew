@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 	"gopkg.in/yaml.v3"
 )
 
@@ -30,7 +30,7 @@ type FSResolver struct {
 // .default file containing the name of a default variant
 // sub-directory. When found, it appends the variant to contextPath
 // and resolves again.
-func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*core.ResolvedContext, error) {
+func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*config.ResolvedContext, error) {
 	selfRegistry := "file://" + r.Root
 	ctx, err := withVisited(ctx, contextRef{Registry: selfRegistry, Context: contextPath})
 	if err != nil {
@@ -55,7 +55,7 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*core.Res
 		return r.Resolve(ctx, filepath.Join(contextPath, name))
 	}
 
-	var ctxCfg core.Config
+	var ctxCfg config.Config
 	if err := yaml.Unmarshal(data, &ctxCfg); err != nil {
 		return nil, fmt.Errorf("parsing context file: %w", err)
 	}
@@ -64,7 +64,7 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*core.Res
 		return resolveWithParent(ctx, ctxCfg, dir, selfRegistry, r.SewHome)
 	}
 
-	return &core.ResolvedContext{
+	return &config.ResolvedContext{
 		Repos:      ctxCfg.Repos,
 		Components: ctxCfg.Components,
 		Dir:        dir,

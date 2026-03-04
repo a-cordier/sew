@@ -3,7 +3,7 @@ package registry
 import (
 	"path/filepath"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 )
 
 // MergeComponents merges user-level component customizations into the resolved
@@ -15,11 +15,11 @@ import (
 //   - helm.values: shallow-merged on top of context values (user wins per key)
 //
 // Value file paths from the user config are resolved relative to configDir.
-func MergeComponents(resolved *core.ResolvedContext, components []core.Component, configDir string) {
+func MergeComponents(resolved *config.ResolvedContext, components []config.Component, configDir string) {
 	if len(components) == 0 {
 		return
 	}
-	byName := make(map[string]*core.Component, len(resolved.Components))
+	byName := make(map[string]*config.Component, len(resolved.Components))
 	for i := range resolved.Components {
 		byName[resolved.Components[i].Name] = &resolved.Components[i]
 	}
@@ -62,7 +62,7 @@ func MergeComponents(resolved *core.ResolvedContext, components []core.Component
 		}
 		if patch.K8s != nil {
 			if comp.K8s == nil {
-				comp.K8s = &core.K8sSpec{}
+				comp.K8s = &config.K8sSpec{}
 			}
 			resolveManifestFilePaths(&patch, configDir)
 			comp.K8s.ManifestFiles = append(comp.K8s.ManifestFiles, patch.K8s.ManifestFiles...)
@@ -73,7 +73,7 @@ func MergeComponents(resolved *core.ResolvedContext, components []core.Component
 
 // resolveValueFilePaths resolves relative value file paths in a component's
 // HelmSpec to absolute paths based on configDir.
-func resolveValueFilePaths(c *core.Component, configDir string) {
+func resolveValueFilePaths(c *config.Component, configDir string) {
 	if c.Helm == nil || configDir == "" {
 		return
 	}
@@ -87,7 +87,7 @@ func resolveValueFilePaths(c *core.Component, configDir string) {
 // resolveManifestFilePaths resolves relative manifest file paths to absolute
 // paths based on configDir. This allows user configs to reference manifest
 // files relative to their own location rather than the registry context dir.
-func resolveManifestFilePaths(c *core.Component, configDir string) {
+func resolveManifestFilePaths(c *config.Component, configDir string) {
 	if c.K8s == nil || configDir == "" {
 		return
 	}
@@ -100,15 +100,15 @@ func resolveManifestFilePaths(c *core.Component, configDir string) {
 
 // MergeRepos merges local repos into context repos, deduplicating by name.
 // When both lists contain a repo with the same name, the local entry wins.
-func MergeRepos(contextRepos, localRepos []core.Repo) []core.Repo {
+func MergeRepos(contextRepos, localRepos []config.Repo) []config.Repo {
 	if len(localRepos) == 0 {
 		return contextRepos
 	}
-	localByName := make(map[string]core.Repo, len(localRepos))
+	localByName := make(map[string]config.Repo, len(localRepos))
 	for _, r := range localRepos {
 		localByName[r.Name] = r
 	}
-	out := make([]core.Repo, 0, len(contextRepos)+len(localRepos))
+	out := make([]config.Repo, 0, len(contextRepos)+len(localRepos))
 	for _, r := range contextRepos {
 		if local, ok := localByName[r.Name]; ok {
 			out = append(out, local)

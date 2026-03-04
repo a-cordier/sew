@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 )
 
 type MirrorConfig struct {
 	Patch  string
-	Mounts []core.Mount
+	Mounts []config.Mount
 }
 
 // PrepareContainerdHosts writes containerd 2.x file-based registry mirror
@@ -21,7 +21,7 @@ type MirrorConfig struct {
 // When both mirrors and preload are configured, each upstream's hosts.toml
 // lists the preload registry first (for pre-pushed images) and the mirror
 // proxy second (for transparent caching of non-preloaded images).
-func PrepareContainerdHosts(cfg *core.MirrorsConfig, preloadUpstreams []string, sewHome string) (*MirrorConfig, error) {
+func PrepareContainerdHosts(cfg *config.MirrorsConfig, preloadUpstreams []string, sewHome string) (*MirrorConfig, error) {
 	hostsDir := filepath.Join(sewHome, "mirrors", "containerd-hosts")
 
 	// Collect all upstreams that need a hosts.toml entry.
@@ -83,7 +83,7 @@ func PrepareContainerdHosts(cfg *core.MirrorsConfig, preloadUpstreams []string, 
 
 	return &MirrorConfig{
 		Patch: "[plugins.\"io.containerd.grpc.v1.cri\".registry]\n  config_path = \"/etc/containerd/certs.d\"",
-		Mounts: []core.Mount{{
+		Mounts: []config.Mount{{
 			HostPath:      hostsDir,
 			ContainerPath: "/etc/containerd/certs.d",
 		}},
@@ -92,6 +92,6 @@ func PrepareContainerdHosts(cfg *core.MirrorsConfig, preloadUpstreams []string, 
 
 // PrepareMirrors is a convenience wrapper for PrepareContainerdHosts when only
 // mirrors are configured (no preloading).
-func PrepareMirrors(cfg *core.MirrorsConfig, sewHome string) (*MirrorConfig, error) {
+func PrepareMirrors(cfg *config.MirrorsConfig, sewHome string) (*MirrorConfig, error) {
 	return PrepareContainerdHosts(cfg, nil, sewHome)
 }

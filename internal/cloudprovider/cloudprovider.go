@@ -20,7 +20,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/privilege"
 	cpkconfig "sigs.k8s.io/cloud-provider-kind/pkg/config"
 	"sigs.k8s.io/cloud-provider-kind/pkg/container"
@@ -211,7 +211,7 @@ func CleanupLBs(clusterName string) error {
 // InstallGatewayCRDs installs the Gateway API Custom Resource Definitions into
 // the named Kind cluster. The channel selects the CRD bundle ("standard" or
 // "experimental").
-func InstallGatewayCRDs(ctx context.Context, clusterName string, channel core.GatewayChannel) error {
+func InstallGatewayCRDs(ctx context.Context, clusterName string, channel config.GatewayChannel) error {
 	restCfg, err := clusterRESTConfig(clusterName)
 	if err != nil {
 		return err

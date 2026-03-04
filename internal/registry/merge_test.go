@@ -4,15 +4,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 )
 
 func TestMergeComponents_MatchingHelmComponent(t *testing.T) {
-	resolved := &core.ResolvedContext{
-		Components: []core.Component{
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
 			{
 				Name: "app",
-				Helm: &core.HelmSpec{
+				Helm: &config.HelmSpec{
 					Chart:   "repo/app",
 					Version: "1.0",
 					Values: map[string]interface{}{
@@ -22,10 +22,10 @@ func TestMergeComponents_MatchingHelmComponent(t *testing.T) {
 			},
 		},
 	}
-	overrides := []core.Component{
+	overrides := []config.Component{
 		{
 			Name: "app",
-			Helm: &core.HelmSpec{
+			Helm: &config.HelmSpec{
 				Version: "2.0",
 				Values: map[string]interface{}{
 					"key1": "override-val",
@@ -56,13 +56,13 @@ func TestMergeComponents_MatchingHelmComponent(t *testing.T) {
 }
 
 func TestMergeComponents_NewComponent(t *testing.T) {
-	resolved := &core.ResolvedContext{
-		Components: []core.Component{
-			{Name: "existing", Helm: &core.HelmSpec{Chart: "existing/chart"}},
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{Name: "existing", Helm: &config.HelmSpec{Chart: "existing/chart"}},
 		},
 	}
-	overrides := []core.Component{
-		{Name: "added", Helm: &core.HelmSpec{Chart: "added/chart"}},
+	overrides := []config.Component{
+		{Name: "added", Helm: &config.HelmSpec{Chart: "added/chart"}},
 	}
 
 	MergeComponents(resolved, overrides, "")
@@ -80,9 +80,9 @@ func TestMergeComponents_NewComponent(t *testing.T) {
 }
 
 func TestMergeComponents_EmptyOverrides(t *testing.T) {
-	resolved := &core.ResolvedContext{
-		Components: []core.Component{
-			{Name: "app", Helm: &core.HelmSpec{Chart: "app/chart"}},
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{Name: "app", Helm: &config.HelmSpec{Chart: "app/chart"}},
 		},
 	}
 
@@ -94,22 +94,22 @@ func TestMergeComponents_EmptyOverrides(t *testing.T) {
 }
 
 func TestMergeComponents_RequirementsDedup(t *testing.T) {
-	resolved := &core.ResolvedContext{
-		Components: []core.Component{
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
 			{
 				Name: "app",
-				Helm: &core.HelmSpec{Chart: "app/chart"},
-				Requires: []core.Requirement{
+				Helm: &config.HelmSpec{Chart: "app/chart"},
+				Requires: []config.Requirement{
 					{Component: "db"},
 				},
 			},
 		},
 	}
-	overrides := []core.Component{
+	overrides := []config.Component{
 		{
 			Name: "app",
-			Helm: &core.HelmSpec{},
-			Requires: []core.Requirement{
+			Helm: &config.HelmSpec{},
+			Requires: []config.Requirement{
 				{Component: "db"},
 				{Component: "cache"},
 			},
@@ -132,20 +132,20 @@ func TestMergeComponents_RequirementsDedup(t *testing.T) {
 }
 
 func TestMergeComponents_K8sManifestsMerge(t *testing.T) {
-	resolved := &core.ResolvedContext{
-		Components: []core.Component{
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
 			{
 				Name: "routes",
-				K8s: &core.K8sSpec{
+				K8s: &config.K8sSpec{
 					ManifestFiles: []string{"/abs/path/base.yaml"},
 				},
 			},
 		},
 	}
-	overrides := []core.Component{
+	overrides := []config.Component{
 		{
 			Name: "routes",
-			K8s: &core.K8sSpec{
+			K8s: &config.K8sSpec{
 				ManifestFiles: []string{"extra.yaml"},
 			},
 		},
@@ -167,21 +167,21 @@ func TestMergeComponents_K8sManifestsMerge(t *testing.T) {
 }
 
 func TestMergeComponents_ValueFilePathResolution(t *testing.T) {
-	resolved := &core.ResolvedContext{
-		Components: []core.Component{
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
 			{
 				Name: "app",
-				Helm: &core.HelmSpec{
+				Helm: &config.HelmSpec{
 					Chart:      "app/chart",
 					ValueFiles: []string{"/abs/values.yaml"},
 				},
 			},
 		},
 	}
-	overrides := []core.Component{
+	overrides := []config.Component{
 		{
 			Name: "app",
-			Helm: &core.HelmSpec{
+			Helm: &config.HelmSpec{
 				ValueFiles: []string{"local-values.yaml"},
 			},
 		},
@@ -203,21 +203,21 @@ func TestMergeComponents_ValueFilePathResolution(t *testing.T) {
 }
 
 func TestMergeComponents_ChartOverride(t *testing.T) {
-	resolved := &core.ResolvedContext{
-		Components: []core.Component{
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
 			{
 				Name: "app",
-				Helm: &core.HelmSpec{
+				Helm: &config.HelmSpec{
 					Chart:   "original/chart",
 					Version: "1.0",
 				},
 			},
 		},
 	}
-	overrides := []core.Component{
+	overrides := []config.Component{
 		{
 			Name: "app",
-			Helm: &core.HelmSpec{
+			Helm: &config.HelmSpec{
 				Chart: "custom/chart",
 			},
 		},
@@ -235,15 +235,15 @@ func TestMergeComponents_ChartOverride(t *testing.T) {
 }
 
 func TestMergeComponents_K8sOnNewComponent(t *testing.T) {
-	resolved := &core.ResolvedContext{
-		Components: []core.Component{
-			{Name: "app", Helm: &core.HelmSpec{Chart: "app/chart"}},
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{Name: "app", Helm: &config.HelmSpec{Chart: "app/chart"}},
 		},
 	}
-	overrides := []core.Component{
+	overrides := []config.Component{
 		{
 			Name: "routes",
-			K8s: &core.K8sSpec{
+			K8s: &config.K8sSpec{
 				ManifestFiles: []string{"gateway.yaml"},
 			},
 		},
@@ -265,10 +265,10 @@ func TestMergeComponents_K8sOnNewComponent(t *testing.T) {
 }
 
 func TestMergeRepos_NoOverlap(t *testing.T) {
-	ctx := []core.Repo{
+	ctx := []config.Repo{
 		{Name: "repo-a", URL: "https://a.example.com"},
 	}
-	local := []core.Repo{
+	local := []config.Repo{
 		{Name: "repo-b", URL: "https://b.example.com"},
 	}
 
@@ -280,11 +280,11 @@ func TestMergeRepos_NoOverlap(t *testing.T) {
 }
 
 func TestMergeRepos_OverlapLocalWins(t *testing.T) {
-	ctx := []core.Repo{
+	ctx := []config.Repo{
 		{Name: "shared", URL: "https://old.example.com"},
 		{Name: "ctx-only", URL: "https://ctx.example.com"},
 	}
-	local := []core.Repo{
+	local := []config.Repo{
 		{Name: "shared", URL: "https://new.example.com"},
 	}
 
@@ -306,7 +306,7 @@ func TestMergeRepos_OverlapLocalWins(t *testing.T) {
 }
 
 func TestMergeRepos_EmptyLocal(t *testing.T) {
-	ctx := []core.Repo{
+	ctx := []config.Repo{
 		{Name: "repo", URL: "https://example.com"},
 	}
 
@@ -318,7 +318,7 @@ func TestMergeRepos_EmptyLocal(t *testing.T) {
 }
 
 func TestMergeRepos_EmptyContext(t *testing.T) {
-	local := []core.Repo{
+	local := []config.Repo{
 		{Name: "repo", URL: "https://example.com"},
 	}
 
@@ -330,12 +330,12 @@ func TestMergeRepos_EmptyContext(t *testing.T) {
 }
 
 func TestMergeRepos_OrderPreserved(t *testing.T) {
-	ctx := []core.Repo{
+	ctx := []config.Repo{
 		{Name: "alpha", URL: "https://alpha.example.com"},
 		{Name: "beta", URL: "https://beta.example.com"},
 		{Name: "gamma", URL: "https://gamma.example.com"},
 	}
-	local := []core.Repo{
+	local := []config.Repo{
 		{Name: "beta", URL: "https://beta-override.example.com"},
 		{Name: "delta", URL: "https://delta.example.com"},
 	}

@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/dns"
 	"github.com/spf13/cobra"
 )
@@ -40,7 +40,7 @@ not need to be invoked directly.`,
 
 func init() {
 	dnsServeCmd.Flags().StringVar(&dnsDir, "dir", "", "path to DNS record directory (default: $SEW_HOME/dns)")
-	dnsServeCmd.Flags().StringVar(&dnsDomain, "domain", core.DNSDefaultDomain, "DNS domain to serve")
+	dnsServeCmd.Flags().StringVar(&dnsDomain, "domain", config.DNSDefaultDomain, "DNS domain to serve")
 	dnsServeCmd.Flags().StringVar(&dnsAddr, "addr", "", "UDP listen address (default: 127.0.0.1:<port>)")
 	dnsServeCmd.Flags().StringVar(&dnsUpstream, "upstream", "8.8.8.8:53", "upstream DNS server for non-matching queries")
 
@@ -61,7 +61,7 @@ func runDNSServe(cmd *cobra.Command, _ []string) error {
 	}
 
 	if dnsAddr == "" {
-		port := core.DNSDefaultPort
+		port := config.DNSDefaultPort
 		if cfg.Features.DNS != nil && cfg.Features.DNS.Port != 0 {
 			port = cfg.Features.DNS.Port
 		}

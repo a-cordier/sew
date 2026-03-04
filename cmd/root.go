@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/a-cordier/sew/core"
 	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/registry"
 	"github.com/spf13/cobra"
@@ -21,7 +20,7 @@ var (
 	cfgFile      string
 	registryURL  string
 	contextPath  string
-	cfg          *core.Config
+	cfg          *config.Config
 	sewHome      string
 )
 
@@ -68,9 +67,9 @@ func Execute() error {
 //  2. If --config is given, load and merge on top; otherwise if ./sew.yaml
 //     exists, load and merge on top.
 //  3. Apply embedded defaults to fill any remaining gaps.
-func resolveConfig(explicit string) (*core.Config, error) {
+func resolveConfig(explicit string) (*config.Config, error) {
 	basePath := filepath.Join(sewHome, "sew.yaml")
-	var base *core.Config
+	var base *config.Config
 	if fileExists(basePath) {
 		var err error
 		base, err = config.Load(basePath)
@@ -78,11 +77,11 @@ func resolveConfig(explicit string) (*core.Config, error) {
 			return nil, fmt.Errorf("loading base config %s: %w", basePath, err)
 		}
 	} else {
-		base = &core.Config{}
+		base = &config.Config{}
 		base.Kind.ApplyDefaults()
 	}
 
-	var projectCfg *core.Config
+	var projectCfg *config.Config
 	switch {
 	case explicit != "":
 		var err error
@@ -114,7 +113,7 @@ func fileExists(path string) bool {
 // resolveContextConfig resolves the registry context (if configured) and
 // merges its Kind and Features settings into the global cfg. The returned
 // ResolvedContext is nil when no registry/context is set.
-func resolveContextConfig() (*core.ResolvedContext, error) {
+func resolveContextConfig() (*config.ResolvedContext, error) {
 	if cfg.Registry == "" || cfg.Context == "" {
 		return nil, nil
 	}
@@ -131,7 +130,7 @@ func resolveContextConfig() (*core.ResolvedContext, error) {
 		return nil, fmt.Errorf("resolving context %q: %w", cfg.Context, err)
 	}
 	cfg.Kind.MergeWithContext(&resolved.Kind)
-	cfg.Features = core.MergeFeatures(resolved.Features, cfg.Features)
-	cfg.Images = core.MergeImages(resolved.Images, cfg.Images)
+	cfg.Features = config.MergeFeatures(resolved.Features, cfg.Features)
+	cfg.Images = config.MergeImages(resolved.Images, cfg.Images)
 	return resolved, nil
 }

@@ -11,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/a-cordier/sew/core"
 	"github.com/a-cordier/sew/internal/cache"
+	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/cloudprovider"
 	"github.com/a-cordier/sew/internal/dns"
 	"github.com/a-cordier/sew/internal/installer"
@@ -46,7 +46,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	featWarnings, err := core.ResolveFeatureDependencies(&cfg.Features)
+	featWarnings, err := config.ResolveFeatureDependencies(&cfg.Features)
 	if err != nil {
 		return fmt.Errorf("validating feature dependencies: %w", err)
 	}
@@ -182,7 +182,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 		}
 	}
 
-	compByName := make(map[string]core.Component)
+	compByName := make(map[string]config.Component)
 	for _, c := range resolved.Components {
 		compByName[c.Name] = c
 	}
@@ -237,7 +237,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-func getPreloadRefs(cfg *core.Config) []string {
+func getPreloadRefs(cfg *config.Config) []string {
 	if cfg.Images.Preload == nil {
 		return nil
 	}
@@ -248,11 +248,11 @@ func getPreloadRefs(cfg *core.Config) []string {
 // the resolved component list so the topo-sort places it before any
 // user-defined HTTPRoutes. CPK's gateway controller (cloud-provider-kind)
 // handles provisioning the Envoy data-plane container automatically.
-func injectGatewayComponents(resolved *core.ResolvedContext) {
-	sewGW := core.Component{
+func injectGatewayComponents(resolved *config.ResolvedContext) {
+	sewGW := config.Component{
 		Name: "sew-gateway",
 		Type: "k8s",
-		K8s: &core.K8sSpec{
+		K8s: &config.K8sSpec{
 			Manifests: []map[string]interface{}{
 				{
 					"apiVersion": "gateway.networking.k8s.io/v1",
@@ -273,7 +273,7 @@ func injectGatewayComponents(resolved *core.ResolvedContext) {
 			},
 		},
 	}
-	resolved.Components = append([]core.Component{sewGW}, resolved.Components...)
+	resolved.Components = append([]config.Component{sewGW}, resolved.Components...)
 }
 
 // The CPK controller is restarted fresh on each sew create, so it discovers the
@@ -281,9 +281,9 @@ func injectGatewayComponents(resolved *core.ResolvedContext) {
 // sync, and the gateway controller to reconcile and set status.addresses.
 const gatewayPollTimeout = 90 * time.Second
 
-func setupDNSRecords(ctx context.Context, cfg *core.Config) error {
+func setupDNSRecords(ctx context.Context, cfg *config.Config) error {
 	dnsDir := filepath.Join(sewHome, "dns")
-	var dnsRecords []core.DNSRecord
+	var dnsRecords []config.DNSRecord
 	if cfg.Features.DNS.Records != nil {
 		dnsRecords = cfg.Features.DNS.Records
 	}
@@ -308,7 +308,7 @@ func setupDNSRecords(ctx context.Context, cfg *core.Config) error {
 	return nil
 }
 
-func ensureCPKController(_ *core.Config, gatewayEnabled bool) error {
+func ensureCPKController(_ *config.Config, gatewayEnabled bool) error {
 	pidDir := filepath.Join(sewHome, "pids")
 	pidPath := filepath.Join(pidDir, "cpk.pid")
 
@@ -422,9 +422,9 @@ func killProcess(pidPath string) {
 	_ = os.Remove(pidPath)
 }
 
-func dnsServerParams(cfg *core.Config) (domain string, port int, dir string) {
-	domain = core.DNSDefaultDomain
-	port = core.DNSDefaultPort
+func dnsServerParams(cfg *config.Config) (domain string, port int, dir string) {
+	domain = config.DNSDefaultDomain
+	port = config.DNSDefaultPort
 	dir = filepath.Join(sewHome, "dns")
 	if cfg.Features.DNS != nil {
 		if cfg.Features.DNS.Domain != "" {
@@ -480,7 +480,7 @@ func startDNSServer(domain string, port int, dir string) error {
 	return nil
 }
 
-func ensureDNSServer(cfg *core.Config) error {
+func ensureDNSServer(cfg *config.Config) error {
 	pidPath := filepath.Join(sewHome, "pids", "dns.pid")
 	killProcess(pidPath)
 	domain, port, dir := dnsServerParams(cfg)
@@ -490,7 +490,7 @@ func ensureDNSServer(cfg *core.Config) error {
 // ensureDNSServerRunning starts the DNS server only if it is not already alive.
 // Used by "sew refresh dns" to restart a server that exited early (e.g. because
 // no record files existed at initial startup).
-func ensureDNSServerRunning(cfg *core.Config) error {
+func ensureDNSServerRunning(cfg *config.Config) error {
 	pidPath := filepath.Join(sewHome, "pids", "dns.pid")
 	if isProcessAlive(pidPath) {
 		return nil

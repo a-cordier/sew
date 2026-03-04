@@ -5,12 +5,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 )
 
 // Resolver resolves a context path against a registry into a ResolvedContext.
 type Resolver interface {
-	Resolve(ctx context.Context, contextPath string) (*core.ResolvedContext, error)
+	Resolve(ctx context.Context, contextPath string) (*config.ResolvedContext, error)
 }
 
 // NewResolver builds the appropriate Resolver from the registry URL.

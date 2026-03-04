@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -41,7 +41,7 @@ const defaultPollInterval = 2 * time.Second
 //
 // Explicit dnsRecords (from features.dns.records) are resolved by looking up
 // each declared service's LoadBalancer ingress IP.
-func IntrospectCluster(ctx context.Context, clusterName, recordDir string, pollTimeout time.Duration, introspectGateway bool, dnsRecords []core.DNSRecord) error {
+func IntrospectCluster(ctx context.Context, clusterName, recordDir string, pollTimeout time.Duration, introspectGateway bool, dnsRecords []config.DNSRecord) error {
 	restCfg, err := introspectRESTConfig(clusterName)
 	if err != nil {
 		return err
@@ -180,7 +180,7 @@ func extractGatewayIP(gw *unstructured.Unstructured) string {
 
 // resolveServiceRecords looks up each declared DNS record's service and returns
 // a hostname→IP map for those with a LoadBalancer ingress IP assigned.
-func resolveServiceRecords(ctx context.Context, client kubernetes.Interface, dnsRecords []core.DNSRecord) (map[string]string, error) {
+func resolveServiceRecords(ctx context.Context, client kubernetes.Interface, dnsRecords []config.DNSRecord) (map[string]string, error) {
 	records := make(map[string]string)
 	for _, r := range dnsRecords {
 		svc, err := client.CoreV1().Services(r.Namespace).Get(ctx, r.Service, metav1.GetOptions{})

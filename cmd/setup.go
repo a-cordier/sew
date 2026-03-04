@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/dns"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -55,8 +55,8 @@ func runSetupDNS(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	domain := core.DNSDefaultDomain
-	port := core.DNSDefaultPort
+	domain := config.DNSDefaultDomain
+	port := config.DNSDefaultPort
 
 	if cfg.Features.DNS != nil {
 		if cfg.Features.DNS.Domain != "" {
@@ -86,7 +86,7 @@ func runTeardownDNS(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	domain := core.DNSDefaultDomain
+	domain := config.DNSDefaultDomain
 	if cfg.Features.DNS != nil && cfg.Features.DNS.Domain != "" {
 		domain = cfg.Features.DNS.Domain
 	}

@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 )
 
 // Installer deploys and removes components.
 type Installer interface {
-	Install(ctx context.Context, comp core.Component, dir string) error
-	Uninstall(ctx context.Context, comp core.Component) error
+	Install(ctx context.Context, comp config.Component, dir string) error
+	Uninstall(ctx context.Context, comp config.Component) error
 }
 
 var installers = map[string]Installer{

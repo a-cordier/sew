@@ -9,8 +9,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/a-cordier/sew/core"
 	"github.com/a-cordier/sew/internal/cloudprovider"
+	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/dns"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -65,7 +65,7 @@ func printFeatureStatus(bold *color.Color) {
 		}
 		port := cfg.Features.DNS.Port
 		if port == 0 {
-			port = core.DNSDefaultPort
+			port = config.DNSDefaultPort
 		}
 		dnsLine += fmt.Sprintf(" (domain: %s, port: %d)", domain, port)
 	}
@@ -106,7 +106,7 @@ func printDNSStatus(bold *color.Color) {
 	}
 	port := cfg.Features.DNS.Port
 	if port == 0 {
-		port = core.DNSDefaultPort
+		port = config.DNSDefaultPort
 	}
 
 	resolverOK := dns.ResolverConfigured(domain, port)

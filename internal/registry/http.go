@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 	"gopkg.in/yaml.v3"
 )
 
@@ -27,7 +27,7 @@ type HTTPResolver struct {
 //
 // For backward compatibility, if sew.yaml returns 404, Resolve falls
 // back to context.yaml before trying the .default variant lookup.
-func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.ResolvedContext, error) {
+func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*config.ResolvedContext, error) {
 	ctx, err := withVisited(ctx, contextRef{Registry: r.BaseURL, Context: contextPath})
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.R
 		return nil, fmt.Errorf("fetching context: %d", status)
 	}
 
-	var parsed core.Config
+	var parsed config.Config
 	if err := yaml.Unmarshal(data, &parsed); err != nil {
 		return nil, fmt.Errorf("parsing context file: %w", err)
 	}
@@ -121,7 +121,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*core.R
 		return resolveWithParent(ctx, parsed, cacheDir, r.BaseURL, r.SewHome)
 	}
 
-	return &core.ResolvedContext{
+	return &config.ResolvedContext{
 		Repos:      parsed.Repos,
 		Components: parsed.Components,
 		Dir:        cacheDir,

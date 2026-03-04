@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 )
 
 type contextRef struct {
@@ -47,7 +47,7 @@ func resolveRegistryURL(rawURL, contextDir string) string {
 // resolveWithParent resolves the parent context declared by childCfg, then
 // merges the child's overrides on top. selfRegistryURL is used as the parent
 // registry when childCfg.Registry is empty.
-func resolveWithParent(ctx context.Context, childCfg core.Config, childDir, selfRegistryURL, sewHome string) (*core.ResolvedContext, error) {
+func resolveWithParent(ctx context.Context, childCfg config.Config, childDir, selfRegistryURL, sewHome string) (*config.ResolvedContext, error) {
 	registryURL := selfRegistryURL
 	if childCfg.Registry != "" {
 		registryURL = resolveRegistryURL(childCfg.Registry, childDir)
@@ -61,16 +61,16 @@ func resolveWithParent(ctx context.Context, childCfg core.Config, childDir, self
 
 	MergeComponents(parent, childCfg.Components, childDir)
 	parent.Repos = MergeRepos(parent.Repos, childCfg.Repos)
-	parent.Features = core.MergeFeatures(parent.Features, childCfg.Features)
+	parent.Features = config.MergeFeatures(parent.Features, childCfg.Features)
 	parent.Kind = mergeKind(parent.Kind, childCfg.Kind)
-	parent.Images = core.MergeImages(parent.Images, childCfg.Images)
+	parent.Images = config.MergeImages(parent.Images, childCfg.Images)
 
 	return parent, nil
 }
 
 // mergeKind merges child Kind overrides on top of a base KindConfig.
 // Non-zero child fields win; zero-value fields inherit from base.
-func mergeKind(base, child core.KindConfig) core.KindConfig {
+func mergeKind(base, child config.KindConfig) config.KindConfig {
 	result := base
 	if child.Name != "" {
 		result.Name = child.Name

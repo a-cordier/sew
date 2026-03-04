@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/dns"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -45,7 +45,7 @@ func runDNSRefresh(_ *cobra.Command, _ []string) error {
 	}
 
 	clusterName := cfg.Kind.Name
-	var dnsRecords []core.DNSRecord
+	var dnsRecords []config.DNSRecord
 	if cfg.Features.DNS != nil && cfg.Features.DNS.Records != nil {
 		dnsRecords = cfg.Features.DNS.Records
 	}

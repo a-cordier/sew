@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 )
@@ -13,7 +13,7 @@ const kindNetworkName = "kind"
 
 // ConnectToKindNetwork connects every cache proxy container to the Kind Docker
 // network so that Kind nodes can resolve them by container name.
-func ConnectToKindNetwork(ctx context.Context, _ string, cfg *core.MirrorsConfig) error {
+func ConnectToKindNetwork(ctx context.Context, _ string, cfg *config.MirrorsConfig) error {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return fmt.Errorf("creating docker client: %w", err)
@@ -49,7 +49,7 @@ func ConnectToKindNetwork(ctx context.Context, _ string, cfg *core.MirrorsConfig
 
 // DisconnectFromKindNetwork disconnects every cache proxy container from the
 // Kind Docker network. Silently succeeds if the network no longer exists.
-func DisconnectFromKindNetwork(ctx context.Context, _ string, cfg *core.MirrorsConfig) error {
+func DisconnectFromKindNetwork(ctx context.Context, _ string, cfg *config.MirrorsConfig) error {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return fmt.Errorf("creating docker client: %w", err)

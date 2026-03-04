@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 )
 
 // writeFile is a test helper that creates parent dirs and writes data.
@@ -446,8 +446,8 @@ components:
 }
 
 func TestMergeKind_ChildNameWins(t *testing.T) {
-	base := core.KindConfig{Name: "base-cluster"}
-	child := core.KindConfig{Name: "child-cluster"}
+	base := config.KindConfig{Name: "base-cluster"}
+	child := config.KindConfig{Name: "child-cluster"}
 	result := mergeKind(base, child)
 	if result.Name != "child-cluster" {
 		t.Fatalf("expected %q, got %q", "child-cluster", result.Name)
@@ -455,15 +455,15 @@ func TestMergeKind_ChildNameWins(t *testing.T) {
 }
 
 func TestMergeKind_EmptyChildInheritsBase(t *testing.T) {
-	base := core.KindConfig{
+	base := config.KindConfig{
 		Name:       "base-cluster",
 		APIVersion: "v1alpha4",
-		Nodes: []core.KindNode{{
+		Nodes: []config.KindNode{{
 			Role:              "control-plane",
-			ExtraPortMappings: []core.PortMapping{{ContainerPort: 80, HostPort: 80}},
+			ExtraPortMappings: []config.PortMapping{{ContainerPort: 80, HostPort: 80}},
 		}},
 	}
-	child := core.KindConfig{}
+	child := config.KindConfig{}
 	result := mergeKind(base, child)
 
 	if result.Name != "base-cluster" {
@@ -478,14 +478,14 @@ func TestMergeKind_EmptyChildInheritsBase(t *testing.T) {
 }
 
 func TestMergeKind_ChildNodesInheritParentPorts(t *testing.T) {
-	base := core.KindConfig{
-		Nodes: []core.KindNode{{
+	base := config.KindConfig{
+		Nodes: []config.KindNode{{
 			Role:              "control-plane",
-			ExtraPortMappings: []core.PortMapping{{ContainerPort: 80, HostPort: 80}},
+			ExtraPortMappings: []config.PortMapping{{ContainerPort: 80, HostPort: 80}},
 		}},
 	}
-	child := core.KindConfig{
-		Nodes: []core.KindNode{{Role: "control-plane"}},
+	child := config.KindConfig{
+		Nodes: []config.KindNode{{Role: "control-plane"}},
 	}
 	result := mergeKind(base, child)
 
@@ -495,16 +495,16 @@ func TestMergeKind_ChildNodesInheritParentPorts(t *testing.T) {
 }
 
 func TestMergeKind_ChildPortsWin(t *testing.T) {
-	base := core.KindConfig{
-		Nodes: []core.KindNode{{
+	base := config.KindConfig{
+		Nodes: []config.KindNode{{
 			Role:              "control-plane",
-			ExtraPortMappings: []core.PortMapping{{ContainerPort: 80, HostPort: 80}},
+			ExtraPortMappings: []config.PortMapping{{ContainerPort: 80, HostPort: 80}},
 		}},
 	}
-	child := core.KindConfig{
-		Nodes: []core.KindNode{{
+	child := config.KindConfig{
+		Nodes: []config.KindNode{{
 			Role:              "control-plane",
-			ExtraPortMappings: []core.PortMapping{{ContainerPort: 9090, HostPort: 9090}},
+			ExtraPortMappings: []config.PortMapping{{ContainerPort: 9090, HostPort: 9090}},
 		}},
 	}
 	result := mergeKind(base, child)

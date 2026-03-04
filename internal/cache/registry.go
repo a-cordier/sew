@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/a-cordier/sew/core"
+	"github.com/a-cordier/sew/internal/config"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
@@ -37,7 +37,7 @@ func ContainerName(upstream string) string {
 
 // AllUpstreams returns the full list of upstream registries to proxy, always
 // including docker.io as the first entry.
-func AllUpstreams(cfg *core.MirrorsConfig) []string {
+func AllUpstreams(cfg *config.MirrorsConfig) []string {
 	upstreams := []string{"docker.io"}
 	seen := map[string]bool{"docker.io": true}
 	for _, u := range cfg.Upstreams {
@@ -51,7 +51,7 @@ func AllUpstreams(cfg *core.MirrorsConfig) []string {
 
 // ResolveDir returns the mirror storage directory, falling back to
 // $sewHome/mirrors when the config does not specify one.
-func ResolveDir(cfg *core.MirrorsConfig, sewHome string) string {
+func ResolveDir(cfg *config.MirrorsConfig, sewHome string) string {
 	if cfg.Data != "" {
 		return cfg.Data
 	}
@@ -61,7 +61,7 @@ func ResolveDir(cfg *core.MirrorsConfig, sewHome string) string {
 // EnsureProxies creates and starts a registry:2 pull-through proxy container
 // for each configured upstream registry. Containers that are already running
 // are left untouched. Stale (stopped) containers are replaced.
-func EnsureProxies(ctx context.Context, cfg *core.MirrorsConfig, sewHome string) error {
+func EnsureProxies(ctx context.Context, cfg *config.MirrorsConfig, sewHome string) error {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return fmt.Errorf("creating docker client: %w", err)
@@ -150,7 +150,7 @@ func EnsureProxies(ctx context.Context, cfg *core.MirrorsConfig, sewHome string)
 
 // StopProxies stops and removes all sew-mirror-* proxy containers for the
 // configured upstreams.
-func StopProxies(ctx context.Context, cfg *core.MirrorsConfig) error {
+func StopProxies(ctx context.Context, cfg *config.MirrorsConfig) error {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return fmt.Errorf("creating docker client: %w", err)
