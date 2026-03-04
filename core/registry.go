@@ -1,9 +1,5 @@
 package core
 
-import (
-	"context"
-)
-
 type Repo struct {
 	Name string `yaml:"name"`
 	URL  string `yaml:"url"`
@@ -64,7 +60,3 @@ type ResolvedContext struct {
 	Images     ImagesConfig
 }
 
-// Resolver resolves a context path against a registry into a ResolvedContext.
-type Resolver interface {
-	Resolve(ctx context.Context, contextPath string) (*ResolvedContext, error)
-}

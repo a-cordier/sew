@@ -1,16 +1,22 @@
 package registry
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 
 	"github.com/a-cordier/sew/core"
 )
 
+// Resolver resolves a context path against a registry into a ResolvedContext.
+type Resolver interface {
+	Resolve(ctx context.Context, contextPath string) (*core.ResolvedContext, error)
+}
+
 // NewResolver builds the appropriate Resolver from the registry URL.
 // A "file://" prefix selects the filesystem resolver; anything else
 // is treated as an HTTP registry with cache rooted under sewHome.
-func NewResolver(registry string, sewHome string) core.Resolver {
+func NewResolver(registry string, sewHome string) Resolver {
 	if strings.HasPrefix(registry, "file://") {
 		return &FSResolver{
 			Root:    strings.TrimPrefix(registry, "file://"),
