@@ -264,6 +264,76 @@ func TestMergeComponents_K8sOnNewComponent(t *testing.T) {
 	}
 }
 
+func TestMergeComponents_ConditionsSelectorTimeout(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name: "apim",
+				Helm: &config.HelmSpec{Chart: "apim/chart"},
+			},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name:       "apim",
+			Conditions: config.Conditions{Ready: true},
+			Selector: &config.Selector{
+				MatchLabels: map[string]string{"app": "apim"},
+			},
+			Timeout: "10m",
+			Helm:    &config.HelmSpec{},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "")
+
+	comp := resolved.Components[0]
+	if !comp.Conditions.Ready {
+		t.Fatal("expected conditions.ready to be true")
+	}
+	if comp.Selector == nil || comp.Selector.MatchLabels["app"] != "apim" {
+		t.Fatalf("expected selector overridden, got %v", comp.Selector)
+	}
+	if comp.Timeout != "10m" {
+		t.Fatalf("expected timeout overridden, got %q", comp.Timeout)
+	}
+}
+
+func TestMergeComponents_ConditionsNotOverriddenWhenUnset(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name:       "apim",
+				Conditions: config.Conditions{Ready: true},
+				Selector: &config.Selector{
+					MatchLabels: map[string]string{"app": "apim"},
+				},
+				Timeout: "5m",
+				Helm:    &config.HelmSpec{Chart: "apim/chart"},
+			},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "apim",
+			Helm: &config.HelmSpec{},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "")
+
+	comp := resolved.Components[0]
+	if !comp.Conditions.Ready {
+		t.Fatal("expected conditions.ready preserved")
+	}
+	if comp.Selector == nil || comp.Selector.MatchLabels["app"] != "apim" {
+		t.Fatal("expected selector preserved")
+	}
+	if comp.Timeout != "5m" {
+		t.Fatalf("expected timeout preserved, got %q", comp.Timeout)
+	}
+}
+
 func TestMergeRepos_NoOverlap(t *testing.T) {
 	ctx := []config.Repo{
 		{Name: "repo-a", URL: "https://a.example.com"},

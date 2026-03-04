@@ -223,6 +223,30 @@ func runUp(_ *cobra.Command, _ []string) error {
 		}); err != nil {
 			return err
 		}
+		if comp.Conditions.Ready {
+			ns := comp.Namespace
+			if ns == "" {
+				ns = "default"
+			}
+			timeout := defaultReadyTimeout
+			if comp.Timeout != "" {
+				if d, err := time.ParseDuration(comp.Timeout); err == nil && d > 0 {
+					timeout = d
+				}
+			}
+			var matchLabels map[string]string
+			if comp.Selector != nil && len(comp.Selector.MatchLabels) > 0 {
+				matchLabels = comp.Selector.MatchLabels
+			}
+			if err := logger.WithSpinner(
+				fmt.Sprintf("Waiting for %q to be ready", comp.Name),
+				func() error {
+					return installer.WaitForReady(ctx, comp.Name, ns, timeout, matchLabels)
+				},
+			); err != nil {
+				return fmt.Errorf("component %q not ready: %w", comp.Name, err)
+			}
+		}
 	}
 
 	if cfg.Features.DNS != nil && cfg.Features.DNS.Enabled {

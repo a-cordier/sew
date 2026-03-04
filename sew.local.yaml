@@ -16,6 +16,10 @@ images:
 
 
 components:
+  - name: apim
+    conditions:
+      ready: true
+
   - name: routing
     type: k8s
     namespace: gravitee

@@ -41,12 +41,15 @@ type Requirement struct {
 }
 
 type Component struct {
-	Name      string        `yaml:"name"`
-	Type      string        `yaml:"type,omitempty"`
-	Namespace string        `yaml:"namespace,omitempty"`
-	Requires  []Requirement `yaml:"requires,omitempty"`
-	Helm      *HelmSpec     `yaml:"helm,omitempty"`
-	K8s       *K8sSpec      `yaml:"k8s,omitempty"`
+	Name       string        `yaml:"name"`
+	Type       string        `yaml:"type,omitempty"`
+	Namespace  string        `yaml:"namespace,omitempty"`
+	Conditions Conditions    `yaml:"conditions,omitempty"`
+	Selector   *Selector     `yaml:"selector,omitempty"`
+	Timeout    string        `yaml:"timeout,omitempty"`
+	Requires   []Requirement `yaml:"requires,omitempty"`
+	Helm       *HelmSpec     `yaml:"helm,omitempty"`
+	K8s        *K8sSpec      `yaml:"k8s,omitempty"`
 }
 
 // EffectiveType returns Type, defaulting to "helm".

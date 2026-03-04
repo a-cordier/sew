@@ -8,6 +8,9 @@ import (
 
 // MergeComponents merges user-level component customizations into the resolved
 // context. Components are matched by name. For each match the merge applies:
+//   - conditions: user wins if conditions.ready is true
+//   - selector: user wins if non-nil
+//   - timeout: user wins if non-empty
 //   - requires: user requirements are appended (deduplicated by component name)
 //   - helm.chart: user wins if non-empty
 //   - helm.version: user wins if non-empty
@@ -41,6 +44,15 @@ func MergeComponents(resolved *config.ResolvedContext, components []config.Compo
 					comp.Requires = append(comp.Requires, r)
 				}
 			}
+		}
+		if patch.Conditions.Ready {
+			comp.Conditions = patch.Conditions
+		}
+		if patch.Selector != nil {
+			comp.Selector = patch.Selector
+		}
+		if patch.Timeout != "" {
+			comp.Timeout = patch.Timeout
 		}
 		if patch.Helm != nil && comp.Helm != nil {
 			if patch.Helm.Chart != "" {
