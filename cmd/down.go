@@ -28,7 +28,8 @@ var downCmd = &cobra.Command{
 	RunE: func(_ *cobra.Command, _ []string) error {
 		start := time.Now()
 
-		if _, err := resolveContextConfig(); err != nil {
+		resolved, err := resolveContextConfig()
+		if err != nil {
 			return err
 		}
 
@@ -94,6 +95,10 @@ var downCmd = &cobra.Command{
 
 		fmt.Println()
 		color.Blue("  Total: %s", time.Since(start).Round(time.Millisecond))
+
+		if resolved != nil {
+			printNotes(resolved.Notes.Delete, cfg)
+		}
 
 		return nil
 	},

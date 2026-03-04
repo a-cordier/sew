@@ -60,6 +60,11 @@ func (c *Component) EffectiveType() string {
 	return c.Type
 }
 
+type ResolvedNotes struct {
+	Create string
+	Delete string
+}
+
 // ResolvedContext is a fully resolved context with all referenced files in Dir.
 type ResolvedContext struct {
 	Repos      []Repo
@@ -68,4 +73,5 @@ type ResolvedContext struct {
 	Kind       KindConfig
 	Features   FeaturesConfig
 	Images     ImagesConfig
+	Notes      ResolvedNotes
 }

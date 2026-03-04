@@ -64,8 +64,22 @@ func resolveWithParent(ctx context.Context, childCfg config.Config, childDir, se
 	parent.Features = config.MergeFeatures(parent.Features, childCfg.Features)
 	parent.Kind = mergeKind(parent.Kind, childCfg.Kind)
 	parent.Images = config.MergeImages(parent.Images, childCfg.Images)
+	parent.Notes = mergeNotes(parent.Notes, readNotes(childDir))
 
 	return parent, nil
+}
+
+// mergeNotes merges child notes on top of base notes.
+// Non-empty child fields win; empty fields inherit from base.
+func mergeNotes(base, child config.ResolvedNotes) config.ResolvedNotes {
+	result := base
+	if child.Create != "" {
+		result.Create = child.Create
+	}
+	if child.Delete != "" {
+		result.Delete = child.Delete
+	}
+	return result
 }
 
 // mergeKind merges child Kind overrides on top of a base KindConfig.

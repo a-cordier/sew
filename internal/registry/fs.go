@@ -71,7 +71,19 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*config.R
 		Kind:       ctxCfg.Kind,
 		Features:   ctxCfg.Features,
 		Images:     ctxCfg.Images,
+		Notes:      readNotes(dir),
 	}, nil
+}
+
+func readNotes(dir string) config.ResolvedNotes {
+	var notes config.ResolvedNotes
+	if data, err := os.ReadFile(filepath.Join(dir, "notes.create")); err == nil {
+		notes.Create = string(data)
+	}
+	if data, err := os.ReadFile(filepath.Join(dir, "notes.delete")); err == nil {
+		notes.Delete = string(data)
+	}
+	return notes
 }
 
 // readContextFile tries sew.yaml first, falling back to context.yaml

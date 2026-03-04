@@ -18,6 +18,7 @@ import (
 	"github.com/a-cordier/sew/internal/installer"
 	"github.com/a-cordier/sew/internal/kind"
 	"github.com/a-cordier/sew/internal/logger"
+	"github.com/a-cordier/sew/internal/notes"
 	"github.com/a-cordier/sew/internal/registry"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -257,6 +258,8 @@ func runUp(_ *cobra.Command, _ []string) error {
 
 	fmt.Println()
 	color.Blue("  Total: %s", time.Since(start).Round(time.Millisecond))
+
+	printNotes(resolved.Notes.Create, cfg)
 
 	return nil
 }
@@ -521,6 +524,19 @@ func ensureDNSServerRunning(cfg *config.Config) error {
 	}
 	domain, port, dir := dnsServerParams(cfg)
 	return startDNSServer(domain, port, dir)
+}
+
+func printNotes(templateContent string, cfg *config.Config) {
+	if templateContent == "" {
+		return
+	}
+	rendered, err := notes.Render(templateContent, cfg)
+	if err != nil {
+		color.Yellow("  ⚠ failed to render notes: %v", err)
+		return
+	}
+	fmt.Println()
+	fmt.Println(rendered)
 }
 
 func isProcessAlive(pidPath string) bool {

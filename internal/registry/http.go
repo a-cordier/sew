@@ -86,34 +86,14 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*config
 	}
 
 	for _, f := range filesToFetch {
-		u := baseURL + "/" + contextPath + "/" + f
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
-		if err != nil {
-			return nil, fmt.Errorf("building request for %s: %w", f, err)
-		}
-		resp, err := client.Do(req)
-		if err != nil {
-			return nil, fmt.Errorf("fetching %s: %w", f, err)
-		}
-		if resp.StatusCode != http.StatusOK {
-			resp.Body.Close()
-			return nil, fmt.Errorf("fetching %s: %s", f, resp.Status)
-		}
-		outPath := filepath.Join(cacheDir, f)
-		if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
-			resp.Body.Close()
+		if err := r.fetchAndCache(ctx, client, baseURL, contextPath, cacheDir, f, false); err != nil {
 			return nil, err
 		}
-		out, err := os.Create(outPath)
-		if err != nil {
-			resp.Body.Close()
+	}
+
+	for _, notesFile := range []string{"notes.create", "notes.delete"} {
+		if err := r.fetchAndCache(ctx, client, baseURL, contextPath, cacheDir, notesFile, true); err != nil {
 			return nil, err
-		}
-		_, err = io.Copy(out, resp.Body)
-		out.Close()
-		resp.Body.Close()
-		if err != nil {
-			return nil, fmt.Errorf("writing %s: %w", f, err)
 		}
 	}
 
@@ -128,6 +108,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*config
 		Kind:       parsed.Kind,
 		Features:   parsed.Features,
 		Images:     parsed.Images,
+		Notes:      readNotes(cacheDir),
 	}, nil
 }
 
@@ -157,6 +138,42 @@ func (r *HTTPResolver) fetchDefault(ctx context.Context, client *http.Client, ba
 		return "", fmt.Errorf("empty .default file at %s", u)
 	}
 	return name, nil
+}
+
+// fetchAndCache fetches a single file from the remote registry and writes it
+// to the local cache directory. When ignoreNotFound is true, a 404 response
+// is silently skipped instead of treated as an error.
+func (r *HTTPResolver) fetchAndCache(ctx context.Context, client *http.Client, baseURL, contextPath, cacheDir, filename string, ignoreNotFound bool) error {
+	u := baseURL + "/" + contextPath + "/" + filename
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return fmt.Errorf("building request for %s: %w", filename, err)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("fetching %s: %w", filename, err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotFound && ignoreNotFound {
+		return nil
+	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("fetching %s: %s", filename, resp.Status)
+	}
+	outPath := filepath.Join(cacheDir, filename)
+	if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
+		return err
+	}
+	out, err := os.Create(outPath)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(out, resp.Body)
+	out.Close()
+	if err != nil {
+		return fmt.Errorf("writing %s: %w", filename, err)
+	}
+	return nil
 }
 
 // fetchContextFile tries to fetch sew.yaml, falling back to context.yaml
