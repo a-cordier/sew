@@ -2,6 +2,7 @@ images:
   preload:
     refs:
       - mongo:7
+      - docker.elastic.co/elasticsearch/elasticsearch:latest
       - graviteeio/apim-gateway:latest
       - graviteeio/apim-management-api:latest
       - graviteeio/apim-management-ui:latest
@@ -22,11 +23,6 @@ kind:
         hostPort: 30083
       - containerPort: 30084
         hostPort: 30084
-
-mirrors:
-  upstreams:
-    - docker.elastic.co
-    - docker.io
 
 repos:
   - name: graviteeio
