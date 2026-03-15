@@ -1,5 +1,0 @@
-registry: file://./registry
-from:
-  - gravitee.io/apim/gateway-api
-images:
-  mirrors: {}
