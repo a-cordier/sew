@@ -44,29 +44,46 @@ func resolveRegistryURL(rawURL, contextDir string) string {
 	return "file://" + filepath.Clean(p)
 }
 
-// resolveWithParent resolves the parent context declared by childCfg, then
-// merges the child's overrides on top. selfRegistryURL is used as the parent
-// registry when childCfg.Registry is empty.
-func resolveWithParent(ctx context.Context, childCfg config.Config, childDir, selfRegistryURL, sewHome string) (*config.ResolvedContext, error) {
+// resolveFrom resolves all context refs declared in childCfg.From, merges them
+// left-to-right into an accumulator, then applies the child's local overrides
+// on top. selfRegistryURL is used as the parent registry when childCfg.Registry
+// is empty.
+func resolveFrom(ctx context.Context, childCfg config.Config, childDir, selfRegistryURL, sewHome string) (*config.ResolvedContext, error) {
 	registryURL := selfRegistryURL
 	if childCfg.Registry != "" {
 		registryURL = resolveRegistryURL(childCfg.Registry, childDir)
 	}
 
-	resolver := NewResolver(registryURL, sewHome)
-	parent, err := resolver.Resolve(ctx, childCfg.Context)
-	if err != nil {
-		return nil, fmt.Errorf("resolving parent context %q: %w", childCfg.Context, err)
+	acc := &config.ResolvedContext{}
+	for _, ref := range childCfg.From {
+		resolver := NewResolver(registryURL, sewHome)
+		parent, err := resolver.Resolve(ctx, ref)
+		if err != nil {
+			return nil, fmt.Errorf("resolving from %q: %w", ref, err)
+		}
+		absolutizeComponentPaths(parent)
+		mergeInto(acc, parent)
 	}
 
-	MergeComponents(parent, childCfg.Components, childDir)
-	parent.Repos = MergeRepos(parent.Repos, childCfg.Repos)
-	parent.Features = config.MergeFeatures(parent.Features, childCfg.Features)
-	parent.Kind = mergeKind(parent.Kind, childCfg.Kind)
-	parent.Images = config.MergeImages(parent.Images, childCfg.Images)
-	parent.Notes = mergeNotes(parent.Notes, readNotes(childDir))
+	MergeComponents(acc, childCfg.Components, childDir)
+	acc.Repos = MergeRepos(acc.Repos, childCfg.Repos)
+	acc.Features = config.MergeFeatures(acc.Features, childCfg.Features)
+	acc.Kind = mergeKind(acc.Kind, childCfg.Kind)
+	acc.Images = config.MergeImages(acc.Images, childCfg.Images)
+	acc.Notes = mergeNotes(acc.Notes, readNotes(childDir))
 
-	return parent, nil
+	return acc, nil
+}
+
+// mergeInto merges a resolved context (src) into an accumulator (acc).
+// Later sources override earlier ones for matching fields.
+func mergeInto(acc, src *config.ResolvedContext) {
+	MergeComponents(acc, src.Components, "")
+	acc.Repos = MergeRepos(acc.Repos, src.Repos)
+	acc.Features = config.MergeFeatures(acc.Features, src.Features)
+	acc.Kind = mergeKind(acc.Kind, src.Kind)
+	acc.Images = config.MergeImages(acc.Images, src.Images)
+	acc.Notes = mergeNotes(acc.Notes, src.Notes)
 }
 
 // mergeNotes merges child notes on top of base notes.

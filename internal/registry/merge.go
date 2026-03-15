@@ -8,6 +8,7 @@ import (
 
 // MergeComponents merges user-level component customizations into the resolved
 // context. Components are matched by name. For each match the merge applies:
+//   - namespace: user wins if non-empty
 //   - conditions: user wins if conditions.ready is true
 //   - selector: user wins if non-nil
 //   - timeout: user wins if non-empty
@@ -44,6 +45,9 @@ func MergeComponents(resolved *config.ResolvedContext, components []config.Compo
 					comp.Requires = append(comp.Requires, r)
 				}
 			}
+		}
+		if patch.Namespace != "" {
+			comp.Namespace = patch.Namespace
 		}
 		if patch.Conditions.Ready {
 			comp.Conditions = patch.Conditions
@@ -107,6 +111,16 @@ func resolveManifestFilePaths(c *config.Component, configDir string) {
 		if !filepath.IsAbs(f) {
 			c.K8s.ManifestFiles[i] = filepath.Join(configDir, f)
 		}
+	}
+}
+
+// absolutizeComponentPaths makes all relative component file paths in rc
+// absolute using rc.Dir. This is necessary before merging multiple parents
+// whose files live in different directories.
+func absolutizeComponentPaths(rc *config.ResolvedContext) {
+	for i := range rc.Components {
+		resolveValueFilePaths(&rc.Components[i], rc.Dir)
+		resolveManifestFilePaths(&rc.Components[i], rc.Dir)
 	}
 }
 

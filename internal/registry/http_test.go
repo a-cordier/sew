@@ -75,7 +75,8 @@ components:
       chart: base/chart
 `)
 	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
-context: parent
+from:
+  - parent
 
 kind:
   name: child-cluster
@@ -120,7 +121,8 @@ components:
         key2: val2
 `)
 	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
-context: parent
+from:
+  - parent
 
 components:
   - name: app
@@ -172,7 +174,8 @@ features:
 components: []
 `)
 	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
-context: parent
+from:
+  - parent
 
 features:
   dns:
@@ -204,11 +207,13 @@ components: []
 func TestHTTPResolver_CycleDetection(t *testing.T) {
 	root := t.TempDir()
 	writeFile(t, filepath.Join(root, "a", "sew.yaml"), `
-context: b
+from:
+  - b
 components: []
 `)
 	writeFile(t, filepath.Join(root, "b", "sew.yaml"), `
-context: a
+from:
+  - a
 components: []
 `)
 
@@ -247,7 +252,8 @@ components:
         gp-key: gp-val
 `)
 	writeFile(t, filepath.Join(root, "mid", "sew.yaml"), `
-context: grandparent
+from:
+  - grandparent
 
 repos:
   - name: mid-repo
@@ -263,7 +269,8 @@ components:
       chart: mid/chart
 `)
 	writeFile(t, filepath.Join(root, "leaf", "sew.yaml"), `
-context: mid
+from:
+  - mid
 
 kind:
   name: leaf-cluster
@@ -317,7 +324,8 @@ components:
 	httpRoot := t.TempDir()
 	writeFile(t, filepath.Join(httpRoot, "child", "sew.yaml"), `
 registry: file://`+fsRoot+`
-context: parent
+from:
+  - parent
 
 components:
   - name: from-http
@@ -352,12 +360,14 @@ func TestHTTPResolver_CrossRegistryCycleDetection(t *testing.T) {
 
 	writeFile(t, filepath.Join(httpRoot, "a", "sew.yaml"), `
 registry: file://`+fsRoot+`
-context: b
+from:
+  - b
 components: []
 `)
 	writeFile(t, filepath.Join(fsRoot, "b", "sew.yaml"), `
 registry: `+srv.URL+`
-context: a
+from:
+  - a
 components: []
 `)
 

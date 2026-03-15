@@ -1,6 +1,6 @@
 registry: file://./registry
-context: gravitee.io/apim/dbless
-
+from:
+  - gravitee.io/apim/dbless
 features:
   lb:
     enabled: true
@@ -8,18 +8,14 @@ features:
     enabled: true
   dns:
     enabled: true
-
 images:
   mirrors:
     upstreams:
       - docker.io
-
-
 components:
   - name: apim
     conditions:
       ready: true
-
   - name: routing
     type: k8s
     namespace: gravitee

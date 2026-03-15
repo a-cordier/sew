@@ -97,8 +97,8 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*config
 		}
 	}
 
-	if parsed.Context != "" {
-		return resolveWithParent(ctx, parsed, cacheDir, r.BaseURL, r.SewHome)
+	if len(parsed.From) > 0 {
+		return resolveFrom(ctx, parsed, cacheDir, r.BaseURL, r.SewHome)
 	}
 
 	return &config.ResolvedContext{

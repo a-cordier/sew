@@ -34,8 +34,8 @@ var downCmd = &cobra.Command{
 		}
 
 		logDir := filepath.Join(sewHome, "logs")
-		if cfg.Context != "" {
-			logDir = filepath.Join(logDir, cfg.Context)
+		if len(cfg.From) > 0 {
+			logDir = filepath.Join(logDir, strings.Join(cfg.From, "_"))
 		}
 		if err := os.MkdirAll(logDir, 0o755); err != nil {
 			return fmt.Errorf("creating log directory %s: %w", logDir, err)

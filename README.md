@@ -1,12 +1,12 @@
 <p align="center"><img src="logo.svg" alt="sew" width="140"/><br><em>Your local Kubernetes tailor shop</em></p>
 
-**sew** spins up local Kubernetes clusters and deploys ready-to-use applications from a **registry** and **context**. You point it at a context (e.g. `gravitee.io/apim/db-less`), and it creates a Kind cluster and installs the components defined there (Helm charts, and in the future manifests or Kustomize).
+**sew** spins up local Kubernetes clusters and deploys ready-to-use applications from a **registry**. You point it at one or more contexts (e.g. `gravitee.io/apim/db-less`), and it creates a Kind cluster and installs the components defined there (Helm charts, and in the future manifests or Kustomize).
 
 ## Concepts
 
 - **Registry** — A tree of context directories, either on the filesystem (`file:///path`) or over HTTP. The binary does not ship a registry; you use your own or a remote one.
 - **Context** — A path inside the registry following `org/product/variant` (e.g. `gravitee.io/apim/db-less`). Each context has a `sew.yaml` that lists Helm repos and components (charts + values). If you omit the variant (e.g. `gravitee.io/apim`), sew looks for a `.default` file to pick one automatically (see [Default variant resolution](#default-variant-resolution)).
-- **Config** — Configuration is layered. A **user-level** config at `$SEW_HOME/sew.yaml` (default `~/.sew/sew.yaml`) provides base settings; a **project-level** `./sew.yaml` (or `--config`) is merged on top. Each layer sets the registry URL, the context to use, the Kind cluster definition, and optional local components and repos. Set the `SEW_HOME` environment variable to change the user-level config location.
+- **Config** — Configuration is layered. A **user-level** config at `$SEW_HOME/sew.yaml` (default `~/.sew/sew.yaml`) provides base settings; a **project-level** `./sew.yaml` (or `--config`) is merged on top. Each layer sets the registry URL, the contexts to compose via `from`, the Kind cluster definition, and optional local components and repos. Set the `SEW_HOME` environment variable to change the user-level config location.
 
 ## Commands
 
@@ -22,13 +22,13 @@
 
 - `--config <path>` — Project-level config file to merge on top of the user-level base (`$SEW_HOME/sew.yaml`). Defaults to `./sew.yaml` when present.
 - `--registry <url>` — Registry URL (e.g. `file://./registry` or `https://…`). Overrides the value from the config file.
-- `--context <path>` — Context path (e.g. `gravitee.io/apim/db-less`). Overrides the value from the config file.
+- `--from <path>` — Context path to compose (e.g. `gravitee.io/apim/db-less`). Repeatable: use multiple `--from` flags to compose several contexts. Overrides the `from` list from the config file.
 
 ## Quick start
 
 1. **Config** — Create a `sew.yaml` (or use the one in this repo) with at least:
    - `registry`: e.g. `file://./registry` for the local test registry, or an HTTP URL.
-   - `context`: e.g. `gravitee.io/apim/db-less`.
+   - `from`: list of context paths, e.g. `[gravitee.io/apim/db-less]`.
    - `kind`: Kind cluster spec (name, nodes, port mappings).
 
 2. **Run** — From the `sew` directory (or with `--config` pointing to this config):
@@ -50,7 +50,8 @@
 
 ```yaml
 registry: file://./registry   # or https://...
-context: gravitee.io/apim/db-less
+from:
+  - gravitee.io/apim/db-less
 
 kind:
   apiVersion: kind.x-k8s.io/v1alpha4
@@ -195,11 +196,16 @@ File paths in `values` are relative to the context directory. `type` defaults to
 
 ## Context composition
 
-A context can inherit from another context by declaring `context` (and optionally `registry`) in its `sew.yaml`. The parent context is resolved first, then the child's overrides are merged on top using the same merge rules as user-level overrides.
+A context can compose other contexts by declaring `from` in its `sew.yaml`. The listed contexts are resolved left-to-right, merged into an accumulator, then the local overrides are applied on top using the same merge rules as user-level overrides.
+
+Both workspace configs (users) and registry contexts (maintainers) use the same `from` field with identical semantics: *"this stack is built from these contexts, plus my local overrides."*
+
+### Single parent
 
 ```yaml
 # registry/org/product/custom/sew.yaml
-context: org/product/base
+from:
+  - org/product/base
 
 kind:
   name: custom-cluster
@@ -216,13 +222,72 @@ components:
 
 This says: start from the `org/product/base` context, override the cluster name, tweak the `app` component's values, and add an `extra` component.
 
-### Same-registry and cross-registry
+### Multi-context composition
 
-When only `context` is set, the parent is resolved from the same registry. To inherit from a context in a different registry, set `registry` as well:
+A context can compose multiple independent contexts. This is useful for assembling a stack from reusable building blocks:
+
+```yaml
+# registry/gravitee.io/apim/aio/sew.yaml
+from:
+  - mongodb/standalone
+  - elastic/elasticsearch
+
+kind:
+  name: gio-apim
+
+components:
+  - name: mongodb
+    namespace: gravitee
+  - name: elasticsearch
+    namespace: gravitee
+  - name: apim
+    type: helm
+    namespace: gravitee
+    requires:
+      - component: mongodb
+      - component: elasticsearch
+    helm:
+      chart: graviteeio/apim
+```
+
+Contexts in `from` are merged left-to-right: later entries override earlier ones on conflicts. Local fields override last.
+
+### Registry organization
+
+The registry follows an **org/product** convention:
+
+```
+registry/
+  mongodb/
+    .default              # -> standalone
+    standalone/
+      sew.yaml
+      mongodb.yaml
+  elastic/
+    elasticsearch/
+      sew.yaml
+      values-elasticsearch.yaml
+    kibana/               # future
+      sew.yaml
+  gravitee.io/
+    apim/
+      .default            # -> aio
+      aio/
+        sew.yaml          # from: [mongodb/standalone, elastic/elasticsearch]
+      dbless/
+        sew.yaml
+```
+
+Swapping implementations is consumer choice — replace `mongodb/standalone` with `postgresql/standalone` in your `from` list.
+
+### Cross-registry composition
+
+By default, `from` entries are resolved against the same registry. To compose from a different registry, set `registry`:
 
 ```yaml
 registry: https://other-registry.example.com
-context: org/product/base
+from:
+  - org/product/base
 
 components:
   - name: addon
@@ -238,7 +303,7 @@ Composition chains work to arbitrary depth (grandparent → parent → child). C
 
 ### Merge semantics
 
-When a child context inherits from a parent, each top-level field is merged as follows:
+When contexts are composed, each top-level field is merged as follows:
 
 - **`kind`** — Scalar fields (`name`, `apiVersion`, `kind`): child wins if set. `nodes`: child replaces the entire list; however, if the child's first node has no `extraPortMappings`, it inherits the parent's. `containerdConfigPatches`: child replaces entirely.
 - **`components`** — Matched by name using the same rules as user-level overrides (see [Merge rules](#merge-rules)): `helm.chart` and `helm.version` child wins, `helm.valueFiles` appended, `helm.values` shallow-merged, `requires` appended and deduplicated. Unmatched components are appended.
@@ -264,7 +329,7 @@ registry/gravitee.io/apim/
     └── ...
 ```
 
-With the tree above, setting `context: gravitee.io/apim` in your config is equivalent to `context: gravitee.io/apim/db-less` — sew reads `.default`, finds `db-less`, and resolves `gravitee.io/apim/db-less`.
+With the tree above, setting `from: [gravitee.io/apim]` in your config is equivalent to `from: [gravitee.io/apim/db-less]` — sew reads `.default`, finds `db-less`, and resolves `gravitee.io/apim/db-less`.
 
 To create a default for your own product, add a `.default` file next to the variant directories:
 
@@ -325,7 +390,8 @@ Then reference it in your `sew.yaml`:
 
 ```yaml
 registry: https://my-registry.example.com
-context: org/product/variant
+from:
+  - org/product/variant
 
 images:
   mirrors:
@@ -386,7 +452,8 @@ Users can add extra images in their own `sew.yaml` — refs from the context and
 ```yaml
 # sew.yaml (user)
 registry: https://my-registry.example.com
-context: org/product/variant
+from:
+  - org/product/variant
 
 images:
   preload:

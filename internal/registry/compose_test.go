@@ -45,7 +45,8 @@ components:
 `)
 
 	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
-context: parent
+from:
+  - parent
 
 kind:
   name: child-cluster
@@ -77,10 +78,6 @@ components:
 	if len(resolved.Components) != 2 {
 		t.Fatalf("expected 2 components, got %d", len(resolved.Components))
 	}
-	// Dir should point to the parent context (base)
-	if resolved.Dir != filepath.Join(root, "parent") {
-		t.Fatalf("expected Dir to be parent dir, got %q", resolved.Dir)
-	}
 }
 
 func TestFSResolver_ParentComposition_ChildOverridesComponent(t *testing.T) {
@@ -103,7 +100,8 @@ components:
 `)
 
 	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
-context: parent
+from:
+  - parent
 
 components:
   - name: app
@@ -157,7 +155,8 @@ components: []
 `)
 
 	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
-context: parent
+from:
+  - parent
 
 features:
   dns:
@@ -190,11 +189,13 @@ func TestFSResolver_CycleDetection(t *testing.T) {
 	sewHome := t.TempDir()
 
 	writeFile(t, filepath.Join(root, "a", "sew.yaml"), `
-context: b
+from:
+  - b
 components: []
 `)
 	writeFile(t, filepath.Join(root, "b", "sew.yaml"), `
-context: a
+from:
+  - a
 components: []
 `)
 
@@ -213,7 +214,8 @@ func TestFSResolver_SelfCycleDetection(t *testing.T) {
 	sewHome := t.TempDir()
 
 	writeFile(t, filepath.Join(root, "self", "sew.yaml"), `
-context: self
+from:
+  - self
 components: []
 `)
 
@@ -253,7 +255,8 @@ components:
 `)
 
 	writeFile(t, filepath.Join(root, "mid", "sew.yaml"), `
-context: grandparent
+from:
+  - grandparent
 
 repos:
   - name: mid-repo
@@ -270,7 +273,8 @@ components:
 `)
 
 	writeFile(t, filepath.Join(root, "leaf", "sew.yaml"), `
-context: mid
+from:
+  - mid
 
 kind:
   name: leaf-cluster
@@ -324,7 +328,8 @@ components:
 
 	// Child omits registry → uses the same FS registry
 	writeFile(t, filepath.Join(root, "derived", "sew.yaml"), `
-context: base
+from:
+  - base
 
 components:
   - name: extra
@@ -356,7 +361,8 @@ components:
 
 	writeFile(t, filepath.Join(regB, "child", "sew.yaml"), `
 registry: file://`+regA+`
-context: parent
+from:
+  - parent
 
 components:
   - name: from-b
@@ -397,7 +403,8 @@ components:
 
 	writeFile(t, filepath.Join(root, "org", "variants", "custom", "sew.yaml"), `
 registry: file://../..
-context: base
+from:
+  - base
 
 kind:
   name: custom-cluster
@@ -587,7 +594,8 @@ components:
 `)
 
 	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
-context: parent
+from:
+  - parent
 
 images:
   preload:
@@ -719,7 +727,8 @@ components:
 `)
 	writeFile(t, filepath.Join(root, "product", ".default"), `standard`)
 	writeFile(t, filepath.Join(root, "product", "standard", "sew.yaml"), `
-context: base
+from:
+  - base
 
 components:
   - name: extra
@@ -745,15 +754,18 @@ func TestFSResolver_ThreeLevelCycleDetection(t *testing.T) {
 	sewHome := t.TempDir()
 
 	writeFile(t, filepath.Join(root, "a", "sew.yaml"), `
-context: b
+from:
+  - b
 components: []
 `)
 	writeFile(t, filepath.Join(root, "b", "sew.yaml"), `
-context: c
+from:
+  - c
 components: []
 `)
 	writeFile(t, filepath.Join(root, "c", "sew.yaml"), `
-context: a
+from:
+  - a
 components: []
 `)
 
@@ -761,6 +773,194 @@ components: []
 	_, err := resolver.Resolve(context.Background(), "a")
 	if err == nil {
 		t.Fatal("expected cycle detection error for a→b→c→a")
+	}
+	if !strings.Contains(err.Error(), "cycle") {
+		t.Fatalf("expected cycle error message, got: %v", err)
+	}
+}
+
+func TestFSResolver_MultiFromComposition(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "mongodb", "standalone", "sew.yaml"), `
+repos:
+  - name: mongodb-repo
+    url: https://example.com/mongo
+
+images:
+  preload:
+    refs:
+      - mongo:7
+
+components:
+  - name: mongodb
+    type: k8s
+    k8s:
+      manifestFiles:
+        - mongodb.yaml
+`)
+	writeFile(t, filepath.Join(root, "mongodb", "standalone", "mongodb.yaml"), "# mongo manifest")
+
+	writeFile(t, filepath.Join(root, "elastic", "elasticsearch", "sew.yaml"), `
+repos:
+  - name: elastic-repo
+    url: https://helm.elastic.co
+
+images:
+  preload:
+    refs:
+      - docker.elastic.co/elasticsearch/elasticsearch:9.3.1
+
+components:
+  - name: elasticsearch
+    type: helm
+    helm:
+      chart: elastic/elasticsearch
+      valueFiles:
+        - values-elasticsearch.yaml
+`)
+	writeFile(t, filepath.Join(root, "elastic", "elasticsearch", "values-elasticsearch.yaml"), "# elastic values")
+
+	writeFile(t, filepath.Join(root, "app", "sew.yaml"), `
+from:
+  - mongodb/standalone
+  - elastic/elasticsearch
+
+kind:
+  name: app-cluster
+
+repos:
+  - name: app-repo
+    url: https://example.com/app
+
+components:
+  - name: app-comp
+    helm:
+      chart: app/chart
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "app")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if resolved.Kind.Name != "app-cluster" {
+		t.Fatalf("expected kind name %q, got %q", "app-cluster", resolved.Kind.Name)
+	}
+
+	repoNames := make(map[string]bool)
+	for _, r := range resolved.Repos {
+		repoNames[r.Name] = true
+	}
+	if !repoNames["mongodb-repo"] || !repoNames["elastic-repo"] || !repoNames["app-repo"] {
+		t.Fatalf("expected all three repos, got %v", resolved.Repos)
+	}
+
+	compNames := make(map[string]bool)
+	for _, c := range resolved.Components {
+		compNames[c.Name] = true
+	}
+	if !compNames["mongodb"] || !compNames["elasticsearch"] || !compNames["app-comp"] {
+		t.Fatalf("expected mongodb, elasticsearch, and app-comp, got %v", compNames)
+	}
+
+	if len(resolved.Images.Preload.Refs) != 2 {
+		t.Fatalf("expected 2 preload image refs, got %d: %v", len(resolved.Images.Preload.Refs), resolved.Images.Preload.Refs)
+	}
+}
+
+func TestFSResolver_MultiFromPathAbsolutization(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "parent-a", "sew.yaml"), `
+components:
+  - name: comp-a
+    type: helm
+    helm:
+      chart: a/chart
+      valueFiles:
+        - values-a.yaml
+`)
+	writeFile(t, filepath.Join(root, "parent-a", "values-a.yaml"), "# values a")
+
+	writeFile(t, filepath.Join(root, "parent-b", "sew.yaml"), `
+components:
+  - name: comp-b
+    type: k8s
+    k8s:
+      manifestFiles:
+        - manifest-b.yaml
+`)
+	writeFile(t, filepath.Join(root, "parent-b", "manifest-b.yaml"), "# manifest b")
+
+	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
+from:
+  - parent-a
+  - parent-b
+components: []
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "child")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(resolved.Components) != 2 {
+		t.Fatalf("expected 2 components, got %d", len(resolved.Components))
+	}
+
+	for _, comp := range resolved.Components {
+		switch comp.Name {
+		case "comp-a":
+			if len(comp.Helm.ValueFiles) != 1 {
+				t.Fatalf("expected 1 value file for comp-a, got %d", len(comp.Helm.ValueFiles))
+			}
+			expected := filepath.Join(root, "parent-a", "values-a.yaml")
+			if comp.Helm.ValueFiles[0] != expected {
+				t.Fatalf("expected value file %q, got %q", expected, comp.Helm.ValueFiles[0])
+			}
+		case "comp-b":
+			if len(comp.K8s.ManifestFiles) != 1 {
+				t.Fatalf("expected 1 manifest file for comp-b, got %d", len(comp.K8s.ManifestFiles))
+			}
+			expected := filepath.Join(root, "parent-b", "manifest-b.yaml")
+			if comp.K8s.ManifestFiles[0] != expected {
+				t.Fatalf("expected manifest file %q, got %q", expected, comp.K8s.ManifestFiles[0])
+			}
+		}
+	}
+}
+
+func TestFSResolver_MultiFromCycleDetection(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "a", "sew.yaml"), `
+from:
+  - b
+  - c
+components: []
+`)
+	writeFile(t, filepath.Join(root, "b", "sew.yaml"), `
+components:
+  - name: b-comp
+    helm:
+      chart: b/chart
+`)
+	writeFile(t, filepath.Join(root, "c", "sew.yaml"), `
+from:
+  - a
+components: []
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	_, err := resolver.Resolve(context.Background(), "a")
+	if err == nil {
+		t.Fatal("expected cycle detection error for a→c→a")
 	}
 	if !strings.Contains(err.Error(), "cycle") {
 		t.Fatalf("expected cycle error message, got: %v", err)

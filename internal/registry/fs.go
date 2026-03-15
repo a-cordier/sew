@@ -60,8 +60,8 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*config.R
 		return nil, fmt.Errorf("parsing context file: %w", err)
 	}
 
-	if ctxCfg.Context != "" {
-		return resolveWithParent(ctx, ctxCfg, dir, selfRegistry, r.SewHome)
+	if len(ctxCfg.From) > 0 {
+		return resolveFrom(ctx, ctxCfg, dir, selfRegistry, r.SewHome)
 	}
 
 	return &config.ResolvedContext{

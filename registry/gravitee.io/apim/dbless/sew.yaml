@@ -1,35 +1,68 @@
 images:
   preload:
     refs:
-      - graviteeio/apim-gateway:latest
-
+      - graviteeio/apim-gateway:latest-debian
+      - graviteeio/kubernetes-operator:latest
 kind:
   name: gio-dbless
   nodes:
-  - role: control-plane
-    extraPortMappings:
-    - containerPort: 30082
-      hostPort: 30082
-    - containerPort: 30084
-      hostPort: 30084
-
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30082
+          hostPort: 30082
+        - containerPort: 30084
+          hostPort: 30084
 repos:
   - name: graviteeio
     url: https://helm.gravitee.io
-
 components:
   - name: apim
     type: helm
     namespace: gravitee
+    conditions:
+      ready: true
+    selector:
+      matchLabels:
+        app.kubernetes.io/instance: apim
     helm:
       chart: graviteeio/apim
-      valueFiles:
-        - values-apim.yaml
-
+      values:
+        api:
+          enabled: false
+        portal:
+          enabled: false
+        ui:
+          enabled: false
+        es:
+          enabled: false
+        ratelimit:
+          type: none
+        gateway:
+          replicaCount: 1
+          autoscaling:
+            enabled: false
+          image:
+            repository: graviteeio/apim-gateway
+            tag: latest
+          ingress:
+            enabled: false
+          services:
+            sync:
+              kubernetes:
+                enabled: true
+          dbLess: true
+          reporters:
+            elasticsearch:
+              enabled: false
+          service:
+            type: NodePort
+            nodePort: 30082
   - name: gko
     type: helm
     namespace: gravitee
     helm:
       chart: graviteeio/gko
-      valueFiles:
-        - values-gko.yaml
+      values:
+        manager:
+          scope:
+            cluster: false

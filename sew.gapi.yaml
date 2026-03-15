@@ -1,5 +1,5 @@
 registry: file://./registry
-context: gravitee.io/apim/gateway-api
-
-images: 
+from:
+  - gravitee.io/apim/gateway-api
+images:
   mirrors: {}

@@ -17,11 +17,11 @@ import (
 var DefaultConfigData []byte
 
 var (
-	cfgFile      string
-	registryURL  string
-	contextPath  string
-	cfg          *config.Config
-	sewHome      string
+	cfgFile     string
+	registryURL string
+	fromPaths   []string
+	cfg         *config.Config
+	sewHome     string
 )
 
 var rootCmd = &cobra.Command{
@@ -44,8 +44,8 @@ var rootCmd = &cobra.Command{
 		if registryURL != "" {
 			cfg.Registry = registryURL
 		}
-		if contextPath != "" {
-			cfg.Context = contextPath
+		if len(fromPaths) > 0 {
+			cfg.From = fromPaths
 		}
 		return nil
 	},
@@ -54,7 +54,7 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "path to config file (default: ./sew.yaml or ~/.sew/sew.yaml)")
 	rootCmd.PersistentFlags().StringVar(&registryURL, "registry", "", "registry URL to use (overrides config file)")
-	rootCmd.PersistentFlags().StringVar(&contextPath, "context", "", "context path to use (overrides config file)")
+	rootCmd.PersistentFlags().StringSliceVar(&fromPaths, "from", nil, "context paths to compose (repeatable, overrides config file)")
 }
 
 // Execute runs the root command.
@@ -114,7 +114,7 @@ func fileExists(path string) bool {
 // merges its Kind and Features settings into the global cfg. The returned
 // ResolvedContext is nil when no registry/context is set.
 func resolveContextConfig() (*config.ResolvedContext, error) {
-	if cfg.Registry == "" || cfg.Context == "" {
+	if cfg.Registry == "" || len(cfg.From) == 0 {
 		return nil, nil
 	}
 	regURL := cfg.Registry
@@ -125,9 +125,9 @@ func resolveContextConfig() (*config.ResolvedContext, error) {
 		}
 	}
 	resolver := registry.NewResolver(regURL, sewHome)
-	resolved, err := resolver.Resolve(context.Background(), cfg.Context)
+	resolved, err := resolver.Resolve(context.Background(), cfg.From[0])
 	if err != nil {
-		return nil, fmt.Errorf("resolving context %q: %w", cfg.Context, err)
+		return nil, fmt.Errorf("resolving context %q: %w", cfg.From[0], err)
 	}
 	cfg.Kind.MergeWithContext(&resolved.Kind)
 	cfg.Features = config.MergeFeatures(resolved.Features, cfg.Features)

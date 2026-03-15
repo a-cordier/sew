@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	Registry   string         `yaml:"registry"`
-	Context    string         `yaml:"context"`
+	From       []string       `yaml:"from,omitempty"`
 	Kind       KindConfig     `yaml:"kind"`
 	Features   FeaturesConfig `yaml:"features,omitempty"`
 	Images     ImagesConfig   `yaml:"images,omitempty"`
@@ -22,7 +22,7 @@ type Config struct {
 }
 
 // ApplyDefaults merges embedded default values into cfg. Only fields that are
-// still at their zero value are populated. The context field is intentionally
+// still at their zero value are populated. The from field is intentionally
 // not defaulted so that omitting it yields a plain Kind cluster.
 func ApplyDefaults(cfg *Config, defaultData []byte) {
 	if len(defaultData) == 0 {
@@ -44,8 +44,8 @@ func Merge(base, override *Config) {
 	if override.Registry != "" {
 		base.Registry = override.Registry
 	}
-	if override.Context != "" {
-		base.Context = override.Context
+	if len(override.From) > 0 {
+		base.From = override.From
 	}
 	if override.Dir != "" {
 		base.Dir = override.Dir

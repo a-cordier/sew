@@ -299,6 +299,54 @@ func TestMergeComponents_ConditionsSelectorTimeout(t *testing.T) {
 	}
 }
 
+func TestMergeComponents_NamespaceOverride(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name: "mongodb",
+				K8s:  &config.K8sSpec{},
+			},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name:      "mongodb",
+			Namespace: "gravitee",
+		},
+	}
+
+	MergeComponents(resolved, overrides, "")
+
+	comp := resolved.Components[0]
+	if comp.Namespace != "gravitee" {
+		t.Fatalf("expected namespace overridden to %q, got %q", "gravitee", comp.Namespace)
+	}
+}
+
+func TestMergeComponents_NamespacePreservedWhenUnset(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name:      "mongodb",
+				Namespace: "infra",
+				K8s:       &config.K8sSpec{},
+			},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "mongodb",
+		},
+	}
+
+	MergeComponents(resolved, overrides, "")
+
+	comp := resolved.Components[0]
+	if comp.Namespace != "infra" {
+		t.Fatalf("expected namespace preserved as %q, got %q", "infra", comp.Namespace)
+	}
+}
+
 func TestMergeComponents_ConditionsNotOverriddenWhenUnset(t *testing.T) {
 	resolved := &config.ResolvedContext{
 		Components: []config.Component{

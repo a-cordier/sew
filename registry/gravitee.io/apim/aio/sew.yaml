@@ -1,61 +1,58 @@
+from:
+  - mongodb/standalone
+  - elastic/elasticsearch
 images:
   preload:
     refs:
-      - mongo:7
-      - docker.elastic.co/elasticsearch/elasticsearch:9.3.1
-      - graviteeio/apim-gateway:latest
-      - graviteeio/apim-management-api:latest
+      - graviteeio/apim-gateway:latest-debian
+      - graviteeio/apim-management-api:latest-debian
       - graviteeio/apim-management-ui:latest
       - graviteeio/apim-portal-ui:latest
-
 kind:
   name: gio-apim
   nodes:
-  - role: control-plane
-    extraPortMappings:
-      - containerPort: 30080
-        hostPort: 30080 
-      - containerPort: 30081
-        hostPort: 30081
-      - containerPort: 30082
-        hostPort: 30082
-      - containerPort: 30083
-        hostPort: 30083
-      - containerPort: 30084
-        hostPort: 30084
-
-repos:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30080
+          hostPort: 30080
+        - containerPort: 30081
+          hostPort: 30081
+        - containerPort: 30082
+          hostPort: 30082
+        - containerPort: 30083
+          hostPort: 30083
+        - containerPort: 30084
+          hostPort: 30084
+repos: # TODO put under a "helm" property
   - name: graviteeio
     url: https://helm.gravitee.io
-  - name: elastic
-    url: https://helm.elastic.co
-
 components:
   - name: mongodb
-    type: k8s
     namespace: gravitee
-    k8s:
-      manifestFiles:
-        - mongodb.yaml
-
   - name: elasticsearch
-    type: helm
     namespace: gravitee
-    helm:
-      chart: elastic/elasticsearch
-      valueFiles:
-        - values-elasticsearch.yaml
-
   - name: tls-server
     type: k8s
     namespace: gravitee
     k8s:
-      manifestFiles:
-        - tls-server.yaml
-
+      manifests:
+        - apiVersion: v1
+          kind: Secret
+          metadata:
+            name: tls-server
+            namespace: gravitee
+          type: kubernetes.io/tls
+          data:
+            tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUN5VENDQWJHZ0F3SUJBZ0lKQVBVVXlZOVp5OGxoTUEwR0NTcUdTSWIzRFFFQkN3VUFNQlF4RWpBUUJnTlYKQkFNTUNXeHZZMkZzYUc5emREQWVGdzB5TmpBeU1qSXhOak14TURKYUZ3MHpNVEF5TWpFeE5qTXhNREphTUJReApFakFRQmdOVkJBTU1DV3h2WTJGc2FHOXpkRENDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DCmdnRUJBTmREbFNGUXRPVGxHT3VJVmdLcFZJdVJPN0l3NVVDVG5hS0pxajlGZHNhSEc1Tzh0NGZGc2VFMXRkQlcKcVZ5U25mcGI5aExpL29mSHkxa0NudmFWeUNGa3JnVmlUSml4Uk9XWFAzRzc4dWQreXVWcHNkandYcjRjV0lsdQplazFzMHM1ZUNUa05INUgyWDN6RFBueHlUR1JGYVQ3Zk1HUHhLMXJjU2g5YXRNU1NzUTZiemxnRExFRk5CamxqCmh6ZkxFeDNFVWo5ZGpFNXVoRE9tU0dqQ2poSm1FamEvbE0zbHFPZ3lnNHhadWhRWEdoNEZGTzVxNUlzRTFTWGoKUHA2dkhKMFFWTi9kNmNVZjR2bGUwUzQ5Q0lZWVlxTllSemxQL25YUThJakkyT2lXT2ZSbm8vREgwVmdzcWkzMwpwQ2lFei9MS3dZSyt3UFBPbm1OUlBaS0ZRbnNDQXdFQUFhTWVNQnd3R2dZRFZSMFJCQk13RVlJSmJHOWpZV3hvCmIzTjBod1IvQUFBQk1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQi9qNUxvODMwNHVnVGZSUGpIVGhsMklIcDkKZjUrenlCVFdPVEZTNDJ2M1BSWXd2M0hxelhYd0F3eUNsQ3JieXoxRXArMmJ3UXBrbG9IdFRjUXBJekVxYkQxSgppZlRNRDRCMUZreDEwN2ViVlhLajY1dUJSTXVjcVY0U1FkQTVqS3ZiRWVPaEVyS2pDQkgwRDlSTFc4ZWVvdEdkCmlpMTVNQ1MvdkF1RGxqYVlsSVF1aWp5ejY1Q0lQS21OeFNyZlA1SXM5RW9EVC96bnVLNTR1Vmo5dTNlNEtBcTgKWlhMNkU5Mzh4TVpsN1lVaEdCRXVYT2JnK2tHRk1wWE83cFlCVTNIUjFDemZNM1QzL00yQW9jN1BtTUY0cGJjRwpYa2piaTFmWHAxSWpDUHpjS2M1dW5vWnJGS1gvM3JPK2szY1hIbUFGcXpIbzVPb2lVSTNvVmx5TEMvTU8KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+            tls.key: LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRRFhRNVVoVUxUazVSanIKaUZZQ3FWU0xrVHV5TU9WQWs1MmlpYW8vUlhiR2h4dVR2TGVIeGJIaE5iWFFWcWxja3AzNlcvWVM0djZIeDh0WgpBcDcybGNnaFpLNEZZa3lZc1VUbGx6OXh1L0xuZnNybGFiSFk4RjYrSEZpSmJucE5iTkxPWGdrNURSK1I5bDk4Cnd6NThja3hrUldrKzN6Qmo4U3RhM0VvZldyVEVrckVPbTg1WUF5eEJUUVk1WTRjM3l4TWR4RkkvWFl4T2JvUXoKcGtob3dvNFNaaEkydjVUTjVham9Nb09NV2JvVUZ4b2VCUlR1YXVTTEJOVWw0ejZlcnh5ZEVGVGYzZW5GSCtMNQpYdEV1UFFpR0dHS2pXRWM1VC81MTBQQ0l5TmpvbGpuMFo2UHd4OUZZTEtvdDk2UW9oTS95eXNHQ3ZzRHp6cDVqClVUMlNoVUo3QWdNQkFBRUNnZ0VBWXpCYTZTejlEWE9iRmZ5T1ZVK2RDMnB5YlZzbVo2a2RPNlhmY3FRWlpNVWcKcWVTTlZOeDlhRjZOVm1CNFRaV3BnWkVhUS8yZ2R3UlM2TUxTYUtEL3hKTlZ0RmxsSGY2ZzFvSG8xQWxjbGRyUQp0d0VLMkFGNlJuTmRRSVpOaUp1YVQwajVTdmFIRTRUSTN2NUFMcXVrRTVnQU5ONDJ0L2FLbWFWajZpcXJuTjk2Cmx5QU9zdktuVktFQURVNk9jYUtnekw2M3dOM3Zjc2pOZXFERDVBY3E0K3ZnZitpbmF2MUVvcFl2ZXhrb2xaUUQKd3pIQW5SQlp6NGZDZGZqVm85NWY2Y2lsejRnSXNOcUFzL2dNNDE4NjllVXovQXQ4aWplbzV3TUIzSXJPNkM3RQpRS2M4UStodFplSEw4UVNwMVRpK2V1MnBOd3QrbWo3UlJhSjJXaUhhRVFLQmdRRHhPMHMwbHJjdUFoR2ZsZVd6Ck9hcG5qWlBQUkxURGtiY0VKUERRZ0ROUmlGWmJ0T3BEVGg5V0RURmNaVTJsSmQrbndHYW1sUnJHVDJteSthNXgKN3BLWWt2OG1oTUdLZkNETWRmTnVvK0pyTkJjYzhZUlVJQWlBb2xYenVaOVJnTi81eGZtempHZUU3Wm1lVHN2ZwpVV1IybWVUMmhiK2ZKS3hzR0FEMG1SbUNqd0tCZ1FEa2NVK1JYdktmU2hqa2FBOVdCR1JNamRZOWdJVVRJT3JXClJ2ckt3bmhiVWVhVHZCaldneVNVRUpNWlZ5ak9TbTJ3ek1MdnNKclk1K01TbC9GYlZ1RGFrem4xOGlVcmV4WncKTytYYjM2Y0NoOTV1WkhmQzkzaEN5SzVXQzhVVG5OVitvWFIxZGRuRXNOZCtoNm1Na1lXc1YvYkRiL3BSNVNENgoxTkdxdjFVSFZRS0JnRjVnZkVQTzAwdkVzM0JrRE1IWnhibE53bzVNcXd2NGJrbkl5ZzVJbWN0RU04VWRPcW1xClhzZ2owVFA4eml2V2JYSUw3QjB3S0pGOWNEVDlTaXA0MUJHdE1QVzQ2cDlyZ01sOVBBZ0ZSZ2Y3RVMvWnJaUGMKRkhkL0MzR1hKYVdWYmdzaVVWYlZqNHFLQ3BmTTdDYU9zV2RWUGliVW5PdCtSWmJrclRzRXl0NHhBb0dCQU5OMAo3Nm9vc1gweElZbUxxV1o5K2puQ3NTV002YUdqUHIzS1JpdVpoNzlBT0tkWDNjWHk3dEQvNXFuMlBCZDRYY0RpClNTK0YwbEFsbGRPSVFpbkNhYkRweHlVYVY3Mi8yaTFaeEpPYW13V0VyeWlRWnl0WjEwQTZjdVhEVDFHd1F3OU0KZEhpbDlrWlRTNlliL1p6cnYwaWd4QkowZk1tQnh0MW9VZ3d6djRsaEFvR0JBTHdXRzFkSEZZZXRsaGo4Q1lSWApHcVFreFg4NHFoNjdGdHJwNmpUUEowMzNqRUNEdlRzQXhEblo5dVlGbmdpbFZtajl6UkVNbjZvYm1WTzBRWGYrCjNTZHFUWCtHYzJNNncxWExCNXc0czJHTnFodU42dDYrYTgrWHVhWmZieXA3cGxQRkxTalF2NWozbGtlbVlnZXIKZUlycitxSWI1K2NOa1pFWXJDK2NwcjhKCi0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K
   - name: apim
     type: helm
     namespace: gravitee
+    conditions:
+      ready: true
+    selector:
+      matchLabels:
+        app.kubernetes.io/instance: apim
     requires:
       - component: mongodb
         conditions:
@@ -74,6 +71,81 @@ components:
       - component: tls-server
     helm:
       chart: graviteeio/apim
-      valueFiles:
-        - values-apim.yaml
-
+      values:
+        secrets:
+          kubernetes:
+            enabled: true
+        mongo:
+          uri: mongodb://mongodb:27017/gravitee?connectTimeoutMS=30000
+        es:
+          endpoints:
+            - http://elasticsearch-master:9200
+        ui:
+          ingress:
+            enabled: false
+          service:
+            type: NodePort
+            nodePort: 30080
+          baseURL: http://localhost:30083/management
+          env:
+            - name: CONSOLE_BASE_HREF
+              value: /
+        portal:
+          enabled: true
+          ingress:
+            enabled: false
+          service:
+            type: NodePort
+            nodePort: 30081
+          baseURL: http://localhost:30083/portal
+        gateway:
+          ingress:
+            enabled: false
+          ingressController:
+            enabled: true
+          servers:
+            - type: http
+              port: 8082
+              service:
+                type: NodePort
+                nodePort: 30082
+                externalPort: 82
+              ingress:
+                enabled: false
+            - type: http
+              port: 8084
+              service:
+                type: NodePort
+                nodePort: 30084
+                externalPort: 84
+              ingress:
+                enabled: false
+              ssl:
+                keystore:
+                  type: pem
+                  secret: secret://kubernetes/tls-server
+                clientAuth: request
+          service:
+            type: NodePort
+          services:
+            sync:
+              kubernetes:
+                enabled: true
+          reporters:
+            elasticsearch:
+              enabled: true
+        api:
+          ingress:
+            enabled: false
+          service:
+            type: NodePort
+            nodePort: 30083
+          env:
+            - name: MANAGEMENT_MONGODB_TRANSACTIONAL
+              value: "false"
+        installation:
+          api:
+            url: http://localhost:30083
+            proxyPath:
+              management: /management
+              portal: /portal

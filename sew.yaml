@@ -1,10 +1,9 @@
 registry: https://a-cordier.github.io/sew
-context: gravitee.io/apim
-
+from:
+  - gravitee.io/apim
 images:
   mirrors: {}
-
 kind:
   name: sew
   nodes:
-  - role: control-plane
+    - role: control-plane

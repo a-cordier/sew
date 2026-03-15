@@ -5,3 +5,13 @@ tasks:
     desc: Run linter
     cmds:
       - go tool revive -config .revive.toml -formatter friendly ./...
+
+  fmt:yaml:
+    desc: Format YAML files
+    cmds:
+      - yamlfmt registry/ *.yaml
+
+  lint:yaml:
+    desc: Check YAML formatting
+    cmds:
+      - yamlfmt -lint registry/ *.yaml
