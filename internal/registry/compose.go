@@ -71,6 +71,7 @@ func resolveFrom(ctx context.Context, childCfg config.Config, childDir, selfRegi
 	acc.Kind = mergeKind(acc.Kind, childCfg.Kind)
 	acc.Images = config.MergeImages(acc.Images, childCfg.Images)
 	acc.Notes = mergeNotes(acc.Notes, readNotes(childDir))
+	acc.Abstract = childCfg.Abstract
 
 	return acc, nil
 }

@@ -72,6 +72,7 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*config.R
 		Features:   ctxCfg.Features,
 		Images:     ctxCfg.Images,
 		Notes:      readNotes(dir),
+		Abstract:   ctxCfg.Abstract,
 	}, nil
 }
 

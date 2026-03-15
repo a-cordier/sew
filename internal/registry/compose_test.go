@@ -935,6 +935,108 @@ components: []
 	}
 }
 
+func TestFSResolver_AbstractContextDirect(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "base", "sew.yaml"), `
+abstract: true
+
+repos:
+  - name: base-repo
+    url: https://example.com/base
+
+components:
+  - name: base-comp
+    helm:
+      chart: base/chart
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "base")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !resolved.Abstract {
+		t.Fatal("expected Abstract to be true for abstract context")
+	}
+}
+
+func TestFSResolver_AbstractComposedProducesNonAbstract(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "base", "sew.yaml"), `
+abstract: true
+
+repos:
+  - name: base-repo
+    url: https://example.com/base
+
+components:
+  - name: base-comp
+    helm:
+      chart: base/chart
+`)
+
+	writeFile(t, filepath.Join(root, "concrete", "sew.yaml"), `
+from:
+  - base
+
+components:
+  - name: extra
+    helm:
+      chart: extra/chart
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "concrete")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resolved.Abstract {
+		t.Fatal("expected Abstract to be false when composing from an abstract context")
+	}
+	if len(resolved.Components) != 2 {
+		t.Fatalf("expected 2 components, got %d", len(resolved.Components))
+	}
+}
+
+func TestFSResolver_AbstractWithFrom(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "grandparent", "sew.yaml"), `
+components:
+  - name: gp-comp
+    helm:
+      chart: gp/chart
+`)
+
+	writeFile(t, filepath.Join(root, "mid", "sew.yaml"), `
+abstract: true
+from:
+  - grandparent
+
+components:
+  - name: mid-comp
+    helm:
+      chart: mid/chart
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "mid")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !resolved.Abstract {
+		t.Fatal("expected Abstract to be true for abstract context that uses 'from'")
+	}
+	if len(resolved.Components) != 2 {
+		t.Fatalf("expected 2 components, got %d", len(resolved.Components))
+	}
+}
+
 func TestFSResolver_MultiFromCycleDetection(t *testing.T) {
 	root := t.TempDir()
 	sewHome := t.TempDir()

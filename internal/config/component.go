@@ -74,4 +74,5 @@ type ResolvedContext struct {
 	Features   FeaturesConfig
 	Images     ImagesConfig
 	Notes      ResolvedNotes
+	Abstract   bool
 }

@@ -109,6 +109,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*config
 		Features:   parsed.Features,
 		Images:     parsed.Images,
 		Notes:      readNotes(cacheDir),
+		Abstract:   parsed.Abstract,
 	}, nil
 }
 

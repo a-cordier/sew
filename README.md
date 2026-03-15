@@ -252,6 +252,64 @@ components:
 
 Contexts in `from` are merged left-to-right: later entries override earlier ones on conflicts. Local fields override last.
 
+### Abstract contexts
+
+A context can be marked as `abstract: true` to indicate that it is a shared base configuration not meant to be deployed on its own. Attempting to deploy an abstract context directly (via `sew create`) produces an error — it must be composed into a concrete context through `from`.
+
+This is useful when several variants share a common foundation (repos, components, Kind settings) but differ in values or extra components. Extract the shared parts into an abstract context and let each variant compose from it:
+
+```yaml
+# registry/org/product/base/sew.yaml
+abstract: true
+
+repos:
+  - name: myrepo
+    url: https://charts.example.com
+
+components:
+  - name: app
+    namespace: default
+    helm:
+      chart: myrepo/app
+      version: "2.0.0"
+      values:
+        replicas: 1
+```
+
+Variants compose from the abstract base and add their own overrides:
+
+```yaml
+# registry/org/product/dev/sew.yaml
+from:
+  - org/product/base
+
+kind:
+  name: dev-cluster
+
+components:
+  - name: app
+    helm:
+      values:
+        debug: true
+```
+
+```yaml
+# registry/org/product/prod/sew.yaml
+from:
+  - org/product/base
+
+kind:
+  name: prod-cluster
+
+components:
+  - name: app
+    helm:
+      values:
+        replicas: 3
+```
+
+Deploying `org/product/base` directly fails, but deploying `org/product/dev` or `org/product/prod` works — each inherits the base repos, components, and settings, then applies its own overrides. The resulting context is not abstract, even though its parent is.
+
 ### Registry organization
 
 The registry follows an **org/product** convention:

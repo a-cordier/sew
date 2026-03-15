@@ -129,6 +129,9 @@ func resolveContextConfig() (*config.ResolvedContext, error) {
 	if err != nil {
 		return nil, fmt.Errorf("resolving context %q: %w", cfg.From[0], err)
 	}
+	if resolved.Abstract {
+		return nil, fmt.Errorf("context %q is abstract and cannot be deployed directly; compose it via 'from' in another context", cfg.From[0])
+	}
 	cfg.Kind.MergeWithContext(&resolved.Kind)
 	cfg.Features = config.MergeFeatures(resolved.Features, cfg.Features)
 	cfg.Images = config.MergeImages(resolved.Images, cfg.Images)

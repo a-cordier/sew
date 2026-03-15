@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Registry   string         `yaml:"registry"`
 	From       []string       `yaml:"from,omitempty"`
+	Abstract   bool           `yaml:"abstract,omitempty"`
 	Kind       KindConfig     `yaml:"kind"`
 	Features   FeaturesConfig `yaml:"features,omitempty"`
 	Images     ImagesConfig   `yaml:"images,omitempty"`
