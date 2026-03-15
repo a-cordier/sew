@@ -11,6 +11,11 @@ tasks:
     cmds:
       - yamlfmt registry/ *.yaml
 
+  test:
+    desc: Run tests
+    cmds:
+      - go test ./...
+
   lint:yaml:
     desc: Check YAML formatting
     cmds:

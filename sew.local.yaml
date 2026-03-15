@@ -1,6 +1,6 @@
 registry: file://./registry
 from:
-  - gravitee.io/apim/dbless
+  - gravitee.io/apim/aio/postgres
 features:
   lb:
     enabled: true

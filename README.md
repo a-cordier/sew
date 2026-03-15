@@ -323,18 +323,31 @@ registry/
   elastic/
     elasticsearch/
       sew.yaml
+  postgresql/
+    .default              # -> standalone
+    standalone/
+      sew.yaml
   gravitee.io/
     apim/
       .default            # -> aio
       aio/
-        sew.yaml          # from: [mongodb/standalone, elastic/elasticsearch]
-        notes.create
+        .default          # -> mongodb
+        base/
+          sew.yaml        # abstract: true -- common APIM config
+        mongodb/
+          sew.yaml        # from: [mongodb/standalone, elastic/elasticsearch, gravitee.io/apim/aio/base]
+          notes.create
+        postgres/
+          sew.yaml        # from: [postgresql/standalone, elastic/elasticsearch, gravitee.io/apim/aio/base]
+          notes.create
       dbless/
         sew.yaml
         notes.create
+      gateway-api/
+        sew.yaml
 ```
 
-Swapping implementations is consumer choice — replace `mongodb/standalone` with `postgresql/standalone` in your `from` list.
+The `.default` chain `gravitee.io/apim` → `aio` → `mongodb` means existing configs with `from: [gravitee.io/apim]` resolve to the mongodb variant without changes. Swapping implementations is consumer choice — replace `mongodb` with `postgres` in your context path.
 
 ### Cross-registry composition
 

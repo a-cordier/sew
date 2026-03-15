@@ -2,6 +2,28 @@ package cache
 
 import "testing"
 
+func TestNormalizeRef(t *testing.T) {
+	tests := []struct {
+		ref  string
+		want string
+	}{
+		{"postgres:17", "docker.io/library/postgres:17"},
+		{"mongo:7", "docker.io/library/mongo:7"},
+		{"graviteeio/apim-gateway:latest-debian", "docker.io/graviteeio/apim-gateway:latest-debian"},
+		{"ghcr.io/org/repo:v1.2", "ghcr.io/org/repo:v1.2"},
+		{"docker.io/library/nginx:1.25", "docker.io/library/nginx:1.25"},
+		{"mongo", "docker.io/library/mongo:latest"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.ref, func(t *testing.T) {
+			got := normalizeRef(tc.ref)
+			if got != tc.want {
+				t.Fatalf("normalizeRef(%q) = %q, want %q", tc.ref, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestStripRegistryHost(t *testing.T) {
 	tests := []struct {
 		ref  string

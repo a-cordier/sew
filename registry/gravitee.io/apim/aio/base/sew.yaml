@@ -1,6 +1,4 @@
-from:
-  - mongodb/standalone
-  - elastic/elasticsearch
+abstract: true
 images:
   preload:
     refs:
@@ -26,11 +24,8 @@ kind:
 repos: # TODO put under a "helm" property
   - name: graviteeio
     url: https://helm.gravitee.io
+
 components:
-  - name: mongodb
-    namespace: gravitee
-  - name: elasticsearch
-    namespace: gravitee
   - name: tls-server
     type: k8s
     namespace: gravitee
@@ -54,20 +49,6 @@ components:
       matchLabels:
         app.kubernetes.io/instance: apim
     requires:
-      - component: mongodb
-        conditions:
-          ready: true
-        selector:
-          matchLabels:
-            app: mongodb
-        timeout: 15m
-      - component: elasticsearch
-        conditions:
-          ready: true
-        selector:
-          matchLabels:
-            app: elasticsearch-master
-        timeout: 15m
       - component: tls-server
     helm:
       chart: graviteeio/apim
@@ -75,8 +56,6 @@ components:
         secrets:
           kubernetes:
             enabled: true
-        mongo:
-          uri: mongodb://mongodb:27017/gravitee?connectTimeoutMS=30000
         es:
           endpoints:
             - http://elasticsearch-master:9200
@@ -140,9 +119,6 @@ components:
           service:
             type: NodePort
             nodePort: 30083
-          env:
-            - name: MANAGEMENT_MONGODB_TRANSACTIONAL
-              value: "false"
         installation:
           api:
             url: http://localhost:30083

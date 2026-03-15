@@ -25,11 +25,9 @@ type FSResolver struct {
 // If the parsed config declares a parent context (via the context field),
 // the parent is resolved first and the child's overrides are merged on top.
 //
-// For backward compatibility, if sew.yaml does not exist, Resolve
-// falls back to context.yaml. If neither exists, it looks for a
-// .default file containing the name of a default variant
-// sub-directory. When found, it appends the variant to contextPath
-// and resolves again.
+// If sew.yaml does not exist, Resolve looks for a .default file
+// containing the name of a default variant sub-directory. When found,
+// it appends the variant to contextPath and resolves again.
 func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*config.ResolvedContext, error) {
 	selfRegistry := "file://" + r.Root
 	ctx, err := withVisited(ctx, contextRef{Registry: selfRegistry, Context: contextPath})
@@ -87,12 +85,6 @@ func readNotes(dir string) config.ResolvedNotes {
 	return notes
 }
 
-// readContextFile tries sew.yaml first, falling back to context.yaml
-// for backward compatibility.
 func (r *FSResolver) readContextFile(dir string) ([]byte, error) {
-	data, err := os.ReadFile(filepath.Join(dir, "sew.yaml"))
-	if err != nil && errors.Is(err, os.ErrNotExist) {
-		return os.ReadFile(filepath.Join(dir, "context.yaml"))
-	}
-	return data, err
+	return os.ReadFile(filepath.Join(dir, "sew.yaml"))
 }

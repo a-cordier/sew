@@ -2,11 +2,13 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"strings"
 	"sync"
 
+	"github.com/distribution/reference"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
@@ -50,15 +52,20 @@ func PullImages(ctx context.Context, images []string) error {
 			sem <- struct{}{}
 			defer func() { <-sem }()
 
-			rc, err := cli.ImagePull(ctx, ref, image.PullOptions{})
+			canonical := normalizeRef(ref)
+			rc, err := cli.ImagePull(ctx, canonical, image.PullOptions{})
 			if err != nil {
 				mu.Lock()
-				errs = append(errs, fmt.Errorf("pulling %s: %w", ref, err))
+				errs = append(errs, fmt.Errorf("pulling %s: %w", canonical, err))
 				mu.Unlock()
 				return
 			}
-			_, _ = io.Copy(io.Discard, rc)
-			rc.Close()
+			if err := drainPullStream(rc); err != nil {
+				mu.Lock()
+				errs = append(errs, fmt.Errorf("pulling %s: %w", canonical, err))
+				mu.Unlock()
+				return
+			}
 		}(img)
 	}
 
@@ -153,9 +160,10 @@ func PushImages(ctx context.Context, images []string) error {
 			sem <- struct{}{}
 			defer func() { <-sem }()
 
+			canonical := normalizeRef(ref)
 			localRef := localReg + "/" + stripRegistryHost(ref)
 
-			if err := cli.ImageTag(ctx, ref, localRef); err != nil {
+			if err := cli.ImageTag(ctx, canonical, localRef); err != nil {
 				mu.Lock()
 				errs = append(errs, fmt.Errorf("tagging %s as %s: %w", ref, localRef, err))
 				mu.Unlock()
@@ -234,6 +242,21 @@ func StopPreloadRegistry(ctx context.Context) error {
 	return forceRemove(ctx, cli, preloadContainerName)
 }
 
+// normalizeRef expands a short Docker image reference into its canonical form
+// so that it matches what the Docker daemon stores after a pull.
+// E.g. "postgres:17" -> "docker.io/library/postgres:17".
+func normalizeRef(ref string) string {
+	named, err := reference.ParseNormalizedNamed(ref)
+	if err != nil {
+		return ref
+	}
+	named = reference.TagNameOnly(named)
+	if tagged, ok := named.(reference.Tagged); ok {
+		return reference.Domain(named) + "/" + reference.Path(named) + ":" + tagged.Tag()
+	}
+	return reference.Domain(named) + "/" + reference.Path(named)
+}
+
 // stripRegistryHost removes the registry hostname from an image reference,
 // returning just the path and tag (e.g. "graviteeio/apim-gateway:latest").
 // Docker Hub images (implicit or explicit docker.io) have just their path
@@ -275,4 +298,23 @@ func registryHost(ref string) string {
 
 func isRegistryHost(s string) bool {
 	return strings.Contains(s, ".") || strings.Contains(s, ":") || s == "localhost"
+}
+
+// drainPullStream reads the Docker pull JSON stream to completion and
+// returns the first error reported in the stream, if any.
+func drainPullStream(rc io.ReadCloser) error {
+	defer rc.Close()
+	dec := json.NewDecoder(rc)
+	var msg struct {
+		Error string `json:"error"`
+	}
+	for dec.More() {
+		if err := dec.Decode(&msg); err != nil {
+			return err
+		}
+		if msg.Error != "" {
+			return fmt.Errorf("%s", msg.Error)
+		}
+	}
+	return nil
 }

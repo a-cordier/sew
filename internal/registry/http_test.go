@@ -381,33 +381,6 @@ components: []
 	}
 }
 
-func TestHTTPResolver_ContextYAMLFallback(t *testing.T) {
-	root := t.TempDir()
-	writeFile(t, filepath.Join(root, "legacy", "context.yaml"), `
-kind:
-  name: legacy-cluster
-
-components:
-  - name: legacy-app
-    helm:
-      chart: legacy/chart
-`)
-
-	srv := newTestServer(t, root)
-	resolver := newHTTPResolver(t, srv.URL)
-
-	resolved, err := resolver.Resolve(context.Background(), "legacy")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if resolved.Kind.Name != "legacy-cluster" {
-		t.Fatalf("expected kind name %q, got %q", "legacy-cluster", resolved.Kind.Name)
-	}
-	if len(resolved.Components) != 1 || resolved.Components[0].Name != "legacy-app" {
-		t.Fatal("expected legacy-app component")
-	}
-}
-
 func TestHTTPResolver_DefaultVariant(t *testing.T) {
 	root := t.TempDir()
 	writeFile(t, filepath.Join(root, "product", ".default"), `standard`)

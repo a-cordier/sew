@@ -32,6 +32,7 @@ components:
         gatewayAPI:
           controller:
             enabled: true
+            applycRDs: true
   - name: gateway-class-parameters
     type: k8s
     namespace: gravitee

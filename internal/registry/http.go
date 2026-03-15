@@ -25,8 +25,7 @@ type HTTPResolver struct {
 // values files to a local cache directory, and returns a ResolvedContext
 // whose Dir points to that cache.
 //
-// For backward compatibility, if sew.yaml returns 404, Resolve falls
-// back to context.yaml before trying the .default variant lookup.
+// If sew.yaml returns 404, Resolve tries the .default variant lookup.
 func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*config.ResolvedContext, error) {
 	ctx, err := withVisited(ctx, contextRef{Registry: r.BaseURL, Context: contextPath})
 	if err != nil {
@@ -177,34 +176,28 @@ func (r *HTTPResolver) fetchAndCache(ctx context.Context, client *http.Client, b
 	return nil
 }
 
-// fetchContextFile tries to fetch sew.yaml, falling back to context.yaml
-// for backward compatibility. It returns the body bytes, the HTTP status
-// code, and any transport-level error. A 404 is returned as status (not
-// as an error) so the caller can attempt the .default fallback.
+// fetchContextFile fetches sew.yaml from the registry. It returns the body
+// bytes, the HTTP status code, and any transport-level error. A 404 is
+// returned as status (not as an error) so the caller can attempt the
+// .default fallback.
 func (r *HTTPResolver) fetchContextFile(ctx context.Context, client *http.Client, baseURL, contextPath string) ([]byte, int, error) {
-	for _, filename := range []string{"sew.yaml", "context.yaml"} {
-		u := baseURL + "/" + contextPath + "/" + filename
-		req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
-		if err != nil {
-			return nil, 0, fmt.Errorf("building request: %w", err)
-		}
-		resp, err := client.Do(req)
-		if err != nil {
-			return nil, 0, fmt.Errorf("fetching context: %w", err)
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode == http.StatusNotFound {
-			continue
-		}
-		if resp.StatusCode != http.StatusOK {
-			return nil, resp.StatusCode, nil
-		}
-		data, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, 0, fmt.Errorf("reading context: %w", err)
-		}
-		return data, http.StatusOK, nil
+	u := baseURL + "/" + contextPath + "/sew.yaml"
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return nil, 0, fmt.Errorf("building request: %w", err)
 	}
-	return nil, http.StatusNotFound, nil
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, 0, fmt.Errorf("fetching context: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, resp.StatusCode, nil
+	}
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, 0, fmt.Errorf("reading context: %w", err)
+	}
+	return data, http.StatusOK, nil
 }
