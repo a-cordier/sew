@@ -262,20 +262,18 @@ registry/
     .default              # -> standalone
     standalone/
       sew.yaml
-      mongodb.yaml
   elastic/
     elasticsearch/
-      sew.yaml
-      values-elasticsearch.yaml
-    kibana/               # future
       sew.yaml
   gravitee.io/
     apim/
       .default            # -> aio
       aio/
         sew.yaml          # from: [mongodb/standalone, elastic/elasticsearch]
+        notes.create
       dbless/
         sew.yaml
+        notes.create
 ```
 
 Swapping implementations is consumer choice — replace `mongodb/standalone` with `postgresql/standalone` in your `from` list.
