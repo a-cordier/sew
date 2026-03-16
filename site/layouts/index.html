@@ -1,0 +1,96 @@
+{{ define "main" }}
+
+{{/* ── Hero ── */}}
+<section class="hero">
+  <div class="hero-inner">
+    <img class="hero-logo" src="{{ "logo.svg" | relURL }}" alt="sew" width="140" height="48">
+    <h1 class="hero-title">Your local Kubernetes tailor shop</h1>
+    <p class="hero-tagline">{{ .Site.Params.tagline }}</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="{{ "docs/" | relURL }}">Get Started</a>
+      <a class="btn btn-secondary" href="{{ "registry/" | relURL }}">Browse Registry</a>
+    </div>
+  </div>
+</section>
+
+{{/* ── Features ── */}}
+<section class="features">
+  <div class="container">
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </div>
+        <h3 class="feature-title">Registry-Powered</h3>
+        <p class="feature-desc">Pick from ready-made application stacks or host your own registry. No bundled configs &mdash; you choose what to deploy.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        </div>
+        <h3 class="feature-title">Composable Contexts</h3>
+        <p class="feature-desc">Layer contexts with <code>from</code> to compose complex stacks from simple building blocks. Override and extend at any level.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3 class="feature-title">Local Kubernetes</h3>
+        <p class="feature-desc">Spins up Kind clusters with port mappings, ingress, and everything wired &mdash; ready for development in one command.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <h3 class="feature-title">Built-in DNS</h3>
+        <p class="feature-desc">Automatic <code>*.sew.local</code> DNS routing to your cluster. Access services by name without manual <code>/etc/hosts</code> edits.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{{/* ── Quick Start ── */}}
+<section class="quickstart">
+  <div class="container">
+    <div class="quickstart-inner">
+      <div class="quickstart-text">
+        <h2 class="quickstart-title">Up and running in seconds</h2>
+        <p class="quickstart-desc">Install sew, point it at a context, and get a fully wired Kubernetes environment on your machine.</p>
+        <a class="btn btn-outline" href="{{ "docs/" | relURL }}">Read the docs</a>
+      </div>
+      <div class="quickstart-code">
+        <div class="code-window">
+          <div class="code-window-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <pre><code><span class="code-comment"># Install</span>
+go install github.com/a-cordier/sew@latest
+
+<span class="code-comment"># Deploy Gravitee APIM with MongoDB</span>
+sew create --from gravitee.io/apim/aio/mongodb
+
+<span class="code-comment"># Tear down when done</span>
+sew delete</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{/* ── Registry CTA ── */}}
+<section class="cta-registry">
+  <div class="container">
+    <div class="cta-inner">
+      <h2 class="cta-title">Explore the registry</h2>
+      <p class="cta-desc">Browse pre-built contexts for databases, API gateways, and full application stacks. Find the right starting point for your project.</p>
+      <a class="btn btn-primary-solid" href="{{ "registry/" | relURL }}">Browse Components</a>
+    </div>
+  </div>
+</section>
+
+{{ end }}

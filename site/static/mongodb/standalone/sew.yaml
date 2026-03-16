@@ -1,0 +1,52 @@
+images:
+  preload:
+    refs:
+      - mongo:7
+components:
+  - name: mongodb
+    type: k8s
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: mongodb
+            labels:
+              app: mongodb
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: mongodb
+            template:
+              metadata:
+                labels:
+                  app: mongodb
+              spec:
+                containers:
+                  - name: mongodb
+                    image: mongo:7
+                    ports:
+                      - containerPort: 27017
+                        name: mongodb
+                    resources:
+                      requests:
+                        cpu: 250m
+                        memory: 512Mi
+                      limits:
+                        cpu: "1"
+                        memory: 1Gi
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: mongodb
+            labels:
+              app: mongodb
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 27017
+                targetPort: 27017
+                name: mongodb
+            selector:
+              app: mongodb

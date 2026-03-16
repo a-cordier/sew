@@ -1,0 +1,8 @@
+Your cluster "{{ .Kind.Name }}" is ready.
+
+Everything has been deployed in the `gravitee` namespace.
+
+APIM Console     http://localhost:30080
+APIM Portal      http://localhost:30081
+APIM Gateway     http://localhost:30082
+Management API   http://localhost:30083

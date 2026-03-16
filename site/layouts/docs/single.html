@@ -1,0 +1,24 @@
+{{ define "main" }}
+<div class="docs-layout">
+  <aside class="docs-sidebar">
+    <nav class="docs-nav">
+      <h3>Documentation</h3>
+      <ul>
+        {{ range .CurrentSection.Pages }}
+        <li>
+          <a href="{{ .RelPermalink }}" class="{{ if eq $.RelPermalink .RelPermalink }}active{{ end }}">
+            {{ .Title }}
+          </a>
+        </li>
+        {{ end }}
+      </ul>
+    </nav>
+  </aside>
+  <div class="docs-content">
+    <h1>{{ .Title }}</h1>
+    <article class="content">
+      {{ .Content }}
+    </article>
+  </div>
+</div>
+{{ end }}

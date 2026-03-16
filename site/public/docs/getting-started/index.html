@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting Started · sew</title>
+<meta name="description" content="Your local Kubernetes tailor shop">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/sew/css/main.min.c35b6e2d1c9eebc478283e312ab9a4cb4cd6a335040c59515ed63b94e8816ace.css" integrity="sha256-w1tuLRye68R4KD4xKrmky0zWozUEDFlRXtY7lOiBas4=">
+<link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
+<script>
+(function() {
+  var t = localStorage.getItem('theme');
+  if (t === 'dark' || t === 'light') {
+    document.documentElement.setAttribute('data-theme', t);
+  }
+})();
+function toggleTheme() {
+  var root = document.documentElement;
+  var current = root.getAttribute('data-theme');
+  if (!current) {
+    current = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  var next = current === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+}
+</script>
+
+</head>
+<body>
+  <nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="/">
+      <img src="/sew/logo.svg" alt="sew" width="56" height="20">
+    </a>
+    <button class="nav-hamburger" aria-label="Toggle menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+      <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"/></svg>
+    </button>
+    <ul class="nav-links">
+      
+      <li>
+        <a href="/sew/docs/"
+           class="">
+          Docs
+          
+        </a>
+      </li>
+      
+      <li>
+        <a href="/sew/registry/"
+           class="">
+          Registry
+          
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/a-cordier/sew" target="_blank" rel="noopener"
+           class="">
+          GitHub
+          
+          <svg class="icon-external" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M3.75 2A1.75 1.75 0 0 0 2 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0 0 14 12.25v-3.5a.75.75 0 0 0-1.5 0v3.5a.25.25 0 0 1-.25.25h-8.5a.25.25 0 0 1-.25-.25v-8.5a.25.25 0 0 1 .25-.25h3.5a.75.75 0 0 0 0-1.5h-3.5zm6.5 0a.75.75 0 0 0 0 1.5h1.19L7.22 7.72a.75.75 0 1 0 1.06 1.06l4.22-4.22v1.19a.75.75 0 0 0 1.5 0v-3A.75.75 0 0 0 13.25 2h-3z"/></svg>
+          
+        </a>
+      </li>
+      
+      <li>
+        <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">
+          <svg class="icon-sun" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 1.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11ZM8 0a.75.75 0 0 1 .75.75v1a.75.75 0 0 1-1.5 0v-1A.75.75 0 0 1 8 0Zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13Zm-8-5a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8Zm12.25-.75h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5Zm-9.6-4.6a.75.75 0 0 1 1.06 0l1 1a.75.75 0 1 1-1.06 1.06l-1-1a.75.75 0 0 1 0-1.06Zm9.35 9.35a.75.75 0 0 1-1.06 0l-1-1a.75.75 0 1 1 1.06-1.06l1 1a.75.75 0 0 1 0 1.06Zm-9.35 0a.75.75 0 0 1 0-1.06l1-1a.75.75 0 1 1 1.06 1.06l-1 1a.75.75 0 0 1-1.06 0ZM13 3.7a.75.75 0 0 1-1.06 0l-1-1a.75.75 0 1 1 1.06-1.06l1 1a.75.75 0 0 1 0 1.06Z"/></svg>
+          <svg class="icon-moon" viewBox="0 0 16 16" fill="currentColor"><path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.221-7.832Z"/></svg>
+        </button>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+  <main class="main">
+    
+<div class="docs-layout">
+  <aside class="docs-sidebar">
+    <nav class="docs-nav">
+      <h3>Documentation</h3>
+      <ul>
+        
+        <li>
+          <a href="/sew/docs/getting-started/" class="active">
+            Getting Started
+          </a>
+        </li>
+        
+        <li>
+          <a href="/sew/docs/concepts/" class="">
+            Concepts
+          </a>
+        </li>
+        
+        <li>
+          <a href="/sew/docs/configuration/" class="">
+            Configuration
+          </a>
+        </li>
+        
+        <li>
+          <a href="/sew/docs/context-format/" class="">
+            Context Format
+          </a>
+        </li>
+        
+        <li>
+          <a href="/sew/docs/images/" class="">
+            Images
+          </a>
+        </li>
+        
+        <li>
+          <a href="/sew/docs/dns/" class="">
+            DNS
+          </a>
+        </li>
+        
+      </ul>
+    </nav>
+  </aside>
+  <div class="docs-content">
+    <h1>Getting Started</h1>
+    <article class="content">
+      <p><strong>sew</strong> spins up local Kubernetes clusters and deploys ready-to-use applications from a <strong>registry</strong>. You point it at one or more contexts (e.g. <code>gravitee.io/apim/db-less</code>), and it creates a Kind cluster and installs the components defined there (Helm charts, and in the future manifests or Kustomize).</p>
+<h2 id="quick-start">Quick start</h2>
+<ol>
+<li>
+<p><strong>Config</strong> — Create a <code>sew.yaml</code> (or use the one in this repo) with at least:</p>
+<ul>
+<li><code>registry</code>: e.g. <code>file://./registry</code> for the local test registry, or an HTTP URL.</li>
+<li><code>from</code>: list of context paths, e.g. <code>[gravitee.io/apim/db-less]</code>.</li>
+<li><code>kind</code>: Kind cluster spec (name, nodes, port mappings).</li>
+</ul>
+</li>
+<li>
+<p><strong>Run</strong> — From the <code>sew</code> directory (or with <code>--config</code> pointing to this config):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go run . create
+</span></span></code></pre></div><p>Or build and run:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go build -o sew .
+</span></span><span style="display:flex;"><span>./sew create
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Tear down</strong>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./sew delete
+</span></span></code></pre></div></li>
+</ol>
+<h2 id="commands">Commands</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Command</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>sew create</code></td>
+          <td>Create the Kind cluster (if missing) and install the context: add Helm repos, then install each component (Helm upgrade &ndash;install). If no registry/context is configured, only creates the cluster.</td>
+      </tr>
+      <tr>
+          <td><code>sew delete</code></td>
+          <td>Delete the Kind cluster defined in the config.</td>
+      </tr>
+      <tr>
+          <td><code>sew setup dns</code></td>
+          <td>One-time OS-level DNS routing so <code>*.sew.local</code> queries reach the local DNS server. Requires sudo.</td>
+      </tr>
+      <tr>
+          <td><code>sew teardown dns</code></td>
+          <td>Remove the OS-level DNS routing created by <code>sew setup dns</code>.</td>
+      </tr>
+      <tr>
+          <td><code>sew refresh dns</code></td>
+          <td>Re-collect DNS records from the running cluster (picks up Gateways and Services created after <code>sew create</code>).</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="global-flags">Global flags</h2>
+<ul>
+<li><code>--config &lt;path&gt;</code> — Project-level config file to merge on top of the user-level base (<code>$SEW_HOME/sew.yaml</code>). Defaults to <code>./sew.yaml</code> when present.</li>
+<li><code>--registry &lt;url&gt;</code> — Registry URL (e.g. <code>file://./registry</code> or <code>https://…</code>). Overrides the value from the config file.</li>
+<li><code>--from &lt;path&gt;</code> — Context path to compose (e.g. <code>gravitee.io/apim/db-less</code>). Repeatable: use multiple <code>--from</code> flags to compose several contexts. Overrides the <code>from</code> list from the config file.</li>
+</ul>
+
+    </article>
+  </div>
+</div>
+
+  </main>
+  <footer class="footer">
+  <div class="footer-inner">
+    <p>
+      <a href="https://github.com/a-cordier/sew" target="_blank" rel="noopener">sew</a>
+      &mdash; Your local Kubernetes tailor shop
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

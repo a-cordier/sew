@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Gateway-Api on sew</title>
+    <link>http://localhost:1313/sew/tags/gateway-api/</link>
+    <description>Recent content in Gateway-Api on sew</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <atom:link href="http://localhost:1313/sew/tags/gateway-api/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>gravitee.io/apim/gateway-api</title>
+      <link>http://localhost:1313/sew/registry/gravitee.io/apim/gateway-api/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/sew/registry/gravitee.io/apim/gateway-api/</guid>
+      <description>&lt;h1 id=&#34;apim-gateway-api&#34;&gt;APIM Gateway API&lt;/h1&gt;&#xA;&lt;p&gt;Deploys the Gravitee Kubernetes Operator (GKO) configured as a Kubernetes&#xA;Gateway API controller. Sets up a &lt;code&gt;GatewayClass&lt;/code&gt; and its parameters so that&#xA;&lt;code&gt;Gateway&lt;/code&gt; and &lt;code&gt;HTTPRoute&lt;/code&gt; resources are reconciled by GKO.&lt;/p&gt;&#xA;&lt;h2 id=&#34;usage&#34;&gt;Usage&lt;/h2&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sew create gravitee.io/apim/gateway-api&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;details&#34;&gt;Details&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;Kind cluster:&lt;/strong&gt; &lt;code&gt;gio-gateway-api&lt;/code&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Ports:&lt;/strong&gt; 80 (HTTP), 443 (HTTPS), 9092&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Features:&lt;/strong&gt; load balancer, DNS&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Components:&lt;/strong&gt; &lt;code&gt;gko&lt;/code&gt; (Helm), &lt;code&gt;gateway-class-parameters&lt;/code&gt; (CRD), &lt;code&gt;gateway-class&lt;/code&gt; (GatewayClass)&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;This context enables the Kubernetes Gateway API flow: create &lt;code&gt;Gateway&lt;/code&gt; and&#xA;&lt;code&gt;HTTPRoute&lt;/code&gt; resources and let GKO provision Gravitee gateway instances&#xA;automatically.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

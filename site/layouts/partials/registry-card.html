@@ -1,0 +1,37 @@
+<a href="{{ .RelPermalink }}" class="registry-card"
+   data-search="{{ .Title | lower }} {{ .Description | lower }} {{ with .Params.tags }}{{ delimit . " " | lower }}{{ end }} {{ with .Params.components }}{{ delimit . " " | lower }}{{ end }}"
+   data-tags="{{ with .Params.tags }}{{ delimit . "," }}{{ end }}">
+  <div class="registry-card-body">
+    <h3 class="registry-card-title">{{ .Title }}</h3>
+    {{ with .Description }}
+    <p class="registry-card-desc">{{ . }}</p>
+    {{ end }}
+  </div>
+  <div class="registry-card-footer">
+    {{ with .Params.tags }}
+    <div class="registry-card-tags">
+      {{ range first 4 . }}
+      <span class="tag tag-sm">{{ . }}</span>
+      {{ end }}
+      {{ if gt (len .) 4 }}
+      <span class="tag tag-sm tag-more">+{{ sub (len .) 4 }}</span>
+      {{ end }}
+    </div>
+    {{ else }}
+      {{/* Fall back to showing component names when no tags */}}
+      {{ with $.Params.components }}
+      <div class="registry-card-tags">
+        {{ range first 4 . }}
+        <span class="tag tag-sm tag-component">{{ . }}</span>
+        {{ end }}
+        {{ if gt (len .) 4 }}
+        <span class="tag tag-sm tag-more">+{{ sub (len .) 4 }}</span>
+        {{ end }}
+      </div>
+      {{ end }}
+    {{ end }}
+    {{ with .Params.from }}
+    <span class="registry-card-deps">{{ len . }} {{ if eq (len .) 1 }}dep{{ else }}deps{{ end }}</span>
+    {{ end }}
+  </div>
+</a>

@@ -1,0 +1,146 @@
+{{ define "main" }}
+<div class="container">
+  <div class="registry-header">
+    <h1>{{ .Title }}</h1>
+    {{ .Content }}
+    <div class="registry-search">
+      <input type="text" id="registry-search" placeholder="Search components by name, tag, or description…" autocomplete="off">
+      <button class="registry-search-clear" id="registry-search-clear" type="button" hidden aria-label="Clear search">&times;</button>
+    </div>
+  </div>
+
+  {{/* Collect leaf component pages (those with components defined) */}}
+  {{ $pages := slice }}
+  {{ range where .Site.Pages "Type" "registry" }}
+    {{ if .Params.components }}
+      {{ $pages = $pages | append . }}
+    {{ end }}
+  {{ end }}
+
+  {{/* Collect all unique tags across component pages */}}
+  {{ $allTags := slice }}
+  {{ range $pages }}
+    {{ with .Params.tags }}
+      {{ range . }}
+        {{ $allTags = $allTags | append . }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+  {{ $allTags = $allTags | uniq | sort }}
+
+  {{ with $allTags }}
+  <div class="registry-filters" id="registry-filters">
+    <span class="registry-filters-label">Filter by tag</span>
+    <div class="registry-filter-tags">
+      {{ range . }}
+      <button class="tag tag-filter" data-tag="{{ . }}" type="button">{{ . }}</button>
+      {{ end }}
+    </div>
+  </div>
+  {{ end }}
+
+  <div class="registry-meta">
+    <span class="registry-count" id="registry-count">{{ len $pages }} component{{ if ne (len $pages) 1 }}s{{ end }}</span>
+    <button class="registry-clear-filters" id="registry-clear-filters" type="button" hidden>Clear filters</button>
+  </div>
+
+  <div class="registry-grid" id="registry-grid">
+    {{ range $pages }}
+      {{ partial "registry-card.html" . }}
+    {{ end }}
+  </div>
+
+  <div class="registry-empty" id="registry-empty" hidden>
+    <div class="registry-empty-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        <line x1="8" y1="11" x2="14" y2="11"/>
+      </svg>
+    </div>
+    <p class="registry-empty-title">No components found</p>
+    <p class="registry-empty-hint">Try a different search term or clear the active filters.</p>
+  </div>
+</div>
+
+<script>
+(function() {
+  var input = document.getElementById('registry-search');
+  var clearBtn = document.getElementById('registry-search-clear');
+  var clearFiltersBtn = document.getElementById('registry-clear-filters');
+  var grid = document.getElementById('registry-grid');
+  var empty = document.getElementById('registry-empty');
+  var countEl = document.getElementById('registry-count');
+  var cards = Array.prototype.slice.call(grid.querySelectorAll('.registry-card'));
+  var filterBtns = Array.prototype.slice.call(document.querySelectorAll('.tag-filter'));
+  var activeTags = {};
+  var totalCount = cards.length;
+
+  function updateCount(n) {
+    countEl.textContent = n + ' component' + (n !== 1 ? 's' : '');
+  }
+
+  function hasActiveFilters() {
+    return input.value.trim() !== '' || Object.keys(activeTags).length > 0;
+  }
+
+  function filter() {
+    var q = input.value.toLowerCase().trim();
+    var words = q ? q.split(/\s+/) : [];
+    var tagKeys = Object.keys(activeTags);
+    var visible = 0;
+
+    cards.forEach(function(card) {
+      var text = card.getAttribute('data-search') || '';
+      var cardTags = (card.getAttribute('data-tags') || '').split(',').filter(Boolean);
+
+      var matchText = !words.length || words.every(function(w) {
+        return text.indexOf(w) !== -1;
+      });
+
+      var matchTags = !tagKeys.length || tagKeys.some(function(t) {
+        return cardTags.indexOf(t) !== -1;
+      });
+
+      var show = matchText && matchTags;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    empty.hidden = visible > 0;
+    updateCount(visible);
+    clearBtn.hidden = !input.value;
+    clearFiltersBtn.hidden = !hasActiveFilters();
+  }
+
+  input.addEventListener('input', filter);
+
+  clearBtn.addEventListener('click', function() {
+    input.value = '';
+    input.focus();
+    filter();
+  });
+
+  clearFiltersBtn.addEventListener('click', function() {
+    input.value = '';
+    activeTags = {};
+    filterBtns.forEach(function(btn) { btn.classList.remove('active'); });
+    filter();
+  });
+
+  filterBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var tag = this.getAttribute('data-tag');
+      if (activeTags[tag]) {
+        delete activeTags[tag];
+        this.classList.remove('active');
+      } else {
+        activeTags[tag] = true;
+        this.classList.add('active');
+      }
+      filter();
+    });
+  });
+})();
+</script>
+{{ end }}

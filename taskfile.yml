@@ -20,3 +20,20 @@ tasks:
     desc: Check YAML formatting
     cmds:
       - yamlfmt -lint registry/ *.yaml
+
+  site:generate:
+    desc: Run the Go generator to produce Hugo content from registry
+    cmds:
+      - go run ./site/cmd/generate
+
+  site:serve:
+    desc: Generate content and start Hugo dev server
+    cmds:
+      - task: site:generate
+      - go tool hugo server --source site
+
+  site:build:
+    desc: Generate content and build the Hugo site for production
+    cmds:
+      - task: site:generate
+      - go tool hugo --minify --source site
