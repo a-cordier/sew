@@ -1,13 +1,13 @@
 ---
 description: "Gravitee APIM all-in-one with PostgreSQL backend and Elasticsearch"
-tags: [gravitee, apim, postgresql, all-in-one, api-management]
+tags: [gravitee, api-management]
 ---
 
 # APIM AIO PostgreSQL
 
 Deploys a full Gravitee API Management stack (Console, Portal, Gateway, and
 Management API) backed by PostgreSQL for persistence and Elasticsearch for
-analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.
+analytics. Management uses JDBC. Rate limiting is also stored in PostgreSQL.
 
 ## Usage
 
