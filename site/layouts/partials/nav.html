@@ -1,6 +1,6 @@
 <nav class="nav">
   <div class="nav-inner">
-    <a class="nav-logo" href="{{ "/" | relURL }}">
+    <a class="nav-logo" href="{{ .Site.Home.RelPermalink }}">
       <img src="{{ "logo.svg" | relURL }}" alt="{{ .Site.Title }}" width="56" height="20">
     </a>
     <button class="nav-hamburger" aria-label="Toggle menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
