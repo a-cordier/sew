@@ -606,6 +606,176 @@ func TestMergeComponents_EmptyConfigDirSkipsResolution(t *testing.T) {
 	}
 }
 
+func TestMergeComponents_PatchOverUserOverride(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name:      "apim",
+				Namespace: "gravitee",
+				Helm: &config.HelmSpec{
+					Chart:   "graviteeio/apim",
+					Version: "4.10.0",
+					Values: map[string]interface{}{
+						"gateway": map[string]interface{}{
+							"image": map[string]interface{}{"tag": "latest"},
+						},
+					},
+				},
+			},
+			{
+				Name:      "mongodb",
+				Namespace: "gravitee",
+				Helm: &config.HelmSpec{
+					Chart:   "bitnami/mongodb",
+					Version: "7.0.0",
+				},
+			},
+		},
+	}
+
+	userOverrides := []config.Component{
+		{
+			Name: "apim",
+			Helm: &config.HelmSpec{
+				Values: map[string]interface{}{
+					"api": map[string]interface{}{"replicas": 2},
+				},
+			},
+		},
+	}
+	MergeComponents(resolved, userOverrides, "")
+
+	patch := []config.Component{
+		{
+			Name: "apim",
+			Helm: &config.HelmSpec{
+				Values: map[string]interface{}{
+					"gateway": map[string]interface{}{
+						"image": map[string]interface{}{"tag": "4.11.0"},
+					},
+				},
+			},
+		},
+	}
+	MergeComponents(resolved, patch, "")
+
+	if len(resolved.Components) != 2 {
+		t.Fatalf("expected 2 components, got %d", len(resolved.Components))
+	}
+	comp := resolved.Components[0]
+	if comp.Helm.Chart != "graviteeio/apim" {
+		t.Fatalf("expected chart preserved, got %q", comp.Helm.Chart)
+	}
+	if comp.Helm.Version != "4.10.0" {
+		t.Fatalf("expected version preserved from user override, got %q", comp.Helm.Version)
+	}
+	gw, ok := comp.Helm.Values["gateway"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected gateway values, got %T", comp.Helm.Values["gateway"])
+	}
+	img, ok := gw["image"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected gateway.image values, got %T", gw["image"])
+	}
+	if img["tag"] != "4.11.0" {
+		t.Fatalf("expected patch tag to win, got %v", img["tag"])
+	}
+	if comp.Helm.Values["api"] == nil {
+		t.Fatal("expected user override 'api' key preserved after patch")
+	}
+}
+
+func TestMergeComponents_PatchOnlyAffectsNamedComponents(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name: "apim",
+				Helm: &config.HelmSpec{
+					Chart:   "graviteeio/apim",
+					Version: "4.10.0",
+					Values:  map[string]interface{}{"key": "original"},
+				},
+			},
+			{
+				Name: "mongodb",
+				Helm: &config.HelmSpec{
+					Chart:   "bitnami/mongodb",
+					Version: "7.0.0",
+					Values:  map[string]interface{}{"key": "original"},
+				},
+			},
+		},
+	}
+
+	patch := []config.Component{
+		{
+			Name: "apim",
+			Helm: &config.HelmSpec{
+				Values: map[string]interface{}{"key": "patched"},
+			},
+		},
+	}
+	MergeComponents(resolved, patch, "")
+
+	apim := resolved.Components[0]
+	if apim.Helm.Values["key"] != "patched" {
+		t.Fatalf("expected apim patched, got %v", apim.Helm.Values["key"])
+	}
+
+	mongo := resolved.Components[1]
+	if mongo.Helm.Values["key"] != "original" {
+		t.Fatalf("expected mongodb untouched, got %v", mongo.Helm.Values["key"])
+	}
+}
+
+func TestMergeComponents_PatchWithValueFiles(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name: "apim",
+				Helm: &config.HelmSpec{
+					Chart:      "graviteeio/apim",
+					ValueFiles: []string{"/registry/base-values.yaml"},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, []config.Component{
+		{
+			Name: "apim",
+			Helm: &config.HelmSpec{
+				ValueFiles: []string{"user-values.yaml"},
+			},
+		},
+	}, "/user")
+
+	MergeComponents(resolved, []config.Component{
+		{
+			Name: "apim",
+			Helm: &config.HelmSpec{
+				ValueFiles: []string{"patch-values.yaml"},
+			},
+		},
+	}, "/patch")
+
+	comp := resolved.Components[0]
+	if len(comp.Helm.ValueFiles) != 3 {
+		t.Fatalf("expected 3 value files, got %d: %v", len(comp.Helm.ValueFiles), comp.Helm.ValueFiles)
+	}
+	if comp.Helm.ValueFiles[0] != "/registry/base-values.yaml" {
+		t.Fatalf("expected base value file first, got %q", comp.Helm.ValueFiles[0])
+	}
+	expectedUser := filepath.Join("/user", "user-values.yaml")
+	if comp.Helm.ValueFiles[1] != expectedUser {
+		t.Fatalf("expected user value file second, got %q", comp.Helm.ValueFiles[1])
+	}
+	expectedPatch := filepath.Join("/patch", "patch-values.yaml")
+	if comp.Helm.ValueFiles[2] != expectedPatch {
+		t.Fatalf("expected patch value file third, got %q", comp.Helm.ValueFiles[2])
+	}
+}
+
 func TestMergeRepos_NoOverlap(t *testing.T) {
 	ctx := []config.Repo{
 		{Name: "repo-a", URL: "https://a.example.com"},

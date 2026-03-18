@@ -33,6 +33,7 @@ type: docs
 | Command | Description |
 |--------|-------------|
 | `sew create` | Create the Kind cluster (if missing) and install the context: add Helm repos, then install each component (Helm upgrade --install). If no registry/context is configured, only creates the cluster. |
+| `sew patch` | Patch a running cluster by merging overrides from a file and upgrading only the affected components. See {{< ref "patch" >}}. |
 | `sew delete` | Delete a cluster and clean up associated resources. Auto-selects the target from state files, or use `--name` to specify. See {{< ref "delete" >}}. |
 | `sew setup dns` | One-time OS-level DNS routing so `*.sew.local` queries reach the local DNS server. Requires sudo. |
 | `sew teardown dns` | Remove the OS-level DNS routing created by `sew setup dns`. |

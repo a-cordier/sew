@@ -56,6 +56,61 @@ func TestSaveAndLoad(t *testing.T) {
 	}
 }
 
+func TestSaveAndLoadWithContextInfo(t *testing.T) {
+	dir := t.TempDir()
+
+	cs := &ClusterState{
+		Name:      "gio-apim",
+		CreatedAt: time.Date(2026, 3, 18, 14, 0, 0, 0, time.UTC),
+		Registry:  "file://./registry",
+		From:      []string{"gravitee.io/apim/aio/postgres"},
+		Features: config.FeaturesConfig{
+			DNS: &config.DNSConfig{Enabled: true, Domain: "sew.local"},
+		},
+	}
+
+	if err := Save(dir, cs); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	loaded, err := Load(dir, "gio-apim")
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+
+	if loaded.Registry != cs.Registry {
+		t.Errorf("Registry = %q, want %q", loaded.Registry, cs.Registry)
+	}
+	if len(loaded.From) != 1 || loaded.From[0] != cs.From[0] {
+		t.Errorf("From = %v, want %v", loaded.From, cs.From)
+	}
+}
+
+func TestSaveAndLoadWithoutContextInfo(t *testing.T) {
+	dir := t.TempDir()
+
+	cs := &ClusterState{
+		Name:      "plain",
+		CreatedAt: time.Now(),
+	}
+
+	if err := Save(dir, cs); err != nil {
+		t.Fatalf("Save: %v", err)
+	}
+
+	loaded, err := Load(dir, "plain")
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+
+	if loaded.Registry != "" {
+		t.Errorf("Registry should be empty, got %q", loaded.Registry)
+	}
+	if len(loaded.From) != 0 {
+		t.Errorf("From should be empty, got %v", loaded.From)
+	}
+}
+
 func TestLoadNotFound(t *testing.T) {
 	dir := t.TempDir()
 	_, err := Load(dir, "nonexistent")

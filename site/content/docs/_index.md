@@ -11,3 +11,5 @@ Learn how to use **sew** to spin up local Kubernetes clusters with pre-configure
 - [Context Format]({{< ref "context-format" >}}) — Writing contexts, composition, abstract contexts, and default variant resolution
 - [Images]({{< ref "images" >}}) — Mirror proxies and image preloading
 - [DNS]({{< ref "dns" >}}) — Local DNS server for in-cluster hostnames
+- [Patch]({{< ref "patch" >}}) — Upgrade components on a running cluster
+- [Delete]({{< ref "delete" >}}) — Tear down a cluster and clean up resources

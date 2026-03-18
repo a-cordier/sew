@@ -16,6 +16,8 @@ import (
 type ClusterState struct {
 	Name      string               `yaml:"name"`
 	CreatedAt time.Time            `yaml:"createdAt"`
+	Registry  string               `yaml:"registry,omitempty"`
+	From      []string             `yaml:"from,omitempty"`
 	Features  config.FeaturesConfig `yaml:"features,omitempty"`
 	Images    config.ImagesConfig   `yaml:"images,omitempty"`
 	Notes     DeleteNotes          `yaml:"notes,omitempty"`

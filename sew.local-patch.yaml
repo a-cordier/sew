@@ -1,0 +1,20 @@
+components:
+  - name: apim
+    helm:
+      values:
+        gateway:
+          image:
+            repository: graviteeio/apim-gateway
+            tag: 4.11.0-alpha
+        api:
+          image:
+            repository: graviteeio/apim-management-api
+            tag: 4.11.0-alpha
+        ui:
+          image:
+            repository: graviteeio/apim-management-ui
+            tag: 4.11.0-alpha
+        portal:
+          image:
+            repository: graviteeio/apim-portal-ui
+            tag: 4.11.0-alpha
