@@ -146,9 +146,63 @@ function toggleTheme() {
 </span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
 </span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">chart</span>: graviteeio/apim
 </span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">version</span>: <span style="color:#f1fa8c">&#34;4.11.0&#34;</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">values</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">valueFiles</span>:
 </span></span><span style="display:flex;"><span>        - values-apim.yaml
-</span></span></code></pre></div><p>File paths in <code>values</code> are relative to the context directory. <code>type</code> defaults to <code>helm</code> if omitted.</p>
+</span></span></code></pre></div><p>File paths in <code>valueFiles</code> are relative to the context directory. <code>type</code> defaults to <code>helm</code> if omitted.</p>
+<h2 id="kubernetes-manifest-components">Kubernetes manifest components</h2>
+<p>Components can also deploy plain Kubernetes resources (no Helm chart required) by setting <code>type: k8s</code>. The <code>k8s</code> block supports two fields:</p>
+<ul>
+<li><strong><code>manifests</code></strong> — a list of inline Kubernetes resource objects</li>
+<li><strong><code>manifestFiles</code></strong> — a list of paths to YAML files containing one or more resources (multi-document YAML separated by <code>---</code> is supported)</li>
+</ul>
+<h3 id="inline-manifests">Inline manifests</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: mongodb
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">type</span>: k8s
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: default
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">k8s</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">manifests</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#ff79c6">apiVersion</span>: apps/v1
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">kind</span>: Deployment
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">metadata</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">name</span>: mongodb
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">spec</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">replicas</span>: <span style="color:#bd93f9">1</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">selector</span>:
+</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">matchLabels</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">app</span>: mongodb
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">template</span>:
+</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">metadata</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">labels</span>:
+</span></span><span style="display:flex;"><span>                  <span style="color:#ff79c6">app</span>: mongodb
+</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">spec</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">containers</span>:
+</span></span><span style="display:flex;"><span>                  - <span style="color:#ff79c6">name</span>: mongodb
+</span></span><span style="display:flex;"><span>                    <span style="color:#ff79c6">image</span>: mongo:7
+</span></span><span style="display:flex;"><span>                    <span style="color:#ff79c6">ports</span>:
+</span></span><span style="display:flex;"><span>                      - <span style="color:#ff79c6">containerPort</span>: <span style="color:#bd93f9">27017</span>
+</span></span><span style="display:flex;"><span>        - <span style="color:#ff79c6">apiVersion</span>: v1
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">kind</span>: Service
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">metadata</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">name</span>: mongodb
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">spec</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">type</span>: ClusterIP
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">ports</span>:
+</span></span><span style="display:flex;"><span>              - <span style="color:#ff79c6">port</span>: <span style="color:#bd93f9">27017</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">targetPort</span>: <span style="color:#bd93f9">27017</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">selector</span>:
+</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">app</span>: mongodb
+</span></span></code></pre></div><h3 id="external-manifest-files">External manifest files</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: routes
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">type</span>: k8s
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">k8s</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">manifestFiles</span>:
+</span></span><span style="display:flex;"><span>        - gateway.yaml
+</span></span><span style="display:flex;"><span>        - httproutes.yaml
+</span></span></code></pre></div><p>File paths in <code>manifestFiles</code> are relative to the context directory. Both fields can be used together in the same component — file-based resources are applied first, then inline manifests.</p>
+<p>Kubernetes manifest components participate in the same dependency graph as Helm components: they can declare <code>requires</code> and be required by other components.</p>
 <h2 id="context-composition">Context composition</h2>
 <p>A context can compose other contexts by declaring <code>from</code> in its <code>sew.yaml</code>. The listed contexts are resolved left-to-right, merged into an accumulator, then the local overrides are applied on top using the same merge rules as user-level overrides.</p>
 <p>Both workspace configs (users) and registry contexts (maintainers) use the same <code>from</code> field with identical semantics: <em>&ldquo;this stack is built from these contexts, plus my local overrides.&rdquo;</em></p>
@@ -287,7 +341,7 @@ function toggleTheme() {
 <p>When contexts are composed, each top-level field is merged as follows:</p>
 <ul>
 <li><strong><code>kind</code></strong> — Scalar fields (<code>name</code>, <code>apiVersion</code>, <code>kind</code>): child wins if set. <code>nodes</code>: child replaces the entire list; <code>extraPortMappings</code> are merged as a <strong>union</strong> keyed by <code>(containerPort, protocol)</code> — parent-only ports are preserved, child-only ports are added, and when both sides define the same key the child wins. <code>containerdConfigPatches</code>: child replaces entirely.</li>
-<li><strong><code>components</code></strong> — Matched by name using the same rules as user-level overrides (see <a href="http://localhost:1313/sew/docs/configuration/#merge-rules">Merge rules</a>): <code>helm.chart</code> and <code>helm.version</code> child wins, <code>helm.valueFiles</code> appended, <code>helm.values</code> shallow-merged, <code>requires</code> appended and deduplicated. Unmatched components are appended.</li>
+<li><strong><code>components</code></strong> — Matched by name using the same rules as user-level overrides (see <a href="http://localhost:1313/sew/docs/configuration/#merge-rules">Merge rules</a>): <code>helm.chart</code> and <code>helm.version</code> child wins, <code>helm.valueFiles</code> appended, <code>helm.values</code> shallow-merged, <code>k8s.manifestFiles</code> appended, <code>k8s.manifests</code> appended, <code>requires</code> appended and deduplicated. Unmatched components are appended.</li>
 <li><strong><code>repos</code></strong> — Deduplicated by name; child entry wins on conflict.</li>
 <li><strong><code>features</code></strong> — Each feature block (<code>lb</code>, <code>gateway</code>, <code>dns</code>) is replaced as a whole if the child defines it; otherwise inherited from parent.</li>
 <li><strong><code>images</code></strong> — <code>preload</code>: when both sides define it, <code>refs</code> are deduplicated (union); when only one side defines it, that side&rsquo;s config is used as-is. <code>mirrors</code> from the child wins when set; otherwise inherited from parent.</li>
@@ -296,17 +350,22 @@ function toggleTheme() {
 <p>A context path usually includes the variant (<code>org/product/variant</code>), but you can also point to the product level and let sew pick the default variant automatically.</p>
 <p>When the resolved path has no <code>sew.yaml</code>, sew looks for a <strong><code>.default</code></strong> file in the same directory. This plain-text dotfile contains a single line — the name of the variant to use. sew then appends that variant to the path and resolves again.</p>
 <pre tabindex="0"><code>registry/gravitee.io/apim/
-├── .default          # contains &#34;db-less&#34;
-├── db-less/
-│   ├── sew.yaml
-│   ├── values-apim.yaml
-│   └── values-gko.yaml
-└── standard/         # another variant
-    ├── sew.yaml
-    └── ...
-</code></pre><p>With the tree above, setting <code>from: [gravitee.io/apim]</code> in your config is equivalent to <code>from: [gravitee.io/apim/db-less]</code> — sew reads <code>.default</code>, finds <code>db-less</code>, and resolves <code>gravitee.io/apim/db-less</code>.</p>
+├── .default          # contains &#34;aio&#34;
+├── aio/
+│   ├── .default      # contains &#34;mongodb&#34;
+│   ├── base/
+│   │   └── sew.yaml  # abstract: true
+│   ├── mongodb/
+│   │   └── sew.yaml
+│   └── postgres/
+│       └── sew.yaml
+├── dbless/
+│   └── sew.yaml
+└── gateway-api/
+    └── sew.yaml
+</code></pre><p>With the tree above, setting <code>from: [gravitee.io/apim]</code> in your config is equivalent to <code>from: [gravitee.io/apim/aio/mongodb]</code> — sew reads <code>.default</code> at each level (<code>apim</code> → <code>aio</code> → <code>mongodb</code>) and resolves the full path.</p>
 <p>To create a default for your own product, add a <code>.default</code> file next to the variant directories:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">echo</span> <span style="color:#f1fa8c">&#34;db-less&#34;</span> &gt; registry/gravitee.io/apim/.default
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#8be9fd;font-style:italic">echo</span> <span style="color:#f1fa8c">&#34;aio&#34;</span> &gt; registry/gravitee.io/apim/.default
 </span></span></code></pre></div><p>If neither <code>sew.yaml</code> nor <code>.default</code> is found at the given path, sew returns an error.</p>
 
     </article>

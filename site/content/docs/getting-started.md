@@ -4,7 +4,7 @@ weight: 1
 type: docs
 ---
 
-**sew** spins up local Kubernetes clusters and deploys ready-to-use applications from a **registry**. You point it at one or more contexts (e.g. `gravitee.io/apim/db-less`), and it creates a Kind cluster and installs the components defined there (Helm charts, and in the future manifests or Kustomize).
+**sew** spins up local Kubernetes clusters and deploys ready-to-use applications from a **registry**. You point it at one or more contexts (e.g. `gravitee.io/apim/db-less`), and it creates a Kind cluster and installs the components defined there (Helm charts and Kubernetes manifests).
 
 ## Quick start
 
@@ -13,19 +13,19 @@ type: docs
    - `from`: list of context paths, e.g. `[gravitee.io/apim/db-less]`.
    - `kind`: Kind cluster spec (name, nodes, port mappings).
 
-2. **Run** — From the `sew` directory (or with `--config` pointing to this config):
+2. **Install** — Install the `sew` binary:
    ```bash
-   go run . create
-   ```
-   Or build and run:
-   ```bash
-   go build -o sew .
-   ./sew create
+   go install github.com/a-cordier/sew@latest
    ```
 
-3. **Tear down**:
+3. **Run** — Create the cluster (use `--config` to point to a custom config):
    ```bash
-   ./sew delete
+   sew create
+   ```
+
+4. **Tear down**:
+   ```bash
+   sew delete
    ```
 
 ## Commands
@@ -36,6 +36,7 @@ type: docs
 | `sew delete` | Delete a cluster and clean up associated resources. Auto-selects the target from state files, or use `--name` to specify. See {{< ref "delete" >}}. |
 | `sew setup dns` | One-time OS-level DNS routing so `*.sew.local` queries reach the local DNS server. Requires sudo. |
 | `sew teardown dns` | Remove the OS-level DNS routing created by `sew setup dns`. |
+| `sew status` | Show the status of the current sew environment: cluster info, enabled features, load balancers, and DNS records. |
 | `sew refresh dns` | Re-collect DNS records from the running cluster (picks up Gateways and Services created after `sew create`). |
 
 ## Global flags

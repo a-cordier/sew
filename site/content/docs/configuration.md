@@ -76,17 +76,47 @@ Beyond overriding fields on components defined by the context, you can declare e
 
 ### Adding a component
 
-List the component under `components`. If its `name` does not match any component from the context, sew appends it as a new component and installs it alongside the context ones:
+List the component under `components`. If its `name` does not match any component from the context, sew appends it as a new component and installs it alongside the context ones.
+
+A component can be either a Helm chart (the default) or plain Kubernetes manifests (`type: k8s`):
 
 ```yaml
 components:
+  # Helm component (default type)
   - name: redis
     namespace: gravitee
     helm:
       chart: bitnami/redis
       values:
         architecture: standalone
+
+  # k8s manifest component
+  - name: mongodb
+    type: k8s
+    namespace: gravitee
+    k8s:
+      manifestFiles:
+        - manifests/mongodb.yaml
+      manifests:
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: mongodb
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 27017
+                targetPort: 27017
+            selector:
+              app: mongodb
 ```
+
+A `k8s` component supports two ways of providing manifests:
+
+- **`manifestFiles`** — a list of paths to YAML files (resolved relative to the config file directory, may contain multiple documents separated by `---`).
+- **`manifests`** — a list of inline Kubernetes resource definitions.
+
+Both can be used together; manifest files are applied first, then inline manifests.
 
 ### Adding Helm repos
 
@@ -154,5 +184,7 @@ When a local component matches a context component by name, the following merge 
 | `helm.version` | Local wins if non-empty |
 | `helm.valueFiles` | Local files are appended (higher precedence in Helm) |
 | `helm.values` | Local values are merged on top of context values |
+| `k8s.manifestFiles` | Local files are appended |
+| `k8s.manifests` | Local manifests are appended |
 
 When there is no name match, the component is added to the deployment as-is.

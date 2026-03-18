@@ -191,15 +191,43 @@ function toggleTheme() {
 <h2 id="local-components">Local components</h2>
 <p>Beyond overriding fields on components defined by the context, you can declare entirely new components and Helm repos in your <code>sew.yaml</code>. This is useful when you need supporting services (databases, caches, message brokers, …) that are not part of the upstream context.</p>
 <h3 id="adding-a-component">Adding a component</h3>
-<p>List the component under <code>components</code>. If its <code>name</code> does not match any component from the context, sew appends it as a new component and installs it alongside the context ones:</p>
+<p>List the component under <code>components</code>. If its <code>name</code> does not match any component from the context, sew appends it as a new component and installs it alongside the context ones.</p>
+<p>A component can be either a Helm chart (the default) or plain Kubernetes manifests (<code>type: k8s</code>):</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4"># Helm component (default type)</span>
 </span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: redis
 </span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: gravitee
 </span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
 </span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">chart</span>: bitnami/redis
 </span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">values</span>:
 </span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">architecture</span>: standalone
-</span></span></code></pre></div><h3 id="adding-helm-repos">Adding Helm repos</h3>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#6272a4"># k8s manifest component</span>
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: mongodb
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">type</span>: k8s
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: gravitee
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">k8s</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">manifestFiles</span>:
+</span></span><span style="display:flex;"><span>        - manifests/mongodb.yaml
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">manifests</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#ff79c6">apiVersion</span>: v1
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">kind</span>: Service
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">metadata</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">name</span>: mongodb
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">spec</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">type</span>: ClusterIP
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">ports</span>:
+</span></span><span style="display:flex;"><span>              - <span style="color:#ff79c6">port</span>: <span style="color:#bd93f9">27017</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">targetPort</span>: <span style="color:#bd93f9">27017</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">selector</span>:
+</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">app</span>: mongodb
+</span></span></code></pre></div><p>A <code>k8s</code> component supports two ways of providing manifests:</p>
+<ul>
+<li><strong><code>manifestFiles</code></strong> — a list of paths to YAML files (resolved relative to the config file directory, may contain multiple documents separated by <code>---</code>).</li>
+<li><strong><code>manifests</code></strong> — a list of inline Kubernetes resource definitions.</li>
+</ul>
+<p>Both can be used together; manifest files are applied first, then inline manifests.</p>
+<h3 id="adding-helm-repos">Adding Helm repos</h3>
 <p>If the new component&rsquo;s chart comes from a repo that the context does not declare, add it under <code>repos</code>:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">repos</span>:
 </span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: bitnami
@@ -272,6 +300,14 @@ function toggleTheme() {
       <tr>
           <td><code>helm.values</code></td>
           <td>Local values are merged on top of context values</td>
+      </tr>
+      <tr>
+          <td><code>k8s.manifestFiles</code></td>
+          <td>Local files are appended</td>
+      </tr>
+      <tr>
+          <td><code>k8s.manifests</code></td>
+          <td>Local manifests are appended</td>
       </tr>
   </tbody>
 </table>

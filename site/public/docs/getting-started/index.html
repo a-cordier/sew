@@ -134,7 +134,7 @@ function toggleTheme() {
   <div class="docs-content">
     <h1>Getting Started</h1>
     <article class="content">
-      <p><strong>sew</strong> spins up local Kubernetes clusters and deploys ready-to-use applications from a <strong>registry</strong>. You point it at one or more contexts (e.g. <code>gravitee.io/apim/db-less</code>), and it creates a Kind cluster and installs the components defined there (Helm charts, and in the future manifests or Kustomize).</p>
+      <p><strong>sew</strong> spins up local Kubernetes clusters and deploys ready-to-use applications from a <strong>registry</strong>. You point it at one or more contexts (e.g. <code>gravitee.io/apim/db-less</code>), and it creates a Kind cluster and installs the components defined there (Helm charts and Kubernetes manifests).</p>
 <h2 id="quick-start">Quick start</h2>
 <ol>
 <li>
@@ -146,15 +146,16 @@ function toggleTheme() {
 </ul>
 </li>
 <li>
-<p><strong>Run</strong> — From the <code>sew</code> directory (or with <code>--config</code> pointing to this config):</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go run . create
-</span></span></code></pre></div><p>Or build and run:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go build -o sew .
-</span></span><span style="display:flex;"><span>./sew create
+<p><strong>Install</strong> — Install the <code>sew</code> binary:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go install github.com/a-cordier/sew@latest
+</span></span></code></pre></div></li>
+<li>
+<p><strong>Run</strong> — Create the cluster (use <code>--config</code> to point to a custom config):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew create
 </span></span></code></pre></div></li>
 <li>
 <p><strong>Tear down</strong>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>./sew delete
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew delete
 </span></span></code></pre></div></li>
 </ol>
 <h2 id="commands">Commands</h2>
@@ -181,6 +182,10 @@ function toggleTheme() {
       <tr>
           <td><code>sew teardown dns</code></td>
           <td>Remove the OS-level DNS routing created by <code>sew setup dns</code>.</td>
+      </tr>
+      <tr>
+          <td><code>sew status</code></td>
+          <td>Show the status of the current sew environment: cluster info, enabled features, load balancers, and DNS records.</td>
       </tr>
       <tr>
           <td><code>sew refresh dns</code></td>

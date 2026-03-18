@@ -18,11 +18,76 @@ components:
     helm:
       chart: graviteeio/apim
       version: "4.11.0"
-      values:
+      valueFiles:
         - values-apim.yaml
 ```
 
-File paths in `values` are relative to the context directory. `type` defaults to `helm` if omitted.
+File paths in `valueFiles` are relative to the context directory. `type` defaults to `helm` if omitted.
+
+## Kubernetes manifest components
+
+Components can also deploy plain Kubernetes resources (no Helm chart required) by setting `type: k8s`. The `k8s` block supports two fields:
+
+- **`manifests`** — a list of inline Kubernetes resource objects
+- **`manifestFiles`** — a list of paths to YAML files containing one or more resources (multi-document YAML separated by `---` is supported)
+
+### Inline manifests
+
+```yaml
+components:
+  - name: mongodb
+    type: k8s
+    namespace: default
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: mongodb
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: mongodb
+            template:
+              metadata:
+                labels:
+                  app: mongodb
+              spec:
+                containers:
+                  - name: mongodb
+                    image: mongo:7
+                    ports:
+                      - containerPort: 27017
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: mongodb
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 27017
+                targetPort: 27017
+            selector:
+              app: mongodb
+```
+
+### External manifest files
+
+```yaml
+components:
+  - name: routes
+    type: k8s
+    namespace: my-app
+    k8s:
+      manifestFiles:
+        - gateway.yaml
+        - httproutes.yaml
+```
+
+File paths in `manifestFiles` are relative to the context directory. Both fields can be used together in the same component — file-based resources are applied first, then inline manifests.
+
+Kubernetes manifest components participate in the same dependency graph as Helm components: they can declare `requires` and be required by other components.
 
 ## Context composition
 
@@ -205,7 +270,7 @@ Composition chains work to arbitrary depth (grandparent → parent → child). C
 When contexts are composed, each top-level field is merged as follows:
 
 - **`kind`** — Scalar fields (`name`, `apiVersion`, `kind`): child wins if set. `nodes`: child replaces the entire list; `extraPortMappings` are merged as a **union** keyed by `(containerPort, protocol)` — parent-only ports are preserved, child-only ports are added, and when both sides define the same key the child wins. `containerdConfigPatches`: child replaces entirely.
-- **`components`** — Matched by name using the same rules as user-level overrides (see [Merge rules]({{< ref "configuration#merge-rules" >}})): `helm.chart` and `helm.version` child wins, `helm.valueFiles` appended, `helm.values` shallow-merged, `requires` appended and deduplicated. Unmatched components are appended.
+- **`components`** — Matched by name using the same rules as user-level overrides (see [Merge rules]({{< ref "configuration#merge-rules" >}})): `helm.chart` and `helm.version` child wins, `helm.valueFiles` appended, `helm.values` shallow-merged, `k8s.manifestFiles` appended, `k8s.manifests` appended, `requires` appended and deduplicated. Unmatched components are appended.
 - **`repos`** — Deduplicated by name; child entry wins on conflict.
 - **`features`** — Each feature block (`lb`, `gateway`, `dns`) is replaced as a whole if the child defines it; otherwise inherited from parent.
 - **`images`** — `preload`: when both sides define it, `refs` are deduplicated (union); when only one side defines it, that side's config is used as-is. `mirrors` from the child wins when set; otherwise inherited from parent.
@@ -218,22 +283,27 @@ When the resolved path has no `sew.yaml`, sew looks for a **`.default`** file in
 
 ```
 registry/gravitee.io/apim/
-├── .default          # contains "db-less"
-├── db-less/
-│   ├── sew.yaml
-│   ├── values-apim.yaml
-│   └── values-gko.yaml
-└── standard/         # another variant
-    ├── sew.yaml
-    └── ...
+├── .default          # contains "aio"
+├── aio/
+│   ├── .default      # contains "mongodb"
+│   ├── base/
+│   │   └── sew.yaml  # abstract: true
+│   ├── mongodb/
+│   │   └── sew.yaml
+│   └── postgres/
+│       └── sew.yaml
+├── dbless/
+│   └── sew.yaml
+└── gateway-api/
+    └── sew.yaml
 ```
 
-With the tree above, setting `from: [gravitee.io/apim]` in your config is equivalent to `from: [gravitee.io/apim/db-less]` — sew reads `.default`, finds `db-less`, and resolves `gravitee.io/apim/db-less`.
+With the tree above, setting `from: [gravitee.io/apim]` in your config is equivalent to `from: [gravitee.io/apim/aio/mongodb]` — sew reads `.default` at each level (`apim` → `aio` → `mongodb`) and resolves the full path.
 
 To create a default for your own product, add a `.default` file next to the variant directories:
 
 ```bash
-echo "db-less" > registry/gravitee.io/apim/.default
+echo "aio" > registry/gravitee.io/apim/.default
 ```
 
 If neither `sew.yaml` nor `.default` is found at the given path, sew returns an error.
