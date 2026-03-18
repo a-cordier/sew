@@ -32,6 +32,7 @@ func MergeComponents(resolved *config.ResolvedContext, components []config.Compo
 		if !ok {
 			resolveValueFilePaths(&patch, configDir)
 			resolveManifestFilePaths(&patch, configDir)
+			resolveLocalResourcePaths(&patch, configDir)
 			resolved.Components = append(resolved.Components, patch)
 			continue
 		}
@@ -81,8 +82,11 @@ func MergeComponents(resolved *config.ResolvedContext, components []config.Compo
 				comp.K8s = &config.K8sSpec{}
 			}
 			resolveManifestFilePaths(&patch, configDir)
+			resolveLocalResourcePaths(&patch, configDir)
 			comp.K8s.ManifestFiles = append(comp.K8s.ManifestFiles, patch.K8s.ManifestFiles...)
 			comp.K8s.Manifests = append(comp.K8s.Manifests, patch.K8s.Manifests...)
+			comp.K8s.Secrets = append(comp.K8s.Secrets, patch.K8s.Secrets...)
+			comp.K8s.ConfigMaps = append(comp.K8s.ConfigMaps, patch.K8s.ConfigMaps...)
 		}
 	}
 }
@@ -114,6 +118,29 @@ func resolveManifestFilePaths(c *config.Component, configDir string) {
 	}
 }
 
+// resolveLocalResourcePaths resolves relative fromFile paths in Secrets and
+// ConfigMaps to absolute paths based on configDir. Both the shorthand
+// top-level FromFile and per-entry FromFile fields are resolved.
+func resolveLocalResourcePaths(c *config.Component, configDir string) {
+	if c.K8s == nil || configDir == "" {
+		return
+	}
+	resolveResources := func(resources []config.LocalResource) {
+		for i := range resources {
+			if resources[i].FromFile != "" && !filepath.IsAbs(resources[i].FromFile) {
+				resources[i].FromFile = filepath.Join(configDir, resources[i].FromFile)
+			}
+			for j := range resources[i].Entries {
+				if resources[i].Entries[j].FromFile != "" && !filepath.IsAbs(resources[i].Entries[j].FromFile) {
+					resources[i].Entries[j].FromFile = filepath.Join(configDir, resources[i].Entries[j].FromFile)
+				}
+			}
+		}
+	}
+	resolveResources(c.K8s.Secrets)
+	resolveResources(c.K8s.ConfigMaps)
+}
+
 // absolutizeComponentPaths makes all relative component file paths in rc
 // absolute using rc.Dir. This is necessary before merging multiple parents
 // whose files live in different directories.
@@ -121,6 +148,7 @@ func absolutizeComponentPaths(rc *config.ResolvedContext) {
 	for i := range rc.Components {
 		resolveValueFilePaths(&rc.Components[i], rc.Dir)
 		resolveManifestFilePaths(&rc.Components[i], rc.Dir)
+		resolveLocalResourcePaths(&rc.Components[i], rc.Dir)
 	}
 }
 

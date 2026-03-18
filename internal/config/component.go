@@ -19,9 +19,24 @@ type HelmSpec struct {
 	Values     map[string]interface{} `yaml:"values,omitempty"`
 }
 
+type ResourceEntry struct {
+	Key      string `yaml:"key,omitempty"`
+	FromFile string `yaml:"fromFile,omitempty"`
+	FromEnv  string `yaml:"fromEnv,omitempty"`
+}
+
+type LocalResource struct {
+	Name      string          `yaml:"name"`
+	OnMissing string          `yaml:"onMissing,omitempty"` // "fail" (default) or "ignore"
+	FromFile  string          `yaml:"fromFile,omitempty"`  // shorthand for single-file
+	Entries   []ResourceEntry `yaml:"entries,omitempty"`
+}
+
 type K8sSpec struct {
 	ManifestFiles []string                 `yaml:"manifestFiles,omitempty"`
 	Manifests     []map[string]interface{} `yaml:"manifests,omitempty"`
+	Secrets       []LocalResource          `yaml:"secrets,omitempty"`
+	ConfigMaps    []LocalResource          `yaml:"configMaps,omitempty"`
 }
 
 type Conditions struct {

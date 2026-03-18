@@ -382,6 +382,230 @@ func TestMergeComponents_ConditionsNotOverriddenWhenUnset(t *testing.T) {
 	}
 }
 
+func TestMergeComponents_SecretsMerge(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name: "app",
+				K8s: &config.K8sSpec{
+					Secrets: []config.LocalResource{
+						{Name: "base-secret", FromFile: "/abs/secret.txt"},
+					},
+				},
+			},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "app",
+			K8s: &config.K8sSpec{
+				Secrets: []config.LocalResource{
+					{Name: "extra-secret", FromFile: "local-secret.txt"},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "/config/dir")
+
+	comp := resolved.Components[0]
+	if len(comp.K8s.Secrets) != 2 {
+		t.Fatalf("expected 2 secrets, got %d", len(comp.K8s.Secrets))
+	}
+	if comp.K8s.Secrets[0].FromFile != "/abs/secret.txt" {
+		t.Fatalf("expected base secret preserved, got %q", comp.K8s.Secrets[0].FromFile)
+	}
+	expected := filepath.Join("/config/dir", "local-secret.txt")
+	if comp.K8s.Secrets[1].FromFile != expected {
+		t.Fatalf("expected extra secret resolved to %q, got %q", expected, comp.K8s.Secrets[1].FromFile)
+	}
+}
+
+func TestMergeComponents_ConfigMapsMerge(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name: "app",
+				K8s: &config.K8sSpec{
+					ConfigMaps: []config.LocalResource{
+						{Name: "base-config", FromFile: "/abs/config.xml"},
+					},
+				},
+			},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "app",
+			K8s: &config.K8sSpec{
+				ConfigMaps: []config.LocalResource{
+					{Name: "extra-config", FromFile: "logback.xml"},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "/config/dir")
+
+	comp := resolved.Components[0]
+	if len(comp.K8s.ConfigMaps) != 2 {
+		t.Fatalf("expected 2 config maps, got %d", len(comp.K8s.ConfigMaps))
+	}
+	if comp.K8s.ConfigMaps[0].FromFile != "/abs/config.xml" {
+		t.Fatalf("expected base config map preserved, got %q", comp.K8s.ConfigMaps[0].FromFile)
+	}
+	expected := filepath.Join("/config/dir", "logback.xml")
+	if comp.K8s.ConfigMaps[1].FromFile != expected {
+		t.Fatalf("expected extra config map resolved to %q, got %q", expected, comp.K8s.ConfigMaps[1].FromFile)
+	}
+}
+
+func TestMergeComponents_LocalResourceEntryPaths(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{Name: "app", K8s: &config.K8sSpec{}},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "app",
+			K8s: &config.K8sSpec{
+				Secrets: []config.LocalResource{
+					{
+						Name: "creds",
+						Entries: []config.ResourceEntry{
+							{Key: "token", FromFile: "token.txt"},
+							{Key: "cert", FromFile: "/abs/cert.pem"},
+							{Key: "API_KEY", FromEnv: "MY_API_KEY"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "/config")
+
+	entries := resolved.Components[0].K8s.Secrets[0].Entries
+	if len(entries) != 3 {
+		t.Fatalf("expected 3 entries, got %d", len(entries))
+	}
+	expected := filepath.Join("/config", "token.txt")
+	if entries[0].FromFile != expected {
+		t.Fatalf("expected relative entry resolved to %q, got %q", expected, entries[0].FromFile)
+	}
+	if entries[1].FromFile != "/abs/cert.pem" {
+		t.Fatalf("expected absolute entry preserved, got %q", entries[1].FromFile)
+	}
+	if entries[2].FromEnv != "MY_API_KEY" {
+		t.Fatalf("expected env entry unchanged, got %q", entries[2].FromEnv)
+	}
+}
+
+func TestMergeComponents_NewComponentWithSecrets(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{Name: "existing", Helm: &config.HelmSpec{Chart: "existing/chart"}},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "license",
+			K8s: &config.K8sSpec{
+				Secrets: []config.LocalResource{
+					{Name: "gravitee-license", FromFile: "./license.key"},
+				},
+				ConfigMaps: []config.LocalResource{
+					{
+						Name: "logging",
+						Entries: []config.ResourceEntry{
+							{Key: "logback.xml", FromFile: "logback.xml"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "/user/config")
+
+	if len(resolved.Components) != 2 {
+		t.Fatalf("expected 2 components, got %d", len(resolved.Components))
+	}
+	comp := resolved.Components[1]
+	expected := filepath.Join("/user/config", "license.key")
+	if comp.K8s.Secrets[0].FromFile != expected {
+		t.Fatalf("expected secret path resolved to %q, got %q", expected, comp.K8s.Secrets[0].FromFile)
+	}
+	expectedEntry := filepath.Join("/user/config", "logback.xml")
+	if comp.K8s.ConfigMaps[0].Entries[0].FromFile != expectedEntry {
+		t.Fatalf("expected config map entry path resolved to %q, got %q", expectedEntry, comp.K8s.ConfigMaps[0].Entries[0].FromFile)
+	}
+}
+
+func TestMergeComponents_SecretsInitK8sWhenNil(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{Name: "app", Helm: &config.HelmSpec{Chart: "app/chart"}},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "app",
+			K8s: &config.K8sSpec{
+				Secrets: []config.LocalResource{
+					{Name: "my-secret", FromFile: "secret.txt"},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "/cfg")
+
+	comp := resolved.Components[0]
+	if comp.K8s == nil {
+		t.Fatal("expected K8s to be initialized")
+	}
+	if len(comp.K8s.Secrets) != 1 {
+		t.Fatalf("expected 1 secret, got %d", len(comp.K8s.Secrets))
+	}
+	expected := filepath.Join("/cfg", "secret.txt")
+	if comp.K8s.Secrets[0].FromFile != expected {
+		t.Fatalf("expected secret path resolved to %q, got %q", expected, comp.K8s.Secrets[0].FromFile)
+	}
+}
+
+func TestMergeComponents_EmptyConfigDirSkipsResolution(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name: "app",
+				K8s: &config.K8sSpec{
+					Secrets: []config.LocalResource{
+						{Name: "s", FromFile: "relative.txt"},
+					},
+				},
+			},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "app",
+			K8s: &config.K8sSpec{
+				ConfigMaps: []config.LocalResource{
+					{Name: "c", FromFile: "also-relative.txt"},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "")
+
+	if resolved.Components[0].K8s.ConfigMaps[0].FromFile != "also-relative.txt" {
+		t.Fatal("expected path left relative when configDir is empty")
+	}
+}
+
 func TestMergeRepos_NoOverlap(t *testing.T) {
 	ctx := []config.Repo{
 		{Name: "repo-a", URL: "https://a.example.com"},

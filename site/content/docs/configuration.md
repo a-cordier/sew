@@ -118,6 +118,75 @@ A `k8s` component supports two ways of providing manifests:
 
 Both can be used together; manifest files are applied first, then inline manifests.
 
+### Local Secrets and ConfigMaps
+
+A `k8s` component can also create Kubernetes Secrets and ConfigMaps from local files or environment variables using the `k8s.secrets` and `k8s.configMaps` fields. This is useful for injecting license keys, credentials, or configuration files that live outside version control.
+
+#### Shorthand syntax
+
+When a Secret or ConfigMap has a single file source, use the `fromFile` shorthand. The data key defaults to the file's basename:
+
+```yaml
+components:
+  - name: licensing
+    type: k8s
+    namespace: my-app
+    k8s:
+      secrets:
+        - name: gravitee-license
+          fromFile: ./gravitee-license.txt
+          onMissing: ignore
+```
+
+This creates a Secret named `gravitee-license` with a single key `gravitee-license.txt` whose value is the file's contents.
+
+#### Full entries syntax
+
+For resources with multiple data entries, or entries sourced from environment variables, use the `entries` list:
+
+```yaml
+components:
+  - name: app-config
+    type: k8s
+    namespace: my-app
+    k8s:
+      secrets:
+        - name: my-credentials
+          onMissing: fail
+          entries:
+            - key: token
+              fromFile: ./token.txt
+            - key: API_KEY
+              fromEnv: MY_API_KEY
+      configMaps:
+        - name: custom-logging
+          onMissing: ignore
+          entries:
+            - key: logback.xml
+              fromFile: ./logback.xml
+            - key: LOG_LEVEL
+              fromEnv: LOG_LEVEL
+```
+
+Each entry specifies either `fromFile` (read from a local file) or `fromEnv` (read from an environment variable), but not both. The `key` field is optional — it defaults to the basename of the file path for `fromFile` entries, or the variable name for `fromEnv` entries.
+
+For Secrets, values are stored in `stringData` (the API server base64-encodes them on write). For ConfigMaps, values go into `data` as plain strings.
+
+#### Missing sources
+
+The `onMissing` field controls what happens when a file or environment variable is not found:
+
+| Value | Behaviour |
+|-------|-----------|
+| `fail` (default) | The setup errors out immediately |
+| `ignore` | A warning is logged and the entire resource is skipped |
+
+`onMissing` applies at the resource level — if any entry in a resource is missing and `onMissing` is `ignore`, the whole resource is skipped (not just the missing entry).
+
+#### Path resolution
+
+`fromFile` paths are resolved relative to the directory containing the config file, following the same convention as `helm.valueFiles` and `k8s.manifestFiles`.
+
 ### Adding Helm repos
 
 If the new component's chart comes from a repo that the context does not declare, add it under `repos`:
@@ -186,5 +255,7 @@ When a local component matches a context component by name, the following merge 
 | `helm.values` | Local values are merged on top of context values |
 | `k8s.manifestFiles` | Local files are appended |
 | `k8s.manifests` | Local manifests are appended |
+| `k8s.secrets` | Local secrets are appended |
+| `k8s.configMaps` | Local configMaps are appended |
 
 When there is no name match, the component is added to the deployment as-is.

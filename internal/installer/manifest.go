@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/a-cordier/sew/internal/config"
+	"github.com/fatih/color"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -39,12 +40,17 @@ func getConfig() (*rest.Config, error) {
 	return kubeconfig.ClientConfig()
 }
 
+func hasK8sWork(k8s *config.K8sSpec) bool {
+	return len(k8s.ManifestFiles) > 0 || len(k8s.Manifests) > 0 ||
+		len(k8s.Secrets) > 0 || len(k8s.ConfigMaps) > 0
+}
+
 func (m *ManifestInstaller) Install(ctx context.Context, comp config.Component, dir string) error {
 	if comp.K8s == nil {
 		return fmt.Errorf("component %q has no k8s spec", comp.Name)
 	}
-	if len(comp.K8s.ManifestFiles) == 0 && len(comp.K8s.Manifests) == 0 {
-		return fmt.Errorf("component %q has no manifest files or inline manifests", comp.Name)
+	if !hasK8sWork(comp.K8s) {
+		return fmt.Errorf("component %q has no manifest files, inline manifests, secrets, or configMaps", comp.Name)
 	}
 
 	config, err := getConfig()
@@ -70,6 +76,10 @@ func (m *ManifestInstaller) Install(ctx context.Context, comp config.Component, 
 		if err != nil && !apierrors.IsAlreadyExists(err) {
 			return fmt.Errorf("create namespace %q: %w", namespace, err)
 		}
+	}
+
+	if err := m.applyLocalResources(ctx, comp.K8s, namespace, discoveryMapper, dynClient); err != nil {
+		return err
 	}
 
 	for _, f := range comp.K8s.ManifestFiles {
@@ -98,6 +108,42 @@ func (m *ManifestInstaller) Install(ctx context.Context, comp config.Component, 
 		obj := &unstructured.Unstructured{Object: manifest}
 		if err := m.applyObject(ctx, obj, namespace, discoveryMapper, dynClient); err != nil {
 			return fmt.Errorf("inline manifest [%d]: %w", i, err)
+		}
+	}
+
+	return nil
+}
+
+func (m *ManifestInstaller) applyLocalResources(
+	ctx context.Context,
+	k8s *config.K8sSpec,
+	namespace string,
+	discoveryMapper meta.RESTMapper,
+	dynClient dynamic.Interface,
+) error {
+	secrets, warnings, err := BuildSecrets(k8s.Secrets)
+	for _, w := range warnings {
+		color.Yellow("  ⚠ %s", w)
+	}
+	if err != nil {
+		return err
+	}
+	for _, s := range secrets {
+		if err := m.applyObject(ctx, s, namespace, discoveryMapper, dynClient); err != nil {
+			return fmt.Errorf("applying secret %q: %w", s.GetName(), err)
+		}
+	}
+
+	configMaps, warnings, err := BuildConfigMaps(k8s.ConfigMaps)
+	for _, w := range warnings {
+		color.Yellow("  ⚠ %s", w)
+	}
+	if err != nil {
+		return err
+	}
+	for _, cm := range configMaps {
+		if err := m.applyObject(ctx, cm, namespace, discoveryMapper, dynClient); err != nil {
+			return fmt.Errorf("applying configmap %q: %w", cm.GetName(), err)
 		}
 	}
 
@@ -161,7 +207,7 @@ func splitYAMLDocuments(data []byte) []string {
 
 // Uninstall re-reads manifest files and deletes the resources.
 func (m *ManifestInstaller) Uninstall(_ context.Context, comp config.Component) error {
-	if comp.K8s == nil || (len(comp.K8s.ManifestFiles) == 0 && len(comp.K8s.Manifests) == 0) {
+	if comp.K8s == nil || !hasK8sWork(comp.K8s) {
 		return nil
 	}
 	// Resolve dir: we don't have it in Uninstall. We need resolved.Dir in cmd.

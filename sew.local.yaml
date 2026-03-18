@@ -22,7 +22,8 @@ components:
     k8s:
       secrets:
         - name: gravitee-license
-          fromFile: ./gravitee-license.txt
+          fromFile: '$HOME/opt/gravitee/license.key'
+          onMissing: ignore
       manifests:
         - apiVersion: gateway.networking.k8s.io/v1
           kind: HTTPRoute
