@@ -34,7 +34,7 @@ function toggleTheme() {
 <body>
   <nav class="nav">
   <div class="nav-inner">
-    <a class="nav-logo" href="/">
+    <a class="nav-logo" href="/sew/">
       <img src="/sew/logo.svg" alt="sew" width="56" height="20">
     </a>
     <button class="nav-hamburger" aria-label="Toggle menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
@@ -86,7 +86,7 @@ function toggleTheme() {
     <h1 id="apim-aio-postgresql">APIM AIO PostgreSQL</h1>
 <p>Deploys a full Gravitee API Management stack (Console, Portal, Gateway, and
 Management API) backed by PostgreSQL for persistence and Elasticsearch for
-analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.</p>
+analytics. Management uses JDBC. Rate limiting is also stored in PostgreSQL.</p>
 <h2 id="usage">Usage</h2>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew create gravitee.io/apim/aio/postgres
 </span></span></code></pre></div><h2 id="endpoints">Endpoints</h2>
@@ -183,7 +183,17 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
       
         
       
+    
+  
+    
+      
         
+      
+        
+      
+    
+  
+    
       
         
       
@@ -199,19 +209,9 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
       
         
       
-        
-      
-        
-      
     
   
     
-      
-        
-      
-        
-      
-        
       
         
       
@@ -223,49 +223,9 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
       
         
       
-        
-      
-        
-      
-        
-      
-        
-      
     
   
     
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-  
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-  
-    
-      
-        
-      
-        
-      
-        
       
         
       
@@ -278,43 +238,17 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
     <span class="registry-filters-label">Filter by tag</span>
     <div class="registry-filter-tags">
       
-      <button class="tag tag-filter" data-tag="all-in-one" type="button">all-in-one</button>
-      
       <button class="tag tag-filter" data-tag="api-management" type="button">api-management</button>
       
-      <button class="tag tag-filter" data-tag="apim" type="button">apim</button>
-      
       <button class="tag tag-filter" data-tag="database" type="button">database</button>
-      
-      <button class="tag tag-filter" data-tag="dbless" type="button">dbless</button>
       
       <button class="tag tag-filter" data-tag="elasticsearch" type="button">elasticsearch</button>
       
       <button class="tag tag-filter" data-tag="gateway" type="button">gateway</button>
       
-      <button class="tag tag-filter" data-tag="gateway-api" type="button">gateway-api</button>
-      
-      <button class="tag tag-filter" data-tag="gko" type="button">gko</button>
-      
       <button class="tag tag-filter" data-tag="gravitee" type="button">gravitee</button>
       
-      <button class="tag tag-filter" data-tag="helm" type="button">helm</button>
-      
-      <button class="tag tag-filter" data-tag="kubernetes" type="button">kubernetes</button>
-      
-      <button class="tag tag-filter" data-tag="logging" type="button">logging</button>
-      
-      <button class="tag tag-filter" data-tag="mongodb" type="button">mongodb</button>
-      
-      <button class="tag tag-filter" data-tag="nosql" type="button">nosql</button>
-      
-      <button class="tag tag-filter" data-tag="postgresql" type="button">postgresql</button>
-      
-      <button class="tag tag-filter" data-tag="search" type="button">search</button>
-      
-      <button class="tag tag-filter" data-tag="sql" type="button">sql</button>
-      
-      <button class="tag tag-filter" data-tag="standalone" type="button">standalone</button>
+      <button class="tag tag-filter" data-tag="operator" type="button">operator</button>
       
     </div>
   </div>
@@ -328,12 +262,12 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
   <div class="registry-grid" id="registry-grid">
     
       <a href="/sew/registry/elastic/elasticsearch/" class="registry-card"
-   data-search="elastic/elasticsearch single-node elasticsearch 9 cluster via helm elasticsearch search logging helm elasticsearch"
-   data-tags="elasticsearch,search,logging,helm">
+   data-search="elastic/elasticsearch single-node elasticsearch cluster elasticsearch elasticsearch"
+   data-tags="elasticsearch">
   <div class="registry-card-body">
     <h3 class="registry-card-title">elastic/elasticsearch</h3>
     
-    <p class="registry-card-desc">Single-node Elasticsearch 9 cluster via Helm</p>
+    <p class="registry-card-desc">Single-node Elasticsearch cluster</p>
     
   </div>
   <div class="registry-card-footer">
@@ -341,12 +275,6 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
     <div class="registry-card-tags">
       
       <span class="tag tag-sm">elasticsearch</span>
-      
-      <span class="tag tag-sm">search</span>
-      
-      <span class="tag tag-sm">logging</span>
-      
-      <span class="tag tag-sm">helm</span>
       
       
     </div>
@@ -357,8 +285,8 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
 
     
       <a href="/sew/registry/gravitee.io/apim/aio/mongodb/" class="registry-card"
-   data-search="gravitee.io/apim/aio/mongodb gravitee apim all-in-one with mongodb backend and elasticsearch gravitee apim mongodb all-in-one api-management mongodb elasticsearch apim"
-   data-tags="gravitee,apim,mongodb,all-in-one,api-management">
+   data-search="gravitee.io/apim/aio/mongodb gravitee apim all-in-one with mongodb backend and elasticsearch gravitee api-management mongodb elasticsearch apim"
+   data-tags="gravitee,api-management">
   <div class="registry-card-body">
     <h3 class="registry-card-title">gravitee.io/apim/aio/mongodb</h3>
     
@@ -371,14 +299,8 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
       
       <span class="tag tag-sm">gravitee</span>
       
-      <span class="tag tag-sm">apim</span>
+      <span class="tag tag-sm">api-management</span>
       
-      <span class="tag tag-sm">mongodb</span>
-      
-      <span class="tag tag-sm">all-in-one</span>
-      
-      
-      <span class="tag tag-sm tag-more">+1</span>
       
     </div>
     
@@ -390,8 +312,8 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
 
     
       <a href="/sew/registry/gravitee.io/apim/aio/postgres/" class="registry-card"
-   data-search="gravitee.io/apim/aio/postgres gravitee apim all-in-one with postgresql backend and elasticsearch gravitee apim postgresql all-in-one api-management postgresql elasticsearch apim"
-   data-tags="gravitee,apim,postgresql,all-in-one,api-management">
+   data-search="gravitee.io/apim/aio/postgres gravitee apim all-in-one with postgresql backend and elasticsearch gravitee api-management postgresql elasticsearch apim"
+   data-tags="gravitee,api-management">
   <div class="registry-card-body">
     <h3 class="registry-card-title">gravitee.io/apim/aio/postgres</h3>
     
@@ -404,14 +326,8 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
       
       <span class="tag tag-sm">gravitee</span>
       
-      <span class="tag tag-sm">apim</span>
+      <span class="tag tag-sm">api-management</span>
       
-      <span class="tag tag-sm">postgresql</span>
-      
-      <span class="tag tag-sm">all-in-one</span>
-      
-      
-      <span class="tag tag-sm tag-more">+1</span>
       
     </div>
     
@@ -423,8 +339,8 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
 
     
       <a href="/sew/registry/gravitee.io/apim/dbless/" class="registry-card"
-   data-search="gravitee.io/apim/dbless gravitee apim gateway in db-less mode with the gravitee kubernetes operator gravitee apim gateway dbless gko apim gko"
-   data-tags="gravitee,apim,gateway,dbless,gko">
+   data-search="gravitee.io/apim/dbless gravitee apim gateway in db-less mode with the gravitee kubernetes operator gravitee api-management operator apim gko"
+   data-tags="gravitee,api-management,operator">
   <div class="registry-card-body">
     <h3 class="registry-card-title">gravitee.io/apim/dbless</h3>
     
@@ -437,14 +353,10 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
       
       <span class="tag tag-sm">gravitee</span>
       
-      <span class="tag tag-sm">apim</span>
+      <span class="tag tag-sm">api-management</span>
       
-      <span class="tag tag-sm">gateway</span>
+      <span class="tag tag-sm">operator</span>
       
-      <span class="tag tag-sm">dbless</span>
-      
-      
-      <span class="tag tag-sm tag-more">+1</span>
       
     </div>
     
@@ -454,8 +366,8 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
 
     
       <a href="/sew/registry/gravitee.io/apim/gateway-api/" class="registry-card"
-   data-search="gravitee.io/apim/gateway-api gravitee gateway using the kubernetes gateway api with gko gravitee apim gateway-api gko kubernetes gko gateway-class-parameters gateway-class"
-   data-tags="gravitee,apim,gateway-api,gko,kubernetes">
+   data-search="gravitee.io/apim/gateway-api gravitee gateway using the kubernetes gateway api with gko gravitee gateway gko gateway-class-parameters gateway-class"
+   data-tags="gravitee,gateway">
   <div class="registry-card-body">
     <h3 class="registry-card-title">gravitee.io/apim/gateway-api</h3>
     
@@ -468,14 +380,8 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
       
       <span class="tag tag-sm">gravitee</span>
       
-      <span class="tag tag-sm">apim</span>
+      <span class="tag tag-sm">gateway</span>
       
-      <span class="tag tag-sm">gateway-api</span>
-      
-      <span class="tag tag-sm">gko</span>
-      
-      
-      <span class="tag tag-sm tag-more">+1</span>
       
     </div>
     
@@ -485,8 +391,8 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
 
     
       <a href="/sew/registry/mongodb/standalone/" class="registry-card"
-   data-search="mongodb/standalone single-node mongodb 7 deployment for kubernetes mongodb database nosql standalone mongodb"
-   data-tags="mongodb,database,nosql,standalone">
+   data-search="mongodb/standalone single-node mongodb 7 deployment for kubernetes database mongodb"
+   data-tags="database">
   <div class="registry-card-body">
     <h3 class="registry-card-title">mongodb/standalone</h3>
     
@@ -497,13 +403,7 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
     
     <div class="registry-card-tags">
       
-      <span class="tag tag-sm">mongodb</span>
-      
       <span class="tag tag-sm">database</span>
-      
-      <span class="tag tag-sm">nosql</span>
-      
-      <span class="tag tag-sm">standalone</span>
       
       
     </div>
@@ -514,8 +414,8 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
 
     
       <a href="/sew/registry/postgresql/standalone/" class="registry-card"
-   data-search="postgresql/standalone single-node postgresql 17 deployment for kubernetes postgresql database sql standalone postgresql"
-   data-tags="postgresql,database,sql,standalone">
+   data-search="postgresql/standalone single-node postgresql 17 deployment for kubernetes database postgresql"
+   data-tags="database">
   <div class="registry-card-body">
     <h3 class="registry-card-title">postgresql/standalone</h3>
     
@@ -526,13 +426,7 @@ analytics. Management uses JDBC and rate limiting is also stored in PostgreSQL.<
     
     <div class="registry-card-tags">
       
-      <span class="tag tag-sm">postgresql</span>
-      
       <span class="tag tag-sm">database</span>
-      
-      <span class="tag tag-sm">sql</span>
-      
-      <span class="tag tag-sm">standalone</span>
       
       
     </div>

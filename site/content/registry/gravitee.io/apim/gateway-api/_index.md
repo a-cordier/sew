@@ -3,10 +3,7 @@ title: gravitee.io/apim/gateway-api
 description: Gravitee Gateway using the Kubernetes Gateway API with GKO
 tags:
     - gravitee
-    - apim
-    - gateway-api
-    - gko
-    - kubernetes
+    - gateway
 components:
     - gko
     - gateway-class-parameters

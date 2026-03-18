@@ -14,17 +14,13 @@
   </url><url>
     <loc>http://localhost:1313/sew/docs/dns/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/tags/all-in-one/</loc>
+    <loc>http://localhost:1313/sew/docs/delete/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/tags/api-management/</loc>
-  </url><url>
-    <loc>http://localhost:1313/sew/tags/apim/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/categories/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/tags/database/</loc>
-  </url><url>
-    <loc>http://localhost:1313/sew/tags/dbless/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/docs/</loc>
   </url><url>
@@ -35,10 +31,6 @@
     <loc>http://localhost:1313/sew/tags/elasticsearch/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/tags/gateway/</loc>
-  </url><url>
-    <loc>http://localhost:1313/sew/tags/gateway-api/</loc>
-  </url><url>
-    <loc>http://localhost:1313/sew/tags/gko/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/tags/gravitee/</loc>
   </url><url>
@@ -56,35 +48,19 @@
   </url><url>
     <loc>http://localhost:1313/sew/registry/gravitee.io/apim/gateway-api/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/tags/helm/</loc>
-  </url><url>
-    <loc>http://localhost:1313/sew/tags/kubernetes/</loc>
-  </url><url>
-    <loc>http://localhost:1313/sew/tags/logging/</loc>
-  </url><url>
     <loc>http://localhost:1313/sew/registry/mongodb/</loc>
-  </url><url>
-    <loc>http://localhost:1313/sew/tags/mongodb/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/registry/mongodb/standalone/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/tags/nosql/</loc>
+    <loc>http://localhost:1313/sew/tags/operator/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/registry/postgresql/</loc>
-  </url><url>
-    <loc>http://localhost:1313/sew/tags/postgresql/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/registry/postgresql/standalone/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/registry/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/tags/search/</loc>
-  </url><url>
     <loc>http://localhost:1313/sew/</loc>
-  </url><url>
-    <loc>http://localhost:1313/sew/tags/sql/</loc>
-  </url><url>
-    <loc>http://localhost:1313/sew/tags/standalone/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/tags/</loc>
   </url>

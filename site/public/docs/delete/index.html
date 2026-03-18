@@ -3,7 +3,7 @@
 <head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Concepts · sew</title>
+<title>Delete · sew</title>
 <meta name="description" content="Your local Kubernetes tailor shop">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,7 +93,7 @@ function toggleTheme() {
         </li>
         
         <li>
-          <a href="/sew/docs/concepts/" class="active">
+          <a href="/sew/docs/concepts/" class="">
             Concepts
           </a>
         </li>
@@ -123,7 +123,7 @@ function toggleTheme() {
         </li>
         
         <li>
-          <a href="/sew/docs/delete/" class="">
+          <a href="/sew/docs/delete/" class="active">
             Delete
           </a>
         </li>
@@ -132,13 +132,63 @@ function toggleTheme() {
     </nav>
   </aside>
   <div class="docs-content">
-    <h1>Concepts</h1>
+    <h1>Delete</h1>
     <article class="content">
-      <ul>
-<li><strong>Registry</strong> — A tree of context directories, either on the filesystem (<code>file:///path</code>) or over HTTP. The binary does not ship a registry; you use your own or a remote one.</li>
-<li><strong>Context</strong> — A path inside the registry following <code>org/product/variant</code> (e.g. <code>gravitee.io/apim/db-less</code>). Each context has a <code>sew.yaml</code> that lists Helm repos and components (charts + values). If you omit the variant (e.g. <code>gravitee.io/apim</code>), sew looks for a <code>.default</code> file to pick one automatically (see <a href="http://localhost:1313/sew/docs/context-format/#default-variant-resolution">Default variant resolution</a>).</li>
-<li><strong>Config</strong> — Configuration is layered. A <strong>user-level</strong> config at <code>$SEW_HOME/sew.yaml</code> (default <code>~/.sew/sew.yaml</code>) provides base settings; a <strong>project-level</strong> <code>./sew.yaml</code> (or <code>--config</code>) is merged on top. Each layer sets the registry URL, the contexts to compose via <code>from</code>, the Kind cluster definition, and optional local components and repos. Set the <code>SEW_HOME</code> environment variable to change the user-level config location.</li>
+      <p><code>sew delete</code> tears down a cluster and cleans up all associated resources: the Kind cluster itself, load balancer containers, DNS records, image mirror proxies, and the preload registry.</p>
+<h2 id="how-it-works">How it works</h2>
+<ol>
+<li><strong>Resolve target</strong> — sew determines which cluster to delete (see <a href="#target-resolution">Target resolution</a> below).</li>
+<li><strong>DNS records</strong> — Removes the cluster&rsquo;s DNS record file (<code>$SEW_HOME/dns/&lt;cluster&gt;.json</code>).</li>
+<li><strong>Load balancer containers</strong> — Stops and removes Docker containers created by the cloud provider controller for this cluster.</li>
+<li><strong>Kind cluster</strong> — Deletes the Kind cluster, which removes all namespaces, Helm releases, and applied manifests in one step.</li>
+<li><strong>Image mirrors</strong> — Stops mirror proxy containers if the cluster state indicates mirrors were configured.</li>
+<li><strong>Preload registry</strong> — Stops the preload registry container if preloaded images were configured.</li>
+<li><strong>Background processes</strong> — Stops the cloud provider controller and DNS server when no Kind clusters or DNS records remain.</li>
+<li><strong>State file</strong> — Removes the cluster&rsquo;s state file from <code>$SEW_HOME/clusters/</code>.</li>
+</ol>
+<h2 id="target-resolution">Target resolution</h2>
+<p><code>sew delete</code> does not need the original <code>sew.yaml</code> or registry to be available. It resolves the target cluster in this order:</p>
+<ol>
+<li><strong><code>--name</code> flag</strong> — If provided, sew looks up the state file for that cluster directly. Works from any directory.</li>
+<li><strong>State files</strong> — If <code>--name</code> is not given, sew scans <code>$SEW_HOME/clusters/</code> for existing state files:
+<ul>
+<li><strong>One cluster</strong>: deletes it automatically.</li>
+<li><strong>Multiple clusters</strong>: shows an interactive prompt to pick one.</li>
 </ul>
+</li>
+<li><strong>Config fallback</strong> — If no state files exist, sew reads <code>kind.name</code> from the <code>sew.yaml</code> config chain (same as <code>sew create</code>). This handles clusters created before the state file feature was introduced.</li>
+</ol>
+<h3 id="state-files">State files</h3>
+<p>A state file is created automatically at the end of a successful <code>sew create</code>. It captures the cluster name, enabled features, image configuration, and any delete notes from the context — everything <code>sew delete</code> needs for a clean teardown.</p>
+<p>State files live at <code>$SEW_HOME/clusters/&lt;cluster-name&gt;.yaml</code> and are removed after a successful delete.</p>
+<h2 id="usage">Usage</h2>
+<p>Delete the current (or only) cluster:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew delete
+</span></span></code></pre></div><p>Delete a specific cluster by name:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew delete --name my-cluster
+</span></span></code></pre></div><h3 id="best-effort-cleanup">Best-effort cleanup</h3>
+<p>If you pass <code>--name</code> but no state file exists for that cluster (e.g. the state was manually deleted or the cluster was created with an older version of sew), delete performs a best-effort cleanup:</p>
+<ul>
+<li>Deletes the Kind cluster</li>
+<li>Removes load balancer containers</li>
+<li>Removes DNS records</li>
+</ul>
+<p>A warning is printed about image mirrors and preload not being stopped, since the original configuration is unknown.</p>
+<h2 id="flags">Flags</h2>
+<table>
+  <thead>
+      <tr>
+          <th>Flag</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>--name &lt;cluster&gt;</code></td>
+          <td>Name of the cluster to delete. When omitted, sew auto-selects from state files or falls back to config.</td>
+      </tr>
+  </tbody>
+</table>
 
     </article>
   </div>

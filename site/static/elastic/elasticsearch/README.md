@@ -1,11 +1,11 @@
 ---
-description: "Single-node Elasticsearch 9 cluster via Helm"
-tags: [elasticsearch, search, logging, helm]
+description: "Single-node Elasticsearch cluster"
+tags: [elasticsearch]
 ---
 
 # Elasticsearch
 
-Deploys a single-node Elasticsearch 9.3.1 cluster using the official Elastic
+Deploys a single-node Elasticsearch cluster using the official Elastic
 Helm chart. Security and persistence are disabled for a lightweight development
 setup.
 

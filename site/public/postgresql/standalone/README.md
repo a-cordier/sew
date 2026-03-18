@@ -1,6 +1,6 @@
 ---
 description: "Single-node PostgreSQL 17 deployment for Kubernetes"
-tags: [postgresql, database, sql, standalone]
+tags: [database]
 ---
 
 # PostgreSQL Standalone

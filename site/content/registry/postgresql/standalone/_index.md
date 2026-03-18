@@ -2,10 +2,7 @@
 title: postgresql/standalone
 description: Single-node PostgreSQL 17 deployment for Kubernetes
 tags:
-    - postgresql
     - database
-    - sql
-    - standalone
 components:
     - postgresql
 type: registry

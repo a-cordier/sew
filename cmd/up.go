@@ -20,6 +20,7 @@ import (
 	"github.com/a-cordier/sew/internal/logger"
 	"github.com/a-cordier/sew/internal/notes"
 	"github.com/a-cordier/sew/internal/registry"
+	"github.com/a-cordier/sew/internal/state"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"k8s.io/klog/v2"
@@ -147,6 +148,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 	}
 
 	if cfg.Registry == "" || len(cfg.From) == 0 {
+		saveClusterState(cfg, nil)
 		return nil
 	}
 
@@ -256,12 +258,32 @@ func runUp(_ *cobra.Command, _ []string) error {
 		}
 	}
 
+	saveClusterState(cfg, resolved)
+
 	fmt.Println()
 	color.Blue("  Total: %s", time.Since(start).Round(time.Millisecond))
 
-	printNotes(resolved.Notes.Create, cfg)
+	if resolved != nil {
+		printNotes(resolved.Notes.Create, cfg)
+	}
 
 	return nil
+}
+
+func saveClusterState(cfg *config.Config, resolved *config.ResolvedContext) {
+	cs := &state.ClusterState{
+		Name:      cfg.Kind.Name,
+		CreatedAt: time.Now(),
+		Features:  cfg.Features,
+		Images:    cfg.Images,
+	}
+	if resolved != nil {
+		cs.Notes.Delete = resolved.Notes.Delete
+	}
+	stateDir := filepath.Join(sewHome, "clusters")
+	if err := state.Save(stateDir, cs); err != nil {
+		color.Yellow("  ⚠ failed to save cluster state: %v", err)
+	}
 }
 
 func getPreloadRefs(cfg *config.Config) []string {

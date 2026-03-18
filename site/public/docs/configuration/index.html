@@ -34,7 +34,7 @@ function toggleTheme() {
 <body>
   <nav class="nav">
   <div class="nav-inner">
-    <a class="nav-logo" href="/">
+    <a class="nav-logo" href="/sew/">
       <img src="/sew/logo.svg" alt="sew" width="56" height="20">
     </a>
     <button class="nav-hamburger" aria-label="Toggle menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
@@ -122,6 +122,12 @@ function toggleTheme() {
           </a>
         </li>
         
+        <li>
+          <a href="/sew/docs/delete/" class="">
+            Delete
+          </a>
+        </li>
+        
       </ul>
     </nav>
   </aside>
@@ -162,6 +168,26 @@ function toggleTheme() {
 </span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">values</span>:
 </span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">architecture</span>: standalone
 </span></span></code></pre></div><p>Value file paths under <code>components.*.helm.valueFiles</code> are resolved relative to the directory containing the config file.</p>
+<h2 id="kind-port-mappings">Kind port mappings</h2>
+<p>Port mappings defined in your <code>sew.yaml</code> are <strong>merged</strong> with those coming from the context (or defaults) using union semantics, keyed by <code>(containerPort, protocol)</code>:</p>
+<ul>
+<li>Ports that exist only in the context are <strong>preserved</strong>.</li>
+<li>Ports that exist only in your config are <strong>added</strong>.</li>
+<li>When both sides define the same <code>(containerPort, protocol)</code>, your entry <strong>wins</strong>.</li>
+</ul>
+<p>This means you can extend a context&rsquo;s port requirements without losing its existing mappings. For example, if a context exposes ports 80 and 443, and your config adds port 9090, the cluster gets all three:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#6272a4"># context defines ports 80 and 443</span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># your sew.yaml</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">kind</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">nodes</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">role</span>: control-plane
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">extraPortMappings</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">containerPort</span>: <span style="color:#bd93f9">9090</span>   <span style="color:#6272a4"># added alongside context ports 80 and 443</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">hostPort</span>: <span style="color:#bd93f9">9090</span>
+</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">containerPort</span>: <span style="color:#bd93f9">443</span>    <span style="color:#6272a4"># overrides the context&#39;s mapping for 443</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">hostPort</span>: <span style="color:#bd93f9">8443</span>
+</span></span></code></pre></div><p>The result contains three port mappings: 80 (from context), 443→8443 (your override), and 9090 (your addition).</p>
+<p>The same union logic applies at every merge layer: context composition (<code>from</code>), user config over context, and user config over defaults.</p>
 <h2 id="local-components">Local components</h2>
 <p>Beyond overriding fields on components defined by the context, you can declare entirely new components and Helm repos in your <code>sew.yaml</code>. This is useful when you need supporting services (databases, caches, message brokers, …) that are not part of the upstream context.</p>
 <h3 id="adding-a-component">Adding a component</h3>

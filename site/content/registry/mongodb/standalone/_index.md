@@ -2,10 +2,7 @@
 title: mongodb/standalone
 description: Single-node MongoDB 7 deployment for Kubernetes
 tags:
-    - mongodb
     - database
-    - nosql
-    - standalone
 components:
     - mongodb
 type: registry
@@ -13,7 +10,7 @@ type: registry
 
 # MongoDB Standalone
 
-Deploys a single-replica MongoDB 7 instance as a Kubernetes Deployment with a
+Deploys a single-replica MongoDB instance as a Kubernetes Deployment with a
 ClusterIP Service on port 27017.
 
 ## Usage

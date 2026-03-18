@@ -34,7 +34,7 @@ function toggleTheme() {
 <body>
   <nav class="nav">
   <div class="nav-inner">
-    <a class="nav-logo" href="/">
+    <a class="nav-logo" href="/sew/">
       <img src="/sew/logo.svg" alt="sew" width="56" height="20">
     </a>
     <button class="nav-hamburger" aria-label="Toggle menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
@@ -119,6 +119,12 @@ function toggleTheme() {
         <li>
           <a href="/sew/docs/dns/" class="">
             DNS
+          </a>
+        </li>
+        
+        <li>
+          <a href="/sew/docs/delete/" class="">
+            Delete
           </a>
         </li>
         
@@ -280,7 +286,7 @@ function toggleTheme() {
 <h3 id="merge-semantics">Merge semantics</h3>
 <p>When contexts are composed, each top-level field is merged as follows:</p>
 <ul>
-<li><strong><code>kind</code></strong> — Scalar fields (<code>name</code>, <code>apiVersion</code>, <code>kind</code>): child wins if set. <code>nodes</code>: child replaces the entire list; however, if the child&rsquo;s first node has no <code>extraPortMappings</code>, it inherits the parent&rsquo;s. <code>containerdConfigPatches</code>: child replaces entirely.</li>
+<li><strong><code>kind</code></strong> — Scalar fields (<code>name</code>, <code>apiVersion</code>, <code>kind</code>): child wins if set. <code>nodes</code>: child replaces the entire list; <code>extraPortMappings</code> are merged as a <strong>union</strong> keyed by <code>(containerPort, protocol)</code> — parent-only ports are preserved, child-only ports are added, and when both sides define the same key the child wins. <code>containerdConfigPatches</code>: child replaces entirely.</li>
 <li><strong><code>components</code></strong> — Matched by name using the same rules as user-level overrides (see <a href="http://localhost:1313/sew/docs/configuration/#merge-rules">Merge rules</a>): <code>helm.chart</code> and <code>helm.version</code> child wins, <code>helm.valueFiles</code> appended, <code>helm.values</code> shallow-merged, <code>requires</code> appended and deduplicated. Unmatched components are appended.</li>
 <li><strong><code>repos</code></strong> — Deduplicated by name; child entry wins on conflict.</li>
 <li><strong><code>features</code></strong> — Each feature block (<code>lb</code>, <code>gateway</code>, <code>dns</code>) is replaced as a whole if the child defines it; otherwise inherited from parent.</li>
