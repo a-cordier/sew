@@ -181,11 +181,17 @@ func TestMergeWithContext_UserPortsReplaceContext(t *testing.T) {
 	}
 	k.MergeWithContext(ctx)
 
-	if len(k.Nodes[0].ExtraPortMappings) != 1 {
-		t.Fatalf("expected 1 port mapping, got %d", len(k.Nodes[0].ExtraPortMappings))
+	if len(k.Nodes[0].ExtraPortMappings) != 3 {
+		t.Fatalf("expected 3 port mappings, got %d", len(k.Nodes[0].ExtraPortMappings))
 	}
-	if k.Nodes[0].ExtraPortMappings[0].ContainerPort != 9090 {
-		t.Fatalf("expected containerPort 9090, got %d", k.Nodes[0].ExtraPortMappings[0].ContainerPort)
+	portMap := make(map[int32]struct{})
+	for _, p := range k.Nodes[0].ExtraPortMappings {
+		portMap[p.ContainerPort] = struct{}{}
+	}
+	for _, want := range []int32{80, 443, 9090} {
+		if _, ok := portMap[want]; !ok {
+			t.Fatalf("expected port %d to be present", want)
+		}
 	}
 }
 
@@ -237,11 +243,18 @@ func TestMergeWithDefaults_UserPortsReplaceDefaults(t *testing.T) {
 	}
 	k.MergeWithDefaults(defaults)
 
-	if len(k.Nodes[0].ExtraPortMappings) != 1 {
-		t.Fatalf("expected 1 port mapping, got %d", len(k.Nodes[0].ExtraPortMappings))
+	if len(k.Nodes[0].ExtraPortMappings) != 3 {
+		t.Fatalf("expected 3 port mappings, got %d", len(k.Nodes[0].ExtraPortMappings))
 	}
-	if k.Nodes[0].ExtraPortMappings[0].ContainerPort != 9090 {
-		t.Fatalf("expected containerPort 9090, got %d", k.Nodes[0].ExtraPortMappings[0].ContainerPort)
+	ports := k.Nodes[0].ExtraPortMappings
+	if ports[0].ContainerPort != 80 {
+		t.Fatalf("expected containerPort 80, got %d", ports[0].ContainerPort)
+	}
+	if ports[1].ContainerPort != 443 {
+		t.Fatalf("expected containerPort 443, got %d", ports[1].ContainerPort)
+	}
+	if ports[2].ContainerPort != 9090 {
+		t.Fatalf("expected containerPort 9090, got %d", ports[2].ContainerPort)
 	}
 }
 
@@ -454,11 +467,17 @@ func TestMergeWithContext_UserPortsReplaceContextNodePorts(t *testing.T) {
 	}
 	k.MergeWithContext(ctx)
 
-	if len(k.Nodes[0].ExtraPortMappings) != 1 {
-		t.Fatalf("expected 1 port mapping, got %d", len(k.Nodes[0].ExtraPortMappings))
+	if len(k.Nodes[0].ExtraPortMappings) != 3 {
+		t.Fatalf("expected 3 port mappings, got %d", len(k.Nodes[0].ExtraPortMappings))
 	}
-	if k.Nodes[0].ExtraPortMappings[0].ContainerPort != 9090 {
-		t.Fatalf("expected user port 9090, got %d", k.Nodes[0].ExtraPortMappings[0].ContainerPort)
+	portMap := make(map[int32]struct{})
+	for _, p := range k.Nodes[0].ExtraPortMappings {
+		portMap[p.ContainerPort] = struct{}{}
+	}
+	for _, want := range []int32{80, 443, 9090} {
+		if _, ok := portMap[want]; !ok {
+			t.Fatalf("expected port %d to be present", want)
+		}
 	}
 }
 
@@ -515,6 +534,189 @@ func TestMergeWithDefaults_NoUserNodesCopiesDefaults(t *testing.T) {
 	}
 	if len(k.Nodes[0].ExtraPortMappings) != 1 || k.Nodes[0].ExtraPortMappings[0].ContainerPort != 80 {
 		t.Fatal("expected default port mappings to be copied")
+	}
+}
+
+func TestMergePortMappings_UnionDedup(t *testing.T) {
+	base := []PortMapping{
+		{ContainerPort: 80, HostPort: 80},
+		{ContainerPort: 443, HostPort: 443},
+	}
+	override := []PortMapping{
+		{ContainerPort: 443, HostPort: 8443},
+		{ContainerPort: 9090, HostPort: 9090},
+	}
+	result := MergePortMappings(base, override)
+
+	if len(result) != 3 {
+		t.Fatalf("expected 3 port mappings (union, deduped), got %d", len(result))
+	}
+	portMap := make(map[int32]int32)
+	for _, p := range result {
+		portMap[p.ContainerPort] = p.HostPort
+	}
+	if hp := portMap[80]; hp != 80 {
+		t.Fatalf("expected base-only port 80 with hostPort 80, got %d", hp)
+	}
+	if hp := portMap[443]; hp != 8443 {
+		t.Fatalf("expected override to win for port 443 with hostPort 8443, got %d", hp)
+	}
+	if hp := portMap[9090]; hp != 9090 {
+		t.Fatalf("expected override-only port 9090 with hostPort 9090, got %d", hp)
+	}
+}
+
+func TestMergePortMappings_ProtocolAwareKeying(t *testing.T) {
+	base := []PortMapping{
+		{ContainerPort: 443, HostPort: 443, Protocol: "TCP"},
+	}
+	override := []PortMapping{
+		{ContainerPort: 443, HostPort: 8443, Protocol: "UDP"},
+	}
+	result := MergePortMappings(base, override)
+
+	if len(result) != 2 {
+		t.Fatalf("expected 2 port mappings (same port, different protocol), got %d", len(result))
+	}
+	type key struct {
+		port     int32
+		protocol string
+	}
+	seen := make(map[key]int32)
+	for _, p := range result {
+		seen[key{p.ContainerPort, p.Protocol}] = p.HostPort
+	}
+	if hp, ok := seen[key{443, "TCP"}]; !ok || hp != 443 {
+		t.Fatal("expected TCP port 443 from base")
+	}
+	if hp, ok := seen[key{443, "UDP"}]; !ok || hp != 8443 {
+		t.Fatal("expected UDP port 443 from override")
+	}
+}
+
+func TestMergePortMappings_SameProtocolOverrideWins(t *testing.T) {
+	base := []PortMapping{
+		{ContainerPort: 443, HostPort: 443, Protocol: "TCP"},
+	}
+	override := []PortMapping{
+		{ContainerPort: 443, HostPort: 8443, Protocol: "TCP"},
+	}
+	result := MergePortMappings(base, override)
+
+	if len(result) != 1 {
+		t.Fatalf("expected 1 port mapping (same key, override wins), got %d", len(result))
+	}
+	if result[0].HostPort != 8443 {
+		t.Fatalf("expected override hostPort 8443, got %d", result[0].HostPort)
+	}
+}
+
+func TestMergePortMappings_EmptyBaseReturnsOverride(t *testing.T) {
+	override := []PortMapping{
+		{ContainerPort: 80, HostPort: 80},
+		{ContainerPort: 443, HostPort: 443},
+	}
+	result := MergePortMappings(nil, override)
+
+	if len(result) != 2 {
+		t.Fatalf("expected 2 port mappings, got %d", len(result))
+	}
+}
+
+func TestMergePortMappings_EmptyOverrideReturnsBase(t *testing.T) {
+	base := []PortMapping{
+		{ContainerPort: 80, HostPort: 80},
+	}
+	result := MergePortMappings(base, nil)
+
+	if len(result) != 1 {
+		t.Fatalf("expected 1 port mapping, got %d", len(result))
+	}
+	if result[0].ContainerPort != 80 {
+		t.Fatalf("expected containerPort 80, got %d", result[0].ContainerPort)
+	}
+}
+
+func TestMergePortMappings_BothEmpty(t *testing.T) {
+	result := MergePortMappings(nil, nil)
+	if len(result) != 0 {
+		t.Fatalf("expected 0 port mappings, got %d", len(result))
+	}
+}
+
+func TestMergeWithContext_UnionDedupConflictOverrideWins(t *testing.T) {
+	k := KindConfig{
+		Name: KindDefaultName,
+		Nodes: []KindNode{{
+			Role: "control-plane",
+			ExtraPortMappings: []PortMapping{
+				{ContainerPort: 80, HostPort: 8080},
+				{ContainerPort: 9090, HostPort: 9090},
+			},
+		}},
+	}
+	ctx := &KindConfig{
+		Nodes: []KindNode{{
+			Role: "control-plane",
+			ExtraPortMappings: []PortMapping{
+				{ContainerPort: 80, HostPort: 80},
+				{ContainerPort: 443, HostPort: 443},
+			},
+		}},
+	}
+	k.MergeWithContext(ctx)
+
+	if len(k.Nodes[0].ExtraPortMappings) != 3 {
+		t.Fatalf("expected 3 port mappings, got %d", len(k.Nodes[0].ExtraPortMappings))
+	}
+	portMap := make(map[int32]int32)
+	for _, p := range k.Nodes[0].ExtraPortMappings {
+		portMap[p.ContainerPort] = p.HostPort
+	}
+	if hp := portMap[80]; hp != 8080 {
+		t.Fatalf("expected user override for port 80 with hostPort 8080, got %d", hp)
+	}
+	if hp := portMap[443]; hp != 443 {
+		t.Fatalf("expected context-only port 443 with hostPort 443, got %d", hp)
+	}
+	if hp := portMap[9090]; hp != 9090 {
+		t.Fatalf("expected user-only port 9090 with hostPort 9090, got %d", hp)
+	}
+}
+
+func TestMergeWithDefaults_UnionDedupConflictOverrideWins(t *testing.T) {
+	k := KindConfig{
+		Name: KindDefaultName,
+		Nodes: []KindNode{{
+			Role: "control-plane",
+			ExtraPortMappings: []PortMapping{
+				{ContainerPort: 80, HostPort: 8080},
+			},
+		}},
+	}
+	defaults := &KindConfig{
+		Nodes: []KindNode{{
+			Role: "control-plane",
+			ExtraPortMappings: []PortMapping{
+				{ContainerPort: 80, HostPort: 80},
+				{ContainerPort: 443, HostPort: 443},
+			},
+		}},
+	}
+	k.MergeWithDefaults(defaults)
+
+	if len(k.Nodes[0].ExtraPortMappings) != 2 {
+		t.Fatalf("expected 2 port mappings, got %d", len(k.Nodes[0].ExtraPortMappings))
+	}
+	portMap := make(map[int32]int32)
+	for _, p := range k.Nodes[0].ExtraPortMappings {
+		portMap[p.ContainerPort] = p.HostPort
+	}
+	if hp := portMap[80]; hp != 8080 {
+		t.Fatalf("expected user override for port 80 with hostPort 8080, got %d", hp)
+	}
+	if hp := portMap[443]; hp != 443 {
+		t.Fatalf("expected default-only port 443 with hostPort 443, got %d", hp)
 	}
 }
 

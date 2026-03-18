@@ -516,11 +516,56 @@ func TestMergeKind_ChildPortsWin(t *testing.T) {
 	}
 	result := mergeKind(base, child)
 
-	if len(result.Nodes[0].ExtraPortMappings) != 1 {
-		t.Fatalf("expected 1 port mapping, got %d", len(result.Nodes[0].ExtraPortMappings))
+	if len(result.Nodes[0].ExtraPortMappings) != 2 {
+		t.Fatalf("expected 2 port mappings (union), got %d", len(result.Nodes[0].ExtraPortMappings))
 	}
-	if result.Nodes[0].ExtraPortMappings[0].ContainerPort != 9090 {
-		t.Fatalf("expected child port 9090, got %d", result.Nodes[0].ExtraPortMappings[0].ContainerPort)
+	portMap := make(map[int32]struct{})
+	for _, p := range result.Nodes[0].ExtraPortMappings {
+		portMap[p.ContainerPort] = struct{}{}
+	}
+	for _, want := range []int32{80, 9090} {
+		if _, ok := portMap[want]; !ok {
+			t.Fatalf("expected port %d to be present", want)
+		}
+	}
+}
+
+func TestMergeKind_PortsUnionDeduplicated(t *testing.T) {
+	base := config.KindConfig{
+		Nodes: []config.KindNode{{
+			Role: "control-plane",
+			ExtraPortMappings: []config.PortMapping{
+				{ContainerPort: 80, HostPort: 80},
+				{ContainerPort: 443, HostPort: 443},
+			},
+		}},
+	}
+	child := config.KindConfig{
+		Nodes: []config.KindNode{{
+			Role: "control-plane",
+			ExtraPortMappings: []config.PortMapping{
+				{ContainerPort: 443, HostPort: 8443},
+				{ContainerPort: 9090, HostPort: 9090},
+			},
+		}},
+	}
+	result := mergeKind(base, child)
+
+	if len(result.Nodes[0].ExtraPortMappings) != 3 {
+		t.Fatalf("expected 3 port mappings (union, deduped), got %d", len(result.Nodes[0].ExtraPortMappings))
+	}
+	portMap := make(map[int32]int32)
+	for _, p := range result.Nodes[0].ExtraPortMappings {
+		portMap[p.ContainerPort] = p.HostPort
+	}
+	if hp, ok := portMap[80]; !ok || hp != 80 {
+		t.Fatal("expected base-only port 80 with hostPort 80")
+	}
+	if hp, ok := portMap[443]; !ok || hp != 8443 {
+		t.Fatalf("expected child override for port 443 with hostPort 8443, got %d", portMap[443])
+	}
+	if hp, ok := portMap[9090]; !ok || hp != 9090 {
+		t.Fatal("expected child-only port 9090 with hostPort 9090")
 	}
 }
 

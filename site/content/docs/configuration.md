@@ -43,6 +43,33 @@ components:
 
 Value file paths under `components.*.helm.valueFiles` are resolved relative to the directory containing the config file.
 
+## Kind port mappings
+
+Port mappings defined in your `sew.yaml` are **merged** with those coming from the context (or defaults) using union semantics, keyed by `(containerPort, protocol)`:
+
+- Ports that exist only in the context are **preserved**.
+- Ports that exist only in your config are **added**.
+- When both sides define the same `(containerPort, protocol)`, your entry **wins**.
+
+This means you can extend a context's port requirements without losing its existing mappings. For example, if a context exposes ports 80 and 443, and your config adds port 9090, the cluster gets all three:
+
+```yaml
+# context defines ports 80 and 443
+# your sew.yaml
+kind:
+  nodes:
+  - role: control-plane
+    extraPortMappings:
+    - containerPort: 9090   # added alongside context ports 80 and 443
+      hostPort: 9090
+    - containerPort: 443    # overrides the context's mapping for 443
+      hostPort: 8443
+```
+
+The result contains three port mappings: 80 (from context), 443→8443 (your override), and 9090 (your addition).
+
+The same union logic applies at every merge layer: context composition (`from`), user config over context, and user config over defaults.
+
 ## Local components
 
 Beyond overriding fields on components defined by the context, you can declare entirely new components and Helm repos in your `sew.yaml`. This is useful when you need supporting services (databases, caches, message brokers, …) that are not part of the upstream context.

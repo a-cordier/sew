@@ -52,6 +52,33 @@ type Mount struct {
 	ContainerPath string `yaml:"containerPath"`
 }
 
+type portKey struct {
+	containerPort int32
+	protocol      string
+}
+
+// MergePortMappings returns the union of base and override port mappings,
+// deduplicated by (containerPort, protocol). When both sides define the same
+// key, the override entry wins.
+func MergePortMappings(base, override []PortMapping) []PortMapping {
+	seen := make(map[portKey]int, len(base))
+	result := make([]PortMapping, len(base))
+	copy(result, base)
+	for i, p := range result {
+		seen[portKey{p.ContainerPort, p.Protocol}] = i
+	}
+	for _, p := range override {
+		key := portKey{p.ContainerPort, p.Protocol}
+		if idx, ok := seen[key]; ok {
+			result[idx] = p
+		} else {
+			seen[key] = len(result)
+			result = append(result, p)
+		}
+	}
+	return result
+}
+
 // RawYAML returns the KindConfig serialized as YAML.
 func (k *KindConfig) RawYAML() ([]byte, error) {
 	return yaml.Marshal(k)
@@ -61,9 +88,9 @@ func (k *KindConfig) RawYAML() ([]byte, error) {
 // sew.yaml does not set a custom cluster name (still the default "sew"), the
 // context's kind.name is used.
 //
-// Port mappings use full-replacement semantics: if the user defines any
-// extraPortMappings on the node, those are kept as-is and all context ports
-// are ignored. If the user defines none, the context ports are used.
+// Port mappings use union semantics keyed by (containerPort, protocol): user
+// ports override context ports on conflict, while context-only ports are
+// preserved.
 func (k *KindConfig) MergeWithContext(ctx *KindConfig) {
 	if ctx == nil {
 		return
@@ -75,17 +102,15 @@ func (k *KindConfig) MergeWithContext(ctx *KindConfig) {
 		return
 	}
 	node := &k.Nodes[0]
-	if len(node.ExtraPortMappings) == 0 {
-		node.ExtraPortMappings = ctx.Nodes[0].ExtraPortMappings
-	}
+	node.ExtraPortMappings = MergePortMappings(ctx.Nodes[0].ExtraPortMappings, node.ExtraPortMappings)
 }
 
 // MergeWithDefaults fills zero-value Kind fields from the embedded defaults,
 // preserving any user-specified values.
 //
-// Port mappings use full-replacement semantics: if the user defines any
-// extraPortMappings on the node, those are kept as-is and the default port
-// mappings are ignored. If the user defines none, the defaults are used.
+// Port mappings use union semantics keyed by (containerPort, protocol): user
+// ports override default ports on conflict, while default-only ports are
+// preserved.
 func (k *KindConfig) MergeWithDefaults(defaults *KindConfig) {
 	if defaults == nil {
 		return
@@ -100,8 +125,6 @@ func (k *KindConfig) MergeWithDefaults(defaults *KindConfig) {
 	}
 	if len(k.Nodes) > 0 && len(defaults.Nodes) > 0 {
 		node := &k.Nodes[0]
-		if len(node.ExtraPortMappings) == 0 {
-			node.ExtraPortMappings = defaults.Nodes[0].ExtraPortMappings
-		}
+		node.ExtraPortMappings = MergePortMappings(defaults.Nodes[0].ExtraPortMappings, node.ExtraPortMappings)
 	}
 }

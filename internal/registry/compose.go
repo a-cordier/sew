@@ -118,8 +118,11 @@ func mergeKind(base, child config.KindConfig) config.KindConfig {
 	}
 	if len(child.Nodes) > 0 {
 		result.Nodes = child.Nodes
-		if len(base.Nodes) > 0 && len(result.Nodes[0].ExtraPortMappings) == 0 {
-			result.Nodes[0].ExtraPortMappings = base.Nodes[0].ExtraPortMappings
+		if len(base.Nodes) > 0 {
+			result.Nodes[0].ExtraPortMappings = config.MergePortMappings(
+				base.Nodes[0].ExtraPortMappings,
+				result.Nodes[0].ExtraPortMappings,
+			)
 		}
 	}
 	return result

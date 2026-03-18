@@ -20,6 +20,9 @@ components:
     type: k8s
     namespace: gravitee
     k8s:
+      secrets:
+        - name: gravitee-license
+          fromFile: ./gravitee-license.txt
       manifests:
         - apiVersion: gateway.networking.k8s.io/v1
           kind: HTTPRoute
