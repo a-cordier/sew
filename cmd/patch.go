@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/a-cordier/sew/internal/config"
+	"github.com/a-cordier/sew/internal/installer"
 	"github.com/a-cordier/sew/internal/kind"
 	"github.com/a-cordier/sew/internal/registry"
 	"github.com/fatih/color"
@@ -17,6 +18,7 @@ import (
 )
 
 var patchClusterName string
+var patchDryRun bool
 
 var patchCmd = &cobra.Command{
 	Use:   "patch <patch-file>",
@@ -40,6 +42,7 @@ patch file.`,
 
 func init() {
 	patchCmd.Flags().StringVar(&patchClusterName, "name", "", "name of the cluster to patch (default: from config)")
+	patchCmd.Flags().BoolVar(&patchDryRun, "dry-run", false, "show what would change without applying")
 	rootCmd.AddCommand(patchCmd)
 }
 
@@ -112,7 +115,7 @@ func runPatch(_ *cobra.Command, args []string) error {
 		return patchedNames[c.Name]
 	}
 
-	if err := installComponents(ctx, resolved, filter); err != nil {
+	if err := installComponents(ctx, resolved, filter, installer.InstallOpts{DryRun: patchDryRun}); err != nil {
 		return err
 	}
 

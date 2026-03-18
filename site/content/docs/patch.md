@@ -108,8 +108,33 @@ sew patch upgrade.yaml
 sew delete
 ```
 
+## Dry-run mode
+
+Use `--dry-run` to preview what a patch would change without applying anything to the cluster. Both Helm and Kubernetes manifest components support server-side dry-run: the API server validates the request and returns what would be created or modified, but nothing is persisted.
+
+```bash
+sew patch upgrade.yaml --dry-run
+```
+
+When `--dry-run` is active:
+
+- **Helm components** — `helm install` / `helm upgrade` runs with `--dry-run=server`, so the chart is rendered and validated by the API server without creating or updating the release.
+- **Kubernetes manifest components** — `kubectl apply` runs with `--dry-run=server` (`DryRun: ["All"]` in apply options), validating the objects without persisting them.
+- **Readiness checks are skipped** — since no resources are actually deployed, sew does not wait for pods or other conditions.
+
+This is especially useful in CI pipelines to catch configuration or chart errors before a real upgrade:
+
+```bash
+# Validate the patch against the live cluster
+sew patch upgrade.yaml --dry-run
+
+# If successful, apply for real
+sew patch upgrade.yaml
+```
+
 ## Flags
 
 | Flag | Description |
 |------|-------------|
 | `--name <cluster>` | Name of the cluster to patch. When omitted, sew uses `kind.name` from the resolved config. |
+| `--dry-run` | Show what would change without applying. Uses server-side dry-run for both Helm and Kubernetes resources. |

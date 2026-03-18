@@ -88,7 +88,7 @@ func isReleaseUninstalled(versions []*release.Release) bool {
 }
 
 // Install runs helm upgrade --install for the component: install if release does not exist, else upgrade.
-func (h *HelmInstaller) Install(ctx context.Context, comp config.Component, dir string) error {
+func (h *HelmInstaller) Install(ctx context.Context, comp config.Component, dir string, opts InstallOpts) error {
 	if comp.Helm == nil {
 		return fmt.Errorf("component %q has no helm spec", comp.Name)
 	}
@@ -174,6 +174,10 @@ func (h *HelmInstaller) Install(ctx context.Context, comp config.Component, dir 
 		instClient.ReleaseName = comp.Name
 		instClient.Namespace = namespace
 		instClient.CreateNamespace = true
+		instClient.DryRun = opts.DryRun
+		if opts.DryRun {
+			instClient.DryRunOption = "server"
+		}
 		instClient.ChartPathOptions = action.ChartPathOptions{}
 		if comp.Helm.Version != "" {
 			instClient.ChartPathOptions.Version = comp.Helm.Version
@@ -196,6 +200,10 @@ func (h *HelmInstaller) Install(ctx context.Context, comp config.Component, dir 
 	upgradeClient := action.NewUpgrade(actionConfig)
 	upgradeClient.SetRegistryClient(registryClient)
 	upgradeClient.Namespace = namespace
+	upgradeClient.DryRun = opts.DryRun
+	if opts.DryRun {
+		upgradeClient.DryRunOption = "server"
+	}
 	if comp.Helm.Version != "" {
 		upgradeClient.Version = comp.Helm.Version
 		upgradeClient.ChartPathOptions.Version = comp.Helm.Version

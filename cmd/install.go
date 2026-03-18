@@ -21,6 +21,7 @@ func installComponents(
 	ctx context.Context,
 	resolved *config.ResolvedContext,
 	filter func(config.Component) bool,
+	opts installer.InstallOpts,
 ) error {
 	if err := registry.Validate(resolved.Components); err != nil {
 		return fmt.Errorf("validating components: %w", err)
@@ -46,7 +47,7 @@ func installComponents(
 
 	for _, comp := range sorted {
 		for _, req := range comp.Requires {
-			if req.Conditions.Ready {
+			if req.Conditions.Ready && !opts.DryRun {
 				dep := compByName[req.Component]
 				depNamespace := dep.Namespace
 				if depNamespace == "" {
@@ -80,11 +81,11 @@ func installComponents(
 		}
 		comp := comp
 		if err := logger.WithSpinner(fmt.Sprintf("Installing %q", comp.Name), func() error {
-			return inst.Install(ctx, comp, resolved.Dir)
+			return inst.Install(ctx, comp, resolved.Dir, opts)
 		}); err != nil {
 			return err
 		}
-		if comp.Conditions.Ready {
+		if comp.Conditions.Ready && !opts.DryRun {
 			ns := comp.Namespace
 			if ns == "" {
 				ns = "default"

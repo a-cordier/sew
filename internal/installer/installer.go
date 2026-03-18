@@ -7,9 +7,14 @@ import (
 	"github.com/a-cordier/sew/internal/config"
 )
 
+// InstallOpts carries optional flags for an install operation.
+type InstallOpts struct {
+	DryRun bool
+}
+
 // Installer deploys and removes components.
 type Installer interface {
-	Install(ctx context.Context, comp config.Component, dir string) error
+	Install(ctx context.Context, comp config.Component, dir string, opts InstallOpts) error
 	Uninstall(ctx context.Context, comp config.Component) error
 }
 

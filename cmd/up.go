@@ -13,6 +13,7 @@ import (
 
 	"github.com/a-cordier/sew/internal/cache"
 	"github.com/a-cordier/sew/internal/config"
+	"github.com/a-cordier/sew/internal/installer"
 	"github.com/a-cordier/sew/internal/cloudprovider"
 	"github.com/a-cordier/sew/internal/dns"
 	"github.com/a-cordier/sew/internal/kind"
@@ -167,7 +168,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 		injectGatewayComponents(resolved)
 	}
 
-	if err := installComponents(ctx, resolved, nil); err != nil {
+	if err := installComponents(ctx, resolved, nil, installer.InstallOpts{}); err != nil {
 		return err
 	}
 
