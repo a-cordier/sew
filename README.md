@@ -64,9 +64,10 @@ kind:
       hostPort: 443
 
 # Optional: add Helm repos required by local components
-repos:
-  - name: bitnami
-    url: https://charts.bitnami.com/bitnami
+helm:
+  repos:
+    - name: bitnami
+      url: https://charts.bitnami.com/bitnami
 
 # Optional: override context components or add new ones
 components:
@@ -105,12 +106,13 @@ components:
 
 ### Adding Helm repos
 
-If the new component's chart comes from a repo that the context does not declare, add it under `repos`:
+If the new component's chart comes from a repo that the context does not declare, add it under `helm.repos`:
 
 ```yaml
-repos:
-  - name: bitnami
-    url: https://charts.bitnami.com/bitnami
+helm:
+  repos:
+    - name: bitnami
+      url: https://charts.bitnami.com/bitnami
 ```
 
 Local repos are merged with context repos. When both lists contain a repo with the same name, the local entry wins.
@@ -177,9 +179,10 @@ When there is no name match, the component is added to the deployment as-is.
 A context lives at `{registry}/{context_path}/` and must contain `sew.yaml`:
 
 ```yaml
-repos:
-  - name: graviteeio
-    url: https://helm.gravitee.io
+helm:
+  repos:
+    - name: graviteeio
+      url: https://helm.gravitee.io
 
 components:
   - name: apim
@@ -262,9 +265,10 @@ This is useful when several variants share a common foundation (repos, component
 # registry/org/product/base/sew.yaml
 abstract: true
 
-repos:
-  - name: myrepo
-    url: https://charts.example.com
+helm:
+  repos:
+    - name: myrepo
+      url: https://charts.example.com
 
 components:
   - name: app
@@ -376,7 +380,7 @@ When contexts are composed, each top-level field is merged as follows:
 
 - **`kind`** — Scalar fields (`name`, `apiVersion`, `kind`): child wins if set. `nodes`: child replaces the entire list; however, if the child's first node has no `extraPortMappings`, it inherits the parent's. `containerdConfigPatches`: child replaces entirely.
 - **`components`** — Matched by name using the same rules as user-level overrides (see [Merge rules](#merge-rules)): `helm.chart` and `helm.version` child wins, `helm.valueFiles` appended, `helm.values` shallow-merged, `requires` appended and deduplicated. Unmatched components are appended.
-- **`repos`** — Deduplicated by name; child entry wins on conflict.
+- **`helm.repos`** — Deduplicated by name; child entry wins on conflict.
 - **`features`** — Each feature block (`lb`, `gateway`, `dns`) is replaced as a whole if the child defines it; otherwise inherited from parent.
 - **`images`** — `preload`: when both sides define it, `refs` are deduplicated (union); when only one side defines it, that side's config is used as-is. `mirrors` from the child wins when set; otherwise inherited from parent.
 

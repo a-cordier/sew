@@ -34,9 +34,10 @@ kind:
     - containerPort: 80
       hostPort: 80
 
-repos:
-  - name: base-repo
-    url: https://example.com/base
+helm:
+  repos:
+    - name: base-repo
+      url: https://example.com/base
 
 components:
   - name: base-comp
@@ -85,9 +86,10 @@ func TestFSResolver_ParentComposition_ChildOverridesComponent(t *testing.T) {
 	sewHome := t.TempDir()
 
 	writeFile(t, filepath.Join(root, "parent", "sew.yaml"), `
-repos:
-  - name: repo1
-    url: https://example.com/repo1
+helm:
+  repos:
+    - name: repo1
+      url: https://example.com/repo1
 
 components:
   - name: app
@@ -242,9 +244,10 @@ kind:
     - containerPort: 80
       hostPort: 80
 
-repos:
-  - name: gp-repo
-    url: https://example.com/gp
+helm:
+  repos:
+    - name: gp-repo
+      url: https://example.com/gp
 
 components:
   - name: gp-comp
@@ -258,9 +261,10 @@ components:
 from:
   - grandparent
 
-repos:
-  - name: mid-repo
-    url: https://example.com/mid
+helm:
+  repos:
+    - name: mid-repo
+      url: https://example.com/mid
 
 components:
   - name: gp-comp
@@ -734,9 +738,10 @@ func TestFSResolver_DefaultVariantWithComposition(t *testing.T) {
 	sewHome := t.TempDir()
 
 	writeFile(t, filepath.Join(root, "base", "sew.yaml"), `
-repos:
-  - name: base-repo
-    url: https://example.com/base
+helm:
+  repos:
+    - name: base-repo
+      url: https://example.com/base
 
 components:
   - name: base-comp
@@ -802,9 +807,10 @@ func TestFSResolver_MultiFromComposition(t *testing.T) {
 	sewHome := t.TempDir()
 
 	writeFile(t, filepath.Join(root, "mongodb", "standalone", "sew.yaml"), `
-repos:
-  - name: mongodb-repo
-    url: https://example.com/mongo
+helm:
+  repos:
+    - name: mongodb-repo
+      url: https://example.com/mongo
 
 images:
   preload:
@@ -821,9 +827,10 @@ components:
 	writeFile(t, filepath.Join(root, "mongodb", "standalone", "mongodb.yaml"), "# mongo manifest")
 
 	writeFile(t, filepath.Join(root, "elastic", "elasticsearch", "sew.yaml"), `
-repos:
-  - name: elastic-repo
-    url: https://helm.elastic.co
+helm:
+  repos:
+    - name: elastic-repo
+      url: https://helm.elastic.co
 
 images:
   preload:
@@ -848,9 +855,10 @@ from:
 kind:
   name: app-cluster
 
-repos:
-  - name: app-repo
-    url: https://example.com/app
+helm:
+  repos:
+    - name: app-repo
+      url: https://example.com/app
 
 components:
   - name: app-comp
@@ -960,9 +968,10 @@ func TestFSResolver_AbstractContextDirect(t *testing.T) {
 	writeFile(t, filepath.Join(root, "base", "sew.yaml"), `
 abstract: true
 
-repos:
-  - name: base-repo
-    url: https://example.com/base
+helm:
+  repos:
+    - name: base-repo
+      url: https://example.com/base
 
 components:
   - name: base-comp
@@ -987,9 +996,10 @@ func TestFSResolver_AbstractComposedProducesNonAbstract(t *testing.T) {
 	writeFile(t, filepath.Join(root, "base", "sew.yaml"), `
 abstract: true
 
-repos:
-  - name: base-repo
-    url: https://example.com/base
+helm:
+  repos:
+    - name: base-repo
+      url: https://example.com/base
 
 components:
   - name: base-comp

@@ -22,9 +22,10 @@ kind:
       hostPort: 443
 
 # Optional: add Helm repos required by local components
-repos:
-  - name: bitnami
-    url: https://charts.bitnami.com/bitnami
+helm:
+  repos:
+    - name: bitnami
+      url: https://charts.bitnami.com/bitnami
 
 # Optional: override context components or add new ones
 components:
@@ -189,12 +190,13 @@ The `onMissing` field controls what happens when a file or environment variable 
 
 ### Adding Helm repos
 
-If the new component's chart comes from a repo that the context does not declare, add it under `repos`:
+If the new component's chart comes from a repo that the context does not declare, add it under `helm.repos`:
 
 ```yaml
-repos:
-  - name: bitnami
-    url: https://charts.bitnami.com/bitnami
+helm:
+  repos:
+    - name: bitnami
+      url: https://charts.bitnami.com/bitnami
 ```
 
 Local repos are merged with context repos. When both lists contain a repo with the same name, the local entry wins.

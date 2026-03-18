@@ -8,6 +8,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type HelmConfig struct {
+	Repos []Repo `yaml:"repos,omitempty"`
+}
+
 type Config struct {
 	Registry   string         `yaml:"registry"`
 	From       []string       `yaml:"from,omitempty"`
@@ -15,7 +19,7 @@ type Config struct {
 	Kind       KindConfig     `yaml:"kind"`
 	Features   FeaturesConfig `yaml:"features,omitempty"`
 	Images     ImagesConfig   `yaml:"images,omitempty"`
-	Repos      []Repo         `yaml:"repos,omitempty"`
+	Helm       HelmConfig     `yaml:"helm,omitempty"`
 	Components []Component    `yaml:"components,omitempty"`
 
 	// Dir is set by Load to resolve relative paths in component value files.
@@ -51,8 +55,8 @@ func Merge(base, override *Config) {
 	if override.Dir != "" {
 		base.Dir = override.Dir
 	}
-	if len(override.Repos) > 0 {
-		base.Repos = override.Repos
+	if len(override.Helm.Repos) > 0 {
+		base.Helm.Repos = override.Helm.Repos
 	}
 	if len(override.Components) > 0 {
 		base.Components = override.Components

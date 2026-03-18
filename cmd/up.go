@@ -162,7 +162,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 	}
 
 	registry.MergeComponents(resolved, cfg.Components, cfg.Dir)
-	resolved.Repos = registry.MergeRepos(resolved.Repos, cfg.Repos)
+	resolved.Repos = registry.MergeRepos(resolved.Repos, cfg.Helm.Repos)
 
 	if gatewayEnabled {
 		injectGatewayComponents(resolved)

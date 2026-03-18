@@ -2,9 +2,10 @@ images:
   preload:
     refs:
       - docker.elastic.co/elasticsearch/elasticsearch:9.3.1
-repos:
-  - name: elastic
-    url: https://helm.elastic.co
+helm:
+  repos:
+    - name: elastic
+      url: https://helm.elastic.co
 components:
   - name: elasticsearch
     type: helm

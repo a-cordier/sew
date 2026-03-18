@@ -66,7 +66,7 @@ func resolveFrom(ctx context.Context, childCfg config.Config, childDir, selfRegi
 	}
 
 	MergeComponents(acc, childCfg.Components, childDir)
-	acc.Repos = MergeRepos(acc.Repos, childCfg.Repos)
+	acc.Repos = MergeRepos(acc.Repos, childCfg.Helm.Repos)
 	acc.Features = config.MergeFeatures(acc.Features, childCfg.Features)
 	acc.Kind = mergeKind(acc.Kind, childCfg.Kind)
 	acc.Images = config.MergeImages(acc.Images, childCfg.Images)

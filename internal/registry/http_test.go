@@ -65,9 +65,10 @@ kind:
     - containerPort: 80
       hostPort: 80
 
-repos:
-  - name: base-repo
-    url: https://example.com/base
+helm:
+  repos:
+    - name: base-repo
+      url: https://example.com/base
 
 components:
   - name: base-comp
@@ -240,9 +241,10 @@ kind:
     - containerPort: 80
       hostPort: 80
 
-repos:
-  - name: gp-repo
-    url: https://example.com/gp
+helm:
+  repos:
+    - name: gp-repo
+      url: https://example.com/gp
 
 components:
   - name: gp-comp
@@ -255,9 +257,10 @@ components:
 from:
   - grandparent
 
-repos:
-  - name: mid-repo
-    url: https://example.com/mid
+helm:
+  repos:
+    - name: mid-repo
+      url: https://example.com/mid
 
 components:
   - name: gp-comp

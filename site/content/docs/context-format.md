@@ -7,9 +7,10 @@ type: docs
 A context lives at `{registry}/{context_path}/` and must contain `sew.yaml`:
 
 ```yaml
-repos:
-  - name: graviteeio
-    url: https://helm.gravitee.io
+helm:
+  repos:
+    - name: graviteeio
+      url: https://helm.gravitee.io
 
 components:
   - name: apim
@@ -157,9 +158,10 @@ This is useful when several variants share a common foundation (repos, component
 # registry/org/product/base/sew.yaml
 abstract: true
 
-repos:
-  - name: myrepo
-    url: https://charts.example.com
+helm:
+  repos:
+    - name: myrepo
+      url: https://charts.example.com
 
 components:
   - name: app
@@ -271,7 +273,7 @@ When contexts are composed, each top-level field is merged as follows:
 
 - **`kind`** — Scalar fields (`name`, `apiVersion`, `kind`): child wins if set. `nodes`: child replaces the entire list; `extraPortMappings` are merged as a **union** keyed by `(containerPort, protocol)` — parent-only ports are preserved, child-only ports are added, and when both sides define the same key the child wins. `containerdConfigPatches`: child replaces entirely.
 - **`components`** — Matched by name using the same rules as user-level overrides (see [Merge rules]({{< ref "configuration#merge-rules" >}})): `helm.chart` and `helm.version` child wins, `helm.valueFiles` appended, `helm.values` shallow-merged, `k8s.manifestFiles` appended, `k8s.manifests` appended, `k8s.secrets` appended, `k8s.configMaps` appended, `requires` appended and deduplicated. Unmatched components are appended.
-- **`repos`** — Deduplicated by name; child entry wins on conflict.
+- **`helm.repos`** — Deduplicated by name; child entry wins on conflict.
 - **`features`** — Each feature block (`lb`, `gateway`, `dns`) is replaced as a whole if the child defines it; otherwise inherited from parent.
 - **`images`** — `preload`: when both sides define it, `refs` are deduplicated (union); when only one side defines it, that side's config is used as-is. `mirrors` from the child wins when set; otherwise inherited from parent.
 

@@ -101,7 +101,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*config
 	}
 
 	return &config.ResolvedContext{
-		Repos:      parsed.Repos,
+		Repos:      parsed.Helm.Repos,
 		Components: parsed.Components,
 		Dir:        cacheDir,
 		Kind:       parsed.Kind,

@@ -63,7 +63,7 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*config.R
 	}
 
 	return &config.ResolvedContext{
-		Repos:      ctxCfg.Repos,
+		Repos:      ctxCfg.Helm.Repos,
 		Components: ctxCfg.Components,
 		Dir:        dir,
 		Kind:       ctxCfg.Kind,

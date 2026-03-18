@@ -12,9 +12,10 @@ kind:
           hostPort: 30082
         - containerPort: 30084
           hostPort: 30084
-repos:
-  - name: graviteeio
-    url: https://helm.gravitee.io
+helm:
+  repos:
+    - name: graviteeio
+      url: https://helm.gravitee.io
 components:
   - name: apim
     type: helm

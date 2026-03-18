@@ -19,9 +19,10 @@ features:
     enabled: true
   dns:
     enabled: true
-repos:
-  - name: graviteeio
-    url: https://helm.gravitee.io
+helm:
+  repos:
+    - name: graviteeio
+      url: https://helm.gravitee.io
 components:
   - name: gko
     type: helm

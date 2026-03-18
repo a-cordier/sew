@@ -23,9 +23,10 @@ kind:
           hostPort: 30083
         - containerPort: 30084
           hostPort: 30084
-repos: # TODO put under a "helm" property
-  - name: graviteeio
-    url: https://helm.gravitee.io
+helm:
+  repos:
+    - name: graviteeio
+      url: https://helm.gravitee.io
 
 components:
   - name: tls-server
