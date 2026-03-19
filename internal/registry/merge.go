@@ -16,7 +16,7 @@ import (
 //   - helm.chart: user wins if non-empty
 //   - helm.version: user wins if non-empty
 //   - helm.valueFiles: user files are appended (higher precedence in Helm)
-//   - helm.values: shallow-merged on top of context values (user wins per key)
+//   - helm.values: deep-merged on top of context values (user wins per leaf key)
 //
 // Value file paths from the user config are resolved relative to configDir.
 func MergeComponents(resolved *config.ResolvedContext, components []config.Component, configDir string) {
@@ -72,9 +72,7 @@ func MergeComponents(resolved *config.ResolvedContext, components []config.Compo
 				if comp.Helm.Values == nil {
 					comp.Helm.Values = make(map[string]interface{})
 				}
-				for k, v := range patch.Helm.Values {
-					comp.Helm.Values[k] = v
-				}
+				deepMergeValues(comp.Helm.Values, patch.Helm.Values)
 			}
 		}
 		if patch.K8s != nil {
@@ -87,6 +85,25 @@ func MergeComponents(resolved *config.ResolvedContext, components []config.Compo
 			comp.K8s.Manifests = append(comp.K8s.Manifests, patch.K8s.Manifests...)
 			comp.K8s.Secrets = append(comp.K8s.Secrets, patch.K8s.Secrets...)
 			comp.K8s.ConfigMaps = append(comp.K8s.ConfigMaps, patch.K8s.ConfigMaps...)
+		}
+	}
+}
+
+// deepMergeValues recursively merges src into dst. When both dst[k] and src[k]
+// are maps, the merge recurses. Otherwise src[k] wins.
+func deepMergeValues(dst, src map[string]interface{}) {
+	for k, srcVal := range src {
+		dstVal, exists := dst[k]
+		if !exists {
+			dst[k] = srcVal
+			continue
+		}
+		dstMap, dstOk := dstVal.(map[string]interface{})
+		srcMap, srcOk := srcVal.(map[string]interface{})
+		if dstOk && srcOk {
+			deepMergeValues(dstMap, srcMap)
+		} else {
+			dst[k] = srcVal
 		}
 	}
 }

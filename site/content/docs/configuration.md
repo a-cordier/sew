@@ -254,7 +254,7 @@ When a local component matches a context component by name, the following merge 
 | `helm.chart` | Local wins if non-empty |
 | `helm.version` | Local wins if non-empty |
 | `helm.valueFiles` | Local files are appended (higher precedence in Helm) |
-| `helm.values` | Local values are merged on top of context values |
+| `helm.values` | Deep-merged on top of context values (local wins per leaf key) |
 | `k8s.manifestFiles` | Local files are appended |
 | `k8s.manifests` | Local manifests are appended |
 | `k8s.secrets` | Local secrets are appended |

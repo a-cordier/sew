@@ -685,6 +685,72 @@ func TestMergeComponents_PatchOverUserOverride(t *testing.T) {
 	}
 }
 
+func TestMergeComponents_DeepMergeValues(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name: "apim",
+				Helm: &config.HelmSpec{
+					Chart: "graviteeio/apim",
+					Values: map[string]interface{}{
+						"gateway": map[string]interface{}{
+							"image": map[string]interface{}{"tag": "4.10.0"},
+							"env": []interface{}{
+								map[string]interface{}{
+									"name":  "gravitee_ratelimit_type",
+									"value": "jdbc",
+								},
+							},
+						},
+						"jdbc": map[string]interface{}{
+							"url": "jdbc:postgresql://postgresql:5432/gravitee",
+						},
+					},
+				},
+			},
+		},
+	}
+	patch := []config.Component{
+		{
+			Name: "apim",
+			Helm: &config.HelmSpec{
+				Values: map[string]interface{}{
+					"gateway": map[string]interface{}{
+						"image": map[string]interface{}{
+							"repository": "graviteeio/apim-gateway",
+							"tag":        "4.11.0-alpha",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, patch, "")
+
+	comp := resolved.Components[0]
+	gw, ok := comp.Helm.Values["gateway"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected gateway values map, got %T", comp.Helm.Values["gateway"])
+	}
+	img, ok := gw["image"].(map[string]interface{})
+	if !ok {
+		t.Fatalf("expected gateway.image map, got %T", gw["image"])
+	}
+	if img["tag"] != "4.11.0-alpha" {
+		t.Fatalf("expected tag overridden to 4.11.0-alpha, got %v", img["tag"])
+	}
+	if img["repository"] != "graviteeio/apim-gateway" {
+		t.Fatalf("expected repository added, got %v", img["repository"])
+	}
+	if gw["env"] == nil {
+		t.Fatal("expected gateway.env preserved after deep merge")
+	}
+	if comp.Helm.Values["jdbc"] == nil {
+		t.Fatal("expected jdbc top-level key preserved")
+	}
+}
+
 func TestMergeComponents_PatchOnlyAffectsNamedComponents(t *testing.T) {
 	resolved := &config.ResolvedContext{
 		Components: []config.Component{

@@ -33,7 +33,7 @@ sew patch upgrade.yaml --name gio-apim
 
 ## Patch file format
 
-The patch file uses the same format as `sew.yaml`. Only the `components` and `helm.repos` sections are relevant — other fields are ignored.
+The patch file uses the same format as `sew.yaml`. The `components`, `helm.repos`, and `images.preload` sections are relevant — other fields are ignored.
 
 ### Example: upgrade image tags
 
@@ -106,6 +106,33 @@ sew patch upgrade.yaml
 
 # 5. Tear down
 sew delete
+```
+
+## Image preloading
+
+When the cluster was created with image preloading enabled (`images.preload` in `sew.yaml`), the Kind nodes are already configured to pull from the local `sew-preload` registry. Declaring `images.preload.refs` in a patch file pre-stages the listed images into that registry before upgrading components, so pods start faster and avoid pulling from remote registries.
+
+If no preload registry is running (e.g. the cluster was created without preload), sew prints a warning and proceeds normally — images will be pulled on-demand by the cluster.
+
+### Example: patch with preloaded images
+
+```yaml
+images:
+  preload:
+    refs:
+      - graviteeio/apim-gateway:4.11.0-alpha
+      - graviteeio/apim-management-api:4.11.0-alpha
+
+components:
+  - name: apim
+    helm:
+      values:
+        gateway:
+          image:
+            tag: 4.11.0-alpha
+        api:
+          image:
+            tag: 4.11.0-alpha
 ```
 
 ## Dry-run mode

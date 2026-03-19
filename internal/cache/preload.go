@@ -28,6 +28,17 @@ func PreloadRegistryHost() string {
 	return preloadContainerName + ":5000"
 }
 
+// IsPreloadRunning reports whether the sew-preload registry container is
+// currently running.
+func IsPreloadRunning(ctx context.Context) (bool, error) {
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return false, err
+	}
+	defer cli.Close()
+	return isContainerRunning(ctx, cli, preloadContainerName)
+}
+
 // PullImages pulls all images in parallel using the Docker daemon on the host.
 // When running on CI with Docker Layer Caching (DLC), already-cached layers
 // make subsequent pulls effectively free.

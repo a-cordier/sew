@@ -8,9 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-cordier/sew/internal/cache"
 	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/installer"
 	"github.com/a-cordier/sew/internal/kind"
+	"github.com/a-cordier/sew/internal/logger"
 	"github.com/a-cordier/sew/internal/registry"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -26,8 +28,8 @@ var patchCmd = &cobra.Command{
 	Long: `Patch merges a partial configuration file into the current resolved context
 and upgrades only the affected components on a running Kind cluster.
 
-The patch file uses the same format as sew.yaml. Only the "components" and
-"helm.repos" sections are relevant; other fields are ignored.
+The patch file uses the same format as sew.yaml. The "components", "helm.repos",
+and "images.preload" sections are relevant; other fields are ignored.
 
 Example:
 
@@ -110,6 +112,27 @@ func runPatch(_ *cobra.Command, args []string) error {
 	resolved.Repos = registry.MergeRepos(resolved.Repos, patch.Helm.Repos)
 
 	ctx := context.Background()
+
+	if !patchDryRun {
+		preloadRefs := getPreloadRefs(patch)
+		if len(preloadRefs) > 0 {
+			running, _ := cache.IsPreloadRunning(ctx)
+			if running {
+				if err := logger.WithSpinner("Pulling images for preload", func() error {
+					return cache.PullImages(ctx, preloadRefs)
+				}); err != nil {
+					return err
+				}
+				if err := logger.WithSpinner("Pushing images to preload registry", func() error {
+					return cache.PushImages(ctx, preloadRefs)
+				}); err != nil {
+					return err
+				}
+			} else {
+				color.Yellow("  preload refs specified but no preload registry running; images will be pulled on demand")
+			}
+		}
+	}
 
 	filter := func(c config.Component) bool {
 		return patchedNames[c.Name]
