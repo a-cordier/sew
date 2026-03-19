@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/a-cordier/sew/internal/config"
@@ -80,10 +82,28 @@ func installComponents(
 			return fmt.Errorf("component %q: %w", comp.Name, err)
 		}
 		comp := comp
-		if err := logger.WithSpinner(fmt.Sprintf("Installing %q", comp.Name), func() error {
-			return inst.Install(ctx, comp, resolved.Dir, opts)
+
+		compOpts := opts
+		var diffBuf *bytes.Buffer
+		if opts.DryRun {
+			diffBuf = &bytes.Buffer{}
+			compOpts.DiffWriter = diffBuf
+		}
+
+		spinnerMsg := fmt.Sprintf("Installing %q", comp.Name)
+		if opts.DryRun {
+			spinnerMsg = fmt.Sprintf("Dry-run %q", comp.Name)
+		}
+
+		if err := logger.WithSpinner(spinnerMsg, func() error {
+			return inst.Install(ctx, comp, resolved.Dir, compOpts)
 		}); err != nil {
 			return err
+		}
+
+		if diffBuf != nil && diffBuf.Len() > 0 {
+			fmt.Fprintln(os.Stderr)
+			fmt.Fprint(os.Stderr, diffBuf.String())
 		}
 		if comp.Conditions.Ready && !opts.DryRun {
 			ns := comp.Namespace

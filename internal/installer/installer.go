@@ -3,13 +3,15 @@ package installer
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/a-cordier/sew/internal/config"
 )
 
 // InstallOpts carries optional flags for an install operation.
 type InstallOpts struct {
-	DryRun bool
+	DryRun     bool
+	DiffWriter io.Writer
 }
 
 // Installer deploys and removes components.

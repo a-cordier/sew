@@ -120,7 +120,11 @@ func runPatch(_ *cobra.Command, args []string) error {
 	}
 
 	fmt.Println()
-	color.Blue("  Patch applied in %s", time.Since(start).Round(time.Millisecond))
+	if patchDryRun {
+		color.Blue("  Dry-run completed in %s", time.Since(start).Round(time.Millisecond))
+	} else {
+		color.Blue("  Patch applied in %s", time.Since(start).Round(time.Millisecond))
+	}
 
 	return nil
 }

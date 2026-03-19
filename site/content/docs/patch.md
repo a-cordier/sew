@@ -121,6 +121,7 @@ When `--dry-run` is active:
 - **Helm components** — `helm install` / `helm upgrade` runs with `--dry-run=server`, so the chart is rendered and validated by the API server without creating or updating the release.
 - **Kubernetes manifest components** — `kubectl apply` runs with `--dry-run=server` (`DryRun: ["All"]` in apply options), validating the objects without persisting them.
 - **Readiness checks are skipped** — since no resources are actually deployed, sew does not wait for pods or other conditions.
+- **Colored diff output** — after each component, sew prints a colored unified diff showing exactly what would change: added lines in green, removed lines in red, and hunk headers in cyan. For fresh installs the entire manifest is shown as additions.
 
 This is especially useful in CI pipelines to catch configuration or chart errors before a real upgrade:
 

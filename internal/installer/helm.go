@@ -190,9 +190,14 @@ func (h *HelmInstaller) Install(ctx context.Context, comp config.Component, dir 
 		if err != nil {
 			return fmt.Errorf("loading chart: %w", err)
 		}
-		_, err = instClient.RunWithContext(ctx, ch, vals)
+		rel, err := instClient.RunWithContext(ctx, ch, vals)
 		if err != nil {
 			return fmt.Errorf("running install: %w", err)
+		}
+		if opts.DryRun && opts.DiffWriter != nil && rel != nil {
+			if err := RenderDiff(comp.Name, "", rel.Manifest, opts.DiffWriter); err != nil {
+				return fmt.Errorf("rendering diff: %w", err)
+			}
 		}
 		return nil
 	}
@@ -216,9 +221,15 @@ func (h *HelmInstaller) Install(ctx context.Context, comp config.Component, dir 
 	if err != nil {
 		return fmt.Errorf("loading chart: %w", err)
 	}
-	_, err = upgradeClient.RunWithContext(ctx, comp.Name, ch, vals)
+	oldManifest := versions[0].Manifest
+	rel, err := upgradeClient.RunWithContext(ctx, comp.Name, ch, vals)
 	if err != nil {
 		return fmt.Errorf("running upgrade: %w", err)
+	}
+	if opts.DryRun && opts.DiffWriter != nil && rel != nil {
+		if err := RenderDiff(comp.Name, oldManifest, rel.Manifest, opts.DiffWriter); err != nil {
+			return fmt.Errorf("rendering diff: %w", err)
+		}
 	}
 	return nil
 }
