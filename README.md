@@ -1,11 +1,11 @@
 <p align="center"><img src="logo.svg" alt="sew" width="140"/><br><em>Your local Kubernetes tailor shop</em></p>
 
-**sew** spins up local Kubernetes clusters and deploys ready-to-use applications from a **registry**. You point it at one or more contexts (e.g. `gravitee.io/apim/db-less`), and it creates a Kind cluster and installs the components defined there (Helm charts, and in the future manifests or Kustomize).
+**sew** spins up local Kubernetes clusters and deploys ready-to-use applications from a **registry**. You point it at one or more contexts (e.g. `gravitee.io/apim/oss/k8s/dbless`), and it creates a Kind cluster and installs the components defined there (Helm charts, and in the future manifests or Kustomize).
 
 ## Concepts
 
 - **Registry** — A tree of context directories, either on the filesystem (`file:///path`) or over HTTP. The binary does not ship a registry; you use your own or a remote one.
-- **Context** — A path inside the registry following `org/product/variant` (e.g. `gravitee.io/apim/db-less`). Each context has a `sew.yaml` that lists Helm repos and components (charts + values). If you omit the variant (e.g. `gravitee.io/apim`), sew looks for a `.default` file to pick one automatically (see [Default variant resolution](#default-variant-resolution)).
+- **Context** — A path inside the registry following `org/product/variant` (e.g. `gravitee.io/apim/oss/k8s/dbless`). Each context has a `sew.yaml` that lists Helm repos and components (charts + values). If you omit the variant (e.g. `gravitee.io/apim`), sew looks for a `.default` file to pick one automatically (see [Default variant resolution](#default-variant-resolution)).
 - **Config** — Configuration is layered. A **user-level** config at `$SEW_HOME/sew.yaml` (default `~/.sew/sew.yaml`) provides base settings; a **project-level** `./sew.yaml` (or `--config`) is merged on top. Each layer sets the registry URL, the contexts to compose via `from`, the Kind cluster definition, and optional local components and repos. Set the `SEW_HOME` environment variable to change the user-level config location.
 
 ## Commands
@@ -22,13 +22,13 @@
 
 - `--config <path>` — Project-level config file to merge on top of the user-level base (`$SEW_HOME/sew.yaml`). Defaults to `./sew.yaml` when present.
 - `--registry <url>` — Registry URL (e.g. `file://./registry` or `https://…`). Overrides the value from the config file.
-- `--from <path>` — Context path to compose (e.g. `gravitee.io/apim/db-less`). Repeatable: use multiple `--from` flags to compose several contexts. Overrides the `from` list from the config file.
+- `--from <path>` — Context path to compose (e.g. `gravitee.io/apim/oss/k8s/dbless`). Repeatable: use multiple `--from` flags to compose several contexts. Overrides the `from` list from the config file.
 
 ## Quick start
 
 1. **Config** — Create a `sew.yaml` (or use the one in this repo) with at least:
    - `registry`: e.g. `file://./registry` for the local test registry, or an HTTP URL.
-   - `from`: list of context paths, e.g. `[gravitee.io/apim/db-less]`.
+   - `from`: list of context paths, e.g. `[gravitee.io/apim/oss/k8s/dbless]`.
    - `kind`: Kind cluster spec (name, nodes, port mappings).
 
 2. **Run** — From the `sew` directory (or with `--config` pointing to this config):
@@ -51,7 +51,7 @@
 ```yaml
 registry: file://./registry   # or https://...
 from:
-  - gravitee.io/apim/db-less
+  - gravitee.io/apim/oss/k8s/dbless
 
 kind:
   apiVersion: kind.x-k8s.io/v1alpha4
@@ -170,9 +170,47 @@ When a local component matches a context component by name, the following merge 
 | `helm.chart` | Local wins if non-empty |
 | `helm.version` | Local wins if non-empty |
 | `helm.valueFiles` | Local files are appended (higher precedence in Helm) |
-| `helm.values` | Local values are merged on top of context values |
+| `helm.values` | Deep-merged on top of context values (see [Values deep merge](#values-deep-merge) below) |
 
 When there is no name match, the component is added to the deployment as-is.
+
+### Values deep merge
+
+When `helm.values` from two layers overlap on the same key, sew picks a merge strategy based on the value type:
+
+| Value type | Strategy | Example keys |
+|-----------|----------|-------------|
+| Maps | Recursive deep merge — each nested key is merged individually, child wins per leaf | `gateway.image`, `jdbc` |
+| Named lists (every element is an object with a `name` key) | Merge by `name` — same-name entries are overridden in place, new entries are appended | `env`, `ports`, `volumeMounts` |
+| Everything else (scalars, plain lists, unnamed object lists) | Replace — child value wins | `replicas`, `es.endpoints`, `servers` |
+
+Named-list merging follows the Kubernetes convention: fields like `env`, `ports`, `volumeMounts`, and `containers` all use `name` as an identity key. This means composed contexts can each contribute entries to the same list without clobbering each other.
+
+**Example**: a postgres context sets JDBC rate-limiting env vars, and a Kafka context adds Kafka env vars. After composition, both sets of env vars are present:
+
+```yaml
+# Context A (postgres) defines:
+gateway:
+  env:
+    - name: gravitee_ratelimit_type
+      value: jdbc
+
+# Context B (kafka) defines:
+gateway:
+  env:
+    - name: KAFKA_PORT
+      value: "9092"
+
+# Merged result — both entries are combined:
+gateway:
+  env:
+    - name: gravitee_ratelimit_type
+      value: jdbc
+    - name: KAFKA_PORT
+      value: "9092"
+```
+
+If both sides define an entry with the same `name`, the later (child) value wins. An empty list (`env: []`) replaces the parent's list entirely — use this to clear inherited entries.
 
 ## Context format
 
@@ -230,7 +268,7 @@ This says: start from the `org/product/base` context, override the cluster name,
 A context can compose multiple independent contexts. This is useful for assembling a stack from reusable building blocks:
 
 ```yaml
-# registry/gravitee.io/apim/aio/sew.yaml
+# registry/gravitee.io/apim/oss/aio/base/sew.yaml
 from:
   - mongodb/standalone
   - elastic/elasticsearch
@@ -325,33 +363,52 @@ registry/
     standalone/
       sew.yaml
   elastic/
+    .default              # -> elasticsearch
     elasticsearch/
       sew.yaml
   postgresql/
     .default              # -> standalone
     standalone/
       sew.yaml
+  kafka/
+    .default              # -> standalone
+    standalone/
+      sew.yaml
   gravitee.io/
     apim/
-      .default            # -> aio
-      aio/
-        .default          # -> mongodb
-        base/
-          sew.yaml        # abstract: true -- common APIM config
-        mongodb/
-          sew.yaml        # from: [mongodb/standalone, elastic/elasticsearch, gravitee.io/apim/aio/base]
-          notes.create
-        postgres/
-          sew.yaml        # from: [postgresql/standalone, elastic/elasticsearch, gravitee.io/apim/aio/base]
-          notes.create
-      dbless/
-        sew.yaml
-        notes.create
-      gateway-api/
-        sew.yaml
+      .default            # -> oss
+      oss/
+        .default          # -> aio
+        aio/
+          .default        # -> postgres
+          base/
+            sew.yaml      # abstract: true -- common APIM config
+          mongodb/
+            sew.yaml      # from: [mongodb/standalone, elastic/elasticsearch, gravitee.io/apim/oss/aio/base]
+            notes.create
+          postgres/
+            sew.yaml      # from: [postgresql/standalone, elastic/elasticsearch, gravitee.io/apim/oss/aio/base]
+            notes.create
+        k8s/
+          .default        # -> dbless
+          dbless/
+            sew.yaml
+            notes.create
+          gateway/
+            sew.yaml
+      ee/
+        .default          # -> kafka
+        kafka/
+          .default        # -> postgres
+          base/
+            sew.yaml      # abstract: true -- from: [kafka/standalone], license + Kafka gateway config
+          mongodb/
+            sew.yaml      # from: [gravitee.io/apim/oss/aio/mongodb, gravitee.io/apim/ee/kafka/base]
+          postgres/
+            sew.yaml      # from: [gravitee.io/apim/oss/aio/postgres, gravitee.io/apim/ee/kafka/base]
 ```
 
-The `.default` chain `gravitee.io/apim` → `aio` → `mongodb` means existing configs with `from: [gravitee.io/apim]` resolve to the mongodb variant without changes. Swapping implementations is consumer choice — replace `mongodb` with `postgres` in your context path.
+The `.default` chain `gravitee.io/apim` → `oss` → `aio` → `postgres` means existing configs with `from: [gravitee.io/apim]` resolve to the OSS postgres variant without changes. Swapping implementations is consumer choice — replace `oss` with `ee` to get the enterprise edition (`ee` → `kafka` → `postgres`), or pick a specific variant like `gravitee.io/apim/oss/aio/mongodb`.
 
 ### Cross-registry composition
 
@@ -379,7 +436,7 @@ Composition chains work to arbitrary depth (grandparent → parent → child). C
 When contexts are composed, each top-level field is merged as follows:
 
 - **`kind`** — Scalar fields (`name`, `apiVersion`, `kind`): child wins if set. `nodes`: child replaces the entire list; however, if the child's first node has no `extraPortMappings`, it inherits the parent's. `containerdConfigPatches`: child replaces entirely.
-- **`components`** — Matched by name using the same rules as user-level overrides (see [Merge rules](#merge-rules)): `helm.chart` and `helm.version` child wins, `helm.valueFiles` appended, `helm.values` shallow-merged, `requires` appended and deduplicated. Unmatched components are appended.
+- **`components`** — Matched by name using the same rules as user-level overrides (see [Merge rules](#merge-rules)): `helm.chart` and `helm.version` child wins, `helm.valueFiles` appended, `helm.values` deep-merged (maps recurse, named lists merge by `name`, scalars replace — see [Values deep merge](#values-deep-merge)), `requires` appended and deduplicated. Unmatched components are appended.
 - **`helm.repos`** — Deduplicated by name; child entry wins on conflict.
 - **`features`** — Each feature block (`lb`, `gateway`, `dns`) is replaced as a whole if the child defines it; otherwise inherited from parent.
 - **`images`** — `preload`: when both sides define it, `refs` are deduplicated (union); when only one side defines it, that side's config is used as-is. `mirrors` from the child wins when set; otherwise inherited from parent.
@@ -392,22 +449,38 @@ When the resolved path has no `sew.yaml`, sew looks for a **`.default`** file in
 
 ```
 registry/gravitee.io/apim/
-├── .default          # contains "db-less"
-├── db-less/
-│   ├── sew.yaml
-│   ├── values-apim.yaml
-│   └── values-gko.yaml
-└── standard/         # another variant
-    ├── sew.yaml
-    └── ...
+├── .default          # contains "oss"
+├── oss/
+│   ├── .default      # contains "aio"
+│   ├── aio/
+│   │   ├── .default  # contains "postgres"
+│   │   ├── base/
+│   │   │   └── sew.yaml  # abstract
+│   │   ├── mongodb/
+│   │   │   └── sew.yaml
+│   │   └── postgres/
+│   │       └── sew.yaml
+│   └── k8s/
+│       ├── .default  # contains "dbless"
+│       ├── dbless/
+│       │   └── sew.yaml
+│       └── gateway/
+│           └── sew.yaml
+└── ee/
+    ├── .default      # contains "kafka"
+    └── kafka/
+        ├── .default  # contains "postgres"
+        ├── base/
+        │   └── sew.yaml  # abstract
+        └── ...
 ```
 
-With the tree above, setting `from: [gravitee.io/apim]` in your config is equivalent to `from: [gravitee.io/apim/db-less]` — sew reads `.default`, finds `db-less`, and resolves `gravitee.io/apim/db-less`.
+With the tree above, setting `from: [gravitee.io/apim]` in your config is equivalent to `from: [gravitee.io/apim/oss/aio/postgres]` — sew reads `.default` at each level, following the chain `oss` → `aio` → `postgres`.
 
 To create a default for your own product, add a `.default` file next to the variant directories:
 
 ```bash
-echo "db-less" > registry/gravitee.io/apim/.default
+echo "oss" > registry/gravitee.io/apim/.default
 ```
 
 If neither `sew.yaml` nor `.default` is found at the given path, sew returns an error.
@@ -623,6 +696,8 @@ features:
 ```
 
 Each record resolves `hostname` to the external IP assigned to the named Service. Static records are collected alongside Gateway-derived ones during `sew create` and `sew refresh dns`.
+
+Wildcard hostnames are supported per RFC 4592. A record with `hostname: "*.kafka.sew.local"` matches any single DNS label in place of `*` (e.g. `demo.kafka.sew.local`, `broker-0-demo.kafka.sew.local`). Exact records take priority over wildcards.
 
 ### Options
 

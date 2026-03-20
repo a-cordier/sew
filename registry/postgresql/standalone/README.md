@@ -24,4 +24,4 @@ sew create postgresql/standalone
 
 This is a minimal, persistence-free PostgreSQL suitable for development and
 testing. It is used as a dependency by higher-level contexts such as
-`gravitee.io/apim/aio/postgres`.
+`gravitee.io/apim/oss/aio/postgres`.

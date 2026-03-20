@@ -12,7 +12,7 @@ Gateway API controller. Sets up a `GatewayClass` and its parameters so that
 ## Usage
 
 ```bash
-sew create gravitee.io/apim/gateway-api
+sew create gravitee.io/apim/oss/k8s/gateway
 ```
 
 ## Details

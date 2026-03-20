@@ -12,7 +12,7 @@ analytics. Management uses JDBC. Rate limiting is also stored in PostgreSQL.
 ## Usage
 
 ```bash
-sew create gravitee.io/apim/aio/postgres
+sew create gravitee.io/apim/oss/aio/postgres
 ```
 
 ## Endpoints
@@ -30,4 +30,4 @@ This context composes from:
 
 - `postgresql/standalone` — PostgreSQL 17 database
 - `elastic/elasticsearch` — Elasticsearch for reporting
-- `gravitee.io/apim/aio/base` — shared APIM Helm configuration
+- `gravitee.io/apim/oss/aio/base` — shared APIM Helm configuration

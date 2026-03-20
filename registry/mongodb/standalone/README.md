@@ -22,4 +22,4 @@ sew create mongodb/standalone
 
 This is a minimal, persistence-free MongoDB suitable for development and
 testing. It is used as a dependency by higher-level contexts such as
-`gravitee.io/apim/aio/mongodb`.
+`gravitee.io/apim/oss/aio/mongodb`.

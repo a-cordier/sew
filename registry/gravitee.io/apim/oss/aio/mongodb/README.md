@@ -12,7 +12,7 @@ analytics.
 ## Usage
 
 ```bash
-sew create gravitee.io/apim/aio/mongodb
+sew create gravitee.io/apim/oss/aio/mongodb
 ```
 
 ## Endpoints
@@ -30,4 +30,4 @@ This context composes from:
 
 - `mongodb/standalone` — MongoDB 7 database
 - `elastic/elasticsearch` — Elasticsearch for reporting
-- `gravitee.io/apim/aio/base` — shared APIM Helm configuration
+- `gravitee.io/apim/oss/aio/base` — shared APIM Helm configuration
