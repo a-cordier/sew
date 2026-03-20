@@ -77,6 +77,24 @@ features:
 
 Each record resolves `hostname` to the external IP assigned to the named Service. Static records are collected alongside Gateway-derived ones during `sew create` and `sew refresh dns`.
 
+### Wildcard records
+
+Wildcard hostnames are supported per [RFC 4592](https://datatracker.ietf.org/doc/html/rfc4592). A record with a `*` first label matches any hostname that shares the remaining suffix:
+
+```yaml
+features:
+  dns:
+    enabled: true
+    records:
+      - hostname: "*.kafka.sew.local"
+        service: apim-gateway
+        namespace: gravitee
+```
+
+With this record, both `demo.kafka.sew.local` and `broker-0-demo.kafka.sew.local` resolve to the `apim-gateway` Service IP — no per-API DNS entries are needed.
+
+Exact records always take priority over wildcards. If you define both `*.kafka.sew.local` and `admin.kafka.sew.local`, the latter is returned for `admin` while all other names fall through to the wildcard.
+
 ## Options
 
 | Field | Default | Description |
