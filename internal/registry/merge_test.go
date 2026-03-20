@@ -767,6 +767,45 @@ func TestMergeComponents_EmptyConfigDirSkipsResolution(t *testing.T) {
 	}
 }
 
+func TestMergeComponents_EnvVarPathExpandedBeforeIsAbs(t *testing.T) {
+	t.Setenv("SEW_TEST_HOME", "/home/testuser")
+
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{Name: "app", K8s: &config.K8sSpec{}},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "app",
+			K8s: &config.K8sSpec{
+				Secrets: []config.LocalResource{
+					{Name: "license", FromFile: "$SEW_TEST_HOME/opt/license.key"},
+				},
+				ConfigMaps: []config.LocalResource{
+					{
+						Name: "creds",
+						Entries: []config.ResourceEntry{
+							{Key: "token", FromFile: "$SEW_TEST_HOME/tokens/token.txt"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "/should/not/be/prepended")
+
+	secret := resolved.Components[0].K8s.Secrets[0]
+	if secret.FromFile != "/home/testuser/opt/license.key" {
+		t.Fatalf("expected env var expanded to absolute path, got %q", secret.FromFile)
+	}
+	entry := resolved.Components[0].K8s.ConfigMaps[0].Entries[0]
+	if entry.FromFile != "/home/testuser/tokens/token.txt" {
+		t.Fatalf("expected env var expanded to absolute path in entry, got %q", entry.FromFile)
+	}
+}
+
 func TestMergeComponents_PatchOverUserOverride(t *testing.T) {
 	resolved := &config.ResolvedContext{
 		Components: []config.Component{

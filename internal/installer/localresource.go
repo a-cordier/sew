@@ -17,7 +17,7 @@ type resolvedEntry struct {
 
 func resolveEntries(res config.LocalResource) ([]resolvedEntry, error) {
 	if res.FromFile != "" {
-		path := os.ExpandEnv(res.FromFile)
+		path := res.FromFile
 		data, err := os.ReadFile(path)
 		if err != nil {
 			return nil, fmt.Errorf("reading file %q: %w", path, err)
@@ -33,7 +33,7 @@ func resolveEntries(res config.LocalResource) ([]resolvedEntry, error) {
 
 		switch {
 		case e.FromFile != "":
-			path := os.ExpandEnv(e.FromFile)
+			path := e.FromFile
 			if key == "" {
 				key = filepath.Base(path)
 			}
