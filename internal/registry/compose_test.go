@@ -1096,3 +1096,136 @@ components: []
 		t.Fatalf("expected cycle error message, got: %v", err)
 	}
 }
+
+// TestFSResolver_NamespacePropagatesThroughAbstractComposition mirrors the
+// real ee/kafka composition chain:
+//
+//	kafka/standalone (type: k8s, no namespace)
+//	  ↑ from
+//	ee/kafka/base (abstract, sets kafka namespace: gravitee)
+//	  ↑ from (with oss/aio/postgres)
+//	ee/kafka/postgres (concrete, via .default)
+//	  ↑ .default
+//	ee/kafka
+//
+// The test asserts the kafka component in the final resolved context has
+// namespace "gravitee".
+func TestFSResolver_NamespacePropagatesThroughAbstractComposition(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "kafka", "standalone", "sew.yaml"), `
+components:
+  - name: kafka
+    type: k8s
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: kafka
+            labels:
+              app: kafka
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: kafka
+            template:
+              metadata:
+                labels:
+                  app: kafka
+              spec:
+                containers:
+                  - name: kafka
+                    image: apache/kafka:latest
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: kafka
+          spec:
+            type: NodePort
+            ports:
+              - port: 9092
+            selector:
+              app: kafka
+`)
+
+	writeFile(t, filepath.Join(root, "oss", "aio", "postgres", "sew.yaml"), `
+components:
+  - name: apim
+    helm:
+      chart: graviteeio/apim3
+`)
+
+	writeFile(t, filepath.Join(root, "ee", "kafka", "base", "sew.yaml"), `
+abstract: true
+from:
+  - kafka/standalone
+components:
+  - name: kafka
+    namespace: gravitee
+    k8s:
+      manifests:
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: kafka
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 9092
+            selector:
+              app: kafka
+  - name: apim
+    helm:
+      values:
+        gateway:
+          kafka:
+            enabled: true
+`)
+
+	writeFile(t, filepath.Join(root, "ee", "kafka", "postgres", "sew.yaml"), `
+from:
+  - oss/aio/postgres
+  - ee/kafka/base
+`)
+
+	writeFile(t, filepath.Join(root, "ee", "kafka", ".default"), `postgres`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "ee/kafka")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	var kafkaComp *config.Component
+	for i := range resolved.Components {
+		if resolved.Components[i].Name == "kafka" {
+			kafkaComp = &resolved.Components[i]
+			break
+		}
+	}
+	if kafkaComp == nil {
+		t.Fatal("kafka component not found in resolved context")
+	}
+	if kafkaComp.Namespace != "gravitee" {
+		t.Fatalf("expected kafka namespace %q, got %q", "gravitee", kafkaComp.Namespace)
+	}
+	if kafkaComp.K8s == nil {
+		t.Fatal("expected kafka component to have K8s spec")
+	}
+
+	foundClusterIP := false
+	for _, m := range kafkaComp.K8s.Manifests {
+		if m["kind"] == "Service" {
+			spec, _ := m["spec"].(map[string]interface{})
+			if spec != nil && spec["type"] == "ClusterIP" {
+				foundClusterIP = true
+			}
+		}
+	}
+	if !foundClusterIP {
+		t.Fatal("expected kafka Service to be overridden to ClusterIP")
+	}
+}

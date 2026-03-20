@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/a-cordier/sew/internal/config"
@@ -27,13 +28,17 @@ func MergeComponents(resolved *config.ResolvedContext, components []config.Compo
 	for i := range resolved.Components {
 		byName[resolved.Components[i].Name] = &resolved.Components[i]
 	}
+	// Two-pass merge: process all merges first (via byName pointers), then
+	// append new components. Appending during the merge loop would invalidate
+	// byName pointers when the slice's backing array is reallocated.
+	var newComponents []config.Component
 	for _, patch := range components {
 		comp, ok := byName[patch.Name]
 		if !ok {
 			resolveValueFilePaths(&patch, configDir)
 			resolveManifestFilePaths(&patch, configDir)
 			resolveLocalResourcePaths(&patch, configDir)
-			resolved.Components = append(resolved.Components, patch)
+			newComponents = append(newComponents, patch)
 			continue
 		}
 		if len(patch.Requires) > 0 {
@@ -76,17 +81,18 @@ func MergeComponents(resolved *config.ResolvedContext, components []config.Compo
 			}
 		}
 		if patch.K8s != nil {
-		if comp.K8s == nil {
-			comp.K8s = &config.K8sSpec{}
+			if comp.K8s == nil {
+				comp.K8s = &config.K8sSpec{}
+			}
+			resolveManifestFilePaths(&patch, configDir)
+			resolveLocalResourcePaths(&patch, configDir)
+			comp.K8s.ManifestFiles = append(comp.K8s.ManifestFiles, patch.K8s.ManifestFiles...)
+			comp.K8s.Manifests = mergeManifests(comp.K8s.Manifests, patch.K8s.Manifests)
+			comp.K8s.Secrets = append(comp.K8s.Secrets, patch.K8s.Secrets...)
+			comp.K8s.ConfigMaps = append(comp.K8s.ConfigMaps, patch.K8s.ConfigMaps...)
 		}
-		resolveManifestFilePaths(&patch, configDir)
-		resolveLocalResourcePaths(&patch, configDir)
-		comp.K8s.ManifestFiles = append(comp.K8s.ManifestFiles, patch.K8s.ManifestFiles...)
-		comp.K8s.Manifests = mergeManifests(comp.K8s.Manifests, patch.K8s.Manifests)
-		comp.K8s.Secrets = append(comp.K8s.Secrets, patch.K8s.Secrets...)
-		comp.K8s.ConfigMaps = append(comp.K8s.ConfigMaps, patch.K8s.ConfigMaps...)
 	}
-	}
+	resolved.Components = append(resolved.Components, newComponents...)
 }
 
 // manifestKey identifies a Kubernetes resource by its API coordinates and name.
@@ -197,12 +203,18 @@ func resolveLocalResourcePaths(c *config.Component, configDir string) {
 	}
 	resolveResources := func(resources []config.LocalResource) {
 		for i := range resources {
-			if resources[i].FromFile != "" && !filepath.IsAbs(resources[i].FromFile) {
-				resources[i].FromFile = filepath.Join(configDir, resources[i].FromFile)
+			if resources[i].FromFile != "" {
+				resources[i].FromFile = os.ExpandEnv(resources[i].FromFile)
+				if !filepath.IsAbs(resources[i].FromFile) {
+					resources[i].FromFile = filepath.Join(configDir, resources[i].FromFile)
+				}
 			}
 			for j := range resources[i].Entries {
-				if resources[i].Entries[j].FromFile != "" && !filepath.IsAbs(resources[i].Entries[j].FromFile) {
-					resources[i].Entries[j].FromFile = filepath.Join(configDir, resources[i].Entries[j].FromFile)
+				if resources[i].Entries[j].FromFile != "" {
+					resources[i].Entries[j].FromFile = os.ExpandEnv(resources[i].Entries[j].FromFile)
+					if !filepath.IsAbs(resources[i].Entries[j].FromFile) {
+						resources[i].Entries[j].FromFile = filepath.Join(configDir, resources[i].Entries[j].FromFile)
+					}
 				}
 			}
 		}

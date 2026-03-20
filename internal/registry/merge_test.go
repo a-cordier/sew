@@ -484,6 +484,38 @@ func TestMergeComponents_NamespaceOverride(t *testing.T) {
 	}
 }
 
+// TestMergeComponents_NamespaceSurvivesAppendReallocation reproduces the bug
+// where appending a new component before merging an existing one causes the
+// byName pointer to become stale after slice reallocation. The namespace
+// override is then written to the old backing array instead of the live slice.
+func TestMergeComponents_NamespaceSurvivesAppendReallocation(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{Name: "kafka", Type: "k8s", K8s: &config.K8sSpec{}},
+		},
+	}
+	overrides := []config.Component{
+		{Name: "license", Type: "k8s"},
+		{Name: "kafka", Namespace: "gravitee"},
+	}
+
+	MergeComponents(resolved, overrides, "")
+
+	var kafka *config.Component
+	for i := range resolved.Components {
+		if resolved.Components[i].Name == "kafka" {
+			kafka = &resolved.Components[i]
+			break
+		}
+	}
+	if kafka == nil {
+		t.Fatal("kafka component not found")
+	}
+	if kafka.Namespace != "gravitee" {
+		t.Fatalf("expected namespace %q, got %q (stale pointer after reallocation?)", "gravitee", kafka.Namespace)
+	}
+}
+
 func TestMergeComponents_NamespacePreservedWhenUnset(t *testing.T) {
 	resolved := &config.ResolvedContext{
 		Components: []config.Component{
