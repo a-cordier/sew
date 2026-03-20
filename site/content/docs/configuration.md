@@ -254,10 +254,48 @@ When a local component matches a context component by name, the following merge 
 | `helm.chart` | Local wins if non-empty |
 | `helm.version` | Local wins if non-empty |
 | `helm.valueFiles` | Local files are appended (higher precedence in Helm) |
-| `helm.values` | Deep-merged on top of context values (local wins per leaf key) |
+| `helm.values` | Deep-merged on top of context values (see [Values deep merge](#values-deep-merge) below) |
 | `k8s.manifestFiles` | Local files are appended |
 | `k8s.manifests` | Union by resource identity (`apiVersion`, `kind`, `name`, `namespace`); later wins on conflict |
 | `k8s.secrets` | Local secrets are appended |
 | `k8s.configMaps` | Local configMaps are appended |
 
 When there is no name match, the component is added to the deployment as-is.
+
+### Values deep merge
+
+When `helm.values` from two layers overlap on the same key, sew picks a merge strategy based on the value type:
+
+| Value type | Strategy | Example keys |
+|-----------|----------|-------------|
+| Maps | Recursive deep merge — each nested key is merged individually, child wins per leaf | `gateway.image`, `jdbc` |
+| Named lists (every element is an object with a `name` key) | Merge by `name` — same-name entries are overridden in place, new entries are appended | `env`, `ports`, `volumeMounts` |
+| Everything else (scalars, plain lists, unnamed object lists) | Replace — child value wins | `replicas`, `es.endpoints`, `servers` |
+
+Named-list merging follows the Kubernetes convention: fields like `env`, `ports`, `volumeMounts`, and `containers` all use `name` as an identity key. This means composed contexts can each contribute entries to the same list without clobbering each other.
+
+**Example**: a postgres context sets JDBC rate-limiting env vars, and a Kafka context adds Kafka env vars. After composition, both sets of env vars are present:
+
+```yaml
+# Context A (postgres) defines:
+gateway:
+  env:
+    - name: gravitee_ratelimit_type
+      value: jdbc
+
+# Context B (kafka) defines:
+gateway:
+  env:
+    - name: KAFKA_PORT
+      value: "9092"
+
+# Merged result — both entries are combined:
+gateway:
+  env:
+    - name: gravitee_ratelimit_type
+      value: jdbc
+    - name: KAFKA_PORT
+      value: "9092"
+```
+
+If both sides define an entry with the same `name`, the later (child) value wins. An empty list (`env: []`) replaces the parent's list entirely — use this to clear inherited entries.
