@@ -131,6 +131,8 @@ func runUp(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
+	saveClusterState(cfg, nil)
+
 	if cfg.Images.Mirrors != nil {
 		if err := logger.WithSpinner("Connecting image mirrors to Kind network", func() error {
 			return cache.ConnectToKindNetwork(ctx, cfg.Kind.Name, cfg.Images.Mirrors)
@@ -148,7 +150,6 @@ func runUp(_ *cobra.Command, _ []string) error {
 	}
 
 	if cfg.Registry == "" || len(cfg.From) == 0 {
-		saveClusterState(cfg, nil)
 		return nil
 	}
 
