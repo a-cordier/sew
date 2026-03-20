@@ -62,7 +62,7 @@ func resolveFrom(ctx context.Context, childCfg config.Config, childDir, selfRegi
 			return nil, fmt.Errorf("resolving from %q: %w", ref, err)
 		}
 		absolutizeComponentPaths(parent)
-		mergeInto(acc, parent)
+		MergeInto(acc, parent)
 	}
 
 	MergeComponents(acc, childCfg.Components, childDir)
@@ -76,9 +76,9 @@ func resolveFrom(ctx context.Context, childCfg config.Config, childDir, selfRegi
 	return acc, nil
 }
 
-// mergeInto merges a resolved context (src) into an accumulator (acc).
+// MergeInto merges a resolved context (src) into an accumulator (acc).
 // Later sources override earlier ones for matching fields.
-func mergeInto(acc, src *config.ResolvedContext) {
+func MergeInto(acc, src *config.ResolvedContext) {
 	MergeComponents(acc, src.Components, "")
 	acc.Repos = MergeRepos(acc.Repos, src.Repos)
 	acc.Features = config.MergeFeatures(acc.Features, src.Features)

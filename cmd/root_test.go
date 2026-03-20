@@ -1,0 +1,526 @@
+package cmd
+
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/a-cordier/sew/internal/config"
+)
+
+func writeFile(t *testing.T, path, content string) {
+	t.Helper()
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func setupCfg(t *testing.T, registryRoot string, from []string) {
+	t.Helper()
+	sewHome = t.TempDir()
+	cfg = &config.Config{
+		Registry: "file://" + registryRoot,
+		From:     from,
+	}
+	cfg.Kind.ApplyDefaults()
+}
+
+func TestResolveContextConfig_MultiFrom_LeftToRightMerge(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "ctx-a", "sew.yaml"), `
+kind:
+  name: cluster-a
+  nodes:
+  - role: control-plane
+    extraPortMappings:
+    - containerPort: 80
+      hostPort: 80
+
+helm:
+  repos:
+    - name: repo-a
+      url: https://example.com/a
+
+components:
+  - name: comp-a
+    helm:
+      chart: a/chart
+`)
+
+	writeFile(t, filepath.Join(root, "ctx-b", "sew.yaml"), `
+kind:
+  name: cluster-b
+  nodes:
+  - role: control-plane
+    extraPortMappings:
+    - containerPort: 9090
+      hostPort: 9090
+
+helm:
+  repos:
+    - name: repo-b
+      url: https://example.com/b
+
+components:
+  - name: comp-b
+    helm:
+      chart: b/chart
+`)
+
+	setupCfg(t, root, []string{"ctx-a", "ctx-b"})
+
+	resolved, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resolved == nil {
+		t.Fatal("expected non-nil resolved context")
+	}
+
+	compNames := make(map[string]bool)
+	for _, c := range resolved.Components {
+		compNames[c.Name] = true
+	}
+	if !compNames["comp-a"] || !compNames["comp-b"] {
+		t.Fatalf("expected both comp-a and comp-b, got %v", compNames)
+	}
+
+	repoNames := make(map[string]bool)
+	for _, r := range resolved.Repos {
+		repoNames[r.Name] = true
+	}
+	if !repoNames["repo-a"] || !repoNames["repo-b"] {
+		t.Fatalf("expected both repo-a and repo-b, got %v", repoNames)
+	}
+
+	if cfg.Kind.Name != "cluster-b" {
+		t.Fatalf("expected kind name from last context %q, got %q", "cluster-b", cfg.Kind.Name)
+	}
+}
+
+func TestResolveContextConfig_MultiFrom_PortOverride(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "base-infra", "sew.yaml"), `
+kind:
+  nodes:
+  - role: control-plane
+    extraPortMappings:
+    - containerPort: 30092
+      hostPort: 9092
+    - containerPort: 80
+      hostPort: 80
+
+components:
+  - name: kafka
+    helm:
+      chart: kafka/chart
+`)
+
+	writeFile(t, filepath.Join(root, "gateway", "sew.yaml"), `
+kind:
+  nodes:
+  - role: control-plane
+    extraPortMappings:
+    - containerPort: 30092
+      hostPort: 30092
+
+components:
+  - name: gw
+    helm:
+      chart: gw/chart
+`)
+
+	setupCfg(t, root, []string{"base-infra", "gateway"})
+
+	resolved, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	portMap := make(map[int32]int32)
+	for _, p := range resolved.Kind.Nodes[0].ExtraPortMappings {
+		portMap[p.ContainerPort] = p.HostPort
+	}
+	if hp, ok := portMap[30092]; !ok || hp != 30092 {
+		t.Fatalf("expected port 30092 overridden to hostPort 30092 by later context, got %d", portMap[30092])
+	}
+	if _, ok := portMap[80]; !ok {
+		t.Fatal("expected port 80 preserved from first context")
+	}
+}
+
+func TestResolveContextConfig_MultiFrom_FeaturesMerge(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "feat-a", "sew.yaml"), `
+features:
+  lb:
+    enabled: true
+  dns:
+    enabled: true
+    domain: a.local
+
+components:
+  - name: comp-a
+    helm:
+      chart: a/chart
+`)
+
+	writeFile(t, filepath.Join(root, "feat-b", "sew.yaml"), `
+features:
+  dns:
+    enabled: true
+    domain: b.local
+    port: 5353
+
+components:
+  - name: comp-b
+    helm:
+      chart: b/chart
+`)
+
+	setupCfg(t, root, []string{"feat-a", "feat-b"})
+
+	_, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if cfg.Features.LB == nil || !cfg.Features.LB.Enabled {
+		t.Fatal("expected LB inherited from first context")
+	}
+	if cfg.Features.DNS == nil || cfg.Features.DNS.Domain != "b.local" {
+		t.Fatal("expected DNS domain overridden by second context")
+	}
+	if cfg.Features.DNS.Port != 5353 {
+		t.Fatalf("expected DNS port 5353 from second context, got %d", cfg.Features.DNS.Port)
+	}
+}
+
+func TestResolveContextConfig_MultiFrom_ImagesMerge(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "img-a", "sew.yaml"), `
+images:
+  preload:
+    refs:
+      - mongo:7
+      - shared:latest
+
+components:
+  - name: comp-a
+    helm:
+      chart: a/chart
+`)
+
+	writeFile(t, filepath.Join(root, "img-b", "sew.yaml"), `
+images:
+  preload:
+    refs:
+      - elastic:9
+      - shared:latest
+
+components:
+  - name: comp-b
+    helm:
+      chart: b/chart
+`)
+
+	setupCfg(t, root, []string{"img-a", "img-b"})
+
+	_, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if cfg.Images.Preload == nil {
+		t.Fatal("expected merged preload images")
+	}
+	refs := make(map[string]bool)
+	for _, r := range cfg.Images.Preload.Refs {
+		refs[r] = true
+	}
+	if !refs["mongo:7"] || !refs["elastic:9"] || !refs["shared:latest"] {
+		t.Fatalf("expected all three image refs (deduplicated), got %v", cfg.Images.Preload.Refs)
+	}
+	if len(cfg.Images.Preload.Refs) != 3 {
+		t.Fatalf("expected 3 refs (shared:latest deduped), got %d", len(cfg.Images.Preload.Refs))
+	}
+}
+
+func TestResolveContextConfig_MultiFrom_AbstractSkipped(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "abstract-ctx", "sew.yaml"), `
+abstract: true
+
+components:
+  - name: base
+    helm:
+      chart: base/chart
+`)
+
+	writeFile(t, filepath.Join(root, "concrete-ctx", "sew.yaml"), `
+components:
+  - name: extra
+    helm:
+      chart: extra/chart
+`)
+
+	setupCfg(t, root, []string{"abstract-ctx", "concrete-ctx"})
+
+	resolved, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("expected no error when composing with abstract in multi-from, got: %v", err)
+	}
+	if resolved == nil {
+		t.Fatal("expected non-nil resolved context")
+	}
+	if len(resolved.Components) != 2 {
+		t.Fatalf("expected 2 components, got %d", len(resolved.Components))
+	}
+}
+
+func TestResolveContextConfig_SingleFrom_AbstractBlocked(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "abstract-only", "sew.yaml"), `
+abstract: true
+
+components:
+  - name: base
+    helm:
+      chart: base/chart
+`)
+
+	setupCfg(t, root, []string{"abstract-only"})
+
+	_, err := resolveContextConfig()
+	if err == nil {
+		t.Fatal("expected error when deploying a single abstract context directly")
+	}
+	if !strings.Contains(err.Error(), "abstract") {
+		t.Fatalf("expected abstract error message, got: %v", err)
+	}
+}
+
+func TestResolveContextConfig_SingleFrom_NonAbstract(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "simple", "sew.yaml"), `
+kind:
+  name: simple-cluster
+
+components:
+  - name: app
+    helm:
+      chart: app/chart
+`)
+
+	setupCfg(t, root, []string{"simple"})
+
+	resolved, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resolved == nil {
+		t.Fatal("expected non-nil resolved context")
+	}
+	if len(resolved.Components) != 1 {
+		t.Fatalf("expected 1 component, got %d", len(resolved.Components))
+	}
+	if cfg.Kind.Name != "simple-cluster" {
+		t.Fatalf("expected kind name %q, got %q", "simple-cluster", cfg.Kind.Name)
+	}
+}
+
+func TestResolveContextConfig_NoRegistryReturnsNil(t *testing.T) {
+	sewHome = t.TempDir()
+	cfg = &config.Config{
+		From: []string{"something"},
+	}
+
+	resolved, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resolved != nil {
+		t.Fatal("expected nil when registry is empty")
+	}
+}
+
+func TestResolveContextConfig_NoFromReturnsNil(t *testing.T) {
+	sewHome = t.TempDir()
+	cfg = &config.Config{
+		Registry: "file:///some/path",
+	}
+
+	resolved, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resolved != nil {
+		t.Fatal("expected nil when from is empty")
+	}
+}
+
+func TestResolveContextConfig_MultiFrom_ComponentOverride(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "provider", "sew.yaml"), `
+components:
+  - name: database
+    helm:
+      chart: bitnami/mongodb
+      version: "7.0"
+      values:
+        auth:
+          enabled: false
+`)
+
+	writeFile(t, filepath.Join(root, "consumer", "sew.yaml"), `
+components:
+  - name: database
+    helm:
+      version: "8.0"
+      values:
+        auth:
+          enabled: true
+        replicaCount: 3
+`)
+
+	setupCfg(t, root, []string{"provider", "consumer"})
+
+	resolved, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(resolved.Components) != 1 {
+		t.Fatalf("expected 1 component (merged by name), got %d", len(resolved.Components))
+	}
+	comp := resolved.Components[0]
+	if comp.Helm.Chart != "bitnami/mongodb" {
+		t.Fatalf("expected chart preserved from first, got %q", comp.Helm.Chart)
+	}
+	if comp.Helm.Version != "8.0" {
+		t.Fatalf("expected version overridden to 8.0, got %q", comp.Helm.Version)
+	}
+}
+
+func TestResolveContextConfig_MultiFrom_ThreeContexts(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "first", "sew.yaml"), `
+kind:
+  name: first-cluster
+  nodes:
+  - role: control-plane
+    extraPortMappings:
+    - containerPort: 80
+      hostPort: 80
+
+components:
+  - name: comp-first
+    helm:
+      chart: first/chart
+`)
+
+	writeFile(t, filepath.Join(root, "second", "sew.yaml"), `
+kind:
+  name: second-cluster
+  nodes:
+  - role: control-plane
+    extraPortMappings:
+    - containerPort: 443
+      hostPort: 443
+
+components:
+  - name: comp-second
+    helm:
+      chart: second/chart
+`)
+
+	writeFile(t, filepath.Join(root, "third", "sew.yaml"), `
+kind:
+  name: third-cluster
+
+components:
+  - name: comp-third
+    helm:
+      chart: third/chart
+`)
+
+	setupCfg(t, root, []string{"first", "second", "third"})
+
+	resolved, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(resolved.Components) != 3 {
+		t.Fatalf("expected 3 components, got %d", len(resolved.Components))
+	}
+
+	if cfg.Kind.Name != "third-cluster" {
+		t.Fatalf("expected kind name from last context %q, got %q", "third-cluster", cfg.Kind.Name)
+	}
+
+	portMap := make(map[int32]int32)
+	for _, p := range resolved.Kind.Nodes[0].ExtraPortMappings {
+		portMap[p.ContainerPort] = p.HostPort
+	}
+	if _, ok := portMap[80]; !ok {
+		t.Fatal("expected port 80 from first context")
+	}
+	if _, ok := portMap[443]; !ok {
+		t.Fatal("expected port 443 from second context")
+	}
+}
+
+func TestResolveContextConfig_MultiFrom_UserCfgOverridesContext(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "ctx-a", "sew.yaml"), `
+features:
+  lb:
+    enabled: true
+
+components:
+  - name: comp-a
+    helm:
+      chart: a/chart
+`)
+
+	writeFile(t, filepath.Join(root, "ctx-b", "sew.yaml"), `
+components:
+  - name: comp-b
+    helm:
+      chart: b/chart
+`)
+
+	sewHome = t.TempDir()
+	cfg = &config.Config{
+		Registry: "file://" + root,
+		From:     []string{"ctx-a", "ctx-b"},
+		Features: config.FeaturesConfig{
+			LB: &config.LBConfig{Enabled: false},
+		},
+	}
+	cfg.Kind.ApplyDefaults()
+
+	_, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if cfg.Features.LB == nil || cfg.Features.LB.Enabled {
+		t.Fatal("expected user-level LB=false to override context LB=true")
+	}
+}

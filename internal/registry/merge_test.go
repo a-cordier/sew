@@ -166,6 +166,167 @@ func TestMergeComponents_K8sManifestsMerge(t *testing.T) {
 	}
 }
 
+func TestMergeComponents_InlineManifestsOverrideByIdentity(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name: "kafka",
+				K8s: &config.K8sSpec{
+					Manifests: []map[string]interface{}{
+						{
+							"apiVersion": "v1",
+							"kind":       "Service",
+							"metadata": map[string]interface{}{
+								"name": "kafka",
+							},
+							"spec": map[string]interface{}{
+								"type": "NodePort",
+							},
+						},
+						{
+							"apiVersion": "apps/v1",
+							"kind":       "Deployment",
+							"metadata": map[string]interface{}{
+								"name": "kafka",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "kafka",
+			K8s: &config.K8sSpec{
+				Manifests: []map[string]interface{}{
+					{
+						"apiVersion": "v1",
+						"kind":       "Service",
+						"metadata": map[string]interface{}{
+							"name": "kafka",
+						},
+						"spec": map[string]interface{}{
+							"type": "ClusterIP",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "")
+
+	comp := resolved.Components[0]
+	if len(comp.K8s.Manifests) != 2 {
+		t.Fatalf("expected 2 manifests (union), got %d", len(comp.K8s.Manifests))
+	}
+	svc := comp.K8s.Manifests[0]
+	spec, _ := svc["spec"].(map[string]interface{})
+	if spec["type"] != "ClusterIP" {
+		t.Fatalf("expected Service overridden to ClusterIP, got %v", spec["type"])
+	}
+	if comp.K8s.Manifests[1]["kind"] != "Deployment" {
+		t.Fatalf("expected Deployment preserved, got %v", comp.K8s.Manifests[1]["kind"])
+	}
+}
+
+func TestMergeComponents_InlineManifestsAppendNew(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name: "app",
+				K8s: &config.K8sSpec{
+					Manifests: []map[string]interface{}{
+						{
+							"apiVersion": "v1",
+							"kind":       "Service",
+							"metadata": map[string]interface{}{
+								"name": "app",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "app",
+			K8s: &config.K8sSpec{
+				Manifests: []map[string]interface{}{
+					{
+						"apiVersion": "v1",
+						"kind":       "ConfigMap",
+						"metadata": map[string]interface{}{
+							"name": "app-config",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "")
+
+	comp := resolved.Components[0]
+	if len(comp.K8s.Manifests) != 2 {
+		t.Fatalf("expected 2 manifests, got %d", len(comp.K8s.Manifests))
+	}
+	if comp.K8s.Manifests[0]["kind"] != "Service" {
+		t.Fatalf("expected Service first, got %v", comp.K8s.Manifests[0]["kind"])
+	}
+	if comp.K8s.Manifests[1]["kind"] != "ConfigMap" {
+		t.Fatalf("expected ConfigMap appended, got %v", comp.K8s.Manifests[1]["kind"])
+	}
+}
+
+func TestMergeComponents_InlineManifestsNamespaceDistinct(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{
+				Name: "infra",
+				K8s: &config.K8sSpec{
+					Manifests: []map[string]interface{}{
+						{
+							"apiVersion": "v1",
+							"kind":       "Service",
+							"metadata": map[string]interface{}{
+								"name":      "redis",
+								"namespace": "cache",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	overrides := []config.Component{
+		{
+			Name: "infra",
+			K8s: &config.K8sSpec{
+				Manifests: []map[string]interface{}{
+					{
+						"apiVersion": "v1",
+						"kind":       "Service",
+						"metadata": map[string]interface{}{
+							"name":      "redis",
+							"namespace": "session",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	MergeComponents(resolved, overrides, "")
+
+	comp := resolved.Components[0]
+	if len(comp.K8s.Manifests) != 2 {
+		t.Fatalf("expected 2 manifests (different namespaces = different identity), got %d", len(comp.K8s.Manifests))
+	}
+}
+
 func TestMergeComponents_ValueFilePathResolution(t *testing.T) {
 	resolved := &config.ResolvedContext{
 		Components: []config.Component{
@@ -839,6 +1000,408 @@ func TestMergeComponents_PatchWithValueFiles(t *testing.T) {
 	expectedPatch := filepath.Join("/patch", "patch-values.yaml")
 	if comp.Helm.ValueFiles[2] != expectedPatch {
 		t.Fatalf("expected patch value file third, got %q", comp.Helm.ValueFiles[2])
+	}
+}
+
+func TestManifestKeyOf_Complete(t *testing.T) {
+	m := map[string]interface{}{
+		"apiVersion": "apps/v1",
+		"kind":       "Deployment",
+		"metadata": map[string]interface{}{
+			"name":      "my-app",
+			"namespace": "production",
+		},
+	}
+	key := manifestKeyOf(m)
+	if key.apiVersion != "apps/v1" {
+		t.Fatalf("expected apiVersion apps/v1, got %q", key.apiVersion)
+	}
+	if key.kind != "Deployment" {
+		t.Fatalf("expected kind Deployment, got %q", key.kind)
+	}
+	if key.name != "my-app" {
+		t.Fatalf("expected name my-app, got %q", key.name)
+	}
+	if key.namespace != "production" {
+		t.Fatalf("expected namespace production, got %q", key.namespace)
+	}
+}
+
+func TestManifestKeyOf_NoMetadata(t *testing.T) {
+	m := map[string]interface{}{
+		"apiVersion": "v1",
+		"kind":       "ConfigMap",
+	}
+	key := manifestKeyOf(m)
+	if key.apiVersion != "v1" || key.kind != "ConfigMap" {
+		t.Fatalf("expected v1/ConfigMap, got %q/%q", key.apiVersion, key.kind)
+	}
+	if key.name != "" || key.namespace != "" {
+		t.Fatalf("expected empty name/namespace, got %q/%q", key.name, key.namespace)
+	}
+}
+
+func TestManifestKeyOf_NoNamespace(t *testing.T) {
+	m := map[string]interface{}{
+		"apiVersion": "v1",
+		"kind":       "Service",
+		"metadata": map[string]interface{}{
+			"name": "kafka",
+		},
+	}
+	key := manifestKeyOf(m)
+	if key.name != "kafka" {
+		t.Fatalf("expected name kafka, got %q", key.name)
+	}
+	if key.namespace != "" {
+		t.Fatalf("expected empty namespace, got %q", key.namespace)
+	}
+}
+
+func TestManifestKeyOf_Empty(t *testing.T) {
+	key := manifestKeyOf(map[string]interface{}{})
+	if key != (manifestKey{}) {
+		t.Fatalf("expected zero manifestKey, got %+v", key)
+	}
+}
+
+func TestManifestKeyOf_NonStringValues(t *testing.T) {
+	m := map[string]interface{}{
+		"apiVersion": 42,
+		"kind":       true,
+		"metadata": map[string]interface{}{
+			"name": 3.14,
+		},
+	}
+	key := manifestKeyOf(m)
+	if key.apiVersion != "" || key.kind != "" || key.name != "" {
+		t.Fatalf("expected all empty strings for non-string values, got %+v", key)
+	}
+}
+
+func TestManifestKeyOf_MetadataWrongType(t *testing.T) {
+	m := map[string]interface{}{
+		"apiVersion": "v1",
+		"kind":       "Service",
+		"metadata":   "not-a-map",
+	}
+	key := manifestKeyOf(m)
+	if key.name != "" || key.namespace != "" {
+		t.Fatalf("expected empty name/namespace for non-map metadata, got %+v", key)
+	}
+}
+
+func TestMergeManifests_BothEmpty(t *testing.T) {
+	result := mergeManifests(nil, nil)
+	if result != nil {
+		t.Fatalf("expected nil, got %v", result)
+	}
+}
+
+func TestMergeManifests_EmptyBase(t *testing.T) {
+	override := []map[string]interface{}{
+		{"apiVersion": "v1", "kind": "Service", "metadata": map[string]interface{}{"name": "svc"}},
+	}
+	result := mergeManifests(nil, override)
+	if len(result) != 1 {
+		t.Fatalf("expected 1 manifest, got %d", len(result))
+	}
+	if result[0]["kind"] != "Service" {
+		t.Fatalf("expected Service, got %v", result[0]["kind"])
+	}
+}
+
+func TestMergeManifests_EmptyOverride(t *testing.T) {
+	base := []map[string]interface{}{
+		{"apiVersion": "v1", "kind": "Service", "metadata": map[string]interface{}{"name": "svc"}},
+	}
+	result := mergeManifests(base, nil)
+	if len(result) != 1 {
+		t.Fatalf("expected 1 manifest, got %d", len(result))
+	}
+}
+
+func TestMergeManifests_NoOverlap(t *testing.T) {
+	base := []map[string]interface{}{
+		{"apiVersion": "v1", "kind": "Service", "metadata": map[string]interface{}{"name": "svc-a"}},
+	}
+	override := []map[string]interface{}{
+		{"apiVersion": "apps/v1", "kind": "Deployment", "metadata": map[string]interface{}{"name": "deploy-b"}},
+	}
+	result := mergeManifests(base, override)
+	if len(result) != 2 {
+		t.Fatalf("expected 2 manifests, got %d", len(result))
+	}
+	if result[0]["kind"] != "Service" {
+		t.Fatalf("expected Service first, got %v", result[0]["kind"])
+	}
+	if result[1]["kind"] != "Deployment" {
+		t.Fatalf("expected Deployment second, got %v", result[1]["kind"])
+	}
+}
+
+func TestMergeManifests_FullOverlap(t *testing.T) {
+	base := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "kafka"},
+			"spec":     map[string]interface{}{"type": "NodePort"},
+		},
+		{
+			"apiVersion": "apps/v1", "kind": "Deployment",
+			"metadata": map[string]interface{}{"name": "kafka"},
+			"spec":     map[string]interface{}{"replicas": 1},
+		},
+	}
+	override := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "kafka"},
+			"spec":     map[string]interface{}{"type": "ClusterIP"},
+		},
+		{
+			"apiVersion": "apps/v1", "kind": "Deployment",
+			"metadata": map[string]interface{}{"name": "kafka"},
+			"spec":     map[string]interface{}{"replicas": 3},
+		},
+	}
+	result := mergeManifests(base, override)
+	if len(result) != 2 {
+		t.Fatalf("expected 2 manifests (all replaced), got %d", len(result))
+	}
+	svcSpec, _ := result[0]["spec"].(map[string]interface{})
+	if svcSpec["type"] != "ClusterIP" {
+		t.Fatalf("expected Service overridden to ClusterIP, got %v", svcSpec["type"])
+	}
+	depSpec, _ := result[1]["spec"].(map[string]interface{})
+	if depSpec["replicas"] != 3 {
+		t.Fatalf("expected Deployment replicas overridden to 3, got %v", depSpec["replicas"])
+	}
+}
+
+func TestMergeManifests_PartialOverlap(t *testing.T) {
+	base := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "kafka"},
+			"spec":     map[string]interface{}{"type": "NodePort"},
+		},
+		{
+			"apiVersion": "apps/v1", "kind": "Deployment",
+			"metadata": map[string]interface{}{"name": "kafka"},
+		},
+	}
+	override := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "kafka"},
+			"spec":     map[string]interface{}{"type": "ClusterIP"},
+		},
+		{
+			"apiVersion": "v1", "kind": "ConfigMap",
+			"metadata": map[string]interface{}{"name": "kafka-config"},
+		},
+	}
+	result := mergeManifests(base, override)
+	if len(result) != 3 {
+		t.Fatalf("expected 3 manifests (1 replaced, 1 kept, 1 appended), got %d", len(result))
+	}
+	svcSpec, _ := result[0]["spec"].(map[string]interface{})
+	if svcSpec["type"] != "ClusterIP" {
+		t.Fatalf("expected Service replaced with ClusterIP, got %v", svcSpec["type"])
+	}
+	if result[1]["kind"] != "Deployment" {
+		t.Fatalf("expected Deployment preserved at index 1, got %v", result[1]["kind"])
+	}
+	if result[2]["kind"] != "ConfigMap" {
+		t.Fatalf("expected ConfigMap appended at index 2, got %v", result[2]["kind"])
+	}
+}
+
+func TestMergeManifests_DifferentAPIVersionSameKindName(t *testing.T) {
+	base := []map[string]interface{}{
+		{
+			"apiVersion": "networking.k8s.io/v1", "kind": "Ingress",
+			"metadata": map[string]interface{}{"name": "my-ingress"},
+		},
+	}
+	override := []map[string]interface{}{
+		{
+			"apiVersion": "networking.k8s.io/v1beta1", "kind": "Ingress",
+			"metadata": map[string]interface{}{"name": "my-ingress"},
+		},
+	}
+	result := mergeManifests(base, override)
+	if len(result) != 2 {
+		t.Fatalf("expected 2 manifests (different apiVersion = different identity), got %d", len(result))
+	}
+}
+
+func TestMergeManifests_NamespaceDistinguishesIdentity(t *testing.T) {
+	base := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "redis", "namespace": "cache"},
+		},
+	}
+	override := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "redis", "namespace": "session"},
+		},
+	}
+	result := mergeManifests(base, override)
+	if len(result) != 2 {
+		t.Fatalf("expected 2 manifests (different namespace = different identity), got %d", len(result))
+	}
+}
+
+func TestMergeManifests_SameNamespaceOverrides(t *testing.T) {
+	base := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "redis", "namespace": "cache"},
+			"spec":     map[string]interface{}{"type": "NodePort"},
+		},
+	}
+	override := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "redis", "namespace": "cache"},
+			"spec":     map[string]interface{}{"type": "ClusterIP"},
+		},
+	}
+	result := mergeManifests(base, override)
+	if len(result) != 1 {
+		t.Fatalf("expected 1 manifest (same identity replaced), got %d", len(result))
+	}
+	spec, _ := result[0]["spec"].(map[string]interface{})
+	if spec["type"] != "ClusterIP" {
+		t.Fatalf("expected ClusterIP, got %v", spec["type"])
+	}
+}
+
+func TestMergeManifests_PreservesBaseOrder(t *testing.T) {
+	base := []map[string]interface{}{
+		{"apiVersion": "v1", "kind": "Service", "metadata": map[string]interface{}{"name": "alpha"}},
+		{"apiVersion": "v1", "kind": "Service", "metadata": map[string]interface{}{"name": "beta"}},
+		{"apiVersion": "v1", "kind": "Service", "metadata": map[string]interface{}{"name": "gamma"}},
+	}
+	override := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "beta"},
+			"spec":     map[string]interface{}{"type": "ClusterIP"},
+		},
+	}
+	result := mergeManifests(base, override)
+	if len(result) != 3 {
+		t.Fatalf("expected 3 manifests, got %d", len(result))
+	}
+	meta0, _ := result[0]["metadata"].(map[string]interface{})
+	meta1, _ := result[1]["metadata"].(map[string]interface{})
+	meta2, _ := result[2]["metadata"].(map[string]interface{})
+	if meta0["name"] != "alpha" || meta1["name"] != "beta" || meta2["name"] != "gamma" {
+		t.Fatalf("expected order alpha/beta/gamma preserved, got %v/%v/%v", meta0["name"], meta1["name"], meta2["name"])
+	}
+	spec1, _ := result[1]["spec"].(map[string]interface{})
+	if spec1["type"] != "ClusterIP" {
+		t.Fatalf("expected beta replaced in-place with ClusterIP, got %v", spec1["type"])
+	}
+}
+
+func TestMergeManifests_DuplicateInOverride(t *testing.T) {
+	base := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "svc"},
+			"spec":     map[string]interface{}{"type": "NodePort"},
+		},
+	}
+	override := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "svc"},
+			"spec":     map[string]interface{}{"type": "ClusterIP"},
+		},
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "svc"},
+			"spec":     map[string]interface{}{"type": "LoadBalancer"},
+		},
+	}
+	result := mergeManifests(base, override)
+	if len(result) != 1 {
+		t.Fatalf("expected 1 manifest (duplicate overrides collapse), got %d", len(result))
+	}
+	spec, _ := result[0]["spec"].(map[string]interface{})
+	if spec["type"] != "LoadBalancer" {
+		t.Fatalf("expected last override wins (LoadBalancer), got %v", spec["type"])
+	}
+}
+
+func TestMergeManifests_BaseNotMutated(t *testing.T) {
+	base := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "svc"},
+			"spec":     map[string]interface{}{"type": "NodePort"},
+		},
+	}
+	override := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "svc"},
+			"spec":     map[string]interface{}{"type": "ClusterIP"},
+		},
+	}
+	mergeManifests(base, override)
+	spec, _ := base[0]["spec"].(map[string]interface{})
+	if spec["type"] != "NodePort" {
+		t.Fatalf("expected base slice elements not mutated, got %v", spec["type"])
+	}
+}
+
+func TestMergeManifests_PortTakeoverScenario(t *testing.T) {
+	kafkaStandalone := []map[string]interface{}{
+		{
+			"apiVersion": "apps/v1", "kind": "Deployment",
+			"metadata": map[string]interface{}{"name": "kafka"},
+			"spec":     map[string]interface{}{"image": "apache/kafka"},
+		},
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "kafka"},
+			"spec": map[string]interface{}{
+				"type": "NodePort",
+				"ports": []interface{}{
+					map[string]interface{}{"port": 9092, "nodePort": 30092},
+				},
+			},
+		},
+	}
+	kafkaGatewayOverride := []map[string]interface{}{
+		{
+			"apiVersion": "v1", "kind": "Service",
+			"metadata": map[string]interface{}{"name": "kafka"},
+			"spec": map[string]interface{}{
+				"type": "ClusterIP",
+				"ports": []interface{}{
+					map[string]interface{}{"port": 9092},
+				},
+			},
+		},
+	}
+	result := mergeManifests(kafkaStandalone, kafkaGatewayOverride)
+	if len(result) != 2 {
+		t.Fatalf("expected 2 manifests, got %d", len(result))
+	}
+	if result[0]["kind"] != "Deployment" {
+		t.Fatalf("expected Deployment first (preserved), got %v", result[0]["kind"])
+	}
+	svcSpec, _ := result[1]["spec"].(map[string]interface{})
+	if svcSpec["type"] != "ClusterIP" {
+		t.Fatalf("expected Service overridden to ClusterIP (port takeover), got %v", svcSpec["type"])
 	}
 }
 

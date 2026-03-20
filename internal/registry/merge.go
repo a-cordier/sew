@@ -76,17 +76,70 @@ func MergeComponents(resolved *config.ResolvedContext, components []config.Compo
 			}
 		}
 		if patch.K8s != nil {
-			if comp.K8s == nil {
-				comp.K8s = &config.K8sSpec{}
-			}
-			resolveManifestFilePaths(&patch, configDir)
-			resolveLocalResourcePaths(&patch, configDir)
-			comp.K8s.ManifestFiles = append(comp.K8s.ManifestFiles, patch.K8s.ManifestFiles...)
-			comp.K8s.Manifests = append(comp.K8s.Manifests, patch.K8s.Manifests...)
-			comp.K8s.Secrets = append(comp.K8s.Secrets, patch.K8s.Secrets...)
-			comp.K8s.ConfigMaps = append(comp.K8s.ConfigMaps, patch.K8s.ConfigMaps...)
+		if comp.K8s == nil {
+			comp.K8s = &config.K8sSpec{}
+		}
+		resolveManifestFilePaths(&patch, configDir)
+		resolveLocalResourcePaths(&patch, configDir)
+		comp.K8s.ManifestFiles = append(comp.K8s.ManifestFiles, patch.K8s.ManifestFiles...)
+		comp.K8s.Manifests = mergeManifests(comp.K8s.Manifests, patch.K8s.Manifests)
+		comp.K8s.Secrets = append(comp.K8s.Secrets, patch.K8s.Secrets...)
+		comp.K8s.ConfigMaps = append(comp.K8s.ConfigMaps, patch.K8s.ConfigMaps...)
+	}
+	}
+}
+
+// manifestKey identifies a Kubernetes resource by its API coordinates and name.
+type manifestKey struct {
+	apiVersion string
+	kind       string
+	name       string
+	namespace  string
+}
+
+// manifestKeyOf extracts the resource identity from an unstructured manifest.
+func manifestKeyOf(m map[string]interface{}) manifestKey {
+	str := func(v interface{}) string {
+		s, _ := v.(string)
+		return s
+	}
+	key := manifestKey{
+		apiVersion: str(m["apiVersion"]),
+		kind:       str(m["kind"]),
+	}
+	if meta, ok := m["metadata"].(map[string]interface{}); ok {
+		key.name = str(meta["name"])
+		key.namespace = str(meta["namespace"])
+	}
+	return key
+}
+
+// mergeManifests returns the union of base and override manifests,
+// deduplicated by (apiVersion, kind, name, namespace). When both sides
+// define the same resource, the override entry wins.
+func mergeManifests(base, override []map[string]interface{}) []map[string]interface{} {
+	if len(override) == 0 {
+		return base
+	}
+	if len(base) == 0 {
+		return override
+	}
+	seen := make(map[manifestKey]int, len(base))
+	result := make([]map[string]interface{}, len(base))
+	copy(result, base)
+	for i, m := range result {
+		seen[manifestKeyOf(m)] = i
+	}
+	for _, m := range override {
+		key := manifestKeyOf(m)
+		if idx, ok := seen[key]; ok {
+			result[idx] = m
+		} else {
+			seen[key] = len(result)
+			result = append(result, m)
 		}
 	}
+	return result
 }
 
 // deepMergeValues recursively merges src into dst. When both dst[k] and src[k]

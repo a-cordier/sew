@@ -256,7 +256,7 @@ When a local component matches a context component by name, the following merge 
 | `helm.valueFiles` | Local files are appended (higher precedence in Helm) |
 | `helm.values` | Deep-merged on top of context values (local wins per leaf key) |
 | `k8s.manifestFiles` | Local files are appended |
-| `k8s.manifests` | Local manifests are appended |
+| `k8s.manifests` | Union by resource identity (`apiVersion`, `kind`, `name`, `namespace`); later wins on conflict |
 | `k8s.secrets` | Local secrets are appended |
 | `k8s.configMaps` | Local configMaps are appended |
 

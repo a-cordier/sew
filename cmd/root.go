@@ -110,9 +110,12 @@ func fileExists(path string) bool {
 	return err == nil
 }
 
-// resolveContextConfig resolves the registry context (if configured) and
-// merges its Kind and Features settings into the global cfg. The returned
-// ResolvedContext is nil when no registry/context is set.
+// resolveContextConfig resolves the registry contexts (if configured) and
+// merges their Kind, Features and Images settings into the global cfg.
+// When multiple from entries are provided they are resolved left-to-right
+// and merged using the same accumulator pattern as registry-level
+// composition.  The returned ResolvedContext is nil when no
+// registry/context is set.
 func resolveContextConfig() (*config.ResolvedContext, error) {
 	if cfg.Registry == "" || len(cfg.From) == 0 {
 		return nil, nil
@@ -124,16 +127,22 @@ func resolveContextConfig() (*config.ResolvedContext, error) {
 			regURL = "file://" + abs
 		}
 	}
-	resolver := registry.NewResolver(regURL, sewHome)
-	resolved, err := resolver.Resolve(context.Background(), cfg.From[0])
-	if err != nil {
-		return nil, fmt.Errorf("resolving context %q: %w", cfg.From[0], err)
+
+	acc := &config.ResolvedContext{}
+	for _, ref := range cfg.From {
+		resolver := registry.NewResolver(regURL, sewHome)
+		resolved, err := resolver.Resolve(context.Background(), ref)
+		if err != nil {
+			return nil, fmt.Errorf("resolving context %q: %w", ref, err)
+		}
+		if len(cfg.From) == 1 && resolved.Abstract {
+			return nil, fmt.Errorf("context %q is abstract and cannot be deployed directly; compose it via 'from' in another context", ref)
+		}
+		registry.MergeInto(acc, resolved)
 	}
-	if resolved.Abstract {
-		return nil, fmt.Errorf("context %q is abstract and cannot be deployed directly; compose it via 'from' in another context", cfg.From[0])
-	}
-	cfg.Kind.MergeWithContext(&resolved.Kind)
-	cfg.Features = config.MergeFeatures(resolved.Features, cfg.Features)
-	cfg.Images = config.MergeImages(resolved.Images, cfg.Images)
-	return resolved, nil
+
+	cfg.Kind.MergeWithContext(&acc.Kind)
+	cfg.Features = config.MergeFeatures(acc.Features, cfg.Features)
+	cfg.Images = config.MergeImages(acc.Images, cfg.Images)
+	return acc, nil
 }
