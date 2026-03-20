@@ -1541,6 +1541,162 @@ func TestMergeRepos_EmptyContext(t *testing.T) {
 	}
 }
 
+func TestDeepMergeValues_NamedListsMergedByName(t *testing.T) {
+	dst := map[string]interface{}{
+		"gateway": map[string]interface{}{
+			"env": []interface{}{
+				map[string]interface{}{"name": "gravitee_ratelimit_type", "value": "jdbc"},
+				map[string]interface{}{"name": "gravitee_ds_url", "value": "jdbc:postgresql://pg:5432/gravitee"},
+			},
+		},
+	}
+	src := map[string]interface{}{
+		"gateway": map[string]interface{}{
+			"env": []interface{}{
+				map[string]interface{}{"name": "KAFKA_PORT", "value": "9092"},
+				map[string]interface{}{"name": "KAFKA_SERVICE_HOST", "value": "kafka"},
+				map[string]interface{}{"name": "gravitee_ratelimit_type", "value": "redis"},
+			},
+		},
+	}
+
+	deepMergeValues(dst, src)
+
+	gw, _ := dst["gateway"].(map[string]interface{})
+	env, _ := gw["env"].([]interface{})
+
+	if len(env) != 4 {
+		t.Fatalf("expected 4 env entries (2 original + 2 new), got %d", len(env))
+	}
+
+	byName := make(map[string]string, len(env))
+	for _, item := range env {
+		m := item.(map[string]interface{})
+		byName[m["name"].(string)] = m["value"].(string)
+	}
+	if byName["gravitee_ratelimit_type"] != "redis" {
+		t.Fatalf("expected same-name entry overridden to 'redis', got %q", byName["gravitee_ratelimit_type"])
+	}
+	if byName["gravitee_ds_url"] != "jdbc:postgresql://pg:5432/gravitee" {
+		t.Fatal("expected dst-only entry preserved")
+	}
+	if byName["KAFKA_PORT"] != "9092" {
+		t.Fatal("expected new entry KAFKA_PORT appended")
+	}
+	if byName["KAFKA_SERVICE_HOST"] != "kafka" {
+		t.Fatal("expected new entry KAFKA_SERVICE_HOST appended")
+	}
+}
+
+func TestDeepMergeValues_UnnamedListsReplaced(t *testing.T) {
+	dst := map[string]interface{}{
+		"gateway": map[string]interface{}{
+			"servers": []interface{}{
+				map[string]interface{}{"host": "0.0.0.0", "port": 8082},
+			},
+		},
+	}
+	src := map[string]interface{}{
+		"gateway": map[string]interface{}{
+			"servers": []interface{}{
+				map[string]interface{}{"host": "0.0.0.0", "port": 9092},
+				map[string]interface{}{"host": "0.0.0.0", "port": 9093},
+			},
+		},
+	}
+
+	deepMergeValues(dst, src)
+
+	gw, _ := dst["gateway"].(map[string]interface{})
+	servers, _ := gw["servers"].([]interface{})
+	if len(servers) != 2 {
+		t.Fatalf("expected servers replaced (2 items), got %d", len(servers))
+	}
+	first := servers[0].(map[string]interface{})
+	if first["port"] != 9092 {
+		t.Fatalf("expected first server port 9092 (from src), got %v", first["port"])
+	}
+}
+
+func TestDeepMergeValues_StringListsReplaced(t *testing.T) {
+	dst := map[string]interface{}{
+		"es": map[string]interface{}{
+			"endpoints": []interface{}{"http://es1:9200", "http://es2:9200"},
+		},
+	}
+	src := map[string]interface{}{
+		"es": map[string]interface{}{
+			"endpoints": []interface{}{"http://es-new:9200"},
+		},
+	}
+
+	deepMergeValues(dst, src)
+
+	es, _ := dst["es"].(map[string]interface{})
+	endpoints, _ := es["endpoints"].([]interface{})
+	if len(endpoints) != 1 {
+		t.Fatalf("expected string list replaced (1 item), got %d", len(endpoints))
+	}
+	if endpoints[0] != "http://es-new:9200" {
+		t.Fatalf("expected src endpoint, got %v", endpoints[0])
+	}
+}
+
+func TestDeepMergeValues_EmptyNamedListNotMerged(t *testing.T) {
+	dst := map[string]interface{}{
+		"env": []interface{}{
+			map[string]interface{}{"name": "A", "value": "1"},
+		},
+	}
+	src := map[string]interface{}{
+		"env": []interface{}{},
+	}
+
+	deepMergeValues(dst, src)
+
+	env, _ := dst["env"].([]interface{})
+	if len(env) != 0 {
+		t.Fatalf("expected empty src list to replace dst (empty list is not a named list), got %d items", len(env))
+	}
+}
+
+func TestDeepMergeValues_NamedListPreservesOrder(t *testing.T) {
+	dst := map[string]interface{}{
+		"env": []interface{}{
+			map[string]interface{}{"name": "A", "value": "1"},
+			map[string]interface{}{"name": "B", "value": "2"},
+			map[string]interface{}{"name": "C", "value": "3"},
+		},
+	}
+	src := map[string]interface{}{
+		"env": []interface{}{
+			map[string]interface{}{"name": "B", "value": "override"},
+			map[string]interface{}{"name": "D", "value": "4"},
+		},
+	}
+
+	deepMergeValues(dst, src)
+
+	env, _ := dst["env"].([]interface{})
+	if len(env) != 4 {
+		t.Fatalf("expected 4 entries, got %d", len(env))
+	}
+	names := make([]string, len(env))
+	for i, item := range env {
+		names[i] = item.(map[string]interface{})["name"].(string)
+	}
+	expected := []string{"A", "B", "C", "D"}
+	for i, name := range names {
+		if name != expected[i] {
+			t.Fatalf("expected order %v, got %v", expected, names)
+		}
+	}
+	bVal := env[1].(map[string]interface{})["value"]
+	if bVal != "override" {
+		t.Fatalf("expected B overridden, got %v", bVal)
+	}
+}
+
 func TestMergeRepos_OrderPreserved(t *testing.T) {
 	ctx := []config.Repo{
 		{Name: "alpha", URL: "https://alpha.example.com"},

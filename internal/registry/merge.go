@@ -149,7 +149,8 @@ func mergeManifests(base, override []map[string]interface{}) []map[string]interf
 }
 
 // deepMergeValues recursively merges src into dst. When both dst[k] and src[k]
-// are maps, the merge recurses. Otherwise src[k] wins.
+// are maps, the merge recurses. When both are named lists (every element is a
+// map with a "name" key), the lists are merged by name. Otherwise src[k] wins.
 func deepMergeValues(dst, src map[string]interface{}) {
 	for k, srcVal := range src {
 		dstVal, exists := dst[k]
@@ -161,10 +162,57 @@ func deepMergeValues(dst, src map[string]interface{}) {
 		srcMap, srcOk := srcVal.(map[string]interface{})
 		if dstOk && srcOk {
 			deepMergeValues(dstMap, srcMap)
-		} else {
-			dst[k] = srcVal
+			continue
+		}
+		dstList, dstOk := dstVal.([]interface{})
+		srcList, srcOk := srcVal.([]interface{})
+		if dstOk && srcOk && isNamedList(dstList) && isNamedList(srcList) {
+			dst[k] = mergeNamedList(dstList, srcList)
+			continue
+		}
+		dst[k] = srcVal
+	}
+}
+
+// isNamedList returns true if list is non-empty and every element is a
+// map[string]interface{} containing a "name" key. This matches the Kubernetes
+// convention for env, ports, volumeMounts, etc.
+func isNamedList(list []interface{}) bool {
+	if len(list) == 0 {
+		return false
+	}
+	for _, item := range list {
+		m, ok := item.(map[string]interface{})
+		if !ok {
+			return false
+		}
+		if _, has := m["name"]; !has {
+			return false
 		}
 	}
+	return true
+}
+
+// mergeNamedList merges two named lists by the "name" field. Entries from src
+// with the same name as an entry in dst override it in place; new entries are
+// appended.
+func mergeNamedList(dst, src []interface{}) []interface{} {
+	byName := make(map[string]int, len(dst))
+	result := make([]interface{}, len(dst))
+	copy(result, dst)
+	for i, item := range result {
+		byName[item.(map[string]interface{})["name"].(string)] = i
+	}
+	for _, item := range src {
+		name := item.(map[string]interface{})["name"].(string)
+		if idx, ok := byName[name]; ok {
+			result[idx] = item
+		} else {
+			byName[name] = len(result)
+			result = append(result, item)
+		}
+	}
+	return result
 }
 
 // resolveValueFilePaths resolves relative value file paths in a component's
