@@ -1,5 +1,5 @@
 .sew/
 sew
-site/generate
-generate
+/site/generate
+/generate
 .test/
