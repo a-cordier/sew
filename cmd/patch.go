@@ -104,7 +104,7 @@ func runPatch(_ *cobra.Command, args []string) error {
 		patchedNames[c.Name] = true
 	}
 	if len(patchedNames) == 0 {
-		color.Yellow("  ⚠ patch file contains no components; nothing to do")
+		logger.Warn("patch file contains no components; nothing to do")
 		return nil
 	}
 

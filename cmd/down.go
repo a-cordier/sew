@@ -71,9 +71,9 @@ func runDown(_ *cobra.Command, _ []string) error {
 
 	dnsDir := filepath.Join(sewHome, "dns")
 	if err := dns.RemoveRecordFile(dnsDir, target.Name); err != nil {
-		color.Yellow("  ⚠ failed to remove DNS record file: %v", err)
+		logger.Warn("failed to remove DNS record file: %v", err)
 	} else {
-		color.Blue("  ✓ Removed DNS records for cluster %q", target.Name)
+		logger.Success("Removed DNS records for cluster %q", target.Name)
 	}
 
 	if err := logger.WithSpinner("Cleaning up load balancer containers", func() error {
@@ -113,7 +113,7 @@ func runDown(_ *cobra.Command, _ []string) error {
 	stopDNSIfNoRecords()
 
 	if err := state.Remove(stateDir, target.Name); err != nil {
-		color.Yellow("  ⚠ failed to remove state file: %v", err)
+		logger.Warn("failed to remove state file: %v", err)
 	}
 
 	fmt.Println()
@@ -168,7 +168,7 @@ func resolveByName(stateDir, name string) (*deleteTarget, error) {
 		return nil, fmt.Errorf("cluster %q not found (no state file and no running Kind cluster)", name)
 	}
 
-	color.Yellow("  ⚠ No state file for cluster %q; performing best-effort cleanup (mirrors and preload will not be stopped)", name)
+	logger.Warn("No state file for cluster %q; performing best-effort cleanup (mirrors and preload will not be stopped)", name)
 	return &deleteTarget{Name: name}, nil
 }
 
@@ -194,7 +194,7 @@ func resolveFromConfig() (*deleteTarget, error) {
 	if cfg.Kind.Name == "" {
 		return nil, fmt.Errorf("no cluster state files found and no cluster name in config; use --name to specify the cluster")
 	}
-	color.Yellow("  ⚠ No state file found; falling back to config (cluster %q)", cfg.Kind.Name)
+	logger.Warn("No state file found; falling back to config (cluster %q)", cfg.Kind.Name)
 	return &deleteTarget{
 		Name:   cfg.Kind.Name,
 		Images: cfg.Images,
@@ -254,7 +254,7 @@ func stopDNSIfNoRecords() {
 	}
 	if proc.Signal(syscall.Signal(0)) == nil {
 		_ = proc.Signal(syscall.SIGTERM)
-		color.Blue("  ✓ Stopped DNS server (pid %d)", pid)
+		logger.Success("Stopped DNS server (pid %d)", pid)
 	}
 	_ = os.Remove(pidPath)
 }
@@ -275,8 +275,10 @@ func stopCPKIfNoKindClusters() {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err == nil {
-			color.Blue("  ✓ Stopped cloud provider controller")
+		err := cmd.Run()
+		fmt.Println()
+		if err == nil {
+			logger.Success("Stopped cloud provider controller")
 		}
 	} else {
 		data, err := os.ReadFile(pidPath)
@@ -293,7 +295,7 @@ func stopCPKIfNoKindClusters() {
 		}
 		if proc.Signal(syscall.Signal(0)) == nil {
 			_ = proc.Signal(syscall.SIGTERM)
-			color.Blue("  ✓ Stopped cloud provider controller (pid %d)", pid)
+			logger.Success("Stopped cloud provider controller (pid %d)", pid)
 		}
 	}
 

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/a-cordier/sew/internal/config"
-	"github.com/fatih/color"
+	"github.com/a-cordier/sew/internal/logger"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -126,7 +126,7 @@ func (m *ManifestInstaller) applyLocalResources(
 ) error {
 	secrets, warnings, err := BuildSecrets(k8s.Secrets)
 	for _, w := range warnings {
-		color.Yellow("  ⚠ %s", w)
+		logger.Warn("%s", w)
 	}
 	if err != nil {
 		return err
@@ -139,7 +139,7 @@ func (m *ManifestInstaller) applyLocalResources(
 
 	configMaps, warnings, err := BuildConfigMaps(k8s.ConfigMaps)
 	for _, w := range warnings {
-		color.Yellow("  ⚠ %s", w)
+		logger.Warn("%s", w)
 	}
 	if err != nil {
 		return err

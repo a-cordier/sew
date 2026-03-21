@@ -5,7 +5,7 @@ import (
 
 	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/dns"
-	"github.com/fatih/color"
+	"github.com/a-cordier/sew/internal/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -68,7 +68,7 @@ func runSetupDNS(_ *cobra.Command, _ []string) error {
 	}
 
 	if dns.ResolverConfigured(domain, port) {
-		color.Blue("  ✓ DNS routing for %q is already configured", domain)
+		logger.Success("DNS routing for %q is already configured", domain)
 		return nil
 	}
 
@@ -77,7 +77,7 @@ func runSetupDNS(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("setting up DNS resolver: %w", err)
 	}
 
-	color.Blue("  ✓ DNS routing configured for %q", domain)
+	logger.Success("DNS routing configured for %q", domain)
 	return nil
 }
 
@@ -96,6 +96,6 @@ func runTeardownDNS(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("tearing down DNS resolver: %w", err)
 	}
 
-	color.Blue("  ✓ DNS routing removed for %q", domain)
+	logger.Success("DNS routing removed for %q", domain)
 	return nil
 }

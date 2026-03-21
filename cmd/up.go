@@ -52,8 +52,9 @@ func runUp(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return fmt.Errorf("validating feature dependencies: %w", err)
 	}
+	fmt.Println()
 	for _, w := range featWarnings {
-		color.Yellow("  ⚠ %s", w)
+		logger.Warn("%s", w)
 	}
 
 	logDir := filepath.Join(sewHome, "logs")
@@ -205,7 +206,7 @@ func saveClusterState(cfg *config.Config, resolved *config.ResolvedContext) {
 	}
 	stateDir := filepath.Join(sewHome, "clusters")
 	if err := state.Save(stateDir, cs); err != nil {
-		color.Yellow("  ⚠ failed to save cluster state: %v", err)
+		logger.Warn("failed to save cluster state: %v", err)
 	}
 }
 
@@ -268,7 +269,7 @@ func setupDNSRecords(ctx context.Context, cfg *config.Config) error {
 	}
 
 	if err := ensureDNSServer(cfg); err != nil {
-		color.Yellow("  ⚠ failed to start DNS server: %v", err)
+		logger.Warn("failed to start DNS server: %v", err)
 	}
 
 	if !dns.ResolverConfigured(cfg.Features.DNS.Domain, cfg.Features.DNS.Port) {
@@ -330,8 +331,8 @@ func ensureCPKController(_ *config.Config, gatewayEnabled bool) error {
 			"\n  sew needs administrator privileges for network routing.\n  Password: ",
 			"sh", "-c", fullCmd+" &")
 		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
+		cmd.Stdout = nil
+		cmd.Stderr = nil
 
 		if err := cmd.Run(); err != nil {
 			return fmt.Errorf("starting cloud provider controller: %w", err)
@@ -347,7 +348,7 @@ func ensureCPKController(_ *config.Config, gatewayEnabled bool) error {
 				if err := os.WriteFile(pidPath, []byte(lines[0]+"\n"), 0o644); err != nil {
 					return fmt.Errorf("writing CPK PID file: %w", err)
 				}
-				color.Blue("  ✓ Cloud provider controller started (pid %s)", lines[0])
+				logger.Success("Cloud provider controller started (pid %s)", lines[0])
 			}
 		}
 		return nil
@@ -372,7 +373,7 @@ func ensureCPKController(_ *config.Config, gatewayEnabled bool) error {
 		return fmt.Errorf("releasing CPK process: %w", err)
 	}
 
-	color.Blue("  ✓ Cloud provider controller started (pid %d)", pid)
+	logger.Success("Cloud provider controller started (pid %d)", pid)
 	return nil
 }
 
@@ -448,7 +449,7 @@ func startDNSServer(domain string, port int, dir string) error {
 		return fmt.Errorf("releasing DNS server process: %w", err)
 	}
 
-	color.Blue("  ✓ DNS server started (pid %d, %s)", pid, addr)
+	logger.Success("DNS server started (pid %d, %s)", pid, addr)
 	return nil
 }
 
@@ -477,7 +478,7 @@ func printNotes(templateContent string, cfg *config.Config) {
 	}
 	rendered, err := notes.Render(templateContent, cfg)
 	if err != nil {
-		color.Yellow("  ⚠ failed to render notes: %v", err)
+		logger.Warn("failed to render notes: %v", err)
 		return
 	}
 	fmt.Println()

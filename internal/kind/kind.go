@@ -16,7 +16,6 @@ func Create(name string, rawConfig []byte) error {
 		return err
 	}
 	if exists {
-		fmt.Printf("Cluster %q already exists, skipping creation\n", name)
 		return nil
 	}
 
@@ -53,7 +52,6 @@ func Delete(name string) error {
 		return err
 	}
 	if !exists {
-		fmt.Printf("Cluster %q does not exist, skipping deletion\n", name)
 		return nil
 	}
 

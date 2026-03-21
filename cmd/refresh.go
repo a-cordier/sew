@@ -9,7 +9,7 @@ import (
 
 	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/dns"
-	"github.com/fatih/color"
+	"github.com/a-cordier/sew/internal/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -55,10 +55,10 @@ func runDNSRefresh(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("introspecting cluster %q: %w", clusterName, err)
 	}
 
-	color.Blue("  ✓ DNS records refreshed for cluster %q", clusterName)
+	logger.Success("DNS records refreshed for cluster %q", clusterName)
 
 	if err := ensureDNSServerRunning(cfg); err != nil {
-		color.Yellow("  ⚠ failed to start DNS server: %v", err)
+		logger.Warn("failed to start DNS server: %v", err)
 	}
 
 	return nil
