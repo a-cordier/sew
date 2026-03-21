@@ -3,7 +3,7 @@ title: "Documentation"
 type: docs
 ---
 
-**sew** makes Kubernetes stacks for dev, test, and CI easy to use and easy to maintain — compose what you need from a registry and deploy it in one command.
+**sew** removes the boilerplate of setting up local Kubernetes environments. It maintains a registry of composable contexts — complete stacks with Helm charts, manifests, networking, and DNS — that you can deploy to a Kind cluster in one command.
 
 <div class="docs-overview-grid">
 
