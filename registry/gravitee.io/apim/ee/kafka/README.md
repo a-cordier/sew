@@ -1,6 +1,6 @@
 ---
 description: "Gravitee APIM with Kafka Gateway support"
-tags: [gravitee, api-management, kafka]
+tags: [api-management, kafka]
 ---
 
 # APIM Kafka Gateway
@@ -11,6 +11,15 @@ gateway using the Kafka protocol via `*.kafka.sew.local:9092` with TLS.
 
 This is an abstract base context. Concrete variants combine it with a
 database-specific AIO context. The default variant is **postgres**.
+
+## Prerequisites
+
+The Kafka Gateway uses host-based routing on `*.kafka.sew.local`. Run the
+one-time DNS setup so these domains resolve locally:
+
+```bash
+sew setup dns
+```
 
 ## Usage
 
@@ -49,6 +58,28 @@ adds Kafka Gateway configuration on top).
 - **Routing mode:** host-based (`*.kafka.sew.local`)
 - **TLS:** enabled via a self-signed certificate stored as a Kubernetes Secret
 - **Upstream broker:** standalone Kafka at `kafka:9092` (ClusterIP)
+
+## Connecting a Kafka client
+
+Extract the TLS certificate from the running cluster:
+
+```bash
+kubectl get secret kafka-tls -n gravitee -o jsonpath='{.data.tls\.crt}' | base64 -d > kafka-tls.crt
+```
+
+Then configure your Kafka client properties:
+
+```properties
+security.protocol=SSL
+ssl.truststore.type=PEM
+ssl.truststore.location=/path/to/kafka-tls.crt
+ssl.endpoint.identification.algorithm=
+```
+
+The `ssl.endpoint.identification.algorithm` must be set to empty because the
+self-signed certificate covers `*.kafka.sew.local` but broker metadata
+addresses use two-level subdomains (e.g. `broker-0-acr.kafka.sew.local`)
+that don't match the single-level wildcard.
 
 ## License
 

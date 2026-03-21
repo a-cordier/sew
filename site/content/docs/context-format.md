@@ -277,6 +277,56 @@ When contexts are composed, each top-level field is merged as follows:
 - **`features`** — Each feature block (`lb`, `gateway`, `dns`) is replaced as a whole if the child defines it; otherwise inherited from parent.
 - **`images`** — `preload`: when both sides define it, `refs` are deduplicated (union); when only one side defines it, that side's config is used as-is. `mirrors` from the child wins when set; otherwise inherited from parent.
 
+### Overriding service networking
+
+When composing contexts, a parent often needs to change how a child's services are exposed -- for example, switching a `NodePort` service to `ClusterIP` because the parent takes over networking through its own ingress, load balancer, or port mappings.
+
+The override technique depends on the component type:
+
+**k8s manifest components** — Provide a full replacement Service manifest. Manifests are merged by resource identity `(apiVersion, kind, name)`, so the parent's Service replaces the child's entirely:
+
+```yaml
+from:
+  - org/db
+
+components:
+  - name: db
+    namespace: my-app
+    k8s:
+      manifests:
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: db
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 27017
+                targetPort: 27017
+            selector:
+              app: db
+```
+
+Because the manifest is replaced wholesale, there is no risk of stale fields leaking through.
+
+**Helm components** — Override the relevant values. Because `helm.values` are deep-merged (maps recurse, scalars replace), you must explicitly clear any fields that are invalid for the new service type. In particular, `nodePort` must be set to `null` when switching to `ClusterIP`, otherwise the child's `nodePort` value survives the merge and Kubernetes rejects it:
+
+```yaml
+from:
+  - org/search-engine
+
+components:
+  - name: search-engine
+    namespace: my-app
+    helm:
+      values:
+        service:
+          type: ClusterIP
+          nodePort: null    # clear the child's nodePort
+```
+
+Omitting `nodePort: null` here would produce `type: ClusterIP` + `nodePort: 30920` after deep merge, which Kubernetes rejects with: `spec.ports[0].nodePort: Forbidden: may not be used when type is 'ClusterIP'`.
+
 ## Default variant resolution
 
 A context path usually includes the variant (`org/product/variant`), but you can also point to the product level and let sew pick the default variant automatically.
