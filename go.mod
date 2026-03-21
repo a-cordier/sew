@@ -101,6 +101,7 @@ require (
 	github.com/bep/textandbinarywriter v0.1.0 // indirect
 	github.com/bep/tmc v0.6.0 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
+	github.com/bitfield/gotestdox v0.2.2 // indirect
 	github.com/bits-and-blooms/bitset v1.24.4 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -127,6 +128,7 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/dlclark/regexp2 v1.11.5 // indirect
+	github.com/dnephin/pflag v1.0.7 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dominikbraun/graph v0.23.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -185,6 +187,7 @@ require (
 	github.com/google/gnostic-models v0.7.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
+	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/google/wire v0.7.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.11 // indirect
@@ -333,6 +336,7 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
+	gotest.tools/gotestsum v1.13.0 // indirect
 	gotest.tools/v3 v3.5.2 // indirect
 	howett.net/plist v1.0.0 // indirect
 	k8s.io/apiextensions-apiserver v0.35.0 // indirect
@@ -362,4 +366,5 @@ tool (
 	github.com/go-task/task/v3/cmd/task
 	github.com/gohugoio/hugo
 	github.com/mgechev/revive
+	gotest.tools/gotestsum
 )

@@ -14,7 +14,7 @@ tasks:
   test:
     desc: Run tests
     cmds:
-      - go test ./...
+      - go tool gotestsum ./...
 
   lint:yaml:
     desc: Check YAML formatting
