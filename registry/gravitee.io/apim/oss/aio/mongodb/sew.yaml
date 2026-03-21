@@ -5,8 +5,29 @@ from:
 components:
   - name: mongodb
     namespace: gravitee
+    k8s:
+      manifests:
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: mongodb
+            labels:
+              app: mongodb
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 27017
+                targetPort: 27017
+                name: mongodb
+            selector:
+              app: mongodb
   - name: elasticsearch
     namespace: gravitee
+    helm:
+      values:
+        service:
+          type: ClusterIP
+          nodePort: null
   - name: apim
     requires:
       - component: mongodb
