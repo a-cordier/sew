@@ -188,7 +188,7 @@ Optional networking features. Each sub-key uses pointer semantics: setting a fea
 |-------|------|----------|-------------|
 | `dns` | map | No | Local DNS server that resolves custom hostnames to in-cluster services, making them reachable from the host. |
 | `gateway` | map | No | Kubernetes Gateway API support. Enabling gateway implicitly enables lb (load-balancer) as a dependency. |
-| `lb` | map | No | Cloud-provider load-balancer emulation (e.g. MetalLB) for LoadBalancer-type services inside the Kind cluster. |
+| `lb` | map | No | Cloud-provider load-balancer emulation for LoadBalancer-type services inside the Kind cluster. |
 
 ### `features.dns`
 
@@ -228,7 +228,7 @@ Kubernetes Gateway API support. Enabling gateway implicitly enables lb (load-bal
 
 ### `features.lb`
 
-Cloud-provider load-balancer emulation (e.g. MetalLB) for LoadBalancer-type services inside the Kind cluster.
+Cloud-provider load-balancer emulation for LoadBalancer-type services inside the Kind cluster.
 
 **Type:** `object`
 

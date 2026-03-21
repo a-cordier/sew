@@ -8,7 +8,7 @@ sew gives you production-like networking on your local machine: load balancers, 
 
 ## Load balancers
 
-By default, `LoadBalancer`-type Services in Kind stay in `Pending` state because there's no cloud provider to assign IPs. sew can emulate this with a local cloud provider controller (MetalLB-based) that assigns real IPs from the Docker network range.
+By default, `LoadBalancer`-type Services in Kind stay in `Pending` state because there's no cloud provider to assign IPs. sew can emulate this with a local cloud provider controller that assigns real IPs from the Docker network range.
 
 Enable it in your `sew.yaml`:
 

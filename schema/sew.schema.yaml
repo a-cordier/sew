@@ -177,8 +177,8 @@ $defs:
   LBConfig:
     type: object
     description: >-
-      Cloud-provider load-balancer emulation (e.g. MetalLB) for
-      LoadBalancer-type services inside the Kind cluster.
+      Cloud-provider load-balancer emulation for LoadBalancer-type
+      services inside the Kind cluster.
     additionalProperties: false
     properties:
       enabled:
