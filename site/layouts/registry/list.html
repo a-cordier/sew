@@ -51,6 +51,19 @@
     {{ $groups = $groups | append $seg }}
   {{ end }}
   {{ $groups = $groups | uniq | sort }}
+  {{ $pinned := site.Params.pinnedGroups | default slice }}
+  {{ $ordered := slice }}
+  {{ range $pinned }}
+    {{ if in $groups . }}
+      {{ $ordered = $ordered | append . }}
+    {{ end }}
+  {{ end }}
+  {{ range $groups }}
+    {{ if not (in $pinned .) }}
+      {{ $ordered = $ordered | append . }}
+    {{ end }}
+  {{ end }}
+  {{ $groups = $ordered }}
 
   <div id="registry-grid">
     {{ range $group := $groups }}
