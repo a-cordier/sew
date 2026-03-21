@@ -9,24 +9,24 @@
 </p>
 
 <p align="center">
-<a href="https://a-cordier.github.io/sew/docs/">Documentation</a> · <a href="https://a-cordier.github.io/sew/registry/">Registry</a> · <a href="#quick-start">Getting Started</a>
+🚀 <a href="#quick-start">Quick Start</a> · 📖 <a href="https://a-cordier.github.io/sew/docs/">Documentation</a> · 🗂️ <a href="https://a-cordier.github.io/sew/registry/">Registry</a>
 </p>
 
 ## Quick start
 
-Install:
+Install sew and make sure [Docker](https://docs.docker.com/get-docker/) is running:
 
 ```bash
 go install github.com/a-cordier/sew@latest
 ```
 
-Create a cluster from a registry context:
+Pick a context from the registry and deploy it in one command:
 
 ```bash
-sew create --registry https://a-cordier.github.io/sew --from gravitee.io/apim
+sew create --from gravitee.io/apim
 ```
 
-Tear it down:
+That's it — sew creates a Kind cluster, installs all components, and gives you a full Gravitee API Management stack. When you're done:
 
 ```bash
 sew delete
