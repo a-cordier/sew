@@ -1,289 +1,42 @@
-<!DOCTYPE html>
-<html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
-  <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Toolchain · sew</title>
-<meta name="description" content="Your local Kubernetes tailor shop">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="/sew/css/main.min.3b24b0d2a8e01a336429aa2fa9131617e7054260326bb04774b9768cd67e55f9.css" integrity="sha256-OySw0qjgGjNkKaovqRMWF&#43;cFQmAya7BHdLl2jNZ&#43;Vfk=">
-<link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
-<script>
-(function() {
-  var t = localStorage.getItem('theme');
-  if (t === 'dark' || t === 'light') {
-    document.documentElement.setAttribute('data-theme', t);
-  }
-})();
-function toggleTheme() {
-  var root = document.documentElement;
-  var current = root.getAttribute('data-theme');
-  if (!current) {
-    current = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  var next = current === 'dark' ? 'light' : 'dark';
-  root.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-}
-</script>
-
-</head>
-<body>
-  <nav class="nav">
-  <div class="nav-inner">
-    <a class="nav-logo" href="/sew/">
-      <img src="/sew/logo.svg" alt="sew" width="56" height="20">
-    </a>
-    <button class="nav-hamburger" aria-label="Toggle menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
-      <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"/></svg>
-    </button>
-    <ul class="nav-links">
-      
-      <li>
-        <a href="/sew/docs/"
-           class="">
-          Docs
-          
-        </a>
-      </li>
-      
-      <li>
-        <a href="/sew/registry/"
-           class="">
-          Registry
-          
-        </a>
-      </li>
-      
-      <li>
-        <a href="https://github.com/a-cordier/sew" target="_blank" rel="noopener"
-           class="">
-          GitHub
-          
-          <svg class="icon-external" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M3.75 2A1.75 1.75 0 0 0 2 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0 0 14 12.25v-3.5a.75.75 0 0 0-1.5 0v3.5a.25.25 0 0 1-.25.25h-8.5a.25.25 0 0 1-.25-.25v-8.5a.25.25 0 0 1 .25-.25h3.5a.75.75 0 0 0 0-1.5h-3.5zm6.5 0a.75.75 0 0 0 0 1.5h1.19L7.22 7.72a.75.75 0 1 0 1.06 1.06l4.22-4.22v1.19a.75.75 0 0 0 1.5 0v-3A.75.75 0 0 0 13.25 2h-3z"/></svg>
-          
-        </a>
-      </li>
-      
-      <li>
-        <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">
-          <svg class="icon-sun" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 1.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11ZM8 0a.75.75 0 0 1 .75.75v1a.75.75 0 0 1-1.5 0v-1A.75.75 0 0 1 8 0Zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13Zm-8-5a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8Zm12.25-.75h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5Zm-9.6-4.6a.75.75 0 0 1 1.06 0l1 1a.75.75 0 1 1-1.06 1.06l-1-1a.75.75 0 0 1 0-1.06Zm9.35 9.35a.75.75 0 0 1-1.06 0l-1-1a.75.75 0 1 1 1.06-1.06l1 1a.75.75 0 0 1 0 1.06Zm-9.35 0a.75.75 0 0 1 0-1.06l1-1a.75.75 0 1 1 1.06 1.06l-1 1a.75.75 0 0 1-1.06 0ZM13 3.7a.75.75 0 0 1-1.06 0l-1-1a.75.75 0 1 1 1.06-1.06l1 1a.75.75 0 0 1 0 1.06Z"/></svg>
-          <svg class="icon-moon" viewBox="0 0 16 16" fill="currentColor"><path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.221-7.832Z"/></svg>
-        </button>
-      </li>
-    </ul>
-  </div>
-</nav>
-
-  <main class="main">
-    
-<div class="docs-layout">
-  <aside class="docs-sidebar">
-    <nav class="docs-nav">
-      
-      
-      <div class="docs-nav-section">
-        
-        <a href="/sew/docs/getting-started/" class="docs-nav-standalone">Getting Started</a>
-        
-      </div>
-      
-      <div class="docs-nav-section">
-        
-        <details open>
-          <summary>
-            <a href="/sew/docs/guides/" class="">Guides</a>
-          </summary>
-          <ul>
-            
-            <li>
-              <a href="/sew/docs/guides/registry/" class="">
-                Registry
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/composing-contexts/" class="">
-                Composing Contexts
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/networking/" class="">
-                Networking
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/images/" class="">
-                Images
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/ai-ready/" class="active">
-                AI Toolchain
-              </a>
-            </li>
-            
-          </ul>
-        </details>
-        
-      </div>
-      
-      <div class="docs-nav-section">
-        
-        <details>
-          <summary>
-            <a href="/sew/docs/reference/" class="">Reference</a>
-          </summary>
-          <ul>
-            
-            <li>
-              <a href="/sew/docs/reference/configuration/" class="">
-                Configuration
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/reference/commands/" class="">
-                Commands
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/reference/context-format/" class="">
-                Context Format
-              </a>
-            </li>
-            
-          </ul>
-        </details>
-        
-      </div>
-      
-    </nav>
-  </aside>
-  <div class="docs-content">
-    <h1>AI Toolchain</h1>
-    <article class="content">
-      <p>sew is designed from the ground up to work well with AI coding assistants. Whether you use Cursor, Codex, Copilot, or another agent, everything in the repo is structured so your assistant can understand the project, validate configs, and follow product-specific rules without guessing.</p>
-<p>This page explains what makes sew agent-friendly, and how you as a maintainer can extend these capabilities for your own products.</p>
-<h2 id="what-makes-sew-ai-friendly">What makes sew AI-friendly</h2>
-<p>Three things work together:</p>
-<ol>
-<li><strong>A typed config schema</strong> &ndash; <code>schema/sew.schema.yaml</code> is a JSON Schema that describes every field in <code>sew.yaml</code>. Agents use it to validate configs, discover available options, and generate correct YAML without reading Go source code.</li>
-<li><strong>A structured registry</strong> &ndash; The <code>org/product/variant</code> convention, <code>.default</code> files, and YAML front matter in READMEs make the registry machine-parseable. An agent can navigate it, understand what each context does, and compose them together.</li>
-<li><strong>Explicit agent rules</strong> &ndash; <code>AGENTS.md</code> at the repo root gives agents project-wide guidance, and product-specific instruction files in <code>agents/</code> provide domain rules scoped to particular registry subtrees.</li>
-</ol>
-<h2 id="agentsmd">AGENTS.md</h2>
-<p>The <code>AGENTS.md</code> file sits at the repository root. AI coding assistants (Cursor, Codex, etc.) automatically discover and read it when they open the project. It tells the agent:</p>
-<ul>
-<li><strong>What sew is</strong> &ndash; a one-line description so the agent has context.</li>
-<li><strong>Where the schema lives</strong> &ndash; points to <code>schema/sew.schema.yaml</code> and tells the agent to prefer it over reading Go source code.</li>
-<li><strong>Agent-specific rules</strong> &ndash; guardrails like &ldquo;always run <code>task lint</code> and <code>task test</code> before proposing changes&rdquo; and &ldquo;validate <code>sew.yaml</code> files against the schema.&rdquo;</li>
-<li><strong>Product-specific instructions</strong> &ndash; a table linking to dedicated instruction files for each product in the registry.</li>
-</ul>
-<p>Here&rsquo;s what the structure looks like:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-markdown" data-lang="markdown"><span style="display:flex;"><span><span style="font-weight:bold"># AGENTS.md
-</span></span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>sew is a CLI tool that makes Kubernetes stacks for dev, test, and CI
-</span></span><span style="display:flex;"><span>easy to use and easy to maintain — compose what you need from a registry and deploy it in one command.
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="font-weight:bold">## Guidelines
-</span></span></span><span style="display:flex;"><span>Read and follow CONTRIBUTING.md for toolchain, commit conventions, ...
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="font-weight:bold">## Schema
-</span></span></span><span style="display:flex;"><span>The machine-readable JSON Schema for sew.yaml lives at
-</span></span><span style="display:flex;"><span>schema/sew.schema.yaml. Use it as the primary reference ...
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="font-weight:bold">## Agent-specific rules
-</span></span></span><span style="display:flex;"><span><span style="color:#ff79c6">-</span> Do not add AI-attribution footers to commits
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">-</span> Always run task lint and task test before proposing changes
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">-</span> When authoring sew.yaml files, validate against the schema
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">-</span> ...
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="font-weight:bold">## Product-specific instructions
-</span></span></span><span style="display:flex;"><span>| Product  | Instructions                  | Applies to            |
-</span></span><span style="display:flex;"><span>|----------|-------------------------------|-----------------------|
-</span></span><span style="display:flex;"><span>| Gravitee | agents/gravitee-agent.md      | registry/gravitee.io/ |
-</span></span></code></pre></div><h2 id="product-specific-instructions">Product-specific instructions</h2>
-<p>When a product has domain rules that agents should follow, you create a dedicated instruction file under <code>agents/</code>. These files are scoped to a specific subtree of the registry and contain rules that only apply when working on that product&rsquo;s contexts.</p>
-<h3 id="file-format">File format</h3>
-<p>Each instruction file uses YAML front matter with two fields:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span>---
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">product</span>: MyProduct
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">paths</span>:
-</span></span><span style="display:flex;"><span>  - registry/mycompany/
-</span></span><span style="display:flex;"><span>---
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4"># MyProduct rules</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>These instructions apply when working on contexts under registry/mycompany/.
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4">## Your domain rules here</span>
-</span></span><span style="display:flex;"><span>...
-</span></span></code></pre></div><ul>
-<li><strong><code>product</code></strong> &ndash; The display name for the product table in <code>AGENTS.md</code>.</li>
-<li><strong><code>paths</code></strong> &ndash; Which registry paths these rules apply to. An agent working on files outside these paths can ignore the file.</li>
-</ul>
-<h3 id="what-belongs-in-a-product-instruction-file">What belongs in a product instruction file</h3>
-<p>Product instructions should cover domain knowledge that an agent wouldn&rsquo;t otherwise have:</p>
-<ul>
-<li><strong>Organizational rules</strong> &ndash; how contexts are structured (e.g. <code>oss/</code> vs <code>ee/</code> splits, naming conventions).</li>
-<li><strong>Required patterns</strong> &ndash; things every context in this product must include (license handling, specific Helm values, mandatory components).</li>
-<li><strong>Override conventions</strong> &ndash; how users are expected to customize the product (which fields to override, which to leave alone).</li>
-<li><strong>README requirements</strong> &ndash; what sections or content must appear in each context&rsquo;s README for consistency.</li>
-</ul>
-<p>For example, the Gravitee product instructions cover the OSS/EE split, how license keys are mounted as Kubernetes Secrets with <code>onMissing: ignore</code>, the required Helm values for license volumes, and the verbatim README section every EE context must include.</p>
-<h3 id="keeping-the-table-in-sync">Keeping the table in sync</h3>
-<p>The product table in <code>AGENTS.md</code> is auto-generated. When you add or remove an instruction file, run:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>task agents:update
-</span></span></code></pre></div><p>This scans <code>agents/*-agent.md</code> files, reads their front matter, and regenerates the table between the <code>&lt;!-- agents:begin --&gt;</code> and <code>&lt;!-- agents:end --&gt;</code> markers in <code>AGENTS.md</code>.</p>
-<h2 id="the-config-schema">The config schema</h2>
-<p>The JSON Schema at <code>schema/sew.schema.yaml</code> is the machine-readable contract for <code>sew.yaml</code>. It defines every field, its type, description, default value, and allowed values. Agents use it to:</p>
-<ul>
-<li><strong>Validate</strong> existing configs &ndash; catch typos, missing required fields, or invalid values before running <code>sew create</code>.</li>
-<li><strong>Generate</strong> new configs &ndash; produce correct YAML by following the schema&rsquo;s structure and constraints.</li>
-<li><strong>Discover</strong> options &ndash; understand what features are available (DNS, load balancers, Gateway API, image mirrors) without reading documentation.</li>
-</ul>
-<p>The <code>AGENTS.md</code> file explicitly tells agents to prefer the schema over Go source code in <code>internal/config/</code>, which avoids the risk of the agent misinterpreting implementation details.</p>
-<p>See the <a href="http://localhost:1313/sew/docs/reference/configuration/">Configuration reference</a> for the full schema documentation.</p>
-<h2 id="registry-structure">Registry structure</h2>
-<p>The registry&rsquo;s conventions are designed to be both human-readable and machine-parseable:</p>
-<ul>
-<li><strong><code>org/product/variant</code> paths</strong> &ndash; predictable, navigable hierarchy.</li>
-<li><strong><code>.default</code> files</strong> &ndash; plain-text pointers that agents can follow to resolve shorthand paths (e.g. <code>mycompany/product</code> resolves to <code>mycompany/product/dev</code> if <code>.default</code> contains <code>dev</code>).</li>
-<li><strong>README front matter</strong> &ndash; <code>title</code>, <code>description</code>, and <code>tags</code> in YAML front matter give agents structured metadata about each context without parsing free-text.</li>
-<li><strong><code>sew.yaml</code> in every context</strong> &ndash; a single, schema-validated file that describes the entire stack. No implicit configuration, no magic.</li>
-</ul>
-<h2 id="making-your-product-ai-friendly">Making your product AI-friendly</h2>
-<p>If you maintain contexts in the sew registry and want AI assistants to work well with your product, follow this checklist:</p>
-<ol>
-<li><strong>Create an agent instruction file</strong> at <code>agents/&lt;product&gt;-agent.md</code> with YAML front matter (<code>product</code>, <code>paths</code>) and your domain rules.</li>
-<li><strong>Run <code>task agents:update</code></strong> to regenerate the product table in <code>AGENTS.md</code>.</li>
-<li><strong>Set <code>.default</code> files</strong> in your registry subtree so agents (and users) can reference your product with shorthand paths.</li>
-<li><strong>Add front matter to every README</strong> (<code>title</code>, <code>description</code>, <code>tags</code>) so the registry browser and agents can discover your contexts.</li>
-<li><strong>Validate your <code>sew.yaml</code> files against the schema</strong> &ndash; if the schema doesn&rsquo;t cover a field you need, contribute to the schema first.</li>
-<li><strong>Document required patterns</strong> in your agent file &ndash; license handling, naming conventions, mandatory components, anything an agent needs to know to produce correct contexts.</li>
-</ol>
-
-    </article>
-  </div>
-</div>
-
-  </main>
-  <footer class="footer">
-  <div class="footer-inner">
-    <p>
-      <a href="https://github.com/a-cordier/sew" target="_blank" rel="noopener">sew</a>
-      &mdash; Your local Kubernetes tailor shop
-    </p>
-  </div>
-</footer>
-
-</body>
-</html>
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>AI Toolchain · sew</title><meta name=description content="Your local Kubernetes tailor shop"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel=stylesheet><link rel=stylesheet href=/sew/css/main.min.3b24b0d2a8e01a336429aa2fa9131617e7054260326bb04774b9768cd67e55f9.css integrity="sha256-OySw0qjgGjNkKaovqRMWF+cFQmAya7BHdLl2jNZ+Vfk="><link rel=icon href=/sew/logo.svg type=image/svg+xml><script>(function(){var e=localStorage.getItem("theme");(e==="dark"||e==="light")&&document.documentElement.setAttribute("data-theme",e)})();function toggleTheme(){var t,n=document.documentElement,e=n.getAttribute("data-theme");e||(e=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"),t=e==="dark"?"light":"dark",n.setAttribute("data-theme",t),localStorage.setItem("theme",t)}</script></head><body><nav class=nav><div class=nav-inner><a class=nav-logo href=/sew/><img src=/sew/logo.svg alt=sew width=56 height=20>
+</a><button class=nav-hamburger aria-label="Toggle menu" onclick='document.querySelector(".nav-links").classList.toggle("open")'>
+<svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M1 2.75A.75.75.0 011.75 2h12.5a.75.75.0 010 1.5H1.75A.75.75.0 011 2.75zm0 5A.75.75.0 011.75 7h12.5a.75.75.0 010 1.5H1.75A.75.75.0 011 7.75zM1.75 12h12.5a.75.75.0 010 1.5H1.75a.75.75.0 010-1.5z"/></svg></button><ul class=nav-links><li><a href=/sew/docs/>Docs</a></li><li><a href=/sew/registry/>Registry</a></li><li><a href=https://github.com/a-cordier/sew target=_blank rel=noopener>GitHub
+<svg class="icon-external" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M3.75 2A1.75 1.75.0 002 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75.0 0014 12.25v-3.5a.75.75.0 00-1.5.0v3.5a.25.25.0 01-.25.25h-8.5a.25.25.0 01-.25-.25v-8.5a.25.25.0 01.25-.25h3.5a.75.75.0 000-1.5h-3.5zm6.5.0a.75.75.0 000 1.5h1.19L7.22 7.72a.75.75.0 101.06 1.06l4.22-4.22v1.19a.75.75.0 001.5.0v-3A.75.75.0 0013.25 2h-3z"/></svg></a></li><li><button class=theme-toggle aria-label="Toggle theme" onclick=toggleTheme()>
+<svg class="icon-sun" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12a4 4 0 100-8 4 4 0 000 8zm0 1.5a5.5 5.5.0 110-11 5.5 5.5.0 010 11zM8 0a.75.75.0 01.75.75v1a.75.75.0 01-1.5.0v-1A.75.75.0 018 0zm0 13a.75.75.0 01.75.75v1.5a.75.75.0 01-1.5.0v-1.5A.75.75.0 018 13zM0 8a.75.75.0 01.75-.75h1.5a.75.75.0 010 1.5H.75A.75.75.0 010 8zm12.25-.75h3a.75.75.0 010 1.5h-3a.75.75.0 010-1.5zm-9.6-4.6a.75.75.0 011.06.0l1 1A.75.75.0 113.65 4.71l-1-1a.75.75.0 010-1.06zM12 12a.75.75.0 01-1.06.0l-1-1A.75.75.0 1111 9.94l1 1A.75.75.0 0112 12zm-9.35.0a.75.75.0 010-1.06l1-1A.75.75.0 114.71 11l-1 1a.75.75.0 01-1.06.0zM13 3.7a.75.75.0 01-1.06.0l-1-1A.75.75.0 1112 1.64l1 1a.75.75.0 010 1.06z"/></svg>
+<svg class="icon-moon" viewBox="0 0 16 16" fill="currentColor"><path d="M9.598 1.591a.749.749.0 01.785-.175 7.001 7.001.0 11-8.967 8.967.75.75.0 01.961-.96 5.5 5.5.0 007.221-7.832z"/></svg></button></li></ul></div></nav><main class=main><div class=docs-layout><aside class=docs-sidebar><nav class=docs-nav><div class=docs-nav-section><a href=/sew/docs/getting-started/ class=docs-nav-standalone>Getting Started</a></div><div class=docs-nav-section><details open><summary><a href=/sew/docs/guides/>Guides</a></summary><ul><li><a href=/sew/docs/guides/registry/>Registry</a></li><li><a href=/sew/docs/guides/composing-contexts/>Composing Contexts</a></li><li><a href=/sew/docs/guides/networking/>Networking</a></li><li><a href=/sew/docs/guides/images/>Images</a></li><li><a href=/sew/docs/guides/ai-ready/ class=active>AI Toolchain</a></li></ul></details></div><div class=docs-nav-section><details><summary><a href=/sew/docs/reference/>Reference</a></summary><ul><li><a href=/sew/docs/reference/configuration/>Configuration</a></li><li><a href=/sew/docs/reference/commands/>Commands</a></li><li><a href=/sew/docs/reference/context-format/>Context Format</a></li></ul></details></div></nav></aside><div class=docs-content><h1>AI Toolchain</h1><article class=content><p>sew is designed from the ground up to work well with AI coding assistants. Whether you use Cursor, Codex, Copilot, or another agent, everything in the repo is structured so your assistant can understand the project, validate configs, and follow product-specific rules without guessing.</p><p>This page explains what makes sew agent-friendly, and how you as a maintainer can extend these capabilities for your own products.</p><h2 id=what-makes-sew-ai-friendly>What makes sew AI-friendly</h2><p>Three things work together:</p><ol><li><strong>A typed config schema</strong> &ndash; <code>schema/sew.schema.yaml</code> is a JSON Schema that describes every field in <code>sew.yaml</code>. Agents use it to validate configs, discover available options, and generate correct YAML without reading Go source code.</li><li><strong>A structured registry</strong> &ndash; The <code>org/product/variant</code> convention, <code>.default</code> files, and YAML front matter in READMEs make the registry machine-parseable. An agent can navigate it, understand what each context does, and compose them together.</li><li><strong>Explicit agent rules</strong> &ndash; <code>AGENTS.md</code> at the repo root gives agents project-wide guidance, and product-specific instruction files in <code>agents/</code> provide domain rules scoped to particular registry subtrees.</li></ol><h2 id=agentsmd>AGENTS.md</h2><p>The <code>AGENTS.md</code> file sits at the repository root. AI coding assistants (Cursor, Codex, etc.) automatically discover and read it when they open the project. It tells the agent:</p><ul><li><strong>What sew is</strong> &ndash; a one-line description so the agent has context.</li><li><strong>Where the schema lives</strong> &ndash; points to <code>schema/sew.schema.yaml</code> and tells the agent to prefer it over reading Go source code.</li><li><strong>Agent-specific rules</strong> &ndash; guardrails like &ldquo;always run <code>task lint</code> and <code>task test</code> before proposing changes&rdquo; and &ldquo;validate <code>sew.yaml</code> files against the schema.&rdquo;</li><li><strong>Product-specific instructions</strong> &ndash; a table linking to dedicated instruction files for each product in the registry.</li></ul><p>Here&rsquo;s what the structure looks like:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-markdown data-lang=markdown><span style=display:flex><span><span style=font-weight:700># AGENTS.md
+</span></span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>sew is a CLI tool that makes Kubernetes stacks for dev, test, and CI
+</span></span><span style=display:flex><span>easy to use and easy to maintain — compose what you need from a registry and deploy it in one command.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=font-weight:700>## Guidelines
+</span></span></span><span style=display:flex><span>Read and follow CONTRIBUTING.md for toolchain, commit conventions, ...
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=font-weight:700>## Schema
+</span></span></span><span style=display:flex><span>The machine-readable JSON Schema for sew.yaml lives at
+</span></span><span style=display:flex><span>schema/sew.schema.yaml. Use it as the primary reference ...
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=font-weight:700>## Agent-specific rules
+</span></span></span><span style=display:flex><span><span style=color:#ff79c6>-</span> Do not add AI-attribution footers to commits
+</span></span><span style=display:flex><span><span style=color:#ff79c6>-</span> Always run task lint and task test before proposing changes
+</span></span><span style=display:flex><span><span style=color:#ff79c6>-</span> When authoring sew.yaml files, validate against the schema
+</span></span><span style=display:flex><span><span style=color:#ff79c6>-</span> ...
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=font-weight:700>## Product-specific instructions
+</span></span></span><span style=display:flex><span>| Product  | Instructions                  | Applies to            |
+</span></span><span style=display:flex><span>|----------|-------------------------------|-----------------------|
+</span></span><span style=display:flex><span>| Gravitee | agents/gravitee-agent.md      | registry/gravitee.io/ |
+</span></span></code></pre></div><h2 id=product-specific-instructions>Product-specific instructions</h2><p>When a product has domain rules that agents should follow, you create a dedicated instruction file under <code>agents/</code>. These files are scoped to a specific subtree of the registry and contain rules that only apply when working on that product&rsquo;s contexts.</p><h3 id=file-format>File format</h3><p>Each instruction file uses YAML front matter with two fields:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span>---
+</span></span><span style=display:flex><span><span style=color:#ff79c6>product</span>: MyProduct
+</span></span><span style=display:flex><span><span style=color:#ff79c6>paths</span>:
+</span></span><span style=display:flex><span>  - registry/mycompany/
+</span></span><span style=display:flex><span>---
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># MyProduct rules</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>These instructions apply when working on contexts under registry/mycompany/.
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4>## Your domain rules here</span>
+</span></span><span style=display:flex><span>...
+</span></span></code></pre></div><ul><li><strong><code>product</code></strong> &ndash; The display name for the product table in <code>AGENTS.md</code>.</li><li><strong><code>paths</code></strong> &ndash; Which registry paths these rules apply to. An agent working on files outside these paths can ignore the file.</li></ul><h3 id=what-belongs-in-a-product-instruction-file>What belongs in a product instruction file</h3><p>Product instructions should cover domain knowledge that an agent wouldn&rsquo;t otherwise have:</p><ul><li><strong>Organizational rules</strong> &ndash; how contexts are structured (e.g. <code>oss/</code> vs <code>ee/</code> splits, naming conventions).</li><li><strong>Required patterns</strong> &ndash; things every context in this product must include (license handling, specific Helm values, mandatory components).</li><li><strong>Override conventions</strong> &ndash; how users are expected to customize the product (which fields to override, which to leave alone).</li><li><strong>README requirements</strong> &ndash; what sections or content must appear in each context&rsquo;s README for consistency.</li></ul><p>For example, the Gravitee product instructions cover the OSS/EE split, how license keys are mounted as Kubernetes Secrets with <code>onMissing: ignore</code>, the required Helm values for license volumes, and the verbatim README section every EE context must include.</p><h3 id=keeping-the-table-in-sync>Keeping the table in sync</h3><p>The product table in <code>AGENTS.md</code> is auto-generated. When you add or remove an instruction file, run:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-bash data-lang=bash><span style=display:flex><span>task agents:update
+</span></span></code></pre></div><p>This scans <code>agents/*-agent.md</code> files, reads their front matter, and regenerates the table between the <code>&lt;!-- agents:begin --></code> and <code>&lt;!-- agents:end --></code> markers in <code>AGENTS.md</code>.</p><h2 id=the-config-schema>The config schema</h2><p>The JSON Schema at <code>schema/sew.schema.yaml</code> is the machine-readable contract for <code>sew.yaml</code>. It defines every field, its type, description, default value, and allowed values. Agents use it to:</p><ul><li><strong>Validate</strong> existing configs &ndash; catch typos, missing required fields, or invalid values before running <code>sew create</code>.</li><li><strong>Generate</strong> new configs &ndash; produce correct YAML by following the schema&rsquo;s structure and constraints.</li><li><strong>Discover</strong> options &ndash; understand what features are available (DNS, load balancers, Gateway API, image mirrors) without reading documentation.</li></ul><p>The <code>AGENTS.md</code> file explicitly tells agents to prefer the schema over Go source code in <code>internal/config/</code>, which avoids the risk of the agent misinterpreting implementation details.</p><p>See the <a href=https://a-cordier.github.io/sew/docs/reference/configuration/>Configuration reference</a> for the full schema documentation.</p><h2 id=registry-structure>Registry structure</h2><p>The registry&rsquo;s conventions are designed to be both human-readable and machine-parseable:</p><ul><li><strong><code>org/product/variant</code> paths</strong> &ndash; predictable, navigable hierarchy.</li><li><strong><code>.default</code> files</strong> &ndash; plain-text pointers that agents can follow to resolve shorthand paths (e.g. <code>mycompany/product</code> resolves to <code>mycompany/product/dev</code> if <code>.default</code> contains <code>dev</code>).</li><li><strong>README front matter</strong> &ndash; <code>title</code>, <code>description</code>, and <code>tags</code> in YAML front matter give agents structured metadata about each context without parsing free-text.</li><li><strong><code>sew.yaml</code> in every context</strong> &ndash; a single, schema-validated file that describes the entire stack. No implicit configuration, no magic.</li></ul><h2 id=making-your-product-ai-friendly>Making your product AI-friendly</h2><p>If you maintain contexts in the sew registry and want AI assistants to work well with your product, follow this checklist:</p><ol><li><strong>Create an agent instruction file</strong> at <code>agents/&lt;product>-agent.md</code> with YAML front matter (<code>product</code>, <code>paths</code>) and your domain rules.</li><li><strong>Run <code>task agents:update</code></strong> to regenerate the product table in <code>AGENTS.md</code>.</li><li><strong>Set <code>.default</code> files</strong> in your registry subtree so agents (and users) can reference your product with shorthand paths.</li><li><strong>Add front matter to every README</strong> (<code>title</code>, <code>description</code>, <code>tags</code>) so the registry browser and agents can discover your contexts.</li><li><strong>Validate your <code>sew.yaml</code> files against the schema</strong> &ndash; if the schema doesn&rsquo;t cover a field you need, contribute to the schema first.</li><li><strong>Document required patterns</strong> in your agent file &ndash; license handling, naming conventions, mandatory components, anything an agent needs to know to produce correct contexts.</li></ol></article></div></div></main><footer class=footer><div class=footer-inner><p><a href=https://github.com/a-cordier/sew target=_blank rel=noopener>sew</a>
+&mdash; Your local Kubernetes tailor shop</p></div></footer></body></html>
