@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.1](https://github.com/a-cordier/sew/compare/v0.3.0...v0.3.1) (2026-03-21)
+
+
+### Documentation
+
+* fix broken link in registry section ([6041cf4](https://github.com/a-cordier/sew/commit/6041cf42ac4c1d99e282e07198822bcaf553b10e))
+* fix links in maintainer section of readme ([be90647](https://github.com/a-cordier/sew/commit/be90647598dc89039111604d541952e1b9af1d05))
+* make gravitee context stick on top in registry ([d462531](https://github.com/a-cordier/sew/commit/d462531b26e86ffbed2c8e29f69c6b4150ad5292))
+
 ## [0.3.0](https://github.com/a-cordier/sew/compare/v0.2.0...v0.3.0) (2026-03-21)
 
 
