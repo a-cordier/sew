@@ -11,3 +11,4 @@ These guides walk you through the main features of sew, from discovering context
 - **[Networking]({{< ref "/docs/guides/networking" >}})** -- Load balancers, Gateway API, and local DNS
 - **[Container Images]({{< ref "/docs/guides/container-images" >}})** -- Mirror proxies and image preloading
 - **[AI Toolchain]({{< ref "/docs/guides/ai-toolchain" >}})** -- How sew works with AI agents, and how to extend it for your product
+- **[Troubleshooting]({{< ref "/docs/guides/troubleshooting" >}})** -- Common issues and how to fix them
