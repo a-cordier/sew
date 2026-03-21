@@ -7,7 +7,7 @@ description: Gravitee APIM gateway in DB-less mode with the Gravitee Kubernetes 
 tags:
     - api-management
     - gateway
-    - operator
+    - kubernetes
 components:
     - apim
     - gko

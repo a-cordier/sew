@@ -3,10 +3,11 @@ title: Kubernetes - Gateway API
 layout: detail
 path: gravitee.io/apim/oss/k8s/gateway
 context: true
-description: Gravitee Gateway using the Kubernetes Gateway API with GKO
+description: Gravitee implementation of the Kubernetes Gateway API
 tags:
     - gateway
-    - operator
+    - networking
+    - kubernetes
 components:
     - gko
     - gateway-class-parameters

@@ -1,7 +1,7 @@
 ---
 title: "Kubernetes - Gateway API"
-description: "Gravitee Gateway using the Kubernetes Gateway API with GKO"
-tags: [gateway, operator]
+description: "Gravitee implementation of the Kubernetes Gateway API"
+tags: [gateway, networking, kubernetes]
 ---
 
 # APIM Gateway API
