@@ -39,15 +39,22 @@
         {{ end }}
 
         {{ with .Params.from }}
+        {{ $sources := slice }}
+        {{ range . }}
+          {{ $page := site.GetPage (printf "/registry/%s" .) }}
+          {{ if $page }}
+            {{ $sources = $sources | append (dict "path" . "page" $page) }}
+          {{ end }}
+        {{ end }}
+        {{ if $sources }}
         <section class="registry-composition">
           <h2>Composition chain</h2>
           <p class="composition-desc">This context is composed from the following base contexts:</p>
           <div class="composition-flow">
-            <ul class="composition-sources{{ if eq (len .) 1 }} single{{ end }}">
-              {{ range . }}
+            <ul class="composition-sources{{ if eq (len $sources) 1 }} single{{ end }}">
+              {{ range $sources }}
               <li class="composition-source">
-                {{ $page := site.GetPage (printf "/registry/%s" .) }}
-                <a href="{{ $page.RelPermalink }}">{{ . }}</a>
+                <a href="{{ .page.RelPermalink }}">{{ .path }}</a>
               </li>
               {{ end }}
             </ul>
@@ -62,6 +69,7 @@
           </div>
         </section>
         {{ end }}
+        {{ end }}
 
         {{ with .Params.notes_create }}
         <section class="registry-notes">
@@ -75,15 +83,23 @@
 
       <aside class="registry-detail-sidebar">
         {{ with .Params.from }}
+        {{ $items := slice }}
+        {{ range . }}
+          {{ $page := site.GetPage (printf "/registry/%s" .) }}
+          {{ if $page }}
+            {{ $items = $items | append (dict "path" . "page" $page) }}
+          {{ end }}
+        {{ end }}
+        {{ if $items }}
         <div class="sidebar-section">
           <h3>From</h3>
           <ul class="dep-list">
-            {{ range . }}
-            {{ $page := site.GetPage (printf "/registry/%s" .) }}
-            <li><a href="{{ $page.RelPermalink }}"><code>{{ . }}</code></a></li>
+            {{ range $items }}
+            <li><a href="{{ .page.RelPermalink }}"><code>{{ .path }}</code></a></li>
             {{ end }}
           </ul>
         </div>
+        {{ end }}
         {{ end }}
 
         {{ with .Params.components }}
@@ -108,10 +124,9 @@
         </div>
         {{ end }}
 
-        {{ with .Params.components }}
         <div class="sidebar-section">
           <h3>Raw config</h3>
-          <a href="{{ printf "%s%s/sew.yaml" $.Site.Home.RelPermalink $.Params.path }}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">
+          <a href="{{ printf "%s%s/sew.yaml" .Site.Home.RelPermalink .Params.path }}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 10v3.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V10"/>
               <polyline points="5 7 8 10 11 7"/>
@@ -120,7 +135,6 @@
             sew.yaml
           </a>
         </div>
-        {{ end }}
       </aside>
     </div>
   </div>

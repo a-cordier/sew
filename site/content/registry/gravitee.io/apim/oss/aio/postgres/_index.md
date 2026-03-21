@@ -14,6 +14,7 @@ from:
 components:
     - postgresql
     - elasticsearch
+    - tls-server
     - apim
 notes_create: |-
     Your cluster "gravitee.io/apim/oss/aio/postgres" is ready.

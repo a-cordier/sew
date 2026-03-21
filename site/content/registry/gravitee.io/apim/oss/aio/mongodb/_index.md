@@ -14,6 +14,7 @@ from:
 components:
     - mongodb
     - elasticsearch
+    - tls-server
     - apim
 notes_create: |-
     Your cluster "gravitee.io/apim/oss/aio/mongodb" is ready.
