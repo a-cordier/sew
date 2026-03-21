@@ -687,6 +687,28 @@ pre code {
   font-weight: 600;
 }
 
+.heading-anchor {
+  opacity: 0;
+  margin-left: 0.3em;
+  color: var(--color-text-faint);
+  text-decoration: none;
+  font-weight: normal;
+  transition: opacity var(--transition-fast);
+}
+
+h1:hover .heading-anchor,
+h2:hover .heading-anchor,
+h3:hover .heading-anchor,
+h4:hover .heading-anchor {
+  opacity: 0.5;
+}
+
+.heading-anchor:hover {
+  opacity: 1;
+  color: var(--color-link);
+  text-decoration: none;
+}
+
 .content h1 { font-size: 1.75rem; }
 .content h2 {
   font-size: 1.35rem;
