@@ -3,4 +3,5 @@ sew
 /site/generate
 /site/public/
 /generate
+/site/public/
 .test/
