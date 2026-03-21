@@ -4,7 +4,7 @@ images:
       - graviteeio/apim-gateway:latest-debian
       - graviteeio/kubernetes-operator:latest
 kind:
-  name: gio-dbless
+  name: gravitee-dbless
   nodes:
     - role: control-plane
       extraPortMappings:
@@ -44,7 +44,7 @@ components:
             enabled: false
           image:
             repository: graviteeio/apim-gateway
-            tag: latest
+            tag: latest-debian
           ingress:
             enabled: false
           services:

@@ -9,7 +9,7 @@ images:
       - graviteeio/apim-portal-ui:latest
 
 kind:
-  name: gio-apim
+  name: gravitee-apim
   nodes:
     - role: control-plane
       extraPortMappings:
