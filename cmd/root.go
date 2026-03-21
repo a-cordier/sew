@@ -12,6 +12,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Version is set by main from the build-time ldflags value.
+var Version string
+
 // DefaultConfigData holds the embedded sew.yaml from the project root,
 // set by main before Execute().
 var DefaultConfigData []byte
@@ -26,7 +29,7 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "sew",
-	Short: "Kubernetes stacks for dev, test, and CI — one command away",
+	Short: "Kubernetes stacks for dev, test, and CI — easy to use, easy to maintain",
 	PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
 		sewHome = os.Getenv("SEW_HOME")
 		if sewHome == "" {
@@ -59,6 +62,7 @@ func init() {
 
 // Execute runs the root command.
 func Execute() error {
+	rootCmd.Version = Version
 	return rootCmd.Execute()
 }
 

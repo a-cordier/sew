@@ -1,6 +1,14 @@
 version: "3"
 
+vars:
+  VERSION: '{{default "dev" .VERSION}}'
+
 tasks:
+  build:
+    desc: Build the sew binary
+    cmds:
+      - go build -ldflags "-X main.version={{.VERSION}}" -o sew .
+
   lint:
     desc: Run linter
     cmds:
