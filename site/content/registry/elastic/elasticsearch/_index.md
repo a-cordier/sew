@@ -15,6 +15,7 @@ notes_create: |-
 
       curl http://localhost:9200
       curl http://localhost:9200/_cluster/health?pretty
+icon: elastic/icon.svg
 type: registry
 ---
 

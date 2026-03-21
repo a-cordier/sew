@@ -16,6 +16,7 @@ notes_create: |-
     If you have mongosh installed you can test the connection with:
 
       mongosh mongodb://localhost:27017
+icon: mongodb/icon.svg
 type: registry
 ---
 
