@@ -22,12 +22,15 @@ type sewComponent struct {
 }
 
 type readmeFrontmatter struct {
+	Title       string   `yaml:"title"`
 	Description string   `yaml:"description"`
 	Tags        []string `yaml:"tags"`
 }
 
 type componentPage struct {
 	Title       string   `yaml:"title"`
+	Path        string   `yaml:"path"`
+	Context     bool     `yaml:"context"`
 	Description string   `yaml:"description,omitempty"`
 	Tags        []string `yaml:"tags,omitempty"`
 	From        []string `yaml:"from,omitempty"`
@@ -86,7 +89,12 @@ func main() {
 		componentDirs[relDir] = true
 		collectIntermediateDirs(relDir, intermediateDirs)
 
-		description, tags, body := parseReadme(filepath.Join(dir, "README.md"))
+		readmeTitle, description, tags, body := parseReadme(filepath.Join(dir, "README.md"))
+
+		title := relDir
+		if readmeTitle != "" {
+			title = readmeTitle
+		}
 		notesCreate := readOptionalFile(filepath.Join(dir, "notes.create"))
 
 		var componentNames []string
@@ -95,7 +103,9 @@ func main() {
 		}
 
 		page := componentPage{
-			Title:       relDir,
+			Title:       title,
+			Path:        relDir,
+			Context:     true,
 			Description: description,
 			Tags:        tags,
 			From:        config.From,
@@ -172,35 +182,34 @@ func parseSewConfig(path string) (*sewConfig, error) {
 	return &config, nil
 }
 
-func parseReadme(path string) (description string, tags []string, body string) {
+func parseReadme(path string) (title string, description string, tags []string, body string) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return "", nil, ""
+		return "", "", nil, ""
 	}
 
 	content := string(data)
 	if !strings.HasPrefix(content, "---\n") {
-		return "", nil, strings.TrimSpace(content)
+		return "", "", nil, strings.TrimSpace(content)
 	}
 
 	rest := content[4:]
 	idx := strings.Index(rest, "\n---")
 	if idx < 0 {
-		return "", nil, strings.TrimSpace(content)
+		return "", "", nil, strings.TrimSpace(content)
 	}
 
 	var fm readmeFrontmatter
 	if err := yaml.Unmarshal([]byte(rest[:idx]), &fm); err != nil {
-		return "", nil, strings.TrimSpace(content)
+		return "", "", nil, strings.TrimSpace(content)
 	}
 
-	// Skip past the closing "---" and any trailing newline
 	bodyStart := idx + 4
 	if bodyStart < len(rest) {
 		body = strings.TrimSpace(rest[bodyStart:])
 	}
 
-	return fm.Description, fm.Tags, body
+	return fm.Title, fm.Description, fm.Tags, body
 }
 
 func readOptionalFile(path string) string {

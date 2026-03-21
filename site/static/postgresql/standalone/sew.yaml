@@ -2,6 +2,13 @@ images:
   preload:
     refs:
       - postgres:17
+kind:
+  name: pg-standalone
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30432
+          hostPort: 5432
 components:
   - name: postgresql
     type: k8s
@@ -50,10 +57,11 @@ components:
             labels:
               app: postgresql
           spec:
-            type: ClusterIP
+            type: NodePort
             ports:
               - port: 5432
                 targetPort: 5432
+                nodePort: 30432
                 name: postgresql
             selector:
               app: postgresql

@@ -2,66 +2,88 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/sew/docs/getting-started/</loc>
+    <loc>http://localhost:61863/sew/docs/getting-started/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/concepts/</loc>
+    <loc>http://localhost:61863/sew/docs/concepts/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/configuration/</loc>
+    <loc>http://localhost:61863/sew/docs/configuration/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/context-format/</loc>
+    <loc>http://localhost:61863/sew/docs/context-format/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/images/</loc>
+    <loc>http://localhost:61863/sew/docs/images/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/dns/</loc>
+    <loc>http://localhost:61863/sew/docs/dns/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/delete/</loc>
+    <loc>http://localhost:61863/sew/docs/patch/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/tags/api-management/</loc>
+    <loc>http://localhost:61863/sew/docs/delete/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/categories/</loc>
+    <loc>http://localhost:61863/sew/tags/api-management/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/tags/database/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/oss/aio/mongodb/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/oss/aio/postgres/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/elastic/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/oss/k8s/dbless/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/elastic/elasticsearch/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/oss/k8s/gateway/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/tags/elasticsearch/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/ee/kafka/mongodb/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/tags/gateway/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/ee/kafka/postgres/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/tags/gravitee/</loc>
+    <loc>http://localhost:61863/sew/categories/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/gravitee.io/</loc>
+    <loc>http://localhost:61863/sew/tags/database/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/</loc>
+    <loc>http://localhost:61863/sew/docs/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/aio/</loc>
+    <loc>http://localhost:61863/sew/registry/elastic/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/aio/mongodb/</loc>
+    <loc>http://localhost:61863/sew/registry/elastic/elasticsearch/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/aio/postgres/</loc>
+    <loc>http://localhost:61863/sew/tags/elasticsearch/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/dbless/</loc>
+    <loc>http://localhost:61863/sew/tags/gateway/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/gateway-api/</loc>
+    <loc>http://localhost:61863/sew/tags/gravitee/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/mongodb/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/mongodb/standalone/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/tags/operator/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/ee/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/postgresql/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/ee/kafka/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/postgresql/standalone/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/oss/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/registry/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/oss/aio/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/</loc>
+    <loc>http://localhost:61863/sew/registry/gravitee.io/apim/oss/k8s/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/tags/</loc>
+    <loc>http://localhost:61863/sew/registry/kafka/</loc>
+  </url><url>
+    <loc>http://localhost:61863/sew/tags/kafka/</loc>
+  </url><url>
+    <loc>http://localhost:61863/sew/registry/kafka/standalone/</loc>
+  </url><url>
+    <loc>http://localhost:61863/sew/tags/messaging/</loc>
+  </url><url>
+    <loc>http://localhost:61863/sew/registry/mongodb/</loc>
+  </url><url>
+    <loc>http://localhost:61863/sew/registry/mongodb/standalone/</loc>
+  </url><url>
+    <loc>http://localhost:61863/sew/tags/operator/</loc>
+  </url><url>
+    <loc>http://localhost:61863/sew/registry/postgresql/</loc>
+  </url><url>
+    <loc>http://localhost:61863/sew/registry/postgresql/standalone/</loc>
+  </url><url>
+    <loc>http://localhost:61863/sew/registry/</loc>
+  </url><url>
+    <loc>http://localhost:61863/sew/</loc>
+  </url><url>
+    <loc>http://localhost:61863/sew/tags/</loc>
   </url>
 </urlset>

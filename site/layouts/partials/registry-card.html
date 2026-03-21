@@ -1,8 +1,11 @@
 <a href="{{ .RelPermalink }}" class="registry-card"
-   data-search="{{ .Title | lower }} {{ .Description | lower }} {{ with .Params.tags }}{{ delimit . " " | lower }}{{ end }} {{ with .Params.components }}{{ delimit . " " | lower }}{{ end }}"
+   data-search="{{ .Title | lower }} {{ with .Params.path }}{{ . | lower }}{{ end }} {{ .Description | lower }} {{ with .Params.tags }}{{ delimit . " " | lower }}{{ end }} {{ with .Params.components }}{{ delimit . " " | lower }}{{ end }}"
    data-tags="{{ with .Params.tags }}{{ delimit . "," }}{{ end }}">
   <div class="registry-card-body">
     <h3 class="registry-card-title">{{ .Title }}</h3>
+    {{ with .Params.path }}
+    <p class="registry-card-path">{{ . }}</p>
+    {{ end }}
     {{ with .Description }}
     <p class="registry-card-desc">{{ . }}</p>
     {{ end }}

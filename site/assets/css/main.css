@@ -988,13 +988,34 @@ pre code {
   border-color: var(--color-border);
 }
 
+/* Grouped card grid */
+
+.registry-group {
+  margin-bottom: 2.5rem;
+}
+
+.registry-group:last-child {
+  margin-bottom: 0;
+  padding-bottom: 3rem;
+}
+
+.registry-group-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-faint);
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border-muted);
+}
+
 /* Card grid */
 
 .registry-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.15rem;
-  padding-bottom: 3rem;
 }
 
 .registry-card {
@@ -1046,10 +1067,18 @@ pre code {
 .registry-card-title {
   font-size: 0.95rem;
   font-weight: 600;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.25rem;
   color: var(--color-text);
-  font-family: var(--font-mono);
   letter-spacing: -0.01em;
+}
+
+.registry-card-path {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--color-text-faint);
+  margin-bottom: 0.45rem;
+  letter-spacing: 0;
+  word-break: break-all;
 }
 
 .registry-card-desc {

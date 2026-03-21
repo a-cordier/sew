@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=61863&amp;path=sew/livereload" data-no-instant defer></script>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DNS · sew</title>
@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/sew/css/main.min.c35b6e2d1c9eebc478283e312ab9a4cb4cd6a335040c59515ed63b94e8816ace.css" integrity="sha256-w1tuLRye68R4KD4xKrmky0zWozUEDFlRXtY7lOiBas4=">
+<link rel="stylesheet" href="/sew/css/main.min.ed9ce6360ed91538991c542da51aa3ebd4208ab63a8c73e9b40418b6119df7e7.css" integrity="sha256-7ZzmNg7ZFTiZHFQtpRqj69QgirY6jHPptAQYthGd9&#43;c=">
 <link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
 <script>
 (function() {
@@ -123,6 +123,12 @@ function toggleTheme() {
         </li>
         
         <li>
+          <a href="/sew/docs/patch/" class="">
+            Patch
+          </a>
+        </li>
+        
+        <li>
           <a href="/sew/docs/delete/" class="">
             Delete
           </a>
@@ -183,6 +189,17 @@ function toggleTheme() {
 </span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">service</span>: my-api-gateway
 </span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">namespace</span>: gravitee
 </span></span></code></pre></div><p>Each record resolves <code>hostname</code> to the external IP assigned to the named Service. Static records are collected alongside Gateway-derived ones during <code>sew create</code> and <code>sew refresh dns</code>.</p>
+<h3 id="wildcard-records">Wildcard records</h3>
+<p>Wildcard hostnames are supported per <a href="https://datatracker.ietf.org/doc/html/rfc4592">RFC 4592</a>. A record with a <code>*</code> first label matches any hostname that shares the remaining suffix:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">features</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">dns</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">enabled</span>: <span style="color:#ff79c6">true</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">records</span>:
+</span></span><span style="display:flex;"><span>      - <span style="color:#ff79c6">hostname</span>: <span style="color:#f1fa8c">&#34;*.kafka.sew.local&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">service</span>: apim-gateway
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">namespace</span>: gravitee
+</span></span></code></pre></div><p>With this record, both <code>demo.kafka.sew.local</code> and <code>broker-0-demo.kafka.sew.local</code> resolve to the <code>apim-gateway</code> Service IP — no per-API DNS entries are needed.</p>
+<p>Exact records always take priority over wildcards. If you define both <code>*.kafka.sew.local</code> and <code>admin.kafka.sew.local</code>, the latter is returned for <code>admin</code> while all other names fall through to the wildcard.</p>
 <h2 id="options">Options</h2>
 <table>
   <thead>

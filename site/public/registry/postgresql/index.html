@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=61863&amp;path=sew/livereload" data-no-instant defer></script>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>postgresql · sew</title>
@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/sew/css/main.min.c35b6e2d1c9eebc478283e312ab9a4cb4cd6a335040c59515ed63b94e8816ace.css" integrity="sha256-w1tuLRye68R4KD4xKrmky0zWozUEDFlRXtY7lOiBas4=">
+<link rel="stylesheet" href="/sew/css/main.min.ed9ce6360ed91538991c542da51aa3ebd4208ab63a8c73e9b40418b6119df7e7.css" integrity="sha256-7ZzmNg7ZFTiZHFQtpRqj69QgirY6jHPptAQYthGd9&#43;c=">
 <link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
 <script>
 (function() {
@@ -94,15 +94,7 @@ function toggleTheme() {
   
   
     
-  
-    
       
-    
-  
-    
-  
-    
-  
     
   
     
@@ -115,6 +107,36 @@ function toggleTheme() {
   
     
       
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+  
+    
+      
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
     
   
     
@@ -143,12 +165,6 @@ function toggleTheme() {
       
         
       
-    
-  
-    
-      
-        
-      
         
       
     
@@ -174,6 +190,38 @@ function toggleTheme() {
     
       
         
+      
+        
+      
+    
+  
+    
+      
+        
+      
+        
+      
+        
+      
+    
+  
+    
+      
+        
+      
+        
+      
+        
+      
+    
+  
+    
+      
+        
+      
+    
+  
+    
       
         
       
@@ -208,6 +256,10 @@ function toggleTheme() {
       
       <button class="tag tag-filter" data-tag="gravitee" type="button">gravitee</button>
       
+      <button class="tag tag-filter" data-tag="kafka" type="button">kafka</button>
+      
+      <button class="tag tag-filter" data-tag="messaging" type="button">messaging</button>
+      
       <button class="tag tag-filter" data-tag="operator" type="button">operator</button>
       
     </div>
@@ -215,17 +267,72 @@ function toggleTheme() {
   
 
   <div class="registry-meta">
-    <span class="registry-count" id="registry-count">7 components</span>
+    <span class="registry-count" id="registry-count">10 components</span>
     <button class="registry-clear-filters" id="registry-clear-filters" type="button" hidden>Clear filters</button>
   </div>
 
-  <div class="registry-grid" id="registry-grid">
+  
+  
+  
     
-      <a href="/sew/registry/elastic/elasticsearch/" class="registry-card"
-   data-search="elastic/elasticsearch single-node elasticsearch cluster elasticsearch elasticsearch"
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+    
+    
+  
+  
+
+  <div id="registry-grid">
+    
+    <div class="registry-group" data-group="elastic">
+      <h2 class="registry-group-title">elastic</h2>
+      <div class="registry-grid">
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <a href="/sew/registry/elastic/elasticsearch/" class="registry-card"
+   data-search="elasticsearch elastic/elasticsearch single-node elasticsearch cluster elasticsearch elasticsearch"
    data-tags="elasticsearch">
   <div class="registry-card-body">
-    <h3 class="registry-card-title">elastic/elasticsearch</h3>
+    <h3 class="registry-card-title">Elasticsearch</h3>
+    
+    <p class="registry-card-path">elastic/elasticsearch</p>
+    
     
     <p class="registry-card-desc">Single-node Elasticsearch cluster</p>
     
@@ -243,12 +350,30 @@ function toggleTheme() {
   </div>
 </a>
 
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </div>
     
-      <a href="/sew/registry/gravitee.io/apim/aio/mongodb/" class="registry-card"
-   data-search="gravitee.io/apim/aio/mongodb gravitee apim all-in-one with mongodb backend and elasticsearch gravitee api-management mongodb elasticsearch apim"
+    <div class="registry-group" data-group="gravitee.io">
+      <h2 class="registry-group-title">gravitee.io</h2>
+      <div class="registry-grid">
+        
+          
+            <a href="/sew/registry/gravitee.io/apim/oss/aio/mongodb/" class="registry-card"
+   data-search="apim - aio mongodb gravitee.io/apim/oss/aio/mongodb gravitee apim all-in-one with mongodb backend and elasticsearch gravitee api-management mongodb elasticsearch apim"
    data-tags="gravitee,api-management">
   <div class="registry-card-body">
-    <h3 class="registry-card-title">gravitee.io/apim/aio/mongodb</h3>
+    <h3 class="registry-card-title">APIM - AIO MongoDB</h3>
+    
+    <p class="registry-card-path">gravitee.io/apim/oss/aio/mongodb</p>
+    
     
     <p class="registry-card-desc">Gravitee APIM all-in-one with MongoDB backend and Elasticsearch</p>
     
@@ -270,12 +395,17 @@ function toggleTheme() {
   </div>
 </a>
 
-    
-      <a href="/sew/registry/gravitee.io/apim/aio/postgres/" class="registry-card"
-   data-search="gravitee.io/apim/aio/postgres gravitee apim all-in-one with postgresql backend and elasticsearch gravitee api-management postgresql elasticsearch apim"
+          
+        
+          
+            <a href="/sew/registry/gravitee.io/apim/oss/aio/postgres/" class="registry-card"
+   data-search="apim - aio postgresql gravitee.io/apim/oss/aio/postgres gravitee apim all-in-one with postgresql backend and elasticsearch gravitee api-management postgresql elasticsearch apim"
    data-tags="gravitee,api-management">
   <div class="registry-card-body">
-    <h3 class="registry-card-title">gravitee.io/apim/aio/postgres</h3>
+    <h3 class="registry-card-title">APIM - AIO PostgreSQL</h3>
+    
+    <p class="registry-card-path">gravitee.io/apim/oss/aio/postgres</p>
+    
     
     <p class="registry-card-desc">Gravitee APIM all-in-one with PostgreSQL backend and Elasticsearch</p>
     
@@ -297,12 +427,17 @@ function toggleTheme() {
   </div>
 </a>
 
-    
-      <a href="/sew/registry/gravitee.io/apim/dbless/" class="registry-card"
-   data-search="gravitee.io/apim/dbless gravitee apim gateway in db-less mode with the gravitee kubernetes operator gravitee api-management operator apim gko"
+          
+        
+          
+            <a href="/sew/registry/gravitee.io/apim/oss/k8s/dbless/" class="registry-card"
+   data-search="apim - db-less gravitee.io/apim/oss/k8s/dbless gravitee apim gateway in db-less mode with the gravitee kubernetes operator gravitee api-management operator apim gko"
    data-tags="gravitee,api-management,operator">
   <div class="registry-card-body">
-    <h3 class="registry-card-title">gravitee.io/apim/dbless</h3>
+    <h3 class="registry-card-title">APIM - DB-less</h3>
+    
+    <p class="registry-card-path">gravitee.io/apim/oss/k8s/dbless</p>
+    
     
     <p class="registry-card-desc">Gravitee APIM gateway in DB-less mode with the Gravitee Kubernetes Operator</p>
     
@@ -324,12 +459,17 @@ function toggleTheme() {
   </div>
 </a>
 
-    
-      <a href="/sew/registry/gravitee.io/apim/gateway-api/" class="registry-card"
-   data-search="gravitee.io/apim/gateway-api gravitee gateway using the kubernetes gateway api with gko gravitee gateway gko gateway-class-parameters gateway-class"
+          
+        
+          
+            <a href="/sew/registry/gravitee.io/apim/oss/k8s/gateway/" class="registry-card"
+   data-search="apim - gateway api gravitee.io/apim/oss/k8s/gateway gravitee gateway using the kubernetes gateway api with gko gravitee gateway gko gateway-class-parameters gateway-class"
    data-tags="gravitee,gateway">
   <div class="registry-card-body">
-    <h3 class="registry-card-title">gravitee.io/apim/gateway-api</h3>
+    <h3 class="registry-card-title">APIM - Gateway API</h3>
+    
+    <p class="registry-card-path">gravitee.io/apim/oss/k8s/gateway</p>
+    
     
     <p class="registry-card-desc">Gravitee Gateway using the Kubernetes Gateway API with GKO</p>
     
@@ -349,12 +489,169 @@ function toggleTheme() {
   </div>
 </a>
 
+          
+        
+          
+            <a href="/sew/registry/gravitee.io/apim/ee/kafka/mongodb/" class="registry-card"
+   data-search="apim - kafka mongodb gravitee.io/apim/ee/kafka/mongodb gravitee apim with kafka gateway and mongodb backend gravitee api-management kafka "
+   data-tags="gravitee,api-management,kafka">
+  <div class="registry-card-body">
+    <h3 class="registry-card-title">APIM - Kafka MongoDB</h3>
     
-      <a href="/sew/registry/mongodb/standalone/" class="registry-card"
-   data-search="mongodb/standalone single-node mongodb 7 deployment for kubernetes database mongodb"
+    <p class="registry-card-path">gravitee.io/apim/ee/kafka/mongodb</p>
+    
+    
+    <p class="registry-card-desc">Gravitee APIM with Kafka Gateway and MongoDB backend</p>
+    
+  </div>
+  <div class="registry-card-footer">
+    
+    <div class="registry-card-tags">
+      
+      <span class="tag tag-sm">gravitee</span>
+      
+      <span class="tag tag-sm">api-management</span>
+      
+      <span class="tag tag-sm">kafka</span>
+      
+      
+    </div>
+    
+    
+    <span class="registry-card-deps">2 deps</span>
+    
+  </div>
+</a>
+
+          
+        
+          
+            <a href="/sew/registry/gravitee.io/apim/ee/kafka/postgres/" class="registry-card"
+   data-search="apim - kafka postgresql gravitee.io/apim/ee/kafka/postgres gravitee apim with kafka gateway and postgresql backend gravitee api-management kafka "
+   data-tags="gravitee,api-management,kafka">
+  <div class="registry-card-body">
+    <h3 class="registry-card-title">APIM - Kafka PostgreSQL</h3>
+    
+    <p class="registry-card-path">gravitee.io/apim/ee/kafka/postgres</p>
+    
+    
+    <p class="registry-card-desc">Gravitee APIM with Kafka Gateway and PostgreSQL backend</p>
+    
+  </div>
+  <div class="registry-card-footer">
+    
+    <div class="registry-card-tags">
+      
+      <span class="tag tag-sm">gravitee</span>
+      
+      <span class="tag tag-sm">api-management</span>
+      
+      <span class="tag tag-sm">kafka</span>
+      
+      
+    </div>
+    
+    
+    <span class="registry-card-deps">2 deps</span>
+    
+  </div>
+</a>
+
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </div>
+    
+    <div class="registry-group" data-group="kafka">
+      <h2 class="registry-group-title">kafka</h2>
+      <div class="registry-grid">
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <a href="/sew/registry/kafka/standalone/" class="registry-card"
+   data-search="kafka - standalone kafka/standalone single-node kafka broker in kraft combined mode messaging kafka"
+   data-tags="messaging">
+  <div class="registry-card-body">
+    <h3 class="registry-card-title">Kafka - Standalone</h3>
+    
+    <p class="registry-card-path">kafka/standalone</p>
+    
+    
+    <p class="registry-card-desc">Single-node Kafka broker in KRaft combined mode</p>
+    
+  </div>
+  <div class="registry-card-footer">
+    
+    <div class="registry-card-tags">
+      
+      <span class="tag tag-sm">messaging</span>
+      
+      
+    </div>
+    
+    
+  </div>
+</a>
+
+          
+        
+          
+        
+          
+        
+      </div>
+    </div>
+    
+    <div class="registry-group" data-group="mongodb">
+      <h2 class="registry-group-title">mongodb</h2>
+      <div class="registry-grid">
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <a href="/sew/registry/mongodb/standalone/" class="registry-card"
+   data-search="mongodb - standalone mongodb/standalone single-node mongodb 7 deployment for kubernetes database mongodb"
    data-tags="database">
   <div class="registry-card-body">
-    <h3 class="registry-card-title">mongodb/standalone</h3>
+    <h3 class="registry-card-title">MongoDB - Standalone</h3>
+    
+    <p class="registry-card-path">mongodb/standalone</p>
+    
     
     <p class="registry-card-desc">Single-node MongoDB 7 deployment for Kubernetes</p>
     
@@ -372,12 +669,44 @@ function toggleTheme() {
   </div>
 </a>
 
+          
+        
+          
+        
+      </div>
+    </div>
     
-      <a href="/sew/registry/postgresql/standalone/" class="registry-card"
-   data-search="postgresql/standalone single-node postgresql 17 deployment for kubernetes database postgresql"
+    <div class="registry-group" data-group="postgresql">
+      <h2 class="registry-group-title">postgresql</h2>
+      <div class="registry-grid">
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            <a href="/sew/registry/postgresql/standalone/" class="registry-card"
+   data-search="postgresql - standalone postgresql/standalone single-node postgresql 17 deployment for kubernetes database postgresql"
    data-tags="database">
   <div class="registry-card-body">
-    <h3 class="registry-card-title">postgresql/standalone</h3>
+    <h3 class="registry-card-title">PostgreSQL - Standalone</h3>
+    
+    <p class="registry-card-path">postgresql/standalone</p>
+    
     
     <p class="registry-card-desc">Single-node PostgreSQL 17 deployment for Kubernetes</p>
     
@@ -395,6 +724,10 @@ function toggleTheme() {
   </div>
 </a>
 
+          
+        
+      </div>
+    </div>
     
   </div>
 
@@ -420,6 +753,7 @@ function toggleTheme() {
   var empty = document.getElementById('registry-empty');
   var countEl = document.getElementById('registry-count');
   var cards = Array.prototype.slice.call(grid.querySelectorAll('.registry-card'));
+  var groups = Array.prototype.slice.call(grid.querySelectorAll('.registry-group'));
   var filterBtns = Array.prototype.slice.call(document.querySelectorAll('.tag-filter'));
   var activeTags = {};
   var totalCount = cards.length;
@@ -453,6 +787,14 @@ function toggleTheme() {
       var show = matchText && matchTags;
       card.style.display = show ? '' : 'none';
       if (show) visible++;
+    });
+
+    groups.forEach(function(group) {
+      var groupCards = Array.prototype.slice.call(group.querySelectorAll('.registry-card'));
+      var anyVisible = groupCards.some(function(card) {
+        return card.style.display !== 'none';
+      });
+      group.style.display = anyVisible ? '' : 'none';
     });
 
     empty.hidden = visible > 0;

@@ -1,4 +1,5 @@
 ---
+title: "MongoDB - Standalone"
 description: "Single-node MongoDB 7 deployment for Kubernetes"
 tags: [database]
 ---

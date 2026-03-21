@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=61863&amp;path=sew/livereload" data-no-instant defer></script>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Configuration · sew</title>
@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/sew/css/main.min.c35b6e2d1c9eebc478283e312ab9a4cb4cd6a335040c59515ed63b94e8816ace.css" integrity="sha256-w1tuLRye68R4KD4xKrmky0zWozUEDFlRXtY7lOiBas4=">
+<link rel="stylesheet" href="/sew/css/main.min.ed9ce6360ed91538991c542da51aa3ebd4208ab63a8c73e9b40418b6119df7e7.css" integrity="sha256-7ZzmNg7ZFTiZHFQtpRqj69QgirY6jHPptAQYthGd9&#43;c=">
 <link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
 <script>
 (function() {
@@ -123,6 +123,12 @@ function toggleTheme() {
         </li>
         
         <li>
+          <a href="/sew/docs/patch/" class="">
+            Patch
+          </a>
+        </li>
+        
+        <li>
           <a href="/sew/docs/delete/" class="">
             Delete
           </a>
@@ -150,9 +156,10 @@ function toggleTheme() {
 </span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">hostPort</span>: <span style="color:#bd93f9">443</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#6272a4"># Optional: add Helm repos required by local components</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">repos</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: bitnami
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">url</span>: https://charts.bitnami.com/bitnami
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">helm</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">repos</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">name</span>: bitnami
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">url</span>: https://charts.bitnami.com/bitnami
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#6272a4"># Optional: override context components or add new ones</span>
 </span></span><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
@@ -227,11 +234,74 @@ function toggleTheme() {
 <li><strong><code>manifests</code></strong> — a list of inline Kubernetes resource definitions.</li>
 </ul>
 <p>Both can be used together; manifest files are applied first, then inline manifests.</p>
+<h3 id="local-secrets-and-configmaps">Local Secrets and ConfigMaps</h3>
+<p>A <code>k8s</code> component can also create Kubernetes Secrets and ConfigMaps from local files or environment variables using the <code>k8s.secrets</code> and <code>k8s.configMaps</code> fields. This is useful for injecting license keys, credentials, or configuration files that live outside version control.</p>
+<h4 id="shorthand-syntax">Shorthand syntax</h4>
+<p>When a Secret or ConfigMap has a single file source, use the <code>fromFile</code> shorthand. The data key defaults to the file&rsquo;s basename:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: licensing
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">type</span>: k8s
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">k8s</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">secrets</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#ff79c6">name</span>: gravitee-license
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">fromFile</span>: ./gravitee-license.txt
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">onMissing</span>: ignore
+</span></span></code></pre></div><p>This creates a Secret named <code>gravitee-license</code> with a single key <code>gravitee-license.txt</code> whose value is the file&rsquo;s contents.</p>
+<h4 id="full-entries-syntax">Full entries syntax</h4>
+<p>For resources with multiple data entries, or entries sourced from environment variables, use the <code>entries</code> list:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: app-config
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">type</span>: k8s
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">k8s</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">secrets</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#ff79c6">name</span>: my-credentials
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">onMissing</span>: fail
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">entries</span>:
+</span></span><span style="display:flex;"><span>            - <span style="color:#ff79c6">key</span>: token
+</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">fromFile</span>: ./token.txt
+</span></span><span style="display:flex;"><span>            - <span style="color:#ff79c6">key</span>: API_KEY
+</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">fromEnv</span>: MY_API_KEY
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">configMaps</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#ff79c6">name</span>: custom-logging
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">onMissing</span>: ignore
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">entries</span>:
+</span></span><span style="display:flex;"><span>            - <span style="color:#ff79c6">key</span>: logback.xml
+</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">fromFile</span>: ./logback.xml
+</span></span><span style="display:flex;"><span>            - <span style="color:#ff79c6">key</span>: LOG_LEVEL
+</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">fromEnv</span>: LOG_LEVEL
+</span></span></code></pre></div><p>Each entry specifies either <code>fromFile</code> (read from a local file) or <code>fromEnv</code> (read from an environment variable), but not both. The <code>key</code> field is optional — it defaults to the basename of the file path for <code>fromFile</code> entries, or the variable name for <code>fromEnv</code> entries.</p>
+<p>For Secrets, values are stored in <code>stringData</code> (the API server base64-encodes them on write). For ConfigMaps, values go into <code>data</code> as plain strings.</p>
+<h4 id="missing-sources">Missing sources</h4>
+<p>The <code>onMissing</code> field controls what happens when a file or environment variable is not found:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Value</th>
+          <th>Behaviour</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>fail</code> (default)</td>
+          <td>The setup errors out immediately</td>
+      </tr>
+      <tr>
+          <td><code>ignore</code></td>
+          <td>A warning is logged and the entire resource is skipped</td>
+      </tr>
+  </tbody>
+</table>
+<p><code>onMissing</code> applies at the resource level — if any entry in a resource is missing and <code>onMissing</code> is <code>ignore</code>, the whole resource is skipped (not just the missing entry).</p>
+<h4 id="path-resolution">Path resolution</h4>
+<p><code>fromFile</code> paths are resolved relative to the directory containing the config file, following the same convention as <code>helm.valueFiles</code> and <code>k8s.manifestFiles</code>.</p>
 <h3 id="adding-helm-repos">Adding Helm repos</h3>
-<p>If the new component&rsquo;s chart comes from a repo that the context does not declare, add it under <code>repos</code>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">repos</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: bitnami
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">url</span>: https://charts.bitnami.com/bitnami
+<p>If the new component&rsquo;s chart comes from a repo that the context does not declare, add it under <code>helm.repos</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">helm</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">repos</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">name</span>: bitnami
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">url</span>: https://charts.bitnami.com/bitnami
 </span></span></code></pre></div><p>Local repos are merged with context repos. When both lists contain a repo with the same name, the local entry wins.</p>
 <h3 id="adding-dependencies-between-components">Adding dependencies between components</h3>
 <p>You can make a context component wait for a local component (or vice-versa) by adding <code>requires</code> entries. Requirements are deduplicated by component name:</p>
@@ -299,7 +369,7 @@ function toggleTheme() {
       </tr>
       <tr>
           <td><code>helm.values</code></td>
-          <td>Local values are merged on top of context values</td>
+          <td>Deep-merged on top of context values (see <a href="#values-deep-merge">Values deep merge</a> below)</td>
       </tr>
       <tr>
           <td><code>k8s.manifestFiles</code></td>
@@ -307,11 +377,69 @@ function toggleTheme() {
       </tr>
       <tr>
           <td><code>k8s.manifests</code></td>
-          <td>Local manifests are appended</td>
+          <td>Union by resource identity (<code>apiVersion</code>, <code>kind</code>, <code>name</code>, <code>namespace</code>); later wins on conflict</td>
+      </tr>
+      <tr>
+          <td><code>k8s.secrets</code></td>
+          <td>Local secrets are appended</td>
+      </tr>
+      <tr>
+          <td><code>k8s.configMaps</code></td>
+          <td>Local configMaps are appended</td>
       </tr>
   </tbody>
 </table>
 <p>When there is no name match, the component is added to the deployment as-is.</p>
+<h3 id="values-deep-merge">Values deep merge</h3>
+<p>When <code>helm.values</code> from two layers overlap on the same key, sew picks a merge strategy based on the value type:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Value type</th>
+          <th>Strategy</th>
+          <th>Example keys</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Maps</td>
+          <td>Recursive deep merge — each nested key is merged individually, child wins per leaf</td>
+          <td><code>gateway.image</code>, <code>jdbc</code></td>
+      </tr>
+      <tr>
+          <td>Named lists (every element is an object with a <code>name</code> key)</td>
+          <td>Merge by <code>name</code> — same-name entries are overridden in place, new entries are appended</td>
+          <td><code>env</code>, <code>ports</code>, <code>volumeMounts</code></td>
+      </tr>
+      <tr>
+          <td>Everything else (scalars, plain lists, unnamed object lists)</td>
+          <td>Replace — child value wins</td>
+          <td><code>replicas</code>, <code>es.endpoints</code>, <code>servers</code></td>
+      </tr>
+  </tbody>
+</table>
+<p>Named-list merging follows the Kubernetes convention: fields like <code>env</code>, <code>ports</code>, <code>volumeMounts</code>, and <code>containers</code> all use <code>name</code> as an identity key. This means composed contexts can each contribute entries to the same list without clobbering each other.</p>
+<p><strong>Example</strong>: a postgres context sets JDBC rate-limiting env vars, and a Kafka context adds Kafka env vars. After composition, both sets of env vars are present:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#6272a4"># Context A (postgres) defines:</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">gateway</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">env</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">name</span>: gravitee_ratelimit_type
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">value</span>: jdbc
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Context B (kafka) defines:</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">gateway</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">env</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">name</span>: KAFKA_PORT
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">value</span>: <span style="color:#f1fa8c">&#34;9092&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Merged result — both entries are combined:</span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">gateway</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">env</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">name</span>: gravitee_ratelimit_type
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">value</span>: jdbc
+</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">name</span>: KAFKA_PORT
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">value</span>: <span style="color:#f1fa8c">&#34;9092&#34;</span>
+</span></span></code></pre></div><p>If both sides define an entry with the same <code>name</code>, the later (child) value wins. An empty list (<code>env: []</code>) replaces the parent&rsquo;s list entirely — use this to clear inherited entries.</p>
 
     </article>
   </div>

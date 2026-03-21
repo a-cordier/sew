@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=61863&amp;path=sew/livereload" data-no-instant defer></script>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Context Format · sew</title>
@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/sew/css/main.min.c35b6e2d1c9eebc478283e312ab9a4cb4cd6a335040c59515ed63b94e8816ace.css" integrity="sha256-w1tuLRye68R4KD4xKrmky0zWozUEDFlRXtY7lOiBas4=">
+<link rel="stylesheet" href="/sew/css/main.min.ed9ce6360ed91538991c542da51aa3ebd4208ab63a8c73e9b40418b6119df7e7.css" integrity="sha256-7ZzmNg7ZFTiZHFQtpRqj69QgirY6jHPptAQYthGd9&#43;c=">
 <link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
 <script>
 (function() {
@@ -123,6 +123,12 @@ function toggleTheme() {
         </li>
         
         <li>
+          <a href="/sew/docs/patch/" class="">
+            Patch
+          </a>
+        </li>
+        
+        <li>
           <a href="/sew/docs/delete/" class="">
             Delete
           </a>
@@ -135,9 +141,10 @@ function toggleTheme() {
     <h1>Context Format</h1>
     <article class="content">
       <p>A context lives at <code>{registry}/{context_path}/</code> and must contain <code>sew.yaml</code>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">repos</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: graviteeio
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">url</span>: https://helm.gravitee.io
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">helm</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">repos</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">name</span>: graviteeio
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">url</span>: https://helm.gravitee.io
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
 </span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: apim
@@ -253,9 +260,10 @@ function toggleTheme() {
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#6272a4"># registry/org/product/base/sew.yaml</span>
 </span></span><span style="display:flex;"><span><span style="color:#ff79c6">abstract</span>: <span style="color:#ff79c6">true</span>
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">repos</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: myrepo
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">url</span>: https://charts.example.com
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">helm</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">repos</span>:
+</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">name</span>: myrepo
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">url</span>: https://charts.example.com
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
 </span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: app
@@ -341,11 +349,48 @@ function toggleTheme() {
 <p>When contexts are composed, each top-level field is merged as follows:</p>
 <ul>
 <li><strong><code>kind</code></strong> — Scalar fields (<code>name</code>, <code>apiVersion</code>, <code>kind</code>): child wins if set. <code>nodes</code>: child replaces the entire list; <code>extraPortMappings</code> are merged as a <strong>union</strong> keyed by <code>(containerPort, protocol)</code> — parent-only ports are preserved, child-only ports are added, and when both sides define the same key the child wins. <code>containerdConfigPatches</code>: child replaces entirely.</li>
-<li><strong><code>components</code></strong> — Matched by name using the same rules as user-level overrides (see <a href="http://localhost:1313/sew/docs/configuration/#merge-rules">Merge rules</a>): <code>helm.chart</code> and <code>helm.version</code> child wins, <code>helm.valueFiles</code> appended, <code>helm.values</code> shallow-merged, <code>k8s.manifestFiles</code> appended, <code>k8s.manifests</code> appended, <code>requires</code> appended and deduplicated. Unmatched components are appended.</li>
-<li><strong><code>repos</code></strong> — Deduplicated by name; child entry wins on conflict.</li>
+<li><strong><code>components</code></strong> — Matched by name using the same rules as user-level overrides (see <a href="http://localhost:61863/sew/docs/configuration/#merge-rules">Merge rules</a>): <code>helm.chart</code> and <code>helm.version</code> child wins, <code>helm.valueFiles</code> appended, <code>helm.values</code> deep-merged (maps recurse, named lists merge by <code>name</code>, scalars replace — see <a href="http://localhost:61863/sew/docs/configuration/#values-deep-merge">Values deep merge</a>), <code>k8s.manifestFiles</code> appended, <code>k8s.manifests</code> merged by resource identity (later wins), <code>k8s.secrets</code> appended, <code>k8s.configMaps</code> appended, <code>requires</code> appended and deduplicated. Unmatched components are appended.</li>
+<li><strong><code>helm.repos</code></strong> — Deduplicated by name; child entry wins on conflict.</li>
 <li><strong><code>features</code></strong> — Each feature block (<code>lb</code>, <code>gateway</code>, <code>dns</code>) is replaced as a whole if the child defines it; otherwise inherited from parent.</li>
 <li><strong><code>images</code></strong> — <code>preload</code>: when both sides define it, <code>refs</code> are deduplicated (union); when only one side defines it, that side&rsquo;s config is used as-is. <code>mirrors</code> from the child wins when set; otherwise inherited from parent.</li>
 </ul>
+<h3 id="overriding-service-networking">Overriding service networking</h3>
+<p>When composing contexts, a parent often needs to change how a child&rsquo;s services are exposed &ndash; for example, switching a <code>NodePort</code> service to <code>ClusterIP</code> because the parent takes over networking through its own ingress, load balancer, or port mappings.</p>
+<p>The override technique depends on the component type:</p>
+<p><strong>k8s manifest components</strong> — Provide a full replacement Service manifest. Manifests are merged by resource identity <code>(apiVersion, kind, name)</code>, so the parent&rsquo;s Service replaces the child&rsquo;s entirely:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">from</span>:
+</span></span><span style="display:flex;"><span>  - org/db
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: db
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">k8s</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">manifests</span>:
+</span></span><span style="display:flex;"><span>        - <span style="color:#ff79c6">apiVersion</span>: v1
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">kind</span>: Service
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">metadata</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">name</span>: db
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">spec</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">type</span>: ClusterIP
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">ports</span>:
+</span></span><span style="display:flex;"><span>              - <span style="color:#ff79c6">port</span>: <span style="color:#bd93f9">27017</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">targetPort</span>: <span style="color:#bd93f9">27017</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">selector</span>:
+</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">app</span>: db
+</span></span></code></pre></div><p>Because the manifest is replaced wholesale, there is no risk of stale fields leaking through.</p>
+<p><strong>Helm components</strong> — Override the relevant values. Because <code>helm.values</code> are deep-merged (maps recurse, scalars replace), you must explicitly clear any fields that are invalid for the new service type. In particular, <code>nodePort</code> must be set to <code>null</code> when switching to <code>ClusterIP</code>, otherwise the child&rsquo;s <code>nodePort</code> value survives the merge and Kubernetes rejects it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">from</span>:
+</span></span><span style="display:flex;"><span>  - org/search-engine
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: search-engine
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">values</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">service</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">type</span>: ClusterIP
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">nodePort</span>: <span style="color:#ff79c6">null</span>    <span style="color:#6272a4"># clear the child&#39;s nodePort</span>
+</span></span></code></pre></div><p>Omitting <code>nodePort: null</code> here would produce <code>type: ClusterIP</code> + <code>nodePort: 30920</code> after deep merge, which Kubernetes rejects with: <code>spec.ports[0].nodePort: Forbidden: may not be used when type is 'ClusterIP'</code>.</p>
 <h2 id="default-variant-resolution">Default variant resolution</h2>
 <p>A context path usually includes the variant (<code>org/product/variant</code>), but you can also point to the product level and let sew pick the default variant automatically.</p>
 <p>When the resolved path has no <code>sew.yaml</code>, sew looks for a <strong><code>.default</code></strong> file in the same directory. This plain-text dotfile contains a single line — the name of the variant to use. sew then appends that variant to the path and resolves again.</p>
