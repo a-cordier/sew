@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/a-cordier/sew/compare/v0.2.0...v0.3.0) (2026-03-21)
+
+
+### Features
+
+* support anchor links in doc site ([002c0f6](https://github.com/a-cordier/sew/commit/002c0f65ab63cb055f5c8a8381af9d6e5d7bafdf))
+
 ## [0.2.0](https://github.com/a-cordier/sew/compare/v0.1.0...v0.2.0) (2026-03-21)
 
 
