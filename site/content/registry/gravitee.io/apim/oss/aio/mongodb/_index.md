@@ -1,11 +1,12 @@
 ---
 title: APIM - AIO MongoDB
+layout: detail
 path: gravitee.io/apim/oss/aio/mongodb
 context: true
 description: Gravitee APIM all-in-one with MongoDB backend and Elasticsearch
 tags:
-    - gravitee
     - api-management
+    - gateway
 from:
     - mongodb/standalone
     - elastic/elasticsearch
@@ -15,7 +16,7 @@ components:
     - elasticsearch
     - apim
 notes_create: |-
-    Your cluster "{{ .Kind.Name }}" is ready.
+    Your cluster "gravitee.io/apim/oss/aio/mongodb" is ready.
 
     Everything has been deployed in the `gravitee` namespace.
 
@@ -25,8 +26,6 @@ notes_create: |-
     Management API   http://localhost:30083
 type: registry
 ---
-
-# APIM AIO MongoDB
 
 Deploys a full Gravitee API Management stack (Console, Portal, Gateway, and
 Management API) backed by MongoDB for persistence and Elasticsearch for

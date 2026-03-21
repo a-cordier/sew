@@ -29,6 +29,7 @@ type readmeFrontmatter struct {
 
 type componentPage struct {
 	Title       string   `yaml:"title"`
+	Layout      string   `yaml:"layout"`
 	Path        string   `yaml:"path"`
 	Context     bool     `yaml:"context"`
 	Description string   `yaml:"description,omitempty"`
@@ -96,6 +97,7 @@ func main() {
 			title = readmeTitle
 		}
 		notesCreate := readOptionalFile(filepath.Join(dir, "notes.create"))
+		notesCreate = strings.ReplaceAll(notesCreate, "{{ .Kind.Name }}", relDir)
 
 		var componentNames []string
 		for _, c := range config.Components {
@@ -104,6 +106,7 @@ func main() {
 
 		page := componentPage{
 			Title:       title,
+			Layout:      "detail",
 			Path:        relDir,
 			Context:     true,
 			Description: description,
@@ -209,7 +212,19 @@ func parseReadme(path string) (title string, description string, tags []string, 
 		body = strings.TrimSpace(rest[bodyStart:])
 	}
 
+	body = stripLeadingH1(body)
+
 	return fm.Title, fm.Description, fm.Tags, body
+}
+
+func stripLeadingH1(body string) string {
+	if !strings.HasPrefix(body, "# ") {
+		return body
+	}
+	if nl := strings.Index(body, "\n"); nl >= 0 {
+		return strings.TrimSpace(body[nl+1:])
+	}
+	return ""
 }
 
 func readOptionalFile(path string) string {

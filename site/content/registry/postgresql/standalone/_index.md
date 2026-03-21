@@ -1,5 +1,6 @@
 ---
 title: PostgreSQL - Standalone
+layout: detail
 path: postgresql/standalone
 context: true
 description: Single-node PostgreSQL 17 deployment for Kubernetes
@@ -8,7 +9,7 @@ tags:
 components:
     - postgresql
 notes_create: |-
-    Your cluster "{{ .Kind.Name }}" is ready.
+    Your cluster "postgresql/standalone" is ready.
 
     PostgreSQL is available at localhost:5432.
 
@@ -19,8 +20,6 @@ notes_create: |-
       PGPASSWORD=postgres psql -h localhost -p 5432 -U postgres -d gravitee
 type: registry
 ---
-
-# PostgreSQL Standalone
 
 Deploys a single-replica PostgreSQL 17 instance as a Kubernetes Deployment with
 a NodePort Service on port 5432.

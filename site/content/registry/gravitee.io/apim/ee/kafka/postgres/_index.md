@@ -1,19 +1,19 @@
 ---
 title: APIM - Kafka PostgreSQL
+layout: detail
 path: gravitee.io/apim/ee/kafka/postgres
 context: true
 description: Gravitee APIM with Kafka Gateway and PostgreSQL backend
 tags:
-    - gravitee
     - api-management
+    - gateway
+    - messaging
     - kafka
 from:
     - gravitee.io/apim/oss/aio/postgres
     - gravitee.io/apim/ee/kafka/base
 type: registry
 ---
-
-# APIM Kafka PostgreSQL
 
 Deploys a full Gravitee API Management stack with Kafka Gateway enabled,
 backed by PostgreSQL for persistence and Elasticsearch for analytics.

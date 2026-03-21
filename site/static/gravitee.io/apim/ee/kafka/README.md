@@ -1,7 +1,7 @@
 ---
 title: "APIM - Kafka Gateway"
 description: "Gravitee APIM with Kafka Gateway support"
-tags: [api-management, kafka]
+tags: [api-management, gateway, messaging, kafka]
 ---
 
 # APIM Kafka Gateway

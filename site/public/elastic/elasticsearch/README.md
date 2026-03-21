@@ -1,7 +1,7 @@
 ---
 title: "Elasticsearch"
 description: "Single-node Elasticsearch cluster"
-tags: [elasticsearch]
+tags: [search]
 ---
 
 # Elasticsearch

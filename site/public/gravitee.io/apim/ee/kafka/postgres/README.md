@@ -1,7 +1,7 @@
 ---
 title: "APIM - Kafka PostgreSQL"
 description: "Gravitee APIM with Kafka Gateway and PostgreSQL backend"
-tags: [gravitee, api-management, kafka]
+tags: [api-management, gateway, messaging, kafka]
 ---
 
 # APIM Kafka PostgreSQL

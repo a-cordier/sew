@@ -1,14 +1,16 @@
 ---
 title: Kafka - Standalone
+layout: detail
 path: kafka/standalone
 context: true
 description: Single-node Kafka broker in KRaft combined mode
 tags:
     - messaging
+    - kafka
 components:
     - kafka
 notes_create: |-
-    Your cluster "{{ .Kind.Name }}" is ready.
+    Your cluster "kafka/standalone" is ready.
 
     Kafka is available at localhost:9092 (plaintext, no TLS).
 
@@ -17,8 +19,6 @@ notes_create: |-
       kcat -b localhost:9092 -L
 type: registry
 ---
-
-# Kafka Standalone
 
 Deploys a single-node Apache Kafka broker running in KRaft combined mode
 (controller + broker in one process, no ZooKeeper). A NodePort Service exposes

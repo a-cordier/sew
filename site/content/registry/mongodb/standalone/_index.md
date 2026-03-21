@@ -1,5 +1,6 @@
 ---
 title: MongoDB - Standalone
+layout: detail
 path: mongodb/standalone
 context: true
 description: Single-node MongoDB 7 deployment for Kubernetes
@@ -8,7 +9,7 @@ tags:
 components:
     - mongodb
 notes_create: |-
-    Your cluster "{{ .Kind.Name }}" is ready.
+    Your cluster "mongodb/standalone" is ready.
 
     MongoDB is available at localhost:27017 (no authentication).
 
@@ -17,8 +18,6 @@ notes_create: |-
       mongosh mongodb://localhost:27017
 type: registry
 ---
-
-# MongoDB Standalone
 
 Deploys a single-replica MongoDB instance as a Kubernetes Deployment with a
 NodePort Service on port 27017.

@@ -1,7 +1,7 @@
 ---
 title: "APIM - AIO MongoDB"
 description: "Gravitee APIM all-in-one with MongoDB backend and Elasticsearch"
-tags: [gravitee, api-management]
+tags: [api-management, gateway]
 ---
 
 # APIM AIO MongoDB

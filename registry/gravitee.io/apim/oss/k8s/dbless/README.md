@@ -1,7 +1,7 @@
 ---
 title: "APIM - DB-less"
 description: "Gravitee APIM gateway in DB-less mode with the Gravitee Kubernetes Operator"
-tags: [gravitee, api-management, operator]
+tags: [api-management, gateway, operator]
 ---
 
 # APIM DB-less

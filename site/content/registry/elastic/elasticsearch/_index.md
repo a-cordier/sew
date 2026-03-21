@@ -1,14 +1,15 @@
 ---
 title: Elasticsearch
+layout: detail
 path: elastic/elasticsearch
 context: true
 description: Single-node Elasticsearch cluster
 tags:
-    - elasticsearch
+    - search
 components:
     - elasticsearch
 notes_create: |-
-    Your cluster "{{ .Kind.Name }}" is ready.
+    Your cluster "elastic/elasticsearch" is ready.
 
     Elasticsearch is available at http://localhost:9200 (security disabled).
 
@@ -16,8 +17,6 @@ notes_create: |-
       curl http://localhost:9200/_cluster/health?pretty
 type: registry
 ---
-
-# Elasticsearch
 
 Deploys a single-node Elasticsearch cluster using the official Elastic
 Helm chart. Security and persistence are disabled for a lightweight development

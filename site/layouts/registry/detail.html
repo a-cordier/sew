@@ -1,31 +1,25 @@
 {{ define "main" }}
 <div class="registry-detail">
   <div class="container">
-    <nav class="breadcrumb">
-      {{ $parts := split .RelPermalink "/" }}
-      {{ $path := "" }}
-      {{ range $i, $p := $parts }}
-        {{ if $p }}
-          {{ $path = printf "%s%s/" $path $p }}
-          {{ if lt $i (sub (len $parts) 2) }}
-            <a href="{{ $path | relURL }}">{{ $p }}</a>
-            <span class="breadcrumb-sep">/</span>
-          {{ else }}
-            <span class="breadcrumb-current">{{ $p }}</span>
-          {{ end }}
-        {{ end }}
-      {{ end }}
+    <nav class="registry-back">
+      <a href="{{ (site.GetPage "/registry").RelPermalink }}">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 3L5 8l5 5"/>
+        </svg>
+        Back to Registry
+      </a>
     </nav>
 
     <div class="registry-detail-layout">
       <article class="registry-detail-main">
         <h1>{{ .Title }}</h1>
+        <p class="registry-path"><code>{{ .Params.path }}</code></p>
         {{ with .Description }}<p class="registry-description">{{ . }}</p>{{ end }}
 
         <div class="registry-install">
           <span class="registry-install-label">Install</span>
           <div class="registry-install-cmd">
-            <code id="install-cmd-text">sew create {{ .Title }}</code>
+            <code id="install-cmd-text">sew create {{ .Params.path }}</code>
             <button class="registry-copy-btn" id="copy-btn" type="button" title="Copy to clipboard" aria-label="Copy command">
               <svg class="copy-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/>
@@ -52,7 +46,8 @@
             <ul class="composition-sources{{ if eq (len .) 1 }} single{{ end }}">
               {{ range . }}
               <li class="composition-source">
-                <a href="{{ printf "/registry/%s/" . | relURL }}">{{ . }}</a>
+                {{ $page := site.GetPage (printf "/registry/%s" .) }}
+                <a href="{{ $page.RelPermalink }}">{{ . }}</a>
               </li>
               {{ end }}
             </ul>
@@ -62,7 +57,7 @@
               </svg>
             </div>
             <div class="composition-target">
-              <span>{{ $.Title }}</span>
+              <span>{{ $.Params.path }}</span>
             </div>
           </div>
         </section>
@@ -81,10 +76,11 @@
       <aside class="registry-detail-sidebar">
         {{ with .Params.from }}
         <div class="sidebar-section">
-          <h3>Dependencies</h3>
+          <h3>From</h3>
           <ul class="dep-list">
             {{ range . }}
-            <li><a href="{{ printf "/registry/%s/" . | relURL }}"><code>{{ . }}</code></a></li>
+            {{ $page := site.GetPage (printf "/registry/%s" .) }}
+            <li><a href="{{ $page.RelPermalink }}"><code>{{ . }}</code></a></li>
             {{ end }}
           </ul>
         </div>
@@ -115,7 +111,7 @@
         {{ with .Params.components }}
         <div class="sidebar-section">
           <h3>Raw config</h3>
-          <a href="{{ printf "/%s/sew.yaml" $.Title | relURL }}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">
+          <a href="{{ printf "%s%s/sew.yaml" $.Site.Home.RelPermalink $.Params.path }}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 10v3.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V10"/>
               <polyline points="5 7 8 10 11 7"/>

@@ -1,25 +1,24 @@
 ---
 title: APIM - DB-less
+layout: detail
 path: gravitee.io/apim/oss/k8s/dbless
 context: true
 description: Gravitee APIM gateway in DB-less mode with the Gravitee Kubernetes Operator
 tags:
-    - gravitee
     - api-management
+    - gateway
     - operator
 components:
     - apim
     - gko
 notes_create: |-
-    Your cluster "{{ .Kind.Name }}" is ready.
+    Your cluster "gravitee.io/apim/oss/k8s/dbless" is ready.
 
     Everything has been deployed in the `gravitee` namespace.
 
     APIM Gateway is listening on http://localhost:30082
 type: registry
 ---
-
-# APIM DB-less
 
 Deploys the Gravitee API Management gateway in DB-less mode alongside the
 Gravitee Kubernetes Operator (GKO). No database or analytics backend is

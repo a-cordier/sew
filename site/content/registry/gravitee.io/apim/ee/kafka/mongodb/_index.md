@@ -1,19 +1,19 @@
 ---
 title: APIM - Kafka MongoDB
+layout: detail
 path: gravitee.io/apim/ee/kafka/mongodb
 context: true
 description: Gravitee APIM with Kafka Gateway and MongoDB backend
 tags:
-    - gravitee
     - api-management
+    - gateway
+    - messaging
     - kafka
 from:
     - gravitee.io/apim/oss/aio/mongodb
     - gravitee.io/apim/ee/kafka/base
 type: registry
 ---
-
-# APIM Kafka MongoDB
 
 Deploys a full Gravitee API Management stack with Kafka Gateway enabled,
 backed by MongoDB for persistence and Elasticsearch for analytics.

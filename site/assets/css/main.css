@@ -1174,40 +1174,40 @@ pre code {
    ═══════════════════════════════════════════════════ */
 
 .registry-detail {
-  padding: 2rem 0 3rem;
+  padding: 3rem 0 5rem;
 }
 
-/* Breadcrumb */
+/* Back link */
 
-.breadcrumb {
-  font-size: 0.84rem;
+.registry-back {
   margin-bottom: 1.75rem;
-  color: var(--color-text-faint);
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
 }
 
-.breadcrumb a {
+.registry-back a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.84rem;
   color: var(--color-text-muted);
-  padding: 0.15rem 0;
   transition: color var(--transition-fast);
 }
 
-.breadcrumb a:hover {
+.registry-back a:hover {
   color: var(--color-link);
   text-decoration: none;
 }
 
-.breadcrumb-sep {
-  margin: 0 0.4rem;
-  opacity: 0.4;
-  user-select: none;
+/* Path subtitle */
+
+.registry-path {
+  margin-bottom: 1rem;
+  color: var(--color-text-muted);
 }
 
-.breadcrumb-current {
-  color: var(--color-text);
-  font-weight: 600;
+.registry-path code {
+  font-size: 0.9rem;
+  background: none;
+  padding: 0;
 }
 
 /* Detail layout: main + sidebar */
@@ -1221,13 +1221,27 @@ pre code {
 
 .registry-detail-main h1 {
   font-size: 1.85rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.registry-detail-main .content {
+  margin-bottom: 1rem;
+}
+
+.registry-detail-main .content h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.registry-detail-main .content h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
 }
 
 .registry-description {
   color: var(--color-text-muted);
   font-size: 1.05rem;
-  margin-bottom: 1.75rem;
+  margin-bottom: 2.25rem;
   line-height: 1.55;
 }
 
@@ -1237,7 +1251,7 @@ pre code {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 2rem;
+  margin-bottom: 2.75rem;
   padding: 0.75rem 1rem;
   background: var(--color-pre-bg);
   border-radius: var(--radius-lg);
@@ -1314,20 +1328,20 @@ pre code {
 /* Composition chain */
 
 .registry-composition {
-  margin-top: 2.5rem;
+  margin-top: 3rem;
   border-top: 1px solid var(--color-border-muted);
-  padding-top: 1.75rem;
+  padding-top: 2.25rem;
 }
 
 .registry-composition h2 {
   font-size: 1.1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .composition-desc {
   font-size: 0.88rem;
   color: var(--color-text-muted);
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .composition-flow {
@@ -1416,14 +1430,14 @@ pre code {
 /* Post-deploy notes */
 
 .registry-notes {
-  margin-top: 2.5rem;
+  margin-top: 3rem;
   border-top: 1px solid var(--color-border-muted);
-  padding-top: 1.75rem;
+  padding-top: 2.25rem;
 }
 
 .registry-notes h2 {
   font-size: 1.1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .registry-notes-content pre {

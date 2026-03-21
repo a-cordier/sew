@@ -1,7 +1,7 @@
 ---
 title: "Kafka - Standalone"
 description: "Single-node Kafka broker in KRaft combined mode"
-tags: [messaging]
+tags: [messaging, kafka]
 ---
 
 # Kafka Standalone

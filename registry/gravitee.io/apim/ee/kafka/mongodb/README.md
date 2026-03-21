@@ -1,7 +1,7 @@
 ---
 title: "APIM - Kafka MongoDB"
 description: "Gravitee APIM with Kafka Gateway and MongoDB backend"
-tags: [gravitee, api-management, kafka]
+tags: [api-management, gateway, messaging, kafka]
 ---
 
 # APIM Kafka MongoDB

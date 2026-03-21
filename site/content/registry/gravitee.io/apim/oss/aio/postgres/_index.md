@@ -1,11 +1,12 @@
 ---
 title: APIM - AIO PostgreSQL
+layout: detail
 path: gravitee.io/apim/oss/aio/postgres
 context: true
 description: Gravitee APIM all-in-one with PostgreSQL backend and Elasticsearch
 tags:
-    - gravitee
     - api-management
+    - gateway
 from:
     - postgresql/standalone
     - elastic/elasticsearch
@@ -15,7 +16,7 @@ components:
     - elasticsearch
     - apim
 notes_create: |-
-    Your cluster "{{ .Kind.Name }}" is ready.
+    Your cluster "gravitee.io/apim/oss/aio/postgres" is ready.
 
     Everything has been deployed in the `gravitee` namespace.
 
@@ -25,8 +26,6 @@ notes_create: |-
     Management API   http://localhost:30083
 type: registry
 ---
-
-# APIM AIO PostgreSQL
 
 Deploys a full Gravitee API Management stack (Console, Portal, Gateway, and
 Management API) backed by PostgreSQL for persistence and Elasticsearch for

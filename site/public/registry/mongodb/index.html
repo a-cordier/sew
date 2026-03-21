@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=61863&amp;path=sew/livereload" data-no-instant defer></script>
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>mongodb · sew</title>
@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/sew/css/main.min.ed9ce6360ed91538991c542da51aa3ebd4208ab63a8c73e9b40418b6119df7e7.css" integrity="sha256-7ZzmNg7ZFTiZHFQtpRqj69QgirY6jHPptAQYthGd9&#43;c=">
+<link rel="stylesheet" href="/sew/css/main.min.6130ab3e6d200b3813734aa45de2987be67b085f2b9f4ba3287f69b74b6311a4.css" integrity="sha256-YTCrPm0gCzgTc0qkXeKYe&#43;Z7CF8rn0ujKH9pt0tjEaQ=">
 <link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
 <script>
 (function() {
@@ -203,14 +203,6 @@ function toggleTheme() {
       
         
       
-    
-  
-    
-      
-        
-      
-        
-      
         
       
     
@@ -219,9 +211,23 @@ function toggleTheme() {
       
         
       
+        
+      
+        
+      
+        
+      
     
   
     
+      
+        
+      
+    
+  
+    
+      
+        
       
         
       
@@ -250,17 +256,15 @@ function toggleTheme() {
       
       <button class="tag tag-filter" data-tag="database" type="button">database</button>
       
-      <button class="tag tag-filter" data-tag="elasticsearch" type="button">elasticsearch</button>
-      
       <button class="tag tag-filter" data-tag="gateway" type="button">gateway</button>
-      
-      <button class="tag tag-filter" data-tag="gravitee" type="button">gravitee</button>
       
       <button class="tag tag-filter" data-tag="kafka" type="button">kafka</button>
       
       <button class="tag tag-filter" data-tag="messaging" type="button">messaging</button>
       
       <button class="tag tag-filter" data-tag="operator" type="button">operator</button>
+      
+      <button class="tag tag-filter" data-tag="search" type="button">search</button>
       
     </div>
   </div>
@@ -326,8 +330,8 @@ function toggleTheme() {
         
           
             <a href="/sew/registry/elastic/elasticsearch/" class="registry-card"
-   data-search="elasticsearch elastic/elasticsearch single-node elasticsearch cluster elasticsearch elasticsearch"
-   data-tags="elasticsearch">
+   data-search="elasticsearch elastic/elasticsearch single-node elasticsearch cluster search elasticsearch"
+   data-tags="search">
   <div class="registry-card-body">
     <h3 class="registry-card-title">Elasticsearch</h3>
     
@@ -341,7 +345,7 @@ function toggleTheme() {
     
     <div class="registry-card-tags">
       
-      <span class="tag tag-sm">elasticsearch</span>
+      <span class="tag tag-sm">search</span>
       
       
     </div>
@@ -367,8 +371,8 @@ function toggleTheme() {
         
           
             <a href="/sew/registry/gravitee.io/apim/oss/aio/mongodb/" class="registry-card"
-   data-search="apim - aio mongodb gravitee.io/apim/oss/aio/mongodb gravitee apim all-in-one with mongodb backend and elasticsearch gravitee api-management mongodb elasticsearch apim"
-   data-tags="gravitee,api-management">
+   data-search="apim - aio mongodb gravitee.io/apim/oss/aio/mongodb gravitee apim all-in-one with mongodb backend and elasticsearch api-management gateway mongodb elasticsearch apim"
+   data-tags="api-management,gateway">
   <div class="registry-card-body">
     <h3 class="registry-card-title">APIM - AIO MongoDB</h3>
     
@@ -382,9 +386,9 @@ function toggleTheme() {
     
     <div class="registry-card-tags">
       
-      <span class="tag tag-sm">gravitee</span>
-      
       <span class="tag tag-sm">api-management</span>
+      
+      <span class="tag tag-sm">gateway</span>
       
       
     </div>
@@ -399,8 +403,8 @@ function toggleTheme() {
         
           
             <a href="/sew/registry/gravitee.io/apim/oss/aio/postgres/" class="registry-card"
-   data-search="apim - aio postgresql gravitee.io/apim/oss/aio/postgres gravitee apim all-in-one with postgresql backend and elasticsearch gravitee api-management postgresql elasticsearch apim"
-   data-tags="gravitee,api-management">
+   data-search="apim - aio postgresql gravitee.io/apim/oss/aio/postgres gravitee apim all-in-one with postgresql backend and elasticsearch api-management gateway postgresql elasticsearch apim"
+   data-tags="api-management,gateway">
   <div class="registry-card-body">
     <h3 class="registry-card-title">APIM - AIO PostgreSQL</h3>
     
@@ -414,9 +418,9 @@ function toggleTheme() {
     
     <div class="registry-card-tags">
       
-      <span class="tag tag-sm">gravitee</span>
-      
       <span class="tag tag-sm">api-management</span>
+      
+      <span class="tag tag-sm">gateway</span>
       
       
     </div>
@@ -431,8 +435,8 @@ function toggleTheme() {
         
           
             <a href="/sew/registry/gravitee.io/apim/oss/k8s/dbless/" class="registry-card"
-   data-search="apim - db-less gravitee.io/apim/oss/k8s/dbless gravitee apim gateway in db-less mode with the gravitee kubernetes operator gravitee api-management operator apim gko"
-   data-tags="gravitee,api-management,operator">
+   data-search="apim - db-less gravitee.io/apim/oss/k8s/dbless gravitee apim gateway in db-less mode with the gravitee kubernetes operator api-management gateway operator apim gko"
+   data-tags="api-management,gateway,operator">
   <div class="registry-card-body">
     <h3 class="registry-card-title">APIM - DB-less</h3>
     
@@ -446,9 +450,9 @@ function toggleTheme() {
     
     <div class="registry-card-tags">
       
-      <span class="tag tag-sm">gravitee</span>
-      
       <span class="tag tag-sm">api-management</span>
+      
+      <span class="tag tag-sm">gateway</span>
       
       <span class="tag tag-sm">operator</span>
       
@@ -463,8 +467,8 @@ function toggleTheme() {
         
           
             <a href="/sew/registry/gravitee.io/apim/oss/k8s/gateway/" class="registry-card"
-   data-search="apim - gateway api gravitee.io/apim/oss/k8s/gateway gravitee gateway using the kubernetes gateway api with gko gravitee gateway gko gateway-class-parameters gateway-class"
-   data-tags="gravitee,gateway">
+   data-search="apim - gateway api gravitee.io/apim/oss/k8s/gateway gravitee gateway using the kubernetes gateway api with gko gateway operator gko gateway-class-parameters gateway-class"
+   data-tags="gateway,operator">
   <div class="registry-card-body">
     <h3 class="registry-card-title">APIM - Gateway API</h3>
     
@@ -478,9 +482,9 @@ function toggleTheme() {
     
     <div class="registry-card-tags">
       
-      <span class="tag tag-sm">gravitee</span>
-      
       <span class="tag tag-sm">gateway</span>
+      
+      <span class="tag tag-sm">operator</span>
       
       
     </div>
@@ -493,8 +497,8 @@ function toggleTheme() {
         
           
             <a href="/sew/registry/gravitee.io/apim/ee/kafka/mongodb/" class="registry-card"
-   data-search="apim - kafka mongodb gravitee.io/apim/ee/kafka/mongodb gravitee apim with kafka gateway and mongodb backend gravitee api-management kafka "
-   data-tags="gravitee,api-management,kafka">
+   data-search="apim - kafka mongodb gravitee.io/apim/ee/kafka/mongodb gravitee apim with kafka gateway and mongodb backend api-management gateway messaging kafka "
+   data-tags="api-management,gateway,messaging,kafka">
   <div class="registry-card-body">
     <h3 class="registry-card-title">APIM - Kafka MongoDB</h3>
     
@@ -508,9 +512,11 @@ function toggleTheme() {
     
     <div class="registry-card-tags">
       
-      <span class="tag tag-sm">gravitee</span>
-      
       <span class="tag tag-sm">api-management</span>
+      
+      <span class="tag tag-sm">gateway</span>
+      
+      <span class="tag tag-sm">messaging</span>
       
       <span class="tag tag-sm">kafka</span>
       
@@ -527,8 +533,8 @@ function toggleTheme() {
         
           
             <a href="/sew/registry/gravitee.io/apim/ee/kafka/postgres/" class="registry-card"
-   data-search="apim - kafka postgresql gravitee.io/apim/ee/kafka/postgres gravitee apim with kafka gateway and postgresql backend gravitee api-management kafka "
-   data-tags="gravitee,api-management,kafka">
+   data-search="apim - kafka postgresql gravitee.io/apim/ee/kafka/postgres gravitee apim with kafka gateway and postgresql backend api-management gateway messaging kafka "
+   data-tags="api-management,gateway,messaging,kafka">
   <div class="registry-card-body">
     <h3 class="registry-card-title">APIM - Kafka PostgreSQL</h3>
     
@@ -542,9 +548,11 @@ function toggleTheme() {
     
     <div class="registry-card-tags">
       
-      <span class="tag tag-sm">gravitee</span>
-      
       <span class="tag tag-sm">api-management</span>
+      
+      <span class="tag tag-sm">gateway</span>
+      
+      <span class="tag tag-sm">messaging</span>
       
       <span class="tag tag-sm">kafka</span>
       
@@ -590,8 +598,8 @@ function toggleTheme() {
         
           
             <a href="/sew/registry/kafka/standalone/" class="registry-card"
-   data-search="kafka - standalone kafka/standalone single-node kafka broker in kraft combined mode messaging kafka"
-   data-tags="messaging">
+   data-search="kafka - standalone kafka/standalone single-node kafka broker in kraft combined mode messaging kafka kafka"
+   data-tags="messaging,kafka">
   <div class="registry-card-body">
     <h3 class="registry-card-title">Kafka - Standalone</h3>
     
@@ -606,6 +614,8 @@ function toggleTheme() {
     <div class="registry-card-tags">
       
       <span class="tag tag-sm">messaging</span>
+      
+      <span class="tag tag-sm">kafka</span>
       
       
     </div>

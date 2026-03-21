@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Elasticsearch on sew</title>
-    <link>http://localhost:61863/sew/tags/elasticsearch/</link>
+    <link>http://localhost:1313/sew/tags/elasticsearch/</link>
     <description>Recent content in Elasticsearch on sew</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <atom:link href="http://localhost:61863/sew/tags/elasticsearch/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/sew/tags/elasticsearch/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Elasticsearch</title>
-      <link>http://localhost:61863/sew/registry/elastic/elasticsearch/</link>
+      <link>http://localhost:1313/sew/registry/elastic/elasticsearch/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      <guid>http://localhost:61863/sew/registry/elastic/elasticsearch/</guid>
-      <description>&lt;h1 id=&#34;elasticsearch&#34;&gt;Elasticsearch&lt;/h1&gt;&#xA;&lt;p&gt;Deploys a single-node Elasticsearch cluster using the official Elastic&#xA;Helm chart. Security and persistence are disabled for a lightweight development&#xA;setup. A NodePort Service exposes the cluster to both in-cluster and host clients.&lt;/p&gt;&#xA;&lt;h2 id=&#34;usage&#34;&gt;Usage&lt;/h2&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sew create elastic/elasticsearch&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;details&#34;&gt;Details&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;Image:&lt;/strong&gt; &lt;code&gt;docker.elastic.co/elasticsearch/elasticsearch:9.3.1&lt;/code&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Helm chart:&lt;/strong&gt; &lt;code&gt;elastic/elasticsearch&lt;/code&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Heap:&lt;/strong&gt; 256 MB (&lt;code&gt;-Xmx256m -Xms256m&lt;/code&gt;)&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Resources:&lt;/strong&gt; 250m–1 CPU, 512Mi–1Gi memory&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Persistence:&lt;/strong&gt; disabled&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;host-access&#34;&gt;Host access&lt;/h3&gt;&#xA;&lt;p&gt;Kind maps &lt;code&gt;hostPort 9200&lt;/code&gt; → &lt;code&gt;containerPort 30920&lt;/code&gt; (NodePort) → &lt;code&gt;targetPort 9200&lt;/code&gt;.&#xA;From the host, connect to &lt;code&gt;localhost:9200&lt;/code&gt;.&lt;/p&gt;</description>
+      <guid>http://localhost:1313/sew/registry/elastic/elasticsearch/</guid>
+      <description>&lt;p&gt;Deploys a single-node Elasticsearch cluster using the official Elastic&#xA;Helm chart. Security and persistence are disabled for a lightweight development&#xA;setup. A NodePort Service exposes the cluster to both in-cluster and host clients.&lt;/p&gt;&#xA;&lt;h2 id=&#34;usage&#34;&gt;Usage&lt;/h2&gt;&#xA;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sew create elastic/elasticsearch&#xA;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;details&#34;&gt;Details&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;&lt;strong&gt;Image:&lt;/strong&gt; &lt;code&gt;docker.elastic.co/elasticsearch/elasticsearch:9.3.1&lt;/code&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Helm chart:&lt;/strong&gt; &lt;code&gt;elastic/elasticsearch&lt;/code&gt;&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Heap:&lt;/strong&gt; 256 MB (&lt;code&gt;-Xmx256m -Xms256m&lt;/code&gt;)&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Resources:&lt;/strong&gt; 250m–1 CPU, 512Mi–1Gi memory&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;Persistence:&lt;/strong&gt; disabled&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h3 id=&#34;host-access&#34;&gt;Host access&lt;/h3&gt;&#xA;&lt;p&gt;Kind maps &lt;code&gt;hostPort 9200&lt;/code&gt; → &lt;code&gt;containerPort 30920&lt;/code&gt; (NodePort) → &lt;code&gt;targetPort 9200&lt;/code&gt;.&#xA;From the host, connect to &lt;code&gt;localhost:9200&lt;/code&gt;.&lt;/p&gt;</description>
     </item>
   </channel>
 </rss>

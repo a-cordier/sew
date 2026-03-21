@@ -1,7 +1,7 @@
 ---
 title: "APIM - AIO PostgreSQL"
 description: "Gravitee APIM all-in-one with PostgreSQL backend and Elasticsearch"
-tags: [gravitee, api-management]
+tags: [api-management, gateway]
 ---
 
 # APIM AIO PostgreSQL

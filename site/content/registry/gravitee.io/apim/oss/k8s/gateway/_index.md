@@ -1,25 +1,24 @@
 ---
 title: APIM - Gateway API
+layout: detail
 path: gravitee.io/apim/oss/k8s/gateway
 context: true
 description: Gravitee Gateway using the Kubernetes Gateway API with GKO
 tags:
-    - gravitee
     - gateway
+    - operator
 components:
     - gko
     - gateway-class-parameters
     - gateway-class
 notes_create: |-
-    Your cluster "{{ .Kind.Name }}" is ready.
+    Your cluster "gravitee.io/apim/oss/k8s/gateway" is ready.
 
     GKO is deployed in the `gravitee` namespace with Gateway API support enabled.
 
     Create Gateway and HTTPRoute resources to start routing traffic.
 type: registry
 ---
-
-# APIM Gateway API
 
 Deploys the Gravitee Kubernetes Operator (GKO) configured as a Kubernetes
 Gateway API controller. Sets up a `GatewayClass` and its parameters so that

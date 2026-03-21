@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=61863&amp;path=sew/livereload" data-no-instant defer></script>
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>APIM - AIO PostgreSQL · sew</title>
@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/sew/css/main.min.ed9ce6360ed91538991c542da51aa3ebd4208ab63a8c73e9b40418b6119df7e7.css" integrity="sha256-7ZzmNg7ZFTiZHFQtpRqj69QgirY6jHPptAQYthGd9&#43;c=">
+<link rel="stylesheet" href="/sew/css/main.min.6130ab3e6d200b3813734aa45de2987be67b085f2b9f4ba3287f69b74b6311a4.css" integrity="sha256-YTCrPm0gCzgTc0qkXeKYe&#43;Z7CF8rn0ujKH9pt0tjEaQ=">
 <link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
 <script>
 (function() {
@@ -80,11 +80,42 @@ function toggleTheme() {
 
   <main class="main">
     
-<div class="container">
-  <div class="registry-header">
-    <h1>APIM - AIO PostgreSQL</h1>
-    <h1 id="apim-aio-postgresql">APIM AIO PostgreSQL</h1>
-<p>Deploys a full Gravitee API Management stack (Console, Portal, Gateway, and
+<div class="registry-detail">
+  <div class="container">
+    <nav class="registry-back">
+      <a href="/sew/registry/">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 3L5 8l5 5"/>
+        </svg>
+        Back to Registry
+      </a>
+    </nav>
+
+    <div class="registry-detail-layout">
+      <article class="registry-detail-main">
+        <h1>APIM - AIO PostgreSQL</h1>
+        <p class="registry-path"><code>gravitee.io/apim/oss/aio/postgres</code></p>
+        <p class="registry-description">Gravitee APIM all-in-one with PostgreSQL backend and Elasticsearch</p>
+
+        <div class="registry-install">
+          <span class="registry-install-label">Install</span>
+          <div class="registry-install-cmd">
+            <code id="install-cmd-text">sew create gravitee.io/apim/oss/aio/postgres</code>
+            <button class="registry-copy-btn" id="copy-btn" type="button" title="Copy to clipboard" aria-label="Copy command">
+              <svg class="copy-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/>
+                <path d="M10.5 5.5V3.5a1.5 1.5 0 0 0-1.5-1.5H3.5A1.5 1.5 0 0 0 2 3.5V9a1.5 1.5 0 0 0 1.5 1.5h2"/>
+              </svg>
+              <svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        
+        <div class="content">
+          <p>Deploys a full Gravitee API Management stack (Console, Portal, Gateway, and
 Management API) backed by PostgreSQL for persistence and Elasticsearch for
 analytics. Management uses JDBC. Rate limiting is also stored in PostgreSQL.</p>
 <h2 id="usage">Usage</h2>
@@ -124,752 +155,138 @@ analytics. Management uses JDBC. Rate limiting is also stored in PostgreSQL.</p>
 <li><code>gravitee.io/apim/oss/aio/base</code> — shared APIM Helm configuration</li>
 </ul>
 
-    <div class="registry-search">
-      <input type="text" id="registry-search" placeholder="Search components by name, tag, or description…" autocomplete="off">
-      <button class="registry-search-clear" id="registry-search-clear" type="button" hidden aria-label="Clear search">&times;</button>
-    </div>
-  </div>
+        </div>
+        
 
-  
-  
-  
-    
-      
-    
-  
-    
-      
-    
-  
-    
-      
-    
-  
-    
-      
-    
-  
-    
-      
-    
-  
-    
-      
-    
-  
-    
-  
-    
-      
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-  
-    
-      
-    
-  
-    
-  
-    
-      
-    
-  
-    
-  
-    
-      
-    
-  
-    
-  
+        
+        <section class="registry-composition">
+          <h2>Composition chain</h2>
+          <p class="composition-desc">This context is composed from the following base contexts:</p>
+          <div class="composition-flow">
+            <ul class="composition-sources">
+              
+              <li class="composition-source">
+                
+                <a href="/sew/registry/postgresql/standalone/">postgresql/standalone</a>
+              </li>
+              
+              <li class="composition-source">
+                
+                <a href="/sew/registry/elastic/elasticsearch/">elastic/elasticsearch</a>
+              </li>
+              
+              <li class="composition-source">
+                
+                <a href="">gravitee.io/apim/oss/aio/base</a>
+              </li>
+              
+            </ul>
+            <div class="composition-connector">
+              <svg width="20" height="16" viewBox="0 0 20 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 8h16M14 3l5 5-5 5"/>
+              </svg>
+            </div>
+            <div class="composition-target">
+              <span>gravitee.io/apim/oss/aio/postgres</span>
+            </div>
+          </div>
+        </section>
+        
 
-  
-  
-  
-    
-      
         
-      
-        
-      
-    
-  
-    
-      
-        
-      
-        
-      
-    
-  
-    
-      
-        
-      
-        
-      
-        
-      
-    
-  
-    
-      
-        
-      
-        
-      
-    
-  
-    
-      
-        
-      
-        
-      
-        
-      
-    
-  
-    
-      
-        
-      
-        
-      
-        
-      
-    
-  
-    
-      
-        
-      
-    
-  
-    
-      
-        
-      
-    
-  
-    
-      
-        
-      
-    
-  
-    
-      
-        
-      
-    
-  
-  
+        <section class="registry-notes">
+          <h2>Post-deploy notes</h2>
+          <div class="registry-notes-content">
+            <pre><code>Your cluster &#34;gravitee.io/apim/oss/aio/postgres&#34; is ready.
 
-  
-  <div class="registry-filters" id="registry-filters">
-    <span class="registry-filters-label">Filter by tag</span>
-    <div class="registry-filter-tags">
-      
-      <button class="tag tag-filter" data-tag="api-management" type="button">api-management</button>
-      
-      <button class="tag tag-filter" data-tag="database" type="button">database</button>
-      
-      <button class="tag tag-filter" data-tag="elasticsearch" type="button">elasticsearch</button>
-      
-      <button class="tag tag-filter" data-tag="gateway" type="button">gateway</button>
-      
-      <button class="tag tag-filter" data-tag="gravitee" type="button">gravitee</button>
-      
-      <button class="tag tag-filter" data-tag="kafka" type="button">kafka</button>
-      
-      <button class="tag tag-filter" data-tag="messaging" type="button">messaging</button>
-      
-      <button class="tag tag-filter" data-tag="operator" type="button">operator</button>
-      
-    </div>
-  </div>
-  
+Everything has been deployed in the `gravitee` namespace.
 
-  <div class="registry-meta">
-    <span class="registry-count" id="registry-count">10 components</span>
-    <button class="registry-clear-filters" id="registry-clear-filters" type="button" hidden>Clear filters</button>
-  </div>
+APIM Console     http://localhost:30080
+APIM Portal      http://localhost:30081
+APIM Gateway     http://localhost:30082
+Management API   http://localhost:30083</code></pre>
+          </div>
+        </section>
+        
+      </article>
 
-  
-  
-  
-    
-    
-  
-    
-    
-  
-    
-    
-  
-    
-    
-  
-    
-    
-  
-    
-    
-  
-    
-    
-  
-    
-    
-  
-    
-    
-  
-    
-    
-  
-  
+      <aside class="registry-detail-sidebar">
+        
+        <div class="sidebar-section">
+          <h3>From</h3>
+          <ul class="dep-list">
+            
+            
+            <li><a href="/sew/registry/postgresql/standalone/"><code>postgresql/standalone</code></a></li>
+            
+            
+            <li><a href="/sew/registry/elastic/elasticsearch/"><code>elastic/elasticsearch</code></a></li>
+            
+            
+            <li><a href=""><code>gravitee.io/apim/oss/aio/base</code></a></li>
+            
+          </ul>
+        </div>
+        
 
-  <div id="registry-grid">
-    
-    <div class="registry-group" data-group="elastic">
-      <h2 class="registry-group-title">elastic</h2>
-      <div class="registry-grid">
         
-          
+        <div class="sidebar-section">
+          <h3>Components</h3>
+          <ul class="component-list">
+            
+            <li>postgresql</li>
+            
+            <li>elasticsearch</li>
+            
+            <li>apim</li>
+            
+          </ul>
+        </div>
         
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-            <a href="/sew/registry/elastic/elasticsearch/" class="registry-card"
-   data-search="elasticsearch elastic/elasticsearch single-node elasticsearch cluster elasticsearch elasticsearch"
-   data-tags="elasticsearch">
-  <div class="registry-card-body">
-    <h3 class="registry-card-title">Elasticsearch</h3>
-    
-    <p class="registry-card-path">elastic/elasticsearch</p>
-    
-    
-    <p class="registry-card-desc">Single-node Elasticsearch cluster</p>
-    
-  </div>
-  <div class="registry-card-footer">
-    
-    <div class="registry-card-tags">
-      
-      <span class="tag tag-sm">elasticsearch</span>
-      
-      
-    </div>
-    
-    
-  </div>
-</a>
 
-          
         
-          
+        <div class="sidebar-section">
+          <h3>Tags</h3>
+          <div class="tag-list">
+            
+            <span class="tag">api-management</span>
+            
+            <span class="tag">gateway</span>
+            
+          </div>
+        </div>
         
-          
-        
-          
-        
-      </div>
-    </div>
-    
-    <div class="registry-group" data-group="gravitee.io">
-      <h2 class="registry-group-title">gravitee.io</h2>
-      <div class="registry-grid">
-        
-          
-            <a href="/sew/registry/gravitee.io/apim/oss/aio/mongodb/" class="registry-card"
-   data-search="apim - aio mongodb gravitee.io/apim/oss/aio/mongodb gravitee apim all-in-one with mongodb backend and elasticsearch gravitee api-management mongodb elasticsearch apim"
-   data-tags="gravitee,api-management">
-  <div class="registry-card-body">
-    <h3 class="registry-card-title">APIM - AIO MongoDB</h3>
-    
-    <p class="registry-card-path">gravitee.io/apim/oss/aio/mongodb</p>
-    
-    
-    <p class="registry-card-desc">Gravitee APIM all-in-one with MongoDB backend and Elasticsearch</p>
-    
-  </div>
-  <div class="registry-card-footer">
-    
-    <div class="registry-card-tags">
-      
-      <span class="tag tag-sm">gravitee</span>
-      
-      <span class="tag tag-sm">api-management</span>
-      
-      
-    </div>
-    
-    
-    <span class="registry-card-deps">3 deps</span>
-    
-  </div>
-</a>
 
-          
         
-          
-            <a href="/sew/registry/gravitee.io/apim/oss/aio/postgres/" class="registry-card"
-   data-search="apim - aio postgresql gravitee.io/apim/oss/aio/postgres gravitee apim all-in-one with postgresql backend and elasticsearch gravitee api-management postgresql elasticsearch apim"
-   data-tags="gravitee,api-management">
-  <div class="registry-card-body">
-    <h3 class="registry-card-title">APIM - AIO PostgreSQL</h3>
-    
-    <p class="registry-card-path">gravitee.io/apim/oss/aio/postgres</p>
-    
-    
-    <p class="registry-card-desc">Gravitee APIM all-in-one with PostgreSQL backend and Elasticsearch</p>
-    
-  </div>
-  <div class="registry-card-footer">
-    
-    <div class="registry-card-tags">
-      
-      <span class="tag tag-sm">gravitee</span>
-      
-      <span class="tag tag-sm">api-management</span>
-      
-      
+        <div class="sidebar-section">
+          <h3>Raw config</h3>
+          <a href="/sew/gravitee.io/apim/oss/aio/postgres/sew.yaml" class="btn btn-outline btn-sm" target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 10v3.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V10"/>
+              <polyline points="5 7 8 10 11 7"/>
+              <line x1="8" y1="1" x2="8" y2="10"/>
+            </svg>
+            sew.yaml
+          </a>
+        </div>
+        
+      </aside>
     </div>
-    
-    
-    <span class="registry-card-deps">3 deps</span>
-    
-  </div>
-</a>
-
-          
-        
-          
-            <a href="/sew/registry/gravitee.io/apim/oss/k8s/dbless/" class="registry-card"
-   data-search="apim - db-less gravitee.io/apim/oss/k8s/dbless gravitee apim gateway in db-less mode with the gravitee kubernetes operator gravitee api-management operator apim gko"
-   data-tags="gravitee,api-management,operator">
-  <div class="registry-card-body">
-    <h3 class="registry-card-title">APIM - DB-less</h3>
-    
-    <p class="registry-card-path">gravitee.io/apim/oss/k8s/dbless</p>
-    
-    
-    <p class="registry-card-desc">Gravitee APIM gateway in DB-less mode with the Gravitee Kubernetes Operator</p>
-    
-  </div>
-  <div class="registry-card-footer">
-    
-    <div class="registry-card-tags">
-      
-      <span class="tag tag-sm">gravitee</span>
-      
-      <span class="tag tag-sm">api-management</span>
-      
-      <span class="tag tag-sm">operator</span>
-      
-      
-    </div>
-    
-    
-  </div>
-</a>
-
-          
-        
-          
-            <a href="/sew/registry/gravitee.io/apim/oss/k8s/gateway/" class="registry-card"
-   data-search="apim - gateway api gravitee.io/apim/oss/k8s/gateway gravitee gateway using the kubernetes gateway api with gko gravitee gateway gko gateway-class-parameters gateway-class"
-   data-tags="gravitee,gateway">
-  <div class="registry-card-body">
-    <h3 class="registry-card-title">APIM - Gateway API</h3>
-    
-    <p class="registry-card-path">gravitee.io/apim/oss/k8s/gateway</p>
-    
-    
-    <p class="registry-card-desc">Gravitee Gateway using the Kubernetes Gateway API with GKO</p>
-    
-  </div>
-  <div class="registry-card-footer">
-    
-    <div class="registry-card-tags">
-      
-      <span class="tag tag-sm">gravitee</span>
-      
-      <span class="tag tag-sm">gateway</span>
-      
-      
-    </div>
-    
-    
-  </div>
-</a>
-
-          
-        
-          
-            <a href="/sew/registry/gravitee.io/apim/ee/kafka/mongodb/" class="registry-card"
-   data-search="apim - kafka mongodb gravitee.io/apim/ee/kafka/mongodb gravitee apim with kafka gateway and mongodb backend gravitee api-management kafka "
-   data-tags="gravitee,api-management,kafka">
-  <div class="registry-card-body">
-    <h3 class="registry-card-title">APIM - Kafka MongoDB</h3>
-    
-    <p class="registry-card-path">gravitee.io/apim/ee/kafka/mongodb</p>
-    
-    
-    <p class="registry-card-desc">Gravitee APIM with Kafka Gateway and MongoDB backend</p>
-    
-  </div>
-  <div class="registry-card-footer">
-    
-    <div class="registry-card-tags">
-      
-      <span class="tag tag-sm">gravitee</span>
-      
-      <span class="tag tag-sm">api-management</span>
-      
-      <span class="tag tag-sm">kafka</span>
-      
-      
-    </div>
-    
-    
-    <span class="registry-card-deps">2 deps</span>
-    
-  </div>
-</a>
-
-          
-        
-          
-            <a href="/sew/registry/gravitee.io/apim/ee/kafka/postgres/" class="registry-card"
-   data-search="apim - kafka postgresql gravitee.io/apim/ee/kafka/postgres gravitee apim with kafka gateway and postgresql backend gravitee api-management kafka "
-   data-tags="gravitee,api-management,kafka">
-  <div class="registry-card-body">
-    <h3 class="registry-card-title">APIM - Kafka PostgreSQL</h3>
-    
-    <p class="registry-card-path">gravitee.io/apim/ee/kafka/postgres</p>
-    
-    
-    <p class="registry-card-desc">Gravitee APIM with Kafka Gateway and PostgreSQL backend</p>
-    
-  </div>
-  <div class="registry-card-footer">
-    
-    <div class="registry-card-tags">
-      
-      <span class="tag tag-sm">gravitee</span>
-      
-      <span class="tag tag-sm">api-management</span>
-      
-      <span class="tag tag-sm">kafka</span>
-      
-      
-    </div>
-    
-    
-    <span class="registry-card-deps">2 deps</span>
-    
-  </div>
-</a>
-
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      </div>
-    </div>
-    
-    <div class="registry-group" data-group="kafka">
-      <h2 class="registry-group-title">kafka</h2>
-      <div class="registry-grid">
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-            <a href="/sew/registry/kafka/standalone/" class="registry-card"
-   data-search="kafka - standalone kafka/standalone single-node kafka broker in kraft combined mode messaging kafka"
-   data-tags="messaging">
-  <div class="registry-card-body">
-    <h3 class="registry-card-title">Kafka - Standalone</h3>
-    
-    <p class="registry-card-path">kafka/standalone</p>
-    
-    
-    <p class="registry-card-desc">Single-node Kafka broker in KRaft combined mode</p>
-    
-  </div>
-  <div class="registry-card-footer">
-    
-    <div class="registry-card-tags">
-      
-      <span class="tag tag-sm">messaging</span>
-      
-      
-    </div>
-    
-    
-  </div>
-</a>
-
-          
-        
-          
-        
-          
-        
-      </div>
-    </div>
-    
-    <div class="registry-group" data-group="mongodb">
-      <h2 class="registry-group-title">mongodb</h2>
-      <div class="registry-grid">
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-            <a href="/sew/registry/mongodb/standalone/" class="registry-card"
-   data-search="mongodb - standalone mongodb/standalone single-node mongodb 7 deployment for kubernetes database mongodb"
-   data-tags="database">
-  <div class="registry-card-body">
-    <h3 class="registry-card-title">MongoDB - Standalone</h3>
-    
-    <p class="registry-card-path">mongodb/standalone</p>
-    
-    
-    <p class="registry-card-desc">Single-node MongoDB 7 deployment for Kubernetes</p>
-    
-  </div>
-  <div class="registry-card-footer">
-    
-    <div class="registry-card-tags">
-      
-      <span class="tag tag-sm">database</span>
-      
-      
-    </div>
-    
-    
-  </div>
-</a>
-
-          
-        
-          
-        
-      </div>
-    </div>
-    
-    <div class="registry-group" data-group="postgresql">
-      <h2 class="registry-group-title">postgresql</h2>
-      <div class="registry-grid">
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-            <a href="/sew/registry/postgresql/standalone/" class="registry-card"
-   data-search="postgresql - standalone postgresql/standalone single-node postgresql 17 deployment for kubernetes database postgresql"
-   data-tags="database">
-  <div class="registry-card-body">
-    <h3 class="registry-card-title">PostgreSQL - Standalone</h3>
-    
-    <p class="registry-card-path">postgresql/standalone</p>
-    
-    
-    <p class="registry-card-desc">Single-node PostgreSQL 17 deployment for Kubernetes</p>
-    
-  </div>
-  <div class="registry-card-footer">
-    
-    <div class="registry-card-tags">
-      
-      <span class="tag tag-sm">database</span>
-      
-      
-    </div>
-    
-    
-  </div>
-</a>
-
-          
-        
-      </div>
-    </div>
-    
-  </div>
-
-  <div class="registry-empty" id="registry-empty" hidden>
-    <div class="registry-empty-icon">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        <line x1="8" y1="11" x2="14" y2="11"/>
-      </svg>
-    </div>
-    <p class="registry-empty-title">No components found</p>
-    <p class="registry-empty-hint">Try a different search term or clear the active filters.</p>
   </div>
 </div>
 
 <script>
 (function() {
-  var input = document.getElementById('registry-search');
-  var clearBtn = document.getElementById('registry-search-clear');
-  var clearFiltersBtn = document.getElementById('registry-clear-filters');
-  var grid = document.getElementById('registry-grid');
-  var empty = document.getElementById('registry-empty');
-  var countEl = document.getElementById('registry-count');
-  var cards = Array.prototype.slice.call(grid.querySelectorAll('.registry-card'));
-  var groups = Array.prototype.slice.call(grid.querySelectorAll('.registry-group'));
-  var filterBtns = Array.prototype.slice.call(document.querySelectorAll('.tag-filter'));
-  var activeTags = {};
-  var totalCount = cards.length;
-
-  function updateCount(n) {
-    countEl.textContent = n + ' component' + (n !== 1 ? 's' : '');
-  }
-
-  function hasActiveFilters() {
-    return input.value.trim() !== '' || Object.keys(activeTags).length > 0;
-  }
-
-  function filter() {
-    var q = input.value.toLowerCase().trim();
-    var words = q ? q.split(/\s+/) : [];
-    var tagKeys = Object.keys(activeTags);
-    var visible = 0;
-
-    cards.forEach(function(card) {
-      var text = card.getAttribute('data-search') || '';
-      var cardTags = (card.getAttribute('data-tags') || '').split(',').filter(Boolean);
-
-      var matchText = !words.length || words.every(function(w) {
-        return text.indexOf(w) !== -1;
+  var btn = document.getElementById('copy-btn');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var text = document.getElementById('install-cmd-text').textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function() {
+        btn.classList.add('copied');
+        setTimeout(function() { btn.classList.remove('copied'); }, 2000);
       });
-
-      var matchTags = !tagKeys.length || tagKeys.some(function(t) {
-        return cardTags.indexOf(t) !== -1;
-      });
-
-      var show = matchText && matchTags;
-      card.style.display = show ? '' : 'none';
-      if (show) visible++;
-    });
-
-    groups.forEach(function(group) {
-      var groupCards = Array.prototype.slice.call(group.querySelectorAll('.registry-card'));
-      var anyVisible = groupCards.some(function(card) {
-        return card.style.display !== 'none';
-      });
-      group.style.display = anyVisible ? '' : 'none';
-    });
-
-    empty.hidden = visible > 0;
-    updateCount(visible);
-    clearBtn.hidden = !input.value;
-    clearFiltersBtn.hidden = !hasActiveFilters();
-  }
-
-  input.addEventListener('input', filter);
-
-  clearBtn.addEventListener('click', function() {
-    input.value = '';
-    input.focus();
-    filter();
-  });
-
-  clearFiltersBtn.addEventListener('click', function() {
-    input.value = '';
-    activeTags = {};
-    filterBtns.forEach(function(btn) { btn.classList.remove('active'); });
-    filter();
-  });
-
-  filterBtns.forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var tag = this.getAttribute('data-tag');
-      if (activeTags[tag]) {
-        delete activeTags[tag];
-        this.classList.remove('active');
-      } else {
-        activeTags[tag] = true;
-        this.classList.add('active');
-      }
-      filter();
-    });
+    }
   });
 })();
 </script>
