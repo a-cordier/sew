@@ -1,5 +1,5 @@
 ---
-title: "Registry"
+title: "Sew Registry"
 weight: 1
 type: docs
 ---

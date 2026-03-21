@@ -1,5 +1,5 @@
 ---
-title: "Images"
+title: "Container Images"
 weight: 4
 type: docs
 ---
