@@ -17,6 +17,7 @@ notes_create: |-
     GKO is deployed in the `gravitee` namespace with Gateway API support enabled.
 
     Create Gateway and HTTPRoute resources to start routing traffic.
+icon: gravitee.io/icon.svg
 type: registry
 ---
 

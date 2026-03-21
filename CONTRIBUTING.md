@@ -143,6 +143,17 @@ service URLs), and **Dependencies** (list of composed contexts).
   context does*, not *which product it uses* — the registry path already
   encodes the product.
 
+### Icon
+
+Place an `icon.svg` file in the context directory (or any ancestor
+directory) to display a product logo on registry cards and detail pages.
+
+- SVG format, square aspect ratio recommended.
+- Icons **inherit** from parent directories: a single `icon.svg` at
+  `registry/org/` covers all contexts under that path.
+- When no icon is found anywhere in the ancestor chain, a generic
+  fallback icon is rendered.
+
 ### notes.create
 
 Write a `notes.create` template that tells the user what is ready and how

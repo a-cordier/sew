@@ -2,7 +2,18 @@
    data-search="{{ .Title | lower }} {{ with .Params.path }}{{ . | lower }}{{ end }} {{ .Description | lower }} {{ with .Params.tags }}{{ delimit . " " | lower }}{{ end }} {{ with .Params.components }}{{ delimit . " " | lower }}{{ end }}"
    data-tags="{{ with .Params.tags }}{{ delimit . "," }}{{ end }}">
   <div class="registry-card-body">
-    <h3 class="registry-card-title">{{ .Title }}</h3>
+    <div class="registry-card-header">
+      {{ with .Params.icon }}
+      <img class="registry-card-icon" src="{{ printf "%s%s" $.Site.Home.RelPermalink . }}" alt="" />
+      {{ else }}
+      <svg class="registry-card-icon registry-card-icon-default" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"/>
+        <path d="M12 22V12"/>
+        <path d="M3 7l9 5 9-5"/>
+      </svg>
+      {{ end }}
+      <h3 class="registry-card-title">{{ .Title }}</h3>
+    </div>
     {{ with .Params.path }}
     <p class="registry-card-path">{{ . }}</p>
     {{ end }}

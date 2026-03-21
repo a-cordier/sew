@@ -25,6 +25,7 @@ notes_create: |-
     APIM Portal      http://localhost:30081
     APIM Gateway     http://localhost:30082
     Management API   http://localhost:30083
+icon: gravitee.io/icon.svg
 type: registry
 ---
 

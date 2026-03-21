@@ -19,6 +19,7 @@ components:
     - kafka
     - license
     - kafka-tls
+icon: gravitee.io/icon.svg
 type: registry
 ---
 
