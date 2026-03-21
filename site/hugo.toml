@@ -4,7 +4,7 @@ title = "sew"
 
 [params]
   description = "Your local Kubernetes tailor shop"
-  tagline = "Kubernetes stacks for dev, test, and CI — one command away"
+  tagline = "Kubernetes stacks for dev, test, and CI — easy to use, easy to maintain"
   githubRepo = "https://github.com/a-cordier/sew"
 
 [menu]

@@ -3,7 +3,7 @@ title: "Documentation"
 type: docs
 ---
 
-**sew** makes Kubernetes stacks for dev, test, and CI dead simple — compose what you need from a registry and deploy it in one command.
+**sew** makes Kubernetes stacks for dev, test, and CI easy to use and easy to maintain — compose what you need from a registry and deploy it in one command.
 
 <div class="docs-overview-grid">
 

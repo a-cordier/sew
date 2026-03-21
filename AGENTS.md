@@ -1,6 +1,6 @@
 # AGENTS.md
 
-sew is a CLI tool that makes Kubernetes stacks for dev, test, and CI dead simple — compose what you need from a registry and deploy it in one command.
+sew is a CLI tool that makes Kubernetes stacks for dev, test, and CI easy to use and easy to maintain — compose what you need from a registry and deploy it in one command.
 
 ## Guidelines
 

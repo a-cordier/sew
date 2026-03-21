@@ -31,7 +31,7 @@ Here's what the structure looks like:
 # AGENTS.md
 
 sew is a CLI tool that makes Kubernetes stacks for dev, test, and CI
-dead simple — compose what you need from a registry and deploy it in one command.
+easy to use and easy to maintain — compose what you need from a registry and deploy it in one command.
 
 ## Guidelines
 Read and follow CONTRIBUTING.md for toolchain, commit conventions, ...
