@@ -8,7 +8,7 @@ Read and follow [CONTRIBUTING.md](CONTRIBUTING.md) for toolchain, commit convent
 
 ## Schema
 
-The machine-readable JSON Schema for `sew.yaml` lives at [`schema/sew.schema.yaml`](schema/sew.schema.yaml). Use it as the primary reference for understanding the `sew.yaml` config format. Prefer the schema over reading Go source code in `internal/config/` when you need to discover config fields, types, defaults, or allowed values.
+sew comes with a [JSON Schema](https://github.com/a-cordier/sew/blob/main/schema/sew.schema.yaml) that describes every field in `sew.yaml`. Use it as the primary reference for understanding the config format. Prefer the schema over exploring Go source code in `internal/config/` when you need to discover config fields, types, defaults, or allowed values.
 
 ## Agent-specific rules
 

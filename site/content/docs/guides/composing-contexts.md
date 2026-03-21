@@ -94,6 +94,23 @@ components:
         debug: true
 ```
 
+## Default variant resolution
+
+When a product has multiple variants, the registry can define a **default** so you don't have to spell out the full path. A `.default` file in a directory contains the name of the variant to use:
+
+```
+registry/mycompany/myproduct/
+├── .default          # contains "dev"
+├── dev/
+│   └── sew.yaml
+└── staging/
+    └── sew.yaml
+```
+
+With this setup, `from: [mycompany/myproduct]` resolves to `mycompany/myproduct/dev`.
+
+Defaults chain across multiple levels -- sew reads `.default` at each directory until it finds a `sew.yaml`. For example, `from: [elastic]` resolves first to `elastic/elasticsearch` (via `elastic/.default`), then to `elastic/elasticsearch/standalone` (via `elastic/elasticsearch/.default`), where the actual `sew.yaml` lives.
+
 ## Local overrides
 
 Beyond composing registry contexts, you can add your own components and Helm repos directly in your project `sew.yaml`. This is useful for supporting services that aren't part of the upstream context:

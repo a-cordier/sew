@@ -12,8 +12,8 @@ This page explains what makes sew agent-friendly, and how you as a maintainer ca
 
 Three things work together:
 
-1. **A typed config schema** -- `schema/sew.schema.yaml` is a JSON Schema that describes every field in `sew.yaml`. Agents use it to validate configs, discover available options, and generate correct YAML without reading Go source code.
-2. **A structured registry** -- The `org/product/variant` convention, `.default` files, and YAML front matter in READMEs make the registry machine-parseable. An agent can navigate it, understand what each context does, and compose them together.
+1. **A typed config schema** -- sew comes with a [JSON Schema](https://github.com/a-cordier/sew/blob/main/schema/sew.schema.yaml) that describes every field in `sew.yaml`. Agents use it to validate configs, discover available options, and generate correct YAML without having to explore the source code.
+2. **A structured registry** -- the registry is designed with a well-structured hierarchy that makes it easy for an agent to discover available contexts, understand what each one does, and compose them together.
 3. **Explicit agent rules** -- `AGENTS.md` at the repo root gives agents project-wide guidance, and product-specific instruction files in `agents/` provide domain rules scoped to particular registry subtrees.
 
 ## AGENTS.md
@@ -113,10 +113,8 @@ See the [Configuration reference]({{< ref "/docs/reference/configuration" >}}) f
 
 ## Registry structure
 
-The registry's conventions are designed to be both human-readable and machine-parseable:
+The registry is designed to be both human-readable and machine-parseable. Its well-structured hierarchy makes it easy for an agent to browse available contexts, read their metadata, and compose them together:
 
-- **`org/product/variant` paths** -- predictable, navigable hierarchy.
-- **`.default` files** -- plain-text pointers that agents can follow to resolve shorthand paths (e.g. `mycompany/product` resolves to `mycompany/product/dev` if `.default` contains `dev`).
 - **README front matter** -- `title`, `description`, and `tags` in YAML front matter give agents structured metadata about each context without parsing free-text.
 - **`sew.yaml` in every context** -- a single, schema-validated file that describes the entire stack. No implicit configuration, no magic.
 
@@ -126,7 +124,6 @@ If you maintain contexts in the sew registry and want AI assistants to work well
 
 1. **Create an agent instruction file** at `agents/<product>-agent.md` with YAML front matter (`product`, `paths`) and your domain rules.
 2. **Run `task agents:update`** to regenerate the product table in `AGENTS.md`.
-3. **Set `.default` files** in your registry subtree so agents (and users) can reference your product with shorthand paths.
-4. **Add front matter to every README** (`title`, `description`, `tags`) so the registry browser and agents can discover your contexts.
-5. **Validate your `sew.yaml` files against the schema** -- if the schema doesn't cover a field you need, contribute to the schema first.
-6. **Document required patterns** in your agent file -- license handling, naming conventions, mandatory components, anything an agent needs to know to produce correct contexts.
+3. **Add front matter to every README** (`title`, `description`, `tags`) so the registry browser and agents can discover your contexts.
+4. **Validate your `sew.yaml` files against the schema** -- if the schema doesn't cover a field you need, contribute to the schema first.
+5. **Document required patterns** in your agent file -- license handling, naming conventions, mandatory components, anything an agent needs to know to produce correct contexts.
