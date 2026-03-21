@@ -4,7 +4,7 @@ weight: 5
 type: docs
 ---
 
-sew is designed from the ground up to work well with AI coding assistants. Whether you use Cursor, Codex, Copilot, or another agent, everything in the repo is structured so your assistant can understand the project, validate configs, and follow product-specific rules without guessing.
+sew is designed from the ground up to work well with AI coding assistants. Whether you use Cursor, Codex, Copilot, or another AI toolchain, everything in the repo is structured so your assistant can understand the project, validate configs, and follow product-specific rules without guessing.
 
 This page explains what makes sew agent-friendly, and how you as a maintainer can extend these capabilities for your own products.
 
