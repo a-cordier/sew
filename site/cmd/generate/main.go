@@ -14,7 +14,12 @@ import (
 type sewConfig struct {
 	Abstract   bool           `yaml:"abstract"`
 	From       []string       `yaml:"from"`
+	Kind       sewKind        `yaml:"kind"`
 	Components []sewComponent `yaml:"components"`
+}
+
+type sewKind struct {
+	Name string `yaml:"name"`
 }
 
 type sewComponent struct {
@@ -110,7 +115,8 @@ func main() {
 			title = readmeTitle
 		}
 		notesCreate := readOptionalFile(filepath.Join(dir, "notes.create"))
-		notesCreate = strings.ReplaceAll(notesCreate, "{{ .Kind.Name }}", relDir)
+		clusterName := resolveKindName(relDir, configs)
+		notesCreate = strings.ReplaceAll(notesCreate, "{{ .Kind.Name }}", clusterName)
 
 		page := componentPage{
 			Title:       title,
@@ -191,6 +197,25 @@ func resolveComponents(relDir string, configs map[string]*sewConfig) []string {
 	}
 	walk(relDir)
 	return result
+}
+
+func resolveKindName(relDir string, configs map[string]*sewConfig) string {
+	name := "sew"
+	var walk func(string)
+	walk = func(dir string) {
+		config, ok := configs[dir]
+		if !ok {
+			return
+		}
+		for _, parent := range config.From {
+			walk(parent)
+		}
+		if config.Kind.Name != "" {
+			name = config.Kind.Name
+		}
+	}
+	walk(relDir)
+	return name
 }
 
 func resolveIcon(registryDir, relDir string) string {
