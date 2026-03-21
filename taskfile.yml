@@ -21,6 +21,11 @@ tasks:
     cmds:
       - yamlfmt -lint registry/ *.yaml
 
+  agents:update:
+    desc: Regenerate the product agents table in AGENTS.md from agents/*-agent.md
+    cmds:
+      - go run ./agents/cmd/update
+
   site:generate:
     desc: Run the Go generator to produce Hugo content from registry
     cmds:

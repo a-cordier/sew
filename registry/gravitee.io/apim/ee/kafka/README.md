@@ -84,9 +84,21 @@ that don't match the single-level wildcard.
 
 ## License
 
-This is an Enterprise Edition (EE) context. It requires a valid Gravitee
-license key at `$HOME/opt/gravitee/license.key`. If the license file is
-missing, the license component is silently skipped (`onMissing: ignore`).
+This is an Enterprise Edition (EE) context. Place your Gravitee license
+key at `$HOME/opt/gravitee/license.key` and sew will automatically mount
+it into the cluster. If the file is missing, the license component is
+silently skipped (`onMissing: ignore`).
+
+To use a different path, override it in your `sew.yaml`:
+
+```yaml
+components:
+  - name: license
+    k8s:
+      secrets:
+        - name: gravitee-license
+          fromFile: '/custom/path/to/license.key'
+```
 
 ## Dependencies
 

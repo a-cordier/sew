@@ -1,0 +1,551 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://github.com/a-cordier/sew/schema/sew.schema.yaml
+title: sew configuration
+description: >-
+  Schema for sew.yaml — the configuration file that defines a local
+  Kubernetes development environment powered by Kind, Helm, and raw
+  manifests.
+type: object
+additionalProperties: false
+
+properties:
+  registry:
+    type: string
+    description: >-
+      Registry path that identifies this configuration context
+      (org/product/variant convention).
+
+  from:
+    type: array
+    description: >-
+      List of registry paths to compose from. Each referenced context
+      is merged in order, allowing reuse of shared building blocks
+      (databases, message brokers, etc.).
+    items:
+      type: string
+
+  abstract:
+    type: boolean
+    description: >-
+      When true, marks this configuration as a shared base that cannot
+      be deployed on its own. Abstract configs are meant to be
+      referenced via 'from' by concrete contexts.
+    default: false
+
+  kind:
+    $ref: "#/$defs/KindConfig"
+
+  features:
+    $ref: "#/$defs/FeaturesConfig"
+
+  images:
+    $ref: "#/$defs/ImagesConfig"
+
+  helm:
+    $ref: "#/$defs/HelmConfig"
+
+  components:
+    type: array
+    description: >-
+      Ordered list of components to deploy. Components are applied
+      sequentially; use 'requires' to express inter-component
+      dependencies.
+    items:
+      $ref: "#/$defs/Component"
+
+$defs:
+  KindConfig:
+    type: object
+    description: Configuration for the Kind (Kubernetes-in-Docker) cluster.
+    additionalProperties: false
+    properties:
+      apiVersion:
+        type: string
+        description: Kind API version for the cluster manifest.
+        default: kind.x-k8s.io/v1alpha4
+      kind:
+        type: string
+        description: Kind resource type (always "Cluster").
+        default: Cluster
+      name:
+        type: string
+        description: Name of the Kind cluster.
+        default: sew
+      nodes:
+        type: array
+        description: >-
+          List of cluster nodes. Defaults to a single control-plane
+          node when omitted.
+        items:
+          $ref: "#/$defs/KindNode"
+      containerdConfigPatches:
+        type: array
+        description: >-
+          Raw containerd configuration patches applied to all nodes in
+          the cluster.
+        items:
+          type: string
+
+  KindNode:
+    type: object
+    description: Configuration for a single Kind cluster node.
+    additionalProperties: false
+    properties:
+      role:
+        type: string
+        description: >-
+          Node role in the cluster (e.g. "control-plane" or "worker").
+      extraPortMappings:
+        type: array
+        description: >-
+          Additional port mappings from the host to the node container,
+          enabling access to NodePort services from the host machine.
+        items:
+          $ref: "#/$defs/PortMapping"
+      extraMounts:
+        type: array
+        description: >-
+          Additional bind-mounts from the host filesystem into the node
+          container.
+        items:
+          $ref: "#/$defs/Mount"
+      labels:
+        type: object
+        description: Labels to apply to the node.
+        additionalProperties:
+          type: string
+      kubeadmConfigPatches:
+        type: array
+        description: >-
+          Raw kubeadm configuration patches applied to this node
+          during cluster creation.
+        items:
+          type: string
+
+  PortMapping:
+    type: object
+    description: Maps a port from the Kind node container to the host.
+    additionalProperties: false
+    required:
+      - containerPort
+      - hostPort
+    properties:
+      containerPort:
+        type: integer
+        description: Port inside the Kind node container.
+        format: int32
+      hostPort:
+        type: integer
+        description: Port on the host machine.
+        format: int32
+      protocol:
+        type: string
+        description: >-
+          Transport protocol (e.g. "TCP", "UDP"). Defaults to TCP when
+          omitted.
+
+  Mount:
+    type: object
+    description: Bind-mount from the host into a Kind node container.
+    additionalProperties: false
+    required:
+      - hostPath
+      - containerPath
+    properties:
+      hostPath:
+        type: string
+        description: Absolute path on the host filesystem.
+      containerPath:
+        type: string
+        description: Path inside the Kind node container.
+
+  FeaturesConfig:
+    type: object
+    description: >-
+      Optional networking features. Each sub-key uses pointer
+      semantics: setting a feature explicitly overrides the inherited
+      context default; omitting it preserves the parent value.
+    additionalProperties: false
+    properties:
+      lb:
+        $ref: "#/$defs/LBConfig"
+      gateway:
+        $ref: "#/$defs/GatewayConfig"
+      dns:
+        $ref: "#/$defs/DNSConfig"
+
+  LBConfig:
+    type: object
+    description: >-
+      Cloud-provider load-balancer emulation (e.g. MetalLB) for
+      LoadBalancer-type services inside the Kind cluster.
+    additionalProperties: false
+    properties:
+      enabled:
+        type: boolean
+        description: Enable or disable the load-balancer feature.
+
+  GatewayConfig:
+    type: object
+    description: >-
+      Kubernetes Gateway API support. Enabling gateway implicitly
+      enables lb (load-balancer) as a dependency.
+    additionalProperties: false
+    properties:
+      enabled:
+        type: boolean
+        description: Enable or disable Gateway API support.
+      channel:
+        type: string
+        description: Gateway API release channel to install.
+        enum:
+          - standard
+          - experimental
+
+  DNSConfig:
+    type: object
+    description: >-
+      Local DNS server that resolves custom hostnames to in-cluster
+      services, making them reachable from the host.
+    additionalProperties: false
+    properties:
+      enabled:
+        type: boolean
+        description: Enable or disable the local DNS feature.
+      domain:
+        type: string
+        description: DNS domain served by the local resolver.
+        default: sew.local
+      port:
+        type: integer
+        description: UDP port the local DNS server listens on.
+        default: 15353
+      records:
+        type: array
+        description: >-
+          Static DNS records mapping hostnames to Kubernetes services.
+        items:
+          $ref: "#/$defs/DNSRecord"
+
+  DNSRecord:
+    type: object
+    description: >-
+      Maps a hostname (supports wildcards) to a Kubernetes service so
+      the local DNS resolver can answer queries for it.
+    additionalProperties: false
+    required:
+      - hostname
+      - service
+      - namespace
+    properties:
+      hostname:
+        type: string
+        description: >-
+          Hostname pattern to resolve (e.g. "*.kafka.sew.local").
+      service:
+        type: string
+        description: >-
+          Name of the Kubernetes Service to resolve the hostname to.
+      namespace:
+        type: string
+        description: Namespace of the target Kubernetes Service.
+
+  ImagesConfig:
+    type: object
+    description: >-
+      Container image management: preloading images into Kind nodes
+      and configuring registry mirrors.
+    additionalProperties: false
+    properties:
+      mirrors:
+        $ref: "#/$defs/MirrorsConfig"
+      preload:
+        $ref: "#/$defs/PreloadConfig"
+
+  MirrorsConfig:
+    type: object
+    description: >-
+      Registry mirror configuration. Mirrors are injected into the
+      Kind nodes' containerd config so pulls go through the mirror
+      first.
+    additionalProperties: false
+    properties:
+      data:
+        type: string
+        description: >-
+          Raw containerd mirror configuration data to inject.
+      upstreams:
+        type: array
+        description: >-
+          List of upstream registry mirror URLs.
+        items:
+          type: string
+
+  PreloadConfig:
+    type: object
+    description: >-
+      Images to pull and preload into Kind nodes before deploying
+      components, avoiding in-cluster pulls and speeding up startup.
+    additionalProperties: false
+    properties:
+      refs:
+        type: array
+        description: >-
+          List of fully-qualified image references (e.g.
+          "docker.io/library/nginx:1.27-alpine") to preload.
+        items:
+          type: string
+
+  HelmConfig:
+    type: object
+    description: Global Helm configuration shared across all components.
+    additionalProperties: false
+    properties:
+      repos:
+        type: array
+        description: >-
+          Helm chart repositories to register before installing
+          components.
+        items:
+          $ref: "#/$defs/Repo"
+
+  Repo:
+    type: object
+    description: A Helm chart repository.
+    additionalProperties: false
+    required:
+      - name
+      - url
+    properties:
+      name:
+        type: string
+        description: >-
+          Local alias for the repository (used as prefix in chart
+          references, e.g. "bitnami" in "bitnami/postgresql").
+      url:
+        type: string
+        description: URL of the Helm chart repository.
+
+  Component:
+    type: object
+    description: >-
+      A deployable unit — either a Helm chart or raw Kubernetes
+      manifests.
+    additionalProperties: false
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: >-
+          Unique name identifying this component within the
+          configuration.
+      type:
+        type: string
+        description: >-
+          Deployment type. "helm" installs a Helm chart; "k8s" applies
+          raw Kubernetes manifests.
+        enum:
+          - helm
+          - k8s
+        default: helm
+      namespace:
+        type: string
+        description: >-
+          Kubernetes namespace to deploy into. When omitted, the
+          component is deployed into the default namespace.
+      conditions:
+        $ref: "#/$defs/Conditions"
+      selector:
+        $ref: "#/$defs/Selector"
+      timeout:
+        type: string
+        description: >-
+          Maximum duration to wait for this component to become ready
+          (e.g. "5m", "120s"). Used when conditions.ready is true.
+      requires:
+        type: array
+        description: >-
+          Dependencies on other components. Each requirement must be
+          satisfied before this component is deployed.
+        items:
+          $ref: "#/$defs/Requirement"
+      helm:
+        $ref: "#/$defs/HelmSpec"
+      k8s:
+        $ref: "#/$defs/K8sSpec"
+
+  Requirement:
+    type: object
+    description: >-
+      Declares a dependency on another component, optionally waiting
+      for it to reach a ready state.
+    additionalProperties: false
+    required:
+      - component
+    properties:
+      component:
+        type: string
+        description: >-
+          Name of the component this requirement depends on.
+      conditions:
+        $ref: "#/$defs/Conditions"
+      selector:
+        $ref: "#/$defs/Selector"
+      timeout:
+        type: string
+        description: >-
+          Maximum duration to wait for the dependency to become ready
+          (e.g. "5m", "15m").
+
+  Conditions:
+    type: object
+    description: >-
+      Readiness conditions for a component or dependency.
+    additionalProperties: false
+    properties:
+      ready:
+        type: boolean
+        description: >-
+          When true, the system waits for the component's pods
+          (matched by selector) to be fully ready before proceeding.
+
+  Selector:
+    type: object
+    description: >-
+      Label selector used to identify the pods to watch for readiness.
+    additionalProperties: false
+    properties:
+      matchLabels:
+        type: object
+        description: >-
+          Map of label key-value pairs that pods must match.
+        additionalProperties:
+          type: string
+
+  HelmSpec:
+    type: object
+    description: >-
+      Helm chart installation specification for a component of type
+      "helm". The chart field may be omitted when the component
+      inherits it from a parent context via 'from' composition.
+    additionalProperties: false
+    properties:
+      chart:
+        type: string
+        description: >-
+          Chart reference in "repo/chart" format (e.g.
+          "bitnami/postgresql").
+      version:
+        type: string
+        description: >-
+          Explicit chart version constraint. When omitted, the latest
+          version is used.
+      valueFiles:
+        type: array
+        description: >-
+          Paths to YAML value files, resolved relative to the
+          sew.yaml directory. Use for large overrides.
+        items:
+          type: string
+      values:
+        type: object
+        description: >-
+          Inline Helm values merged on top of valueFiles. Use for
+          small tweaks; prefer valueFiles for large overrides.
+
+  K8sSpec:
+    type: object
+    description: >-
+      Raw Kubernetes resource specification for a component of type
+      "k8s".
+    additionalProperties: false
+    properties:
+      manifestFiles:
+        type: array
+        description: >-
+          Paths to YAML manifest files, resolved relative to the
+          sew.yaml directory.
+        items:
+          type: string
+      manifests:
+        type: array
+        description: >-
+          Inline Kubernetes resource manifests. Each entry is a
+          complete resource object (apiVersion, kind, metadata, etc.).
+        items:
+          type: object
+      secrets:
+        type: array
+        description: >-
+          Local secrets to create as Kubernetes Secret resources
+          before applying other manifests.
+        items:
+          $ref: "#/$defs/LocalResource"
+      configMaps:
+        type: array
+        description: >-
+          Local config maps to create as Kubernetes ConfigMap resources
+          before applying other manifests.
+        items:
+          $ref: "#/$defs/LocalResource"
+
+  LocalResource:
+    type: object
+    description: >-
+      A Kubernetes Secret or ConfigMap created from local files or
+      environment variables.
+    additionalProperties: false
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: >-
+          Name of the Kubernetes Secret or ConfigMap to create.
+      onMissing:
+        type: string
+        description: >-
+          Behavior when a referenced file or env var is missing.
+          "fail" aborts deployment; "ignore" skips the resource
+          silently.
+        enum:
+          - fail
+          - ignore
+        default: fail
+      fromFile:
+        type: string
+        description: >-
+          Path to a single file whose contents become the resource
+          data. Supports environment variable expansion (e.g.
+          "$HOME/opt/license.key"). Shorthand for a single-entry
+          resource.
+      entries:
+        type: array
+        description: >-
+          Multiple data entries for the resource, each sourced from a
+          file or environment variable.
+        items:
+          $ref: "#/$defs/ResourceEntry"
+
+  ResourceEntry:
+    type: object
+    description: >-
+      A single data entry in a LocalResource, sourced from a file or
+      environment variable.
+    additionalProperties: false
+    properties:
+      key:
+        type: string
+        description: >-
+          Key name in the resulting Secret or ConfigMap data map.
+      fromFile:
+        type: string
+        description: >-
+          Path to a file whose contents become this entry's value.
+          Supports environment variable expansion.
+      fromEnv:
+        type: string
+        description: >-
+          Name of an environment variable whose value becomes this
+          entry's value.
