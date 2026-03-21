@@ -12,7 +12,12 @@
 
     <div class="registry-detail-layout">
       <article class="registry-detail-main">
-        <h1>{{ .Title }}</h1>
+        <div class="registry-detail-header">
+          {{ with .Params.icon }}
+          <img class="registry-detail-icon" src="{{ printf "%s%s" $.Site.Home.RelPermalink . }}" alt="" />
+          {{ end }}
+          <h1>{{ .Title }}</h1>
+        </div>
         <p class="registry-path"><code>{{ .Params.path }}</code></p>
         {{ with .Description }}<p class="registry-description">{{ . }}</p>{{ end }}
 

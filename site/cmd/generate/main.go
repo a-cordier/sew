@@ -37,6 +37,7 @@ type componentPage struct {
 	From        []string `yaml:"from,omitempty"`
 	Components  []string `yaml:"components,omitempty"`
 	NotesCreate string   `yaml:"notes_create,omitempty"`
+	Icon        string   `yaml:"icon,omitempty"`
 	Type        string   `yaml:"type"`
 }
 
@@ -121,6 +122,7 @@ func main() {
 			From:        config.From,
 			Components:  resolveComponents(relDir, configs),
 			NotesCreate: notesCreate,
+			Icon:        resolveIcon(registryDir, relDir),
 			Type:        "registry",
 		}
 
@@ -189,6 +191,22 @@ func resolveComponents(relDir string, configs map[string]*sewConfig) []string {
 	}
 	walk(relDir)
 	return result
+}
+
+func resolveIcon(registryDir, relDir string) string {
+	dir := relDir
+	for {
+		candidate := filepath.Join(registryDir, dir, "icon.svg")
+		if _, err := os.Stat(candidate); err == nil {
+			return filepath.Join(dir, "icon.svg")
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir || parent == "." {
+			break
+		}
+		dir = parent
+	}
+	return ""
 }
 
 func writeRegistryRoot(contentDir string) {

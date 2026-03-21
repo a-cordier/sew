@@ -17,6 +17,7 @@ notes_create: |-
     Everything has been deployed in the `gravitee` namespace.
 
     APIM Gateway is listening on http://localhost:30082
+icon: gravitee.io/icon.svg
 type: registry
 ---
 
