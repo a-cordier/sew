@@ -17,7 +17,7 @@ tasks:
   fmt:yaml:
     desc: Format YAML files
     cmds:
-      - yamlfmt registry/ *.yaml
+      - go tool yamlfmt registry/ *.yaml
 
   test:
     desc: Run tests
@@ -27,7 +27,7 @@ tasks:
   lint:yaml:
     desc: Check YAML formatting
     cmds:
-      - yamlfmt -lint registry/ *.yaml
+      - go tool yamlfmt -lint registry/ *.yaml
 
   agents:update:
     desc: Regenerate the product agents table in AGENTS.md from agents/*-agent.md
