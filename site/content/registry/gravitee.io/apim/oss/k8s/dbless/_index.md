@@ -12,7 +12,7 @@ components:
     - apim
     - gko
 notes_create: |-
-    Your cluster "gravitee.io/apim/oss/k8s/dbless" is ready.
+    Your cluster "gravitee-dbless" is ready.
 
     Everything has been deployed in the `gravitee` namespace.
 

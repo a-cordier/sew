@@ -12,7 +12,7 @@ components:
     - gateway-class-parameters
     - gateway-class
 notes_create: |-
-    Your cluster "gravitee.io/apim/oss/k8s/gateway" is ready.
+    Your cluster "gravitee-gateway" is ready.
 
     GKO is deployed in the `gravitee` namespace with Gateway API support enabled.
 

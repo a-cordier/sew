@@ -9,7 +9,7 @@ tags:
 components:
     - kafka
 notes_create: |-
-    Your cluster "kafka/standalone" is ready.
+    Your cluster "kafka-standalone" is ready.
 
     Kafka is available at localhost:9092 (plaintext, no TLS).
 

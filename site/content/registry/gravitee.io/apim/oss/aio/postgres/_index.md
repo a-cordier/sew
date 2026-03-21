@@ -17,7 +17,7 @@ components:
     - tls-server
     - apim
 notes_create: |-
-    Your cluster "gravitee.io/apim/oss/aio/postgres" is ready.
+    Your cluster "gravitee-apim" is ready.
 
     Everything has been deployed in the `gravitee` namespace.
 

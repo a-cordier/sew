@@ -9,7 +9,7 @@ tags:
 components:
     - elasticsearch
 notes_create: |-
-    Your cluster "elastic/elasticsearch" is ready.
+    Your cluster "es-standalone" is ready.
 
     Elasticsearch is available at http://localhost:9200 (security disabled).
 

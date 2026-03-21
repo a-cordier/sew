@@ -9,7 +9,7 @@ tags:
 components:
     - mongodb
 notes_create: |-
-    Your cluster "mongodb/standalone" is ready.
+    Your cluster "mongo-standalone" is ready.
 
     MongoDB is available at localhost:27017 (no authentication).
 

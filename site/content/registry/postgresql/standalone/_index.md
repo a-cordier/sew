@@ -9,7 +9,7 @@ tags:
 components:
     - postgresql
 notes_create: |-
-    Your cluster "postgresql/standalone" is ready.
+    Your cluster "pg-standalone" is ready.
 
     PostgreSQL is available at localhost:5432.
 
