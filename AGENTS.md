@@ -33,6 +33,14 @@ sew comes with a [JSON Schema](https://github.com/a-cordier/sew/blob/main/schema
   ```
 - Concrete context READMEs must be **self-contained**. Never link to an abstract parent's README — abstract contexts don't get pages on the site and those links will be broken. Inline any relevant documentation from the parent directly into each concrete variant's README.
 - Any change that affects the user — new feature, changed behavior, new CLI flag, new config field, registry restructure, etc. — **must** come with matching documentation updates. Update the relevant pages under `site/content/docs/` (guides, reference, getting started) and, when applicable, the `README.md` and `CONTRIBUTING.md`. Documentation is not optional; a feature without docs is not complete.
+- When a feature or command requires `sudo`, the documentation **must** explain *why* elevated privileges are needed (e.g. which system directories are written to) and clarify which commands can run without `sudo` afterwards. Use a blockquote for this, for example:
+
+  ```
+  > The setup command requires `sudo` because it writes to system
+  > directories: `/etc/resolver/` on macOS, and `systemd-resolved`
+  > configuration on Linux. Once done, day-to-day `sew create` and
+  > `sew delete` commands run without elevated privileges.
+  ```
 
 ## Product-specific instructions
 
