@@ -1,0 +1,45 @@
+images:
+  preload:
+    refs:
+      - docker.elastic.co/elasticsearch/elasticsearch:9.3.1
+kind:
+  name: es-standalone
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30920
+          hostPort: 9200
+helm:
+  repos:
+    - name: elastic
+      url: https://helm.elastic.co
+components:
+  - name: elasticsearch
+    type: helm
+    helm:
+      chart: elastic/elasticsearch
+      values:
+        image: docker.elastic.co/elasticsearch/elasticsearch
+        imageTag: 9.3.1
+        clusterName: elasticsearch
+        nodeGroup: master
+        replicas: 1
+        minimumMasterNodes: 1
+        esJavaOpts: "-Xmx256m -Xms256m"
+        createCert: false
+        extraEnvs:
+          - name: xpack.security.enabled
+            value: "false"
+        protocol: http
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        service:
+          type: NodePort
+          nodePort: 30920
+        persistence:
+          enabled: false

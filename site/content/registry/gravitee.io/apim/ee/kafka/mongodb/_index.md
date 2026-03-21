@@ -8,7 +8,6 @@ tags:
     - api-management
     - gateway
     - messaging
-    - kafka
 from:
     - gravitee.io/apim/oss/aio/mongodb
     - gravitee.io/apim/ee/kafka/base

@@ -6,7 +6,6 @@ context: true
 description: Single-node Kafka broker in KRaft combined mode
 tags:
     - messaging
-    - kafka
 components:
     - kafka
 notes_create: |-
