@@ -129,7 +129,7 @@
         return text.indexOf(w) !== -1;
       });
 
-      var matchTags = !tagKeys.length || tagKeys.some(function(t) {
+      var matchTags = !tagKeys.length || tagKeys.every(function(t) {
         return cardTags.indexOf(t) !== -1;
       });
 
