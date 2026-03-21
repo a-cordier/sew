@@ -16,6 +16,13 @@ required — APIs are defined entirely through Kubernetes custom resources.
 sew create --from gravitee.io/apim/oss/k8s/dbless
 ```
 
+## Endpoints
+
+| Service        | URL                        |
+|----------------|----------------------------|
+| APIM Gateway   | http://localhost:30082      |
+
+
 ## Details
 
 - **Kind cluster:** `gio-dbless`
