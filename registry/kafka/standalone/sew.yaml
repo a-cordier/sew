@@ -3,6 +3,7 @@ images:
     refs:
       - apache/kafka:latest
 kind:
+  name: kafka-standalone
   nodes:
     - role: control-plane
       extraPortMappings:

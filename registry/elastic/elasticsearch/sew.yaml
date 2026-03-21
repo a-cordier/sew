@@ -2,6 +2,13 @@ images:
   preload:
     refs:
       - docker.elastic.co/elasticsearch/elasticsearch:9.3.1
+kind:
+  name: es-standalone
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30920
+          hostPort: 9200
 helm:
   repos:
     - name: elastic
@@ -31,5 +38,8 @@ components:
           limits:
             cpu: 1000m
             memory: 1Gi
+        service:
+          type: NodePort
+          nodePort: 30920
         persistence:
           enabled: false

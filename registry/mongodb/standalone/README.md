@@ -6,7 +6,7 @@ tags: [database]
 # MongoDB Standalone
 
 Deploys a single-replica MongoDB instance as a Kubernetes Deployment with a
-ClusterIP Service on port 27017.
+NodePort Service on port 27017.
 
 ## Usage
 
@@ -19,6 +19,11 @@ sew create mongodb/standalone
 - **Image:** `mongo:7`
 - **Port:** 27017
 - **Resources:** 250m–1 CPU, 512Mi–1Gi memory
+
+### Host access
+
+Kind maps `hostPort 27017` → `containerPort 30017` (NodePort) → `targetPort 27017`.
+From the host, connect to `localhost:27017`.
 
 This is a minimal, persistence-free MongoDB suitable for development and
 testing. It is used as a dependency by higher-level contexts such as

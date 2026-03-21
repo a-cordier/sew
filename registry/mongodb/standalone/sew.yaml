@@ -2,6 +2,13 @@ images:
   preload:
     refs:
       - mongo:7
+kind:
+  name: mongo-standalone
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30017
+          hostPort: 27017
 components:
   - name: mongodb
     type: k8s
@@ -43,10 +50,11 @@ components:
             labels:
               app: mongodb
           spec:
-            type: ClusterIP
+            type: NodePort
             ports:
               - port: 27017
                 targetPort: 27017
+                nodePort: 30017
                 name: mongodb
             selector:
               app: mongodb
