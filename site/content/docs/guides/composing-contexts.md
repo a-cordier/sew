@@ -111,6 +111,17 @@ With this setup, `from: [mycompany/myproduct]` resolves to `mycompany/myproduct/
 
 Defaults chain across multiple levels -- sew reads `.default` at each directory until it finds a `sew.yaml`. For example, `from: [elastic]` resolves first to `elastic/elasticsearch` (via `elastic/.default`), then to `elastic/elasticsearch/standalone` (via `elastic/elasticsearch/.default`), where the actual `sew.yaml` lives.
 
+## Config resolution order
+
+When you run `sew create`, sew builds the final configuration by merging multiple layers. Each layer overrides the one before it:
+
+- **User-level base** (`$SEW_HOME/sew.yaml`, defaults to `~/.sew/sew.yaml`) -- Shared settings across all your projects. Use this for things like a custom registry URL, image mirrors, or a default DNS domain. This file is optional.
+- **Project-level** (`./sew.yaml` or the path given with `--config`) -- Your project's specific config. This is where you list `from` entries, add components, and set cluster options.
+- **Registry contexts** -- Each entry in `from` is fetched and merged left-to-right. Later contexts override earlier ones on conflicts.
+- **Embedded defaults** -- sew fills in any remaining gaps with sensible defaults (cluster name, ports, feature flags).
+
+The `--registry` and `--from` CLI flags override the corresponding values from config files, so you can quickly test a different context without editing your `sew.yaml`.
+
 ## Local overrides
 
 Beyond composing registry contexts, you can add your own components and Helm repos directly in your project `sew.yaml`. This is useful for supporting services that aren't part of the upstream context:
