@@ -64,6 +64,14 @@ components:
         license:
           name: gravitee-license
         gateway:
+          extraVolumes: |
+            - name: graviteeio-license
+              secret:
+                secretName: gravitee-license
+          extraVolumeMounts: |
+            - name: graviteeio-license
+              mountPath: /opt/graviteeio-gateway/license
+              readOnly: true
           service:
             type: LoadBalancer
           env:
@@ -83,3 +91,12 @@ components:
               keystore:
                 type: pem
                 secret: secret://kubernetes/kafka-tls
+        api:
+          extraVolumes: |
+            - name: graviteeio-license
+              secret:
+                secretName: gravitee-license
+          extraVolumeMounts: |
+            - name: graviteeio-license
+              mountPath: /opt/graviteeio-management-api/license
+              readOnly: true
