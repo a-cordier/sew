@@ -6,6 +6,7 @@ title = "sew"
   description = "Your local Kubernetes tailor shop"
   tagline = "Discover, use and maintain Kubernetes application stacks for CI, test and dev workflows."
   githubRepo = "https://github.com/a-cordier/sew"
+  pinnedGroups = ["gravitee.io"]
 
 [menu]
   [[menu.main]]
