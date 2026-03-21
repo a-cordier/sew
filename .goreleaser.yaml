@@ -21,17 +21,4 @@ archives:
           - zip
 
 changelog:
-  sort: asc
-  use: github
-  groups:
-    - title: Features
-      regexp: '^feat:'
-    - title: Bug Fixes
-      regexp: '^fix:'
-  filters:
-    exclude:
-      - '^docs:'
-      - '^refactor:'
-      - '^style:'
-      - '^test:'
-      - '^chore:'
+  disable: true
