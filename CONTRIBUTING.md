@@ -17,13 +17,16 @@ It applies to both human developers and AI agents working on the project.
 |---|---|
 | `go build` | Build the `sew` binary |
 | `go run . create` | Build and run in one step |
-| `task test` | Run all tests (`go test ./...`) |
+| `task test` | Run all tests (`gotestsum`) |
 | `task lint` | Run Go linter (`revive`) |
 | `task fmt:yaml` | Format YAML files in `registry/` and root |
 | `task lint:yaml` | Check YAML formatting (CI-safe, no writes) |
 | `task site:generate` | Generate Hugo site content from the registry |
 | `task site:serve` | Generate content and start the Hugo dev server |
 | `task site:build` | Generate content and build the Hugo site for production |
+
+When adding or modifying tasks in `taskfile.yml`, update the table above
+to keep it in sync.
 
 Always run `task lint` and `task test` before submitting changes.
 
