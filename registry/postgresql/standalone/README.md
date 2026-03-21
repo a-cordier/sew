@@ -12,7 +12,7 @@ a NodePort Service on port 5432.
 ## Usage
 
 ```bash
-sew create postgresql/standalone
+sew create --from postgresql/standalone
 ```
 
 ## Details

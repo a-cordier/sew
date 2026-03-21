@@ -26,7 +26,7 @@ NodePort Service on port 27017.
 ## Usage
 
 ```bash
-sew create mongodb/standalone
+sew create --from mongodb/standalone
 ```
 
 ## Details

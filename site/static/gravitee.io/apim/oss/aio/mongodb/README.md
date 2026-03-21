@@ -13,7 +13,7 @@ analytics.
 ## Usage
 
 ```bash
-sew create gravitee.io/apim/oss/aio/mongodb
+sew create --from gravitee.io/apim/oss/aio/mongodb
 ```
 
 ## Endpoints

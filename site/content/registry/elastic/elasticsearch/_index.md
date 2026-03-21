@@ -26,7 +26,7 @@ setup. A NodePort Service exposes the cluster to both in-cluster and host client
 ## Usage
 
 ```bash
-sew create elastic/elasticsearch
+sew create --from elastic/elasticsearch
 ```
 
 ## Details

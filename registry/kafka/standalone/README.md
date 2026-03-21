@@ -13,7 +13,7 @@ the broker to both in-cluster and host clients.
 ## Usage
 
 ```bash
-sew create kafka/standalone
+sew create --from kafka/standalone
 ```
 
 ## Details
