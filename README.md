@@ -5,7 +5,7 @@
 <a href="https://github.com/a-cordier/sew/releases/latest"><img src="https://img.shields.io/github/v/release/a-cordier/sew" alt="Release"></a>
 <img src="https://img.shields.io/github/go-mod/go-version/a-cordier/sew" alt="Go version">
 <img src="https://img.shields.io/github/license/a-cordier/sew" alt="License">
-<a href="https://goreportcard.com/report/github.com/a-cordier/sew"><img src="https://goreportcard.com/badge/github.com/a-cordier/sew" alt="Go Report Card"></a>
+<a href="https://goreportcard.com/report/github.com/a-cordier/sew"><img src="https://img.shields.io/badge/go%20report-A+-brightgreen.svg?style=flat" alt="Go Report Card"></a>
 </p>
 
 <p align="center">
