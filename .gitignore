@@ -1,5 +1,6 @@
 .sew/
 sew
 /site/generate
+/site/public/
 /generate
 .test/
