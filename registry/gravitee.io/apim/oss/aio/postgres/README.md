@@ -13,7 +13,7 @@ analytics. Management uses JDBC. Rate limiting is also stored in PostgreSQL.
 ## Usage
 
 ```bash
-sew create gravitee.io/apim/oss/aio/postgres
+sew create --from gravitee.io/apim/oss/aio/postgres
 ```
 
 ## Endpoints

@@ -26,11 +26,11 @@ sew setup dns
 
 ```bash
 # Uses the default variant (postgres)
-sew create gravitee.io/apim/ee/kafka
+sew create --from gravitee.io/apim/ee/kafka
 
 # Explicitly select a variant
-sew create gravitee.io/apim/ee/kafka/postgres
-sew create gravitee.io/apim/ee/kafka/mongodb
+sew create --from gravitee.io/apim/ee/kafka/postgres
+sew create --from gravitee.io/apim/ee/kafka/mongodb
 ```
 
 ## Variants

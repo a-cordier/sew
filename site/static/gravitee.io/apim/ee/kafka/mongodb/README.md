@@ -12,7 +12,7 @@ backed by MongoDB for persistence and Elasticsearch for analytics.
 ## Usage
 
 ```bash
-sew create gravitee.io/apim/ee/kafka/mongodb
+sew create --from gravitee.io/apim/ee/kafka/mongodb
 ```
 
 ## Endpoints

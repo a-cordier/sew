@@ -29,7 +29,7 @@ backed by PostgreSQL for persistence and Elasticsearch for analytics.
 ## Usage
 
 ```bash
-sew create gravitee.io/apim/ee/kafka/postgres
+sew create --from gravitee.io/apim/ee/kafka/postgres
 ```
 
 ## Endpoints
