@@ -1,6 +1,14 @@
 <p align="center"><img src="logo.svg" alt="sew" width="140"/><br><em>Your local Kubernetes tailor shop</em></p>
 
 <p align="center">
+<a href="https://github.com/a-cordier/sew/actions/workflows/lint.yml"><img src="https://github.com/a-cordier/sew/actions/workflows/lint.yml/badge.svg" alt="CI"></a>
+<a href="https://github.com/a-cordier/sew/releases/latest"><img src="https://img.shields.io/github/v/release/a-cordier/sew" alt="Release"></a>
+<img src="https://img.shields.io/github/go-mod/go-version/a-cordier/sew" alt="Go version">
+<img src="https://img.shields.io/github/license/a-cordier/sew" alt="License">
+<a href="https://goreportcard.com/report/github.com/a-cordier/sew"><img src="https://goreportcard.com/badge/github.com/a-cordier/sew" alt="Go Report Card"></a>
+</p>
+
+<p align="center">
 <a href="https://a-cordier.github.io/sew/docs/">Documentation</a> · <a href="https://a-cordier.github.io/sew/registry/">Registry</a> · <a href="#quick-start">Getting Started</a>
 </p>
 
