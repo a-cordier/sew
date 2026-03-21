@@ -1,430 +1,138 @@
-<!DOCTYPE html>
-<html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=63548&amp;path=sew/livereload" data-no-instant defer></script>
-  <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Composing Contexts · sew</title>
-<meta name="description" content="Your local Kubernetes tailor shop">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="/sew/css/main.min.3b24b0d2a8e01a336429aa2fa9131617e7054260326bb04774b9768cd67e55f9.css" integrity="sha256-OySw0qjgGjNkKaovqRMWF&#43;cFQmAya7BHdLl2jNZ&#43;Vfk=">
-<link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
-<script>
-(function() {
-  var t = localStorage.getItem('theme');
-  if (t === 'dark' || t === 'light') {
-    document.documentElement.setAttribute('data-theme', t);
-  }
-})();
-function toggleTheme() {
-  var root = document.documentElement;
-  var current = root.getAttribute('data-theme');
-  if (!current) {
-    current = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  var next = current === 'dark' ? 'light' : 'dark';
-  root.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-}
-</script>
-
-</head>
-<body>
-  <nav class="nav">
-  <div class="nav-inner">
-    <a class="nav-logo" href="/sew/">
-      <img src="/sew/logo.svg" alt="sew" width="56" height="20">
-    </a>
-    <button class="nav-hamburger" aria-label="Toggle menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
-      <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"/></svg>
-    </button>
-    <ul class="nav-links">
-      
-      <li>
-        <a href="/sew/docs/"
-           class="">
-          Docs
-          
-        </a>
-      </li>
-      
-      <li>
-        <a href="/sew/registry/"
-           class="">
-          Registry
-          
-        </a>
-      </li>
-      
-      <li>
-        <a href="https://github.com/a-cordier/sew" target="_blank" rel="noopener"
-           class="">
-          GitHub
-          
-          <svg class="icon-external" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M3.75 2A1.75 1.75 0 0 0 2 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0 0 14 12.25v-3.5a.75.75 0 0 0-1.5 0v3.5a.25.25 0 0 1-.25.25h-8.5a.25.25 0 0 1-.25-.25v-8.5a.25.25 0 0 1 .25-.25h3.5a.75.75 0 0 0 0-1.5h-3.5zm6.5 0a.75.75 0 0 0 0 1.5h1.19L7.22 7.72a.75.75 0 1 0 1.06 1.06l4.22-4.22v1.19a.75.75 0 0 0 1.5 0v-3A.75.75 0 0 0 13.25 2h-3z"/></svg>
-          
-        </a>
-      </li>
-      
-      <li>
-        <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">
-          <svg class="icon-sun" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 1.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11ZM8 0a.75.75 0 0 1 .75.75v1a.75.75 0 0 1-1.5 0v-1A.75.75 0 0 1 8 0Zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13Zm-8-5a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8Zm12.25-.75h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5Zm-9.6-4.6a.75.75 0 0 1 1.06 0l1 1a.75.75 0 1 1-1.06 1.06l-1-1a.75.75 0 0 1 0-1.06Zm9.35 9.35a.75.75 0 0 1-1.06 0l-1-1a.75.75 0 1 1 1.06-1.06l1 1a.75.75 0 0 1 0 1.06Zm-9.35 0a.75.75 0 0 1 0-1.06l1-1a.75.75 0 1 1 1.06 1.06l-1 1a.75.75 0 0 1-1.06 0ZM13 3.7a.75.75 0 0 1-1.06 0l-1-1a.75.75 0 1 1 1.06-1.06l1 1a.75.75 0 0 1 0 1.06Z"/></svg>
-          <svg class="icon-moon" viewBox="0 0 16 16" fill="currentColor"><path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.221-7.832Z"/></svg>
-        </button>
-      </li>
-    </ul>
-  </div>
-</nav>
-
-  <main class="main">
-    
-<div class="docs-layout">
-  <aside class="docs-sidebar">
-    <nav class="docs-nav">
-      
-      
-      <div class="docs-nav-section">
-        
-        <a href="/sew/docs/getting-started/" class="docs-nav-standalone">Getting Started</a>
-        
-      </div>
-      
-      <div class="docs-nav-section">
-        
-        <details open>
-          <summary>
-            <a href="/sew/docs/guides/" class="">Guides</a>
-          </summary>
-          <ul>
-            
-            <li>
-              <a href="/sew/docs/guides/registry/" class="">
-                Registry
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/composing-contexts/" class="active">
-                Composing Contexts
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/networking/" class="">
-                Networking
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/images/" class="">
-                Images
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/ai-ready/" class="">
-                AI Toolchain
-              </a>
-            </li>
-            
-          </ul>
-        </details>
-        
-      </div>
-      
-      <div class="docs-nav-section">
-        
-        <details>
-          <summary>
-            <a href="/sew/docs/reference/" class="">Reference</a>
-          </summary>
-          <ul>
-            
-            <li>
-              <a href="/sew/docs/reference/configuration/" class="">
-                Configuration
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/reference/commands/" class="">
-                Commands
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/reference/context-format/" class="">
-                Context Format
-              </a>
-            </li>
-            
-          </ul>
-        </details>
-        
-      </div>
-      
-    </nav>
-  </aside>
-  <div class="docs-content">
-    <h1>Composing Contexts</h1>
-    <article class="content">
-      <p>One of sew&rsquo;s key strengths is composition. You can layer contexts together using <code>from</code> to build complex stacks from simple, reusable building blocks &ndash; without duplicating configuration.</p>
-<h2 id="the-basics">The basics</h2>
-<p>The <code>from</code> field lists registry paths to compose. Each context is resolved and merged in order, with your local overrides applied last:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">registry</span>: https://raw.githubusercontent.com/a-cordier/sew/refs/heads/main/registry
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">from</span>:
-</span></span><span style="display:flex;"><span>  - elastic/elasticsearch
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">kind</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">name</span>: my-cluster
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: elasticsearch
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
-</span></span></code></pre></div><p>This says: start from the <code>elastic/elasticsearch</code> context, rename the cluster, and move Elasticsearch into a different namespace.</p>
-<h2 id="multi-context-composition">Multi-context composition</h2>
-<p>You can compose multiple independent contexts into a single stack. This is how you assemble real-world environments from reusable pieces:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">from</span>:
-</span></span><span style="display:flex;"><span>  - mongodb/standalone
-</span></span><span style="display:flex;"><span>  - elastic/elasticsearch
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">kind</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">name</span>: my-stack
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: mongodb
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: elasticsearch
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: my-service
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">type</span>: helm
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">requires</span>:
-</span></span><span style="display:flex;"><span>      - <span style="color:#ff79c6">component</span>: mongodb
-</span></span><span style="display:flex;"><span>      - <span style="color:#ff79c6">component</span>: elasticsearch
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">chart</span>: myrepo/my-service
-</span></span></code></pre></div><p>Contexts in <code>from</code> are merged left-to-right: later entries override earlier ones on conflicts. Your local fields override last.</p>
-<h2 id="abstract-contexts">Abstract contexts</h2>
-<p>When several variants share a common foundation, extract the shared parts into an <strong>abstract</strong> context. Mark it with <code>abstract: true</code> &ndash; it can&rsquo;t be deployed on its own, only composed into concrete contexts:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#6272a4"># registry/mycompany/myproduct/base/sew.yaml</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">abstract</span>: <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">helm</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">repos</span>:
-</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">name</span>: myrepo
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">url</span>: https://charts.example.com
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: app
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: default
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">chart</span>: myrepo/app
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">version</span>: <span style="color:#f1fa8c">&#34;2.0.0&#34;</span>
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">values</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">replicas</span>: <span style="color:#bd93f9">1</span>
-</span></span></code></pre></div><p>Concrete variants compose from the abstract base:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#6272a4"># registry/mycompany/myproduct/dev/sew.yaml</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">from</span>:
-</span></span><span style="display:flex;"><span>  - mycompany/myproduct/base
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">kind</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">name</span>: dev-cluster
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: app
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">values</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">debug</span>: <span style="color:#ff79c6">true</span>
-</span></span></code></pre></div><h2 id="local-overrides">Local overrides</h2>
-<p>Beyond composing registry contexts, you can add your own components and Helm repos directly in your project <code>sew.yaml</code>. This is useful for supporting services that aren&rsquo;t part of the upstream context:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">from</span>:
-</span></span><span style="display:flex;"><span>  - mycompany/myproduct/dev
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">helm</span>:
-</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">repos</span>:
-</span></span><span style="display:flex;"><span>    - <span style="color:#ff79c6">name</span>: bitnami
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">url</span>: https://charts.bitnami.com/bitnami
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: redis
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">chart</span>: bitnami/redis
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">values</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">architecture</span>: standalone
-</span></span></code></pre></div><p>If a component name matches one from the context, your values are merged on top. If there&rsquo;s no match, the component is added as a new deployment.</p>
-<h3 id="kubernetes-manifest-components">Kubernetes manifest components</h3>
-<p>You can also deploy plain Kubernetes resources without a Helm chart by setting <code>type: k8s</code>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: routes
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">type</span>: k8s
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">k8s</span>:
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">manifestFiles</span>:
-</span></span><span style="display:flex;"><span>        - gateway.yaml
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">manifests</span>:
-</span></span><span style="display:flex;"><span>        - <span style="color:#ff79c6">apiVersion</span>: v1
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">kind</span>: Service
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">metadata</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">name</span>: my-service
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">spec</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">type</span>: ClusterIP
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">ports</span>:
-</span></span><span style="display:flex;"><span>              - <span style="color:#ff79c6">port</span>: <span style="color:#bd93f9">8080</span>
-</span></span><span style="display:flex;"><span>                <span style="color:#ff79c6">targetPort</span>: <span style="color:#bd93f9">8080</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">selector</span>:
-</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">app</span>: my-service
-</span></span></code></pre></div><h3 id="local-secrets-and-configmaps">Local secrets and ConfigMaps</h3>
-<p>A <code>k8s</code> component can create Secrets and ConfigMaps from local files or environment variables:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: credentials
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">type</span>: k8s
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">namespace</span>: my-app
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">k8s</span>:
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">secrets</span>:
-</span></span><span style="display:flex;"><span>        - <span style="color:#ff79c6">name</span>: license-key
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">fromFile</span>: ./license.key
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">onMissing</span>: ignore
-</span></span><span style="display:flex;"><span>        - <span style="color:#ff79c6">name</span>: api-credentials
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">entries</span>:
-</span></span><span style="display:flex;"><span>            - <span style="color:#ff79c6">key</span>: token
-</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">fromFile</span>: ./token.txt
-</span></span><span style="display:flex;"><span>            - <span style="color:#ff79c6">key</span>: API_KEY
-</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">fromEnv</span>: MY_API_KEY
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">configMaps</span>:
-</span></span><span style="display:flex;"><span>        - <span style="color:#ff79c6">name</span>: logging-config
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">entries</span>:
-</span></span><span style="display:flex;"><span>            - <span style="color:#ff79c6">key</span>: logback.xml
-</span></span><span style="display:flex;"><span>              <span style="color:#ff79c6">fromFile</span>: ./logback.xml
-</span></span></code></pre></div><p>The <code>onMissing</code> field controls behavior when a source file or env var is missing: <code>fail</code> (default) aborts the deployment, <code>ignore</code> skips the resource with a warning.</p>
-<h2 id="dependencies-between-components">Dependencies between components</h2>
-<p>Use <code>requires</code> to express inter-component dependencies. sew installs components in dependency order and can wait for readiness:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: my-service
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">requires</span>:
-</span></span><span style="display:flex;"><span>      - <span style="color:#ff79c6">component</span>: mongodb
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">conditions</span>:
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">ready</span>: <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">selector</span>:
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">matchLabels</span>:
-</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">app.kubernetes.io/instance</span>: mongodb
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">conditions</span>:
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">ready</span>: <span style="color:#ff79c6">true</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">timeout</span>: 10m
-</span></span></code></pre></div><h2 id="merge-rules">Merge rules</h2>
-<p>When composing contexts or applying local overrides, sew merges fields following these rules:</p>
-<table>
-  <thead>
-      <tr>
-          <th>Field</th>
-          <th>Behavior</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><code>helm.chart</code></td>
-          <td>Your value wins if non-empty</td>
-      </tr>
-      <tr>
-          <td><code>helm.version</code></td>
-          <td>Your value wins if non-empty</td>
-      </tr>
-      <tr>
-          <td><code>helm.valueFiles</code></td>
-          <td>Your files are appended (higher precedence in Helm)</td>
-      </tr>
-      <tr>
-          <td><code>helm.values</code></td>
-          <td>Deep-merged &ndash; maps recurse, named lists merge by <code>name</code>, scalars replace</td>
-      </tr>
-      <tr>
-          <td><code>k8s.manifestFiles</code></td>
-          <td>Your files are appended</td>
-      </tr>
-      <tr>
-          <td><code>k8s.manifests</code></td>
-          <td>Union by resource identity; your version wins on conflict</td>
-      </tr>
-      <tr>
-          <td><code>k8s.secrets</code></td>
-          <td>Your secrets are appended</td>
-      </tr>
-      <tr>
-          <td><code>k8s.configMaps</code></td>
-          <td>Your configMaps are appended</td>
-      </tr>
-      <tr>
-          <td><code>requires</code></td>
-          <td>Your requirements are appended (deduplicated by component name)</td>
-      </tr>
-      <tr>
-          <td><code>conditions</code></td>
-          <td>Your value wins if <code>ready</code> is true</td>
-      </tr>
-      <tr>
-          <td><code>selector</code></td>
-          <td>Your value wins if set</td>
-      </tr>
-      <tr>
-          <td><code>timeout</code></td>
-          <td>Your value wins if non-empty</td>
-      </tr>
-  </tbody>
-</table>
-<h3 id="values-deep-merge">Values deep merge</h3>
-<p>When <code>helm.values</code> overlap on the same key, sew picks a strategy based on the value type:</p>
-<table>
-  <thead>
-      <tr>
-          <th>Value type</th>
-          <th>Strategy</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Maps</td>
-          <td>Recursive deep merge &ndash; each nested key is merged individually</td>
-      </tr>
-      <tr>
-          <td>Named lists (objects with a <code>name</code> key)</td>
-          <td>Merge by <code>name</code> &ndash; same-name entries are overridden, new entries appended</td>
-      </tr>
-      <tr>
-          <td>Everything else (scalars, plain lists)</td>
-          <td>Replace &ndash; your value wins</td>
-      </tr>
-  </tbody>
-</table>
-<p>An empty list (<code>env: []</code>) replaces the parent&rsquo;s list entirely &ndash; use this to clear inherited entries.</p>
-<h2 id="multi-level-composition">Multi-level composition</h2>
-<p>Composition chains work to arbitrary depth. A grandparent context can be composed by a parent, which is then composed by your project config. sew tracks visited contexts and errors if it detects a cycle.</p>
-<h2 id="overriding-service-networking">Overriding service networking</h2>
-<p>When composing contexts, you might need to change how a child context exposes services. For Helm components, override the relevant values:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
-</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: search-engine
-</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
-</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">values</span>:
-</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">service</span>:
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">type</span>: ClusterIP
-</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">nodePort</span>: <span style="color:#ff79c6">null</span>    <span style="color:#6272a4"># clear the child&#39;s nodePort to avoid Kubernetes rejection</span>
-</span></span></code></pre></div><p>For <code>k8s</code> manifest components, provide a full replacement Service manifest &ndash; manifests are merged by resource identity, so your Service replaces the child&rsquo;s entirely.</p>
-
-    </article>
-  </div>
-</div>
-
-  </main>
-  <footer class="footer">
-  <div class="footer-inner">
-    <p>
-      <a href="https://github.com/a-cordier/sew" target="_blank" rel="noopener">sew</a>
-      &mdash; Your local Kubernetes tailor shop
-    </p>
-  </div>
-</footer>
-
-</body>
-</html>
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Composing Contexts · sew</title><meta name=description content="Your local Kubernetes tailor shop"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel=stylesheet><link rel=stylesheet href=/sew/css/main.min.3b24b0d2a8e01a336429aa2fa9131617e7054260326bb04774b9768cd67e55f9.css integrity="sha256-OySw0qjgGjNkKaovqRMWF+cFQmAya7BHdLl2jNZ+Vfk="><link rel=icon href=/sew/logo.svg type=image/svg+xml><script>(function(){var e=localStorage.getItem("theme");(e==="dark"||e==="light")&&document.documentElement.setAttribute("data-theme",e)})();function toggleTheme(){var t,n=document.documentElement,e=n.getAttribute("data-theme");e||(e=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"),t=e==="dark"?"light":"dark",n.setAttribute("data-theme",t),localStorage.setItem("theme",t)}</script></head><body><nav class=nav><div class=nav-inner><a class=nav-logo href=/sew/><img src=/sew/logo.svg alt=sew width=56 height=20>
+</a><button class=nav-hamburger aria-label="Toggle menu" onclick='document.querySelector(".nav-links").classList.toggle("open")'>
+<svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M1 2.75A.75.75.0 011.75 2h12.5a.75.75.0 010 1.5H1.75A.75.75.0 011 2.75zm0 5A.75.75.0 011.75 7h12.5a.75.75.0 010 1.5H1.75A.75.75.0 011 7.75zM1.75 12h12.5a.75.75.0 010 1.5H1.75a.75.75.0 010-1.5z"/></svg></button><ul class=nav-links><li><a href=/sew/docs/>Docs</a></li><li><a href=/sew/registry/>Registry</a></li><li><a href=https://github.com/a-cordier/sew target=_blank rel=noopener>GitHub
+<svg class="icon-external" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M3.75 2A1.75 1.75.0 002 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75.0 0014 12.25v-3.5a.75.75.0 00-1.5.0v3.5a.25.25.0 01-.25.25h-8.5a.25.25.0 01-.25-.25v-8.5a.25.25.0 01.25-.25h3.5a.75.75.0 000-1.5h-3.5zm6.5.0a.75.75.0 000 1.5h1.19L7.22 7.72a.75.75.0 101.06 1.06l4.22-4.22v1.19a.75.75.0 001.5.0v-3A.75.75.0 0013.25 2h-3z"/></svg></a></li><li><button class=theme-toggle aria-label="Toggle theme" onclick=toggleTheme()>
+<svg class="icon-sun" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12a4 4 0 100-8 4 4 0 000 8zm0 1.5a5.5 5.5.0 110-11 5.5 5.5.0 010 11zM8 0a.75.75.0 01.75.75v1a.75.75.0 01-1.5.0v-1A.75.75.0 018 0zm0 13a.75.75.0 01.75.75v1.5a.75.75.0 01-1.5.0v-1.5A.75.75.0 018 13zM0 8a.75.75.0 01.75-.75h1.5a.75.75.0 010 1.5H.75A.75.75.0 010 8zm12.25-.75h3a.75.75.0 010 1.5h-3a.75.75.0 010-1.5zm-9.6-4.6a.75.75.0 011.06.0l1 1A.75.75.0 113.65 4.71l-1-1a.75.75.0 010-1.06zM12 12a.75.75.0 01-1.06.0l-1-1A.75.75.0 1111 9.94l1 1A.75.75.0 0112 12zm-9.35.0a.75.75.0 010-1.06l1-1A.75.75.0 114.71 11l-1 1a.75.75.0 01-1.06.0zM13 3.7a.75.75.0 01-1.06.0l-1-1A.75.75.0 1112 1.64l1 1a.75.75.0 010 1.06z"/></svg>
+<svg class="icon-moon" viewBox="0 0 16 16" fill="currentColor"><path d="M9.598 1.591a.749.749.0 01.785-.175 7.001 7.001.0 11-8.967 8.967.75.75.0 01.961-.96 5.5 5.5.0 007.221-7.832z"/></svg></button></li></ul></div></nav><main class=main><div class=docs-layout><aside class=docs-sidebar><nav class=docs-nav><div class=docs-nav-section><a href=/sew/docs/getting-started/ class=docs-nav-standalone>Getting Started</a></div><div class=docs-nav-section><details open><summary><a href=/sew/docs/guides/>Guides</a></summary><ul><li><a href=/sew/docs/guides/registry/>Registry</a></li><li><a href=/sew/docs/guides/composing-contexts/ class=active>Composing Contexts</a></li><li><a href=/sew/docs/guides/networking/>Networking</a></li><li><a href=/sew/docs/guides/images/>Images</a></li><li><a href=/sew/docs/guides/ai-ready/>AI Toolchain</a></li></ul></details></div><div class=docs-nav-section><details><summary><a href=/sew/docs/reference/>Reference</a></summary><ul><li><a href=/sew/docs/reference/configuration/>Configuration</a></li><li><a href=/sew/docs/reference/commands/>Commands</a></li><li><a href=/sew/docs/reference/context-format/>Context Format</a></li></ul></details></div></nav></aside><div class=docs-content><h1>Composing Contexts</h1><article class=content><p>One of sew&rsquo;s key strengths is composition. You can layer contexts together using <code>from</code> to build complex stacks from simple, reusable building blocks &ndash; without duplicating configuration.</p><h2 id=the-basics>The basics</h2><p>The <code>from</code> field lists registry paths to compose. Each context is resolved and merged in order, with your local overrides applied last:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#ff79c6>registry</span>: https://raw.githubusercontent.com/a-cordier/sew/refs/heads/main/registry
+</span></span><span style=display:flex><span><span style=color:#ff79c6>from</span>:
+</span></span><span style=display:flex><span>  - elastic/elasticsearch
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>kind</span>:
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>name</span>: my-cluster
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>components</span>:
+</span></span><span style=display:flex><span>  - <span style=color:#ff79c6>name</span>: elasticsearch
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>namespace</span>: my-app
+</span></span></code></pre></div><p>This says: start from the <code>elastic/elasticsearch</code> context, rename the cluster, and move Elasticsearch into a different namespace.</p><h2 id=multi-context-composition>Multi-context composition</h2><p>You can compose multiple independent contexts into a single stack. This is how you assemble real-world environments from reusable pieces:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#ff79c6>from</span>:
+</span></span><span style=display:flex><span>  - mongodb/standalone
+</span></span><span style=display:flex><span>  - elastic/elasticsearch
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>kind</span>:
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>name</span>: my-stack
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>components</span>:
+</span></span><span style=display:flex><span>  - <span style=color:#ff79c6>name</span>: mongodb
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>namespace</span>: my-app
+</span></span><span style=display:flex><span>  - <span style=color:#ff79c6>name</span>: elasticsearch
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>namespace</span>: my-app
+</span></span><span style=display:flex><span>  - <span style=color:#ff79c6>name</span>: my-service
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>type</span>: helm
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>namespace</span>: my-app
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>requires</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ff79c6>component</span>: mongodb
+</span></span><span style=display:flex><span>      - <span style=color:#ff79c6>component</span>: elasticsearch
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>helm</span>:
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>chart</span>: myrepo/my-service
+</span></span></code></pre></div><p>Contexts in <code>from</code> are merged left-to-right: later entries override earlier ones on conflicts. Your local fields override last.</p><h2 id=abstract-contexts>Abstract contexts</h2><p>When several variants share a common foundation, extract the shared parts into an <strong>abstract</strong> context. Mark it with <code>abstract: true</code> &ndash; it can&rsquo;t be deployed on its own, only composed into concrete contexts:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#6272a4># registry/mycompany/myproduct/base/sew.yaml</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>abstract</span>: <span style=color:#ff79c6>true</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>helm</span>:
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>repos</span>:
+</span></span><span style=display:flex><span>    - <span style=color:#ff79c6>name</span>: myrepo
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>url</span>: https://charts.example.com
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>components</span>:
+</span></span><span style=display:flex><span>  - <span style=color:#ff79c6>name</span>: app
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>namespace</span>: default
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>helm</span>:
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>chart</span>: myrepo/app
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>version</span>: <span style=color:#f1fa8c>&#34;2.0.0&#34;</span>
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>values</span>:
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>replicas</span>: <span style=color:#bd93f9>1</span>
+</span></span></code></pre></div><p>Concrete variants compose from the abstract base:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#6272a4># registry/mycompany/myproduct/dev/sew.yaml</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>from</span>:
+</span></span><span style=display:flex><span>  - mycompany/myproduct/base
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>kind</span>:
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>name</span>: dev-cluster
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>components</span>:
+</span></span><span style=display:flex><span>  - <span style=color:#ff79c6>name</span>: app
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>helm</span>:
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>values</span>:
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>debug</span>: <span style=color:#ff79c6>true</span>
+</span></span></code></pre></div><h2 id=local-overrides>Local overrides</h2><p>Beyond composing registry contexts, you can add your own components and Helm repos directly in your project <code>sew.yaml</code>. This is useful for supporting services that aren&rsquo;t part of the upstream context:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#ff79c6>from</span>:
+</span></span><span style=display:flex><span>  - mycompany/myproduct/dev
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>helm</span>:
+</span></span><span style=display:flex><span>  <span style=color:#ff79c6>repos</span>:
+</span></span><span style=display:flex><span>    - <span style=color:#ff79c6>name</span>: bitnami
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>url</span>: https://charts.bitnami.com/bitnami
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>components</span>:
+</span></span><span style=display:flex><span>  - <span style=color:#ff79c6>name</span>: redis
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>namespace</span>: my-app
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>helm</span>:
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>chart</span>: bitnami/redis
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>values</span>:
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>architecture</span>: standalone
+</span></span></code></pre></div><p>If a component name matches one from the context, your values are merged on top. If there&rsquo;s no match, the component is added as a new deployment.</p><h3 id=kubernetes-manifest-components>Kubernetes manifest components</h3><p>You can also deploy plain Kubernetes resources without a Helm chart by setting <code>type: k8s</code>:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#ff79c6>components</span>:
+</span></span><span style=display:flex><span>  - <span style=color:#ff79c6>name</span>: routes
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>type</span>: k8s
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>namespace</span>: my-app
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>k8s</span>:
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>manifestFiles</span>:
+</span></span><span style=display:flex><span>        - gateway.yaml
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>manifests</span>:
+</span></span><span style=display:flex><span>        - <span style=color:#ff79c6>apiVersion</span>: v1
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>kind</span>: Service
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>metadata</span>:
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>name</span>: my-service
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>spec</span>:
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>type</span>: ClusterIP
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>ports</span>:
+</span></span><span style=display:flex><span>              - <span style=color:#ff79c6>port</span>: <span style=color:#bd93f9>8080</span>
+</span></span><span style=display:flex><span>                <span style=color:#ff79c6>targetPort</span>: <span style=color:#bd93f9>8080</span>
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>selector</span>:
+</span></span><span style=display:flex><span>              <span style=color:#ff79c6>app</span>: my-service
+</span></span></code></pre></div><h3 id=local-secrets-and-configmaps>Local secrets and ConfigMaps</h3><p>A <code>k8s</code> component can create Secrets and ConfigMaps from local files or environment variables:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#ff79c6>components</span>:
+</span></span><span style=display:flex><span>  - <span style=color:#ff79c6>name</span>: credentials
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>type</span>: k8s
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>namespace</span>: my-app
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>k8s</span>:
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>secrets</span>:
+</span></span><span style=display:flex><span>        - <span style=color:#ff79c6>name</span>: license-key
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>fromFile</span>: ./license.key
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>onMissing</span>: ignore
+</span></span><span style=display:flex><span>        - <span style=color:#ff79c6>name</span>: api-credentials
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>entries</span>:
+</span></span><span style=display:flex><span>            - <span style=color:#ff79c6>key</span>: token
+</span></span><span style=display:flex><span>              <span style=color:#ff79c6>fromFile</span>: ./token.txt
+</span></span><span style=display:flex><span>            - <span style=color:#ff79c6>key</span>: API_KEY
+</span></span><span style=display:flex><span>              <span style=color:#ff79c6>fromEnv</span>: MY_API_KEY
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>configMaps</span>:
+</span></span><span style=display:flex><span>        - <span style=color:#ff79c6>name</span>: logging-config
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>entries</span>:
+</span></span><span style=display:flex><span>            - <span style=color:#ff79c6>key</span>: logback.xml
+</span></span><span style=display:flex><span>              <span style=color:#ff79c6>fromFile</span>: ./logback.xml
+</span></span></code></pre></div><p>The <code>onMissing</code> field controls behavior when a source file or env var is missing: <code>fail</code> (default) aborts the deployment, <code>ignore</code> skips the resource with a warning.</p><h2 id=dependencies-between-components>Dependencies between components</h2><p>Use <code>requires</code> to express inter-component dependencies. sew installs components in dependency order and can wait for readiness:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#ff79c6>components</span>:
+</span></span><span style=display:flex><span>  - <span style=color:#ff79c6>name</span>: my-service
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>requires</span>:
+</span></span><span style=display:flex><span>      - <span style=color:#ff79c6>component</span>: mongodb
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>conditions</span>:
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>ready</span>: <span style=color:#ff79c6>true</span>
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>selector</span>:
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>matchLabels</span>:
+</span></span><span style=display:flex><span>            <span style=color:#ff79c6>app.kubernetes.io/instance</span>: mongodb
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>conditions</span>:
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>ready</span>: <span style=color:#ff79c6>true</span>
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>timeout</span>: 10m
+</span></span></code></pre></div><h2 id=merge-rules>Merge rules</h2><p>When composing contexts or applying local overrides, sew merges fields following these rules:</p><table><thead><tr><th>Field</th><th>Behavior</th></tr></thead><tbody><tr><td><code>helm.chart</code></td><td>Your value wins if non-empty</td></tr><tr><td><code>helm.version</code></td><td>Your value wins if non-empty</td></tr><tr><td><code>helm.valueFiles</code></td><td>Your files are appended (higher precedence in Helm)</td></tr><tr><td><code>helm.values</code></td><td>Deep-merged &ndash; maps recurse, named lists merge by <code>name</code>, scalars replace</td></tr><tr><td><code>k8s.manifestFiles</code></td><td>Your files are appended</td></tr><tr><td><code>k8s.manifests</code></td><td>Union by resource identity; your version wins on conflict</td></tr><tr><td><code>k8s.secrets</code></td><td>Your secrets are appended</td></tr><tr><td><code>k8s.configMaps</code></td><td>Your configMaps are appended</td></tr><tr><td><code>requires</code></td><td>Your requirements are appended (deduplicated by component name)</td></tr><tr><td><code>conditions</code></td><td>Your value wins if <code>ready</code> is true</td></tr><tr><td><code>selector</code></td><td>Your value wins if set</td></tr><tr><td><code>timeout</code></td><td>Your value wins if non-empty</td></tr></tbody></table><h3 id=values-deep-merge>Values deep merge</h3><p>When <code>helm.values</code> overlap on the same key, sew picks a strategy based on the value type:</p><table><thead><tr><th>Value type</th><th>Strategy</th></tr></thead><tbody><tr><td>Maps</td><td>Recursive deep merge &ndash; each nested key is merged individually</td></tr><tr><td>Named lists (objects with a <code>name</code> key)</td><td>Merge by <code>name</code> &ndash; same-name entries are overridden, new entries appended</td></tr><tr><td>Everything else (scalars, plain lists)</td><td>Replace &ndash; your value wins</td></tr></tbody></table><p>An empty list (<code>env: []</code>) replaces the parent&rsquo;s list entirely &ndash; use this to clear inherited entries.</p><h2 id=multi-level-composition>Multi-level composition</h2><p>Composition chains work to arbitrary depth. A grandparent context can be composed by a parent, which is then composed by your project config. sew tracks visited contexts and errors if it detects a cycle.</p><h2 id=overriding-service-networking>Overriding service networking</h2><p>When composing contexts, you might need to change how a child context exposes services. For Helm components, override the relevant values:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#ff79c6>components</span>:
+</span></span><span style=display:flex><span>  - <span style=color:#ff79c6>name</span>: search-engine
+</span></span><span style=display:flex><span>    <span style=color:#ff79c6>helm</span>:
+</span></span><span style=display:flex><span>      <span style=color:#ff79c6>values</span>:
+</span></span><span style=display:flex><span>        <span style=color:#ff79c6>service</span>:
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>type</span>: ClusterIP
+</span></span><span style=display:flex><span>          <span style=color:#ff79c6>nodePort</span>: <span style=color:#ff79c6>null</span>    <span style=color:#6272a4># clear the child&#39;s nodePort to avoid Kubernetes rejection</span>
+</span></span></code></pre></div><p>For <code>k8s</code> manifest components, provide a full replacement Service manifest &ndash; manifests are merged by resource identity, so your Service replaces the child&rsquo;s entirely.</p></article></div></div></main><footer class=footer><div class=footer-inner><p><a href=https://github.com/a-cordier/sew target=_blank rel=noopener>sew</a>
+&mdash; Your local Kubernetes tailor shop</p></div></footer></body></html>

@@ -26,7 +26,7 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:   "sew",
-	Short: "Spin up local Kubernetes clusters and deploy ready-to-use applications",
+	Short: "Kubernetes stacks for dev, test, and CI — one command away",
 	PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
 		sewHome = os.Getenv("SEW_HOME")
 		if sewHome == "" {

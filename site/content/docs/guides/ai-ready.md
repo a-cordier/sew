@@ -30,8 +30,8 @@ Here's what the structure looks like:
 ```markdown
 # AGENTS.md
 
-sew is a CLI tool that spins up local Kubernetes clusters and deploys
-ready-to-use applications from a composable registry of contexts.
+sew is a CLI tool that makes Kubernetes stacks for dev, test, and CI
+dead simple — compose what you need from a registry and deploy it in one command.
 
 ## Guidelines
 Read and follow CONTRIBUTING.md for toolchain, commit conventions, ...

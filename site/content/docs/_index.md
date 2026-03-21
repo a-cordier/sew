@@ -3,7 +3,7 @@ title: "Documentation"
 type: docs
 ---
 
-**sew** spins up local Kubernetes clusters and deploys ready-to-use application stacks from a composable registry of contexts. You pick what you need, compose it together, and get a fully wired development environment in one command.
+**sew** makes Kubernetes stacks for dev, test, and CI dead simple — compose what you need from a registry and deploy it in one command.
 
 <div class="docs-overview-grid">
 
