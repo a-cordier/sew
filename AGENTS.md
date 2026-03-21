@@ -32,6 +32,7 @@ sew comes with a [JSON Schema](https://github.com/a-cordier/sew/blob/main/schema
   See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns) for details.
   ```
 - Concrete context READMEs must be **self-contained**. Never link to an abstract parent's README — abstract contexts don't get pages on the site and those links will be broken. Inline any relevant documentation from the parent directly into each concrete variant's README.
+- Any change that affects the user — new feature, changed behavior, new CLI flag, new config field, registry restructure, etc. — **must** come with matching documentation updates. Update the relevant pages under `site/content/docs/` (guides, reference, getting started) and, when applicable, the `README.md` and `CONTRIBUTING.md`. Documentation is not optional; a feature without docs is not complete.
 
 ## Product-specific instructions
 
