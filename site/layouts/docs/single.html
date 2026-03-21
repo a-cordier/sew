@@ -2,16 +2,29 @@
 <div class="docs-layout">
   <aside class="docs-sidebar">
     <nav class="docs-nav">
-      <h3>Documentation</h3>
-      <ul>
-        {{ range .CurrentSection.Pages }}
-        <li>
-          <a href="{{ .RelPermalink }}" class="{{ if eq $.RelPermalink .RelPermalink }}active{{ end }}">
-            {{ .Title }}
-          </a>
-        </li>
+      {{ $docsRoot := .Site.GetPage "/docs" }}
+      {{ range $docsRoot.Sections }}
+      <div class="docs-nav-section">
+        {{ if .Pages }}
+        <details{{ if ($.IsDescendant .) }} open{{ end }}>
+          <summary>
+            <a href="{{ .RelPermalink }}" class="{{ if eq $.RelPermalink .RelPermalink }}active{{ end }}">{{ .Title }}</a>
+          </summary>
+          <ul>
+            {{ range .Pages }}
+            <li>
+              <a href="{{ .RelPermalink }}" class="{{ if eq $.RelPermalink .RelPermalink }}active{{ end }}">
+                {{ .Title }}
+              </a>
+            </li>
+            {{ end }}
+          </ul>
+        </details>
+        {{ else }}
+        <a href="{{ .RelPermalink }}" class="docs-nav-standalone{{ if eq $.RelPermalink .RelPermalink }} active{{ end }}">{{ .Title }}</a>
         {{ end }}
-      </ul>
+      </div>
+      {{ end }}
     </nav>
   </aside>
   <div class="docs-content">

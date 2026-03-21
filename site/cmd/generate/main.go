@@ -160,6 +160,8 @@ func main() {
 		fatalf("copy to static: %v", err)
 	}
 
+	generateSchemaDoc("schema/sew.schema.yaml", "site/content/docs/reference/configuration.md")
+
 	fmt.Println("done")
 }
 

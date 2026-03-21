@@ -495,17 +495,23 @@ pre code {
 }
 
 .feature-card {
+  display: block;
   padding: 1.75rem 1.5rem;
   border-radius: var(--radius-lg);
   background: var(--color-bg-subtle);
   border: 1px solid var(--color-border-muted);
   transition: border-color var(--transition-med), box-shadow var(--transition-med), transform var(--transition-med);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 .feature-card:hover {
   border-color: var(--color-border);
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+  text-decoration: none;
+  color: inherit;
 }
 
 .feature-icon {
@@ -770,17 +776,73 @@ pre code {
   overflow-y: auto;
 }
 
-.docs-nav h3 {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-faint);
-  margin-bottom: 0.75rem;
+.docs-nav-section {
+  margin-bottom: 0.25rem;
+}
+
+.docs-nav-section details {
+  border: none;
+}
+
+.docs-nav-section summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0;
+}
+
+.docs-nav-section summary::-webkit-details-marker {
+  display: none;
+}
+
+.docs-nav-section summary::before {
+  content: "›";
+  display: inline-block;
+  font-size: 0.85rem;
   font-weight: 600;
+  color: var(--color-text-faint);
+  transition: transform var(--transition-fast);
+  width: 0.85rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.docs-nav-section details[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.docs-nav-section summary a,
+.docs-nav-standalone {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+  padding: 0.3rem 0.25rem;
+  display: block;
+  border-radius: var(--radius);
+}
+
+.docs-nav-section summary a:hover,
+.docs-nav-standalone:hover {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.docs-nav-section summary a.active,
+.docs-nav-standalone.active {
+  color: var(--color-link);
 }
 
 .docs-nav ul {
   list-style: none;
+  margin: 0.15rem 0 0.35rem 1.2rem;
+  padding: 0;
+  border-left: 1px solid var(--color-border-muted);
 }
 
 .docs-nav li + li {
@@ -789,13 +851,13 @@ pre code {
 
 .docs-nav a {
   display: block;
-  padding: 0.4rem 0.85rem;
+  padding: 0.35rem 0.85rem;
   border-radius: var(--radius);
   color: var(--color-text-muted);
   font-size: 0.875rem;
   font-weight: 450;
   transition: background var(--transition-fast), color var(--transition-fast);
-  border-left: 2px solid transparent;
+  text-decoration: none;
 }
 
 .docs-nav a:hover {
@@ -804,11 +866,10 @@ pre code {
   text-decoration: none;
 }
 
-.docs-nav a.active {
+.docs-nav ul a.active {
   background: var(--color-tag-bg);
   color: var(--color-link);
   font-weight: 550;
-  border-left-color: var(--color-link);
 }
 
 .docs-content h1 {

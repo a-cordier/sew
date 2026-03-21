@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=52119&amp;path=sew/livereload" data-no-instant defer></script>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Getting Started · sew</title>
@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/sew/css/main.min.6130ab3e6d200b3813734aa45de2987be67b085f2b9f4ba3287f69b74b6311a4.css" integrity="sha256-YTCrPm0gCzgTc0qkXeKYe&#43;Z7CF8rn0ujKH9pt0tjEaQ=">
+<link rel="stylesheet" href="/sew/css/main.min.37964ca7e1d24a0ee2560de4f096c54253adbb1306fc56b7d05748fb17bdb0a4.css" integrity="sha256-N5ZMp&#43;HSSg7iVg3k8JbFQlOtuxMG/Fa30FdI&#43;xe9sKQ=">
 <link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
 <script>
 (function() {
@@ -83,131 +83,121 @@ function toggleTheme() {
 <div class="docs-layout">
   <aside class="docs-sidebar">
     <nav class="docs-nav">
-      <h3>Documentation</h3>
-      <ul>
+      
+      
+      <div class="docs-nav-section">
         
-        <li>
-          <a href="/sew/docs/getting-started/" class="active">
-            Getting Started
-          </a>
-        </li>
+        <a href="/sew/docs/getting-started/" class="docs-nav-standalone active">Getting Started</a>
         
-        <li>
-          <a href="/sew/docs/concepts/" class="">
-            Concepts
-          </a>
-        </li>
+      </div>
+      
+      <div class="docs-nav-section">
         
-        <li>
-          <a href="/sew/docs/configuration/" class="">
-            Configuration
-          </a>
-        </li>
+        <details>
+          <summary>
+            <a href="/sew/docs/guides/" class="">Guides</a>
+          </summary>
+          <ul>
+            
+            <li>
+              <a href="/sew/docs/guides/registry/" class="">
+                Registry
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/composing-contexts/" class="">
+                Composing Contexts
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/networking/" class="">
+                Networking
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/images/" class="">
+                Images
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/ai-ready/" class="">
+                AI Toolchain
+              </a>
+            </li>
+            
+          </ul>
+        </details>
         
-        <li>
-          <a href="/sew/docs/context-format/" class="">
-            Context Format
-          </a>
-        </li>
+      </div>
+      
+      <div class="docs-nav-section">
         
-        <li>
-          <a href="/sew/docs/images/" class="">
-            Images
-          </a>
-        </li>
+        <details>
+          <summary>
+            <a href="/sew/docs/reference/" class="">Reference</a>
+          </summary>
+          <ul>
+            
+            <li>
+              <a href="/sew/docs/reference/configuration/" class="">
+                Configuration
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/reference/commands/" class="">
+                Commands
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/reference/context-format/" class="">
+                Context Format
+              </a>
+            </li>
+            
+          </ul>
+        </details>
         
-        <li>
-          <a href="/sew/docs/dns/" class="">
-            DNS
-          </a>
-        </li>
-        
-        <li>
-          <a href="/sew/docs/patch/" class="">
-            Patch
-          </a>
-        </li>
-        
-        <li>
-          <a href="/sew/docs/delete/" class="">
-            Delete
-          </a>
-        </li>
-        
-      </ul>
+      </div>
+      
     </nav>
   </aside>
   <div class="docs-content">
     <h1>Getting Started</h1>
     <article class="content">
-      <p><strong>sew</strong> spins up local Kubernetes clusters and deploys ready-to-use applications from a <strong>registry</strong>. You point it at one or more contexts (e.g. <code>gravitee.io/apim/db-less</code>), and it creates a Kind cluster and installs the components defined there (Helm charts and Kubernetes manifests).</p>
-<h2 id="quick-start">Quick start</h2>
-<ol>
-<li>
-<p><strong>Config</strong> — Create a <code>sew.yaml</code> (or use the one in this repo) with at least:</p>
-<ul>
-<li><code>registry</code>: e.g. <code>file://./registry</code> for the local test registry, or an HTTP URL.</li>
-<li><code>from</code>: list of context paths, e.g. <code>[gravitee.io/apim/db-less]</code>.</li>
-<li><code>kind</code>: Kind cluster spec (name, nodes, port mappings).</li>
-</ul>
-</li>
-<li>
-<p><strong>Install</strong> — Install the <code>sew</code> binary:</p>
+      <p>Get sew installed and deploy your first application stack in under a minute.</p>
+<h2 id="install">Install</h2>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go install github.com/a-cordier/sew@latest
-</span></span></code></pre></div></li>
-<li>
-<p><strong>Run</strong> — Create the cluster (use <code>--config</code> to point to a custom config):</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew create
-</span></span></code></pre></div></li>
-<li>
-<p><strong>Tear down</strong>:</p>
+</span></span></code></pre></div><p>Make sure you have <a href="https://docs.docker.com/get-docker/">Docker</a> running &ndash; sew uses it under the hood for Kind clusters.</p>
+<h2 id="create-your-first-cluster">Create your first cluster</h2>
+<p>You don&rsquo;t even need a config file to get started. Pick a context from the registry and deploy it in one command:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew create --from elastic/elasticsearch
+</span></span></code></pre></div><p>That&rsquo;s it. sew creates a Kind cluster, installs the Helm repos and components defined by the context, and gives you a running Elasticsearch instance. When you&rsquo;re done:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew delete
-</span></span></code></pre></div></li>
+</span></span></code></pre></div><h2 id="using-a-config-file">Using a config file</h2>
+<p>For anything beyond a quick test, you&rsquo;ll want a <code>sew.yaml</code> file. It lets you compose multiple contexts, add your own components, and configure networking:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">from</span>:
+</span></span><span style="display:flex;"><span>  - elastic/elasticsearch
+</span></span></code></pre></div><p>Then just run <code>sew create</code> without flags. The config file is where things get interesting &ndash; you can layer contexts, override values, enable DNS, and more. See <a href="http://localhost:52119/sew/docs/guides/composing-contexts/">Composing Contexts</a> for the full story.</p>
+<h2 id="what-just-happened">What just happened?</h2>
+<p>Whether you used <code>--from</code> or a config file, sew did the same thing behind the scenes:</p>
+<ol>
+<li><strong>Fetched the context</strong> from the registry &ndash; a <code>sew.yaml</code> describing which Helm charts and Kubernetes manifests to deploy, and how.</li>
+<li><strong>Created a Kind cluster</strong> with the port mappings, nodes, and settings specified by the context.</li>
+<li><strong>Installed components</strong> in dependency order &ndash; adding Helm repos, running <code>helm upgrade --install</code>, and applying Kubernetes manifests.</li>
 </ol>
-<h2 id="commands">Commands</h2>
-<table>
-  <thead>
-      <tr>
-          <th>Command</th>
-          <th>Description</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><code>sew create</code></td>
-          <td>Create the Kind cluster (if missing) and install the context: add Helm repos, then install each component (Helm upgrade &ndash;install). If no registry/context is configured, only creates the cluster.</td>
-      </tr>
-      <tr>
-          <td><code>sew patch</code></td>
-          <td>Patch a running cluster by merging overrides from a file and upgrading only the affected components. See http://localhost:1313/sew/docs/patch/.</td>
-      </tr>
-      <tr>
-          <td><code>sew delete</code></td>
-          <td>Delete a cluster and clean up associated resources. Auto-selects the target from state files, or use <code>--name</code> to specify. See http://localhost:1313/sew/docs/delete/.</td>
-      </tr>
-      <tr>
-          <td><code>sew setup dns</code></td>
-          <td>One-time OS-level DNS routing so <code>*.sew.local</code> queries reach the local DNS server. Requires sudo.</td>
-      </tr>
-      <tr>
-          <td><code>sew teardown dns</code></td>
-          <td>Remove the OS-level DNS routing created by <code>sew setup dns</code>.</td>
-      </tr>
-      <tr>
-          <td><code>sew status</code></td>
-          <td>Show the status of the current sew environment: cluster info, enabled features, load balancers, and DNS records.</td>
-      </tr>
-      <tr>
-          <td><code>sew refresh dns</code></td>
-          <td>Re-collect DNS records from the running cluster (picks up Gateways and Services created after <code>sew create</code>).</td>
-      </tr>
-  </tbody>
-</table>
-<h2 id="global-flags">Global flags</h2>
+<p>You didn&rsquo;t need to write any Helm commands, manage chart repos, or wire up port mappings. The context handled it.</p>
+<h2 id="whats-next">What&rsquo;s next?</h2>
 <ul>
-<li><code>--config &lt;path&gt;</code> — Project-level config file to merge on top of the user-level base (<code>$SEW_HOME/sew.yaml</code>). Defaults to <code>./sew.yaml</code> when present.</li>
-<li><code>--registry &lt;url&gt;</code> — Registry URL (e.g. <code>file://./registry</code> or <code>https://…</code>). Overrides the value from the config file.</li>
-<li><code>--from &lt;path&gt;</code> — Context path to compose (e.g. <code>gravitee.io/apim/db-less</code>). Repeatable: use multiple <code>--from</code> flags to compose several contexts. Overrides the <code>from</code> list from the config file.</li>
+<li><strong><a href="http://localhost:52119/sew/docs/guides/registry/">Browse the registry</a></strong> to find contexts for databases, API gateways, and full application stacks.</li>
+<li><strong><a href="http://localhost:52119/sew/docs/guides/composing-contexts/">Compose contexts</a></strong> to build complex stacks from simple building blocks.</li>
+<li><strong><a href="http://localhost:52119/sew/docs/guides/networking/">Set up networking</a></strong> with load balancers, Gateway API, and local DNS.</li>
+<li><strong><a href="http://localhost:52119/sew/docs/reference/commands/">Explore the CLI</a></strong> to see everything sew can do.</li>
 </ul>
 
     </article>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=52119&amp;path=sew/livereload" data-no-instant defer></script>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commands · sew</title>
+<meta name="description" content="Your local Kubernetes tailor shop">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/sew/css/main.min.37964ca7e1d24a0ee2560de4f096c54253adbb1306fc56b7d05748fb17bdb0a4.css" integrity="sha256-N5ZMp&#43;HSSg7iVg3k8JbFQlOtuxMG/Fa30FdI&#43;xe9sKQ=">
+<link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
+<script>
+(function() {
+  var t = localStorage.getItem('theme');
+  if (t === 'dark' || t === 'light') {
+    document.documentElement.setAttribute('data-theme', t);
+  }
+})();
+function toggleTheme() {
+  var root = document.documentElement;
+  var current = root.getAttribute('data-theme');
+  if (!current) {
+    current = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  var next = current === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+}
+</script>
+
+</head>
+<body>
+  <nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="/sew/">
+      <img src="/sew/logo.svg" alt="sew" width="56" height="20">
+    </a>
+    <button class="nav-hamburger" aria-label="Toggle menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+      <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"/></svg>
+    </button>
+    <ul class="nav-links">
+      
+      <li>
+        <a href="/sew/docs/"
+           class="">
+          Docs
+          
+        </a>
+      </li>
+      
+      <li>
+        <a href="/sew/registry/"
+           class="">
+          Registry
+          
+        </a>
+      </li>
+      
+      <li>
+        <a href="https://github.com/a-cordier/sew" target="_blank" rel="noopener"
+           class="">
+          GitHub
+          
+          <svg class="icon-external" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M3.75 2A1.75 1.75 0 0 0 2 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0 0 14 12.25v-3.5a.75.75 0 0 0-1.5 0v3.5a.25.25 0 0 1-.25.25h-8.5a.25.25 0 0 1-.25-.25v-8.5a.25.25 0 0 1 .25-.25h3.5a.75.75 0 0 0 0-1.5h-3.5zm6.5 0a.75.75 0 0 0 0 1.5h1.19L7.22 7.72a.75.75 0 1 0 1.06 1.06l4.22-4.22v1.19a.75.75 0 0 0 1.5 0v-3A.75.75 0 0 0 13.25 2h-3z"/></svg>
+          
+        </a>
+      </li>
+      
+      <li>
+        <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">
+          <svg class="icon-sun" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 1.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11ZM8 0a.75.75 0 0 1 .75.75v1a.75.75 0 0 1-1.5 0v-1A.75.75 0 0 1 8 0Zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13Zm-8-5a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8Zm12.25-.75h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5Zm-9.6-4.6a.75.75 0 0 1 1.06 0l1 1a.75.75 0 1 1-1.06 1.06l-1-1a.75.75 0 0 1 0-1.06Zm9.35 9.35a.75.75 0 0 1-1.06 0l-1-1a.75.75 0 1 1 1.06-1.06l1 1a.75.75 0 0 1 0 1.06Zm-9.35 0a.75.75 0 0 1 0-1.06l1-1a.75.75 0 1 1 1.06 1.06l-1 1a.75.75 0 0 1-1.06 0ZM13 3.7a.75.75 0 0 1-1.06 0l-1-1a.75.75 0 1 1 1.06-1.06l1 1a.75.75 0 0 1 0 1.06Z"/></svg>
+          <svg class="icon-moon" viewBox="0 0 16 16" fill="currentColor"><path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.221-7.832Z"/></svg>
+        </button>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+  <main class="main">
+    
+<div class="docs-layout">
+  <aside class="docs-sidebar">
+    <nav class="docs-nav">
+      
+      
+      <div class="docs-nav-section">
+        
+        <a href="/sew/docs/getting-started/" class="docs-nav-standalone">Getting Started</a>
+        
+      </div>
+      
+      <div class="docs-nav-section">
+        
+        <details>
+          <summary>
+            <a href="/sew/docs/guides/" class="">Guides</a>
+          </summary>
+          <ul>
+            
+            <li>
+              <a href="/sew/docs/guides/registry/" class="">
+                Registry
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/composing-contexts/" class="">
+                Composing Contexts
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/networking/" class="">
+                Networking
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/images/" class="">
+                Images
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/ai-ready/" class="">
+                AI Toolchain
+              </a>
+            </li>
+            
+          </ul>
+        </details>
+        
+      </div>
+      
+      <div class="docs-nav-section">
+        
+        <details open>
+          <summary>
+            <a href="/sew/docs/reference/" class="">Reference</a>
+          </summary>
+          <ul>
+            
+            <li>
+              <a href="/sew/docs/reference/configuration/" class="">
+                Configuration
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/reference/commands/" class="active">
+                Commands
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/reference/context-format/" class="">
+                Context Format
+              </a>
+            </li>
+            
+          </ul>
+        </details>
+        
+      </div>
+      
+    </nav>
+  </aside>
+  <div class="docs-content">
+    <h1>Commands</h1>
+    <article class="content">
+      <p>All sew commands in one place. Every command respects the global flags listed at the bottom of this page.</p>
+<h2 id="sew-create">sew create</h2>
+<p>Create a Kind cluster and deploy the components defined by your context.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew create
+</span></span></code></pre></div><p>sew resolves the config chain (user-level <code>$SEW_HOME/sew.yaml</code> merged with your project <code>sew.yaml</code>), fetches contexts from the registry, creates the Kind cluster, and installs components in dependency order. If no registry or context is configured, only the bare cluster is created.</p>
+<p>When features like load balancers, Gateway API, or DNS are enabled, sew sets them up automatically after the cluster is ready.</p>
+<h3 id="flags">Flags</h3>
+<table>
+  <thead>
+      <tr>
+          <th>Flag</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>--config &lt;path&gt;</code></td>
+          <td>Project-level config file. Defaults to <code>./sew.yaml</code> when present.</td>
+      </tr>
+      <tr>
+          <td><code>--registry &lt;url&gt;</code></td>
+          <td>Registry URL. Overrides the value from config.</td>
+      </tr>
+      <tr>
+          <td><code>--from &lt;path&gt;</code></td>
+          <td>Context path to compose. Repeatable. Overrides the <code>from</code> list from config.</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="sew-patch">sew patch</h2>
+<p>Upgrade components on a running cluster by merging a patch file into the resolved context and re-deploying only the affected components. This is useful for testing upgrades (bumping image tags or chart versions), toggling feature flags, or applying configuration tweaks.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew patch upgrade.yaml
+</span></span><span style="display:flex;"><span>sew patch upgrade.yaml --name my-cluster
+</span></span><span style="display:flex;"><span>sew patch upgrade.yaml --dry-run
+</span></span></code></pre></div><h3 id="how-it-works">How it works</h3>
+<ol>
+<li><strong>Resolve context</strong> &ndash; sew loads the config chain and resolves the registry context, exactly as <code>sew create</code> does.</li>
+<li><strong>Verify cluster</strong> &ndash; sew checks that the target Kind cluster is running.</li>
+<li><strong>Load patch file</strong> &ndash; the patch file is loaded (same format as <code>sew.yaml</code>).</li>
+<li><strong>Merge</strong> &ndash; patch components are merged on top of the resolved context using the standard <a href="http://localhost:52119/sew/docs/guides/composing-contexts/#merge-rules">merge rules</a>.</li>
+<li><strong>Upgrade</strong> &ndash; only components named in the patch file are upgraded (Helm upgrade / kubectl apply), in dependency order.</li>
+<li><strong>Readiness</strong> &ndash; sew waits for patched components that have <code>conditions.ready: true</code>.</li>
+</ol>
+<p>Components not mentioned in the patch file are left untouched.</p>
+<h3 id="patch-file-format">Patch file format</h3>
+<p>The patch file uses the same format as <code>sew.yaml</code>. Only <code>components</code>, <code>helm.repos</code>, and <code>images.preload</code> are relevant &ndash; other fields are ignored.</p>
+<h4 id="upgrade-image-tags">Upgrade image tags</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: my-app
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">values</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">gateway</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">image</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">tag</span>: <span style="color:#f1fa8c">&#34;2.1.0&#34;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">api</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">image</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#ff79c6">tag</span>: <span style="color:#f1fa8c">&#34;2.1.0&#34;</span>
+</span></span></code></pre></div><h4 id="change-a-chart-version">Change a chart version</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: my-app
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">version</span>: <span style="color:#f1fa8c">&#34;2.1.0&#34;</span>
+</span></span></code></pre></div><h4 id="add-a-value-file-overlay">Add a value file overlay</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: my-app
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">valueFiles</span>:
+</span></span><span style="display:flex;"><span>        - ./staging-overrides.yaml
+</span></span></code></pre></div><p>Value file paths are resolved relative to the directory containing the patch file.</p>
+<h4 id="patch-a-k8s-manifest-component">Patch a k8s manifest component</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: custom-routes
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">k8s</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">manifestFiles</span>:
+</span></span><span style="display:flex;"><span>        - ./updated-routes.yaml
+</span></span></code></pre></div><h3 id="typical-workflow">Typical workflow</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#6272a4"># Create the cluster with the current version</span>
+</span></span><span style="display:flex;"><span>sew create
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Run tests against the current version</span>
+</span></span><span style="display:flex;"><span>./run-tests.sh
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Patch: upgrade to the new version</span>
+</span></span><span style="display:flex;"><span>sew patch upgrade.yaml
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Run tests against the new version</span>
+</span></span><span style="display:flex;"><span>./run-tests.sh
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Tear down</span>
+</span></span><span style="display:flex;"><span>sew delete
+</span></span></code></pre></div><h3 id="image-preloading">Image preloading</h3>
+<p>When the cluster was created with image preloading enabled, the Kind nodes are already configured to pull from the local <code>sew-preload</code> registry. Adding <code>images.preload.refs</code> to your patch file pre-stages images before upgrading, so pods start faster:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">images</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#ff79c6">preload</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">refs</span>:
+</span></span><span style="display:flex;"><span>      - myrepo/my-app:2.1.0-rc1
+</span></span><span style="display:flex;"><span>      - myrepo/my-api:2.1.0-rc1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ff79c6">components</span>:
+</span></span><span style="display:flex;"><span>  - <span style="color:#ff79c6">name</span>: my-app
+</span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
+</span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">values</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#ff79c6">image</span>:
+</span></span><span style="display:flex;"><span>          <span style="color:#ff79c6">tag</span>: <span style="color:#bd93f9">2.1.0</span>-rc1
+</span></span></code></pre></div><p>If no preload registry is running, sew prints a warning and proceeds normally.</p>
+<h3 id="dry-run-mode">Dry-run mode</h3>
+<p>Use <code>--dry-run</code> to preview what a patch would change without applying anything:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew patch upgrade.yaml --dry-run
+</span></span></code></pre></div><p>When <code>--dry-run</code> is active:</p>
+<ul>
+<li><strong>Helm components</strong> run <code>helm upgrade --dry-run=server</code> &ndash; the chart is rendered and validated by the API server without creating the release</li>
+<li><strong>Kubernetes manifest components</strong> run <code>kubectl apply --dry-run=server</code> &ndash; objects are validated without persisting</li>
+<li><strong>Readiness checks are skipped</strong> since no resources are actually deployed</li>
+<li><strong>Colored diff output</strong> shows exactly what would change: added lines in green, removed lines in red</li>
+</ul>
+<p>This is especially useful in CI pipelines:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew patch upgrade.yaml --dry-run
+</span></span><span style="display:flex;"><span>sew patch upgrade.yaml
+</span></span></code></pre></div><h3 id="flags-1">Flags</h3>
+<table>
+  <thead>
+      <tr>
+          <th>Flag</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>--name &lt;cluster&gt;</code></td>
+          <td>Name of the cluster to patch. Defaults to <code>kind.name</code> from the resolved config.</td>
+      </tr>
+      <tr>
+          <td><code>--dry-run</code></td>
+          <td>Preview changes without applying. Uses server-side dry-run for both Helm and Kubernetes resources.</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="sew-delete">sew delete</h2>
+<p>Tear down a cluster and clean up all associated resources: the Kind cluster, load balancer containers, DNS records, mirror proxies, and the preload registry.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew delete
+</span></span><span style="display:flex;"><span>sew delete --name my-cluster
+</span></span></code></pre></div><h3 id="how-it-works-1">How it works</h3>
+<ol>
+<li><strong>Resolve target</strong> &ndash; sew determines which cluster to delete (see <a href="#target-resolution">Target resolution</a> below).</li>
+<li><strong>DNS records</strong> &ndash; Removes the cluster&rsquo;s DNS record file.</li>
+<li><strong>Load balancer containers</strong> &ndash; Stops and removes Docker containers created by the cloud provider controller.</li>
+<li><strong>Kind cluster</strong> &ndash; Deletes the Kind cluster, removing all namespaces, Helm releases, and applied manifests.</li>
+<li><strong>Image mirrors</strong> &ndash; Stops mirror proxy containers if mirrors were configured.</li>
+<li><strong>Preload registry</strong> &ndash; Stops the preload registry container if preloading was configured.</li>
+<li><strong>Background processes</strong> &ndash; Stops the cloud provider controller and DNS server when no clusters or DNS records remain.</li>
+<li><strong>State file</strong> &ndash; Removes the cluster&rsquo;s state file from <code>$SEW_HOME/clusters/</code>.</li>
+</ol>
+<h3 id="target-resolution">Target resolution</h3>
+<p><code>sew delete</code> doesn&rsquo;t need the original <code>sew.yaml</code> or registry to be available. It resolves the target cluster in this order:</p>
+<ol>
+<li><strong><code>--name</code> flag</strong> &ndash; If provided, sew looks up the state file for that cluster directly. Works from any directory.</li>
+<li><strong>State files</strong> &ndash; If <code>--name</code> is omitted, sew scans <code>$SEW_HOME/clusters/</code> for existing state files. With one cluster, it&rsquo;s deleted automatically. With multiple clusters, you get an interactive prompt.</li>
+<li><strong>Config fallback</strong> &ndash; If no state files exist, sew reads <code>kind.name</code> from the config chain.</li>
+</ol>
+<h4 id="state-files">State files</h4>
+<p>A state file is created automatically at the end of a successful <code>sew create</code>. It captures the cluster name, enabled features, and image configuration &ndash; everything <code>sew delete</code> needs for a clean teardown.</p>
+<p>State files live at <code>$SEW_HOME/clusters/&lt;cluster-name&gt;.yaml</code> and are removed after a successful delete.</p>
+<h3 id="best-effort-cleanup">Best-effort cleanup</h3>
+<p>If you pass <code>--name</code> but no state file exists for that cluster, sew performs a best-effort cleanup:</p>
+<ul>
+<li>Deletes the Kind cluster</li>
+<li>Removes load balancer containers</li>
+<li>Removes DNS records</li>
+</ul>
+<p>A warning is printed about mirrors and preload not being stopped, since the original configuration is unknown.</p>
+<h3 id="flags-2">Flags</h3>
+<table>
+  <thead>
+      <tr>
+          <th>Flag</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>--name &lt;cluster&gt;</code></td>
+          <td>Name of the cluster to delete. When omitted, sew auto-selects from state files or falls back to config.</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="sew-status">sew status</h2>
+<p>Show the status of your current sew environment: cluster info, enabled features, load balancers, and DNS records.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew status
+</span></span></code></pre></div><h2 id="sew-setup-dns">sew setup dns</h2>
+<p>Configure your operating system to forward <code>*.sew.local</code> queries to the local DNS server. This is a one-time setup that requires sudo.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew setup dns
+</span></span></code></pre></div><ul>
+<li><strong>macOS</strong>: creates <code>/etc/resolver/sew.local</code> (persists across reboots)</li>
+<li><strong>Linux</strong>: configures <code>systemd-resolved</code> on the loopback interface (runtime only)</li>
+</ul>
+<p>After this, <code>sew create</code> and <code>sew delete</code> run without sudo.</p>
+<h2 id="sew-teardown-dns">sew teardown dns</h2>
+<p>Remove the OS-level DNS routing created by <code>sew setup dns</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew teardown dns
+</span></span></code></pre></div><h2 id="sew-refresh-dns">sew refresh dns</h2>
+<p>Re-collect DNS records from the running cluster. Use this after deploying additional Gateways or LoadBalancer Services that weren&rsquo;t present during <code>sew create</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sew refresh dns
+</span></span></code></pre></div><p>The running DNS server picks up the updated records immediately.</p>
+<h2 id="global-flags">Global flags</h2>
+<p>These flags are available on all commands:</p>
+<table>
+  <thead>
+      <tr>
+          <th>Flag</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>--config &lt;path&gt;</code></td>
+          <td>Project-level config file to merge on top of the user-level base (<code>$SEW_HOME/sew.yaml</code>). Defaults to <code>./sew.yaml</code> when present.</td>
+      </tr>
+      <tr>
+          <td><code>--registry &lt;url&gt;</code></td>
+          <td>Registry URL (e.g. <code>file://./registry</code> or <code>https://…</code>). Overrides the value from config.</td>
+      </tr>
+      <tr>
+          <td><code>--from &lt;path&gt;</code></td>
+          <td>Context path to compose (e.g. <code>elastic/elasticsearch</code>). Repeatable. Overrides the <code>from</code> list from config.</td>
+      </tr>
+  </tbody>
+</table>
+
+    </article>
+  </div>
+</div>
+
+  </main>
+  <footer class="footer">
+  <div class="footer-inner">
+    <p>
+      <a href="https://github.com/a-cordier/sew" target="_blank" rel="noopener">sew</a>
+      &mdash; Your local Kubernetes tailor shop
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

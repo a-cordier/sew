@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="/sew/css/main.min.6130ab3e6d200b3813734aa45de2987be67b085f2b9f4ba3287f69b74b6311a4.css" integrity="sha256-YTCrPm0gCzgTc0qkXeKYe&#43;Z7CF8rn0ujKH9pt0tjEaQ=">
+<link rel="stylesheet" href="/sew/css/main.min.37964ca7e1d24a0ee2560de4f096c54253adbb1306fc56b7d05748fb17bdb0a4.css" integrity="sha256-N5ZMp&#43;HSSg7iVg3k8JbFQlOtuxMG/Fa30FdI&#43;xe9sKQ=">
 <link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
 <script>
 (function() {
@@ -83,74 +83,114 @@ function toggleTheme() {
 <div class="docs-layout">
   <aside class="docs-sidebar">
     <nav class="docs-nav">
-      <h3>Documentation</h3>
-      <ul>
+      
+      
+      <div class="docs-nav-section">
         
-        <li>
-          <a href="/sew/docs/getting-started/" class="">
-            Getting Started
-          </a>
-        </li>
+        <a href="/sew/docs/getting-started/" class="docs-nav-standalone">Getting Started</a>
         
-        <li>
-          <a href="/sew/docs/concepts/" class="">
-            Concepts
-          </a>
-        </li>
+      </div>
+      
+      <div class="docs-nav-section">
         
-        <li>
-          <a href="/sew/docs/configuration/" class="">
-            Configuration
-          </a>
-        </li>
+        <details>
+          <summary>
+            <a href="/sew/docs/guides/" class="">Guides</a>
+          </summary>
+          <ul>
+            
+            <li>
+              <a href="/sew/docs/guides/registry/" class="">
+                Registry
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/composing-contexts/" class="">
+                Composing Contexts
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/networking/" class="">
+                Networking
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/images/" class="">
+                Images
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/guides/ai-ready/" class="">
+                AI Ready
+              </a>
+            </li>
+            
+          </ul>
+        </details>
         
-        <li>
-          <a href="/sew/docs/context-format/" class="">
-            Context Format
-          </a>
-        </li>
+      </div>
+      
+      <div class="docs-nav-section">
         
-        <li>
-          <a href="/sew/docs/images/" class="">
-            Images
-          </a>
-        </li>
+        <details>
+          <summary>
+            <a href="/sew/docs/reference/" class="">Reference</a>
+          </summary>
+          <ul>
+            
+            <li>
+              <a href="/sew/docs/reference/configuration/" class="">
+                Configuration
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/reference/commands/" class="">
+                Commands
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/reference/context-format/" class="">
+                Context Format
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/reference/patch/" class="">
+                Patch
+              </a>
+            </li>
+            
+            <li>
+              <a href="/sew/docs/reference/delete/" class="">
+                Delete
+              </a>
+            </li>
+            
+          </ul>
+        </details>
         
-        <li>
-          <a href="/sew/docs/dns/" class="">
-            DNS
-          </a>
-        </li>
-        
-        <li>
-          <a href="/sew/docs/patch/" class="">
-            Patch
-          </a>
-        </li>
-        
-        <li>
-          <a href="/sew/docs/delete/" class="">
-            Delete
-          </a>
-        </li>
-        
-      </ul>
+      </div>
+      
     </nav>
   </aside>
   <div class="docs-content">
     <h1>Documentation</h1>
     <article class="content">
-      <p>Learn how to use <strong>sew</strong> to spin up local Kubernetes clusters with pre-configured application stacks.</p>
-<ul>
-<li><a href="http://localhost:1313/sew/docs/getting-started/">Getting Started</a> — Install, configure, and run your first cluster</li>
-<li><a href="http://localhost:1313/sew/docs/concepts/">Concepts</a> — Registry, context, and config layering</li>
-<li><a href="http://localhost:1313/sew/docs/configuration/">Configuration</a> — Config format, local components, and merge rules</li>
-<li><a href="http://localhost:1313/sew/docs/context-format/">Context Format</a> — Writing contexts, composition, abstract contexts, and default variant resolution</li>
-<li><a href="http://localhost:1313/sew/docs/images/">Images</a> — Mirror proxies and image preloading</li>
-<li><a href="http://localhost:1313/sew/docs/dns/">DNS</a> — Local DNS server for in-cluster hostnames</li>
-<li><a href="http://localhost:1313/sew/docs/patch/">Patch</a> — Upgrade components on a running cluster</li>
-<li><a href="http://localhost:1313/sew/docs/delete/">Delete</a> — Tear down a cluster and clean up resources</li>
-</ul>
+      <p><strong>sew</strong> spins up local Kubernetes clusters and deploys ready-to-use application stacks from a composable registry of contexts. You pick what you need, compose it together, and get a fully wired development environment in one command.</p>
+<div class="docs-overview-grid">
+<h3 id="getting-started"><a href="http://localhost:1313/sew/docs/getting-started/">Getting Started</a></h3>
+<p>Install sew and create your first cluster in under a minute.</p>
+<h3 id="guides"><a href="http://localhost:1313/sew/docs/guides/">Guides</a></h3>
+<p>Learn how to browse the registry, compose contexts, set up networking, and manage images.</p>
+<h3 id="reference"><a href="http://localhost:1313/sew/docs/reference/">Reference</a></h3>
+<p>Configuration schema, CLI commands, context authoring, and operational details.</p>
+</div>
 
     </article>
   </div>

@@ -1,3 +1,5 @@
 .sew/
 sew
+site/generate
+generate
 .test/

@@ -2,21 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>http://localhost:1313/sew/docs/reference/configuration/</loc>
+  </url><url>
     <loc>http://localhost:1313/sew/docs/getting-started/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/concepts/</loc>
+    <loc>http://localhost:1313/sew/docs/guides/registry/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/configuration/</loc>
+    <loc>http://localhost:1313/sew/docs/reference/commands/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/context-format/</loc>
+    <loc>http://localhost:1313/sew/docs/guides/composing-contexts/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/images/</loc>
+    <loc>http://localhost:1313/sew/docs/guides/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/dns/</loc>
+    <loc>http://localhost:1313/sew/docs/reference/context-format/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/patch/</loc>
+    <loc>http://localhost:1313/sew/docs/guides/networking/</loc>
   </url><url>
-    <loc>http://localhost:1313/sew/docs/delete/</loc>
+    <loc>http://localhost:1313/sew/docs/reference/</loc>
+  </url><url>
+    <loc>http://localhost:1313/sew/docs/guides/images/</loc>
+  </url><url>
+    <loc>http://localhost:1313/sew/docs/reference/patch/</loc>
+  </url><url>
+    <loc>http://localhost:1313/sew/docs/guides/ai-ready/</loc>
+  </url><url>
+    <loc>http://localhost:1313/sew/docs/reference/delete/</loc>
   </url><url>
     <loc>http://localhost:1313/sew/tags/api-management/</loc>
   </url><url>
