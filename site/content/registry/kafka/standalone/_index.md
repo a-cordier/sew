@@ -16,6 +16,7 @@ notes_create: |-
     If you have kcat installed you can test the connection with:
 
       kcat -b localhost:9092 -L
+icon: kafka/icon.svg
 type: registry
 ---
 

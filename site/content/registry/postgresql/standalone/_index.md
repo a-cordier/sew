@@ -18,6 +18,7 @@ notes_create: |-
       Password   postgres
 
       PGPASSWORD=postgres psql -h localhost -p 5432 -U postgres -d gravitee
+icon: postgresql/icon.svg
 type: registry
 ---
 
