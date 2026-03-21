@@ -4,7 +4,7 @@ weight: 3
 type: docs
 ---
 
-sew gives you production-like networking on your local machine: load balancers, Gateway API support, and automatic DNS resolution. You don't need to look up IPs or manage `/etc/hosts` -- services are reachable by name.
+sew gives you production-like networking on your local machine: load balancers, Gateway API support, and automatic DNS resolution. Say goodbye to `/etc/hosts` edits and IP hunting -- services are reachable by name out of the box.
 
 ## Load balancers
 
