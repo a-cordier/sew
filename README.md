@@ -59,7 +59,7 @@ task site:build    # rebuild the doc site after registry/ or site/ changes
 
 ### Context maintainers
 
-Contexts live under `registry/` following the `org/product/variant` convention. Each context has a `sew.yaml` describing Helm repos, components, and features. Refer to the [Context Format](https://a-cordier.github.io/sew/docs/context-format/) and [AI Toolchain](https://a-cordier.github.io/sew/docs/ai-toolchain/) docs for authoring guidelines.
+Contexts live under `registry/` following the `org/product/variant` convention. Each context has a `sew.yaml` describing Helm repos, components, and features. Refer to the [Context Format](https://a-cordier.github.io/sew/docs/reference/context-format/) and [AI Toolchain](https://a-cordier.github.io/sew/docs/guides/ai-ready/) docs for authoring guidelines.
 
 ## License
 
