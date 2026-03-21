@@ -1,5 +1,5 @@
 ---
-title: APIM - Gateway API
+title: Kubernetes - Gateway API
 layout: detail
 path: gravitee.io/apim/oss/k8s/gateway
 context: true
