@@ -1,10 +1,10 @@
-name: Lint
+name: CI
 
 on:
   pull_request:
 
 jobs:
-  revive:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -14,5 +14,14 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Install yamlfmt
+        run: go install github.com/google/yamlfmt/cmd/yamlfmt@latest
+
       - name: Lint
         run: go tool task lint
+
+      - name: Lint YAML
+        run: go tool task lint:yaml
+
+      - name: Test
+        run: go tool task test
