@@ -134,6 +134,14 @@ tags: [relevant, tags]
 Include **Usage** (the `sew create` command), **Endpoints** (table of
 service URLs), and **Dependencies** (list of composed contexts).
 
+#### Tags
+
+- Every context README must have at least one tag.
+- Do not use product or organization names as tags (e.g. `kafka`,
+  `mongodb`, `gravitee`, `elasticsearch`). Tags describe *what the
+  context does*, not *which product it uses* — the registry path already
+  encodes the product.
+
 ### notes.create
 
 Write a `notes.create` template that tells the user what is ready and how

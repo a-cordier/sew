@@ -1,0 +1,8 @@
+Your cluster "{{ .Kind.Name }}" is ready.
+
+Kafka is available at localhost:9092 (plaintext, no TLS).
+
+If you have kcat installed you can test the connection with:
+
+  kcat -b localhost:9092 -L
+
