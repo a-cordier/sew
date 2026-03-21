@@ -218,10 +218,45 @@ A warning is printed about mirrors and preload not being stopped, since the orig
 
 ## sew status
 
-Show the status of your current sew environment: cluster info, enabled features, load balancers, and DNS records.
+Show the status of your current sew environment at a glance: cluster name, enabled features, active load balancers, and DNS state.
 
 ```bash
 sew status
+```
+
+### What it shows
+
+**Cluster** -- The cluster name from the resolved config.
+
+**Features** -- Whether load balancers, Gateway API, and DNS are enabled. For Gateway API, shows the channel (`standard` or `experimental`). For DNS, shows the domain and port.
+
+**Load Balancers** -- Lists active load balancer containers and their IPs. sew queries Docker directly for containers associated with the cluster, so this reflects the actual running state even if the original config is no longer available.
+
+**DNS** -- Three pieces of information:
+- **Resolver**: whether OS-level DNS routing is configured (i.e. whether `sew setup dns` has been run)
+- **Server**: whether the local DNS server process is running
+- **Records**: all registered hostname-to-IP mappings, grouped by cluster
+
+### Example output
+
+```
+Cluster
+  Name: gio-apim
+
+Features
+  lb:      enabled
+  gateway: disabled
+  dns:     enabled (domain: sew.local, port: 15353)
+
+Load Balancers
+  sew-lb-gio-apim-1 → 172.18.0.5
+
+DNS
+  resolver: configured for sew.local
+  server:   running on 127.0.0.1:15353
+  records:
+    console.sew.local → 172.18.0.5 (gio-apim)
+    gateway.sew.local → 172.18.0.5 (gio-apim)
 ```
 
 ## sew setup dns
