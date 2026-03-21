@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=63548&amp;path=sew/livereload" data-no-instant defer></script>
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Registry · sew</title>
@@ -204,14 +204,14 @@ function toggleTheme() {
 <p>To create your own:</p>
 <ol>
 <li>Create a directory structure following the <code>org/product/variant</code> convention.</li>
-<li>Add a <code>sew.yaml</code> to each leaf context (see <a href="http://localhost:63548/sew/docs/reference/context-format/">Context Format</a>).</li>
+<li>Add a <code>sew.yaml</code> to each leaf context (see <a href="http://localhost:1313/sew/docs/reference/context-format/">Context Format</a>).</li>
 <li>Serve it however you like &ndash; a Git repo&rsquo;s raw URL, a static file server, or an internal CDN.</li>
 </ol>
 <p>Your team points their configs at your registry URL and uses your contexts just like the central ones:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">registry</span>: https://registry.mycompany.com/sew
 </span></span><span style="display:flex;"><span><span style="color:#ff79c6">from</span>:
 </span></span><span style="display:flex;"><span>  - myproduct/dev
-</span></span></code></pre></div><p>You can also compose across registries. A context in your private registry can reference contexts from the central registry (or any other) through cross-registry composition &ndash; see <a href="http://localhost:63548/sew/docs/guides/composing-contexts/">Composing Contexts</a>.</p>
+</span></span></code></pre></div><p>You can also compose across registries. A context in your private registry can reference contexts from the central registry (or any other) through cross-registry composition &ndash; see <a href="http://localhost:1313/sew/docs/guides/composing-contexts/">Composing Contexts</a>.</p>
 <h2 id="local-filesystem-registries">Local filesystem registries</h2>
 <p>During development, you don&rsquo;t need to push your registry to a server. Point sew at a directory on your machine using a <code>file://</code> URL:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">registry</span>: file://./my-registry

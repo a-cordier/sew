@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=63548&amp;path=sew/livereload" data-no-instant defer></script>
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Context Format · sew</title>
@@ -170,7 +170,7 @@ function toggleTheme() {
   <div class="docs-content">
     <h1>Context Format</h1>
     <article class="content">
-      <p>This page is for context <strong>authors</strong> &ndash; the people who create and maintain registry contexts for others to use. If you&rsquo;re just using contexts, see <a href="http://localhost:63548/sew/docs/guides/composing-contexts/">Composing Contexts</a>.</p>
+      <p>This page is for context <strong>authors</strong> &ndash; the people who create and maintain registry contexts for others to use. If you&rsquo;re just using contexts, see <a href="http://localhost:1313/sew/docs/guides/composing-contexts/">Composing Contexts</a>.</p>
 <h2 id="anatomy-of-a-context">Anatomy of a context</h2>
 <p>A context lives at <code>{registry}/{context_path}/</code> and must contain a <code>sew.yaml</code>. At minimum, it declares components to deploy:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">helm</span>:
@@ -235,7 +235,7 @@ function toggleTheme() {
 </span></span><span style="display:flex;"><span>      - <span style="color:#ff79c6">component</span>: elasticsearch
 </span></span><span style="display:flex;"><span>    <span style="color:#ff79c6">helm</span>:
 </span></span><span style="display:flex;"><span>      <span style="color:#ff79c6">chart</span>: myrepo/my-app
-</span></span></code></pre></div><p>Parents are resolved left-to-right, then local overrides are applied on top using the standard <a href="http://localhost:63548/sew/docs/guides/composing-contexts/#merge-rules">merge rules</a>.</p>
+</span></span></code></pre></div><p>Parents are resolved left-to-right, then local overrides are applied on top using the standard <a href="http://localhost:1313/sew/docs/guides/composing-contexts/#merge-rules">merge rules</a>.</p>
 <h3 id="cross-registry-composition">Cross-registry composition</h3>
 <p>By default, <code>from</code> entries are resolved against the same registry. To compose from a different registry:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">registry</span>: https://other-registry.example.com

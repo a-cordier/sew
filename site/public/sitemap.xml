@@ -2,90 +2,90 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:63548/sew/docs/reference/configuration/</loc>
+    <loc>http://localhost:1313/sew/docs/reference/configuration/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/docs/getting-started/</loc>
+    <loc>http://localhost:1313/sew/docs/getting-started/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/docs/guides/registry/</loc>
+    <loc>http://localhost:1313/sew/docs/guides/registry/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/docs/reference/commands/</loc>
+    <loc>http://localhost:1313/sew/docs/reference/commands/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/docs/guides/composing-contexts/</loc>
+    <loc>http://localhost:1313/sew/docs/guides/composing-contexts/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/docs/guides/</loc>
+    <loc>http://localhost:1313/sew/docs/guides/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/docs/reference/context-format/</loc>
+    <loc>http://localhost:1313/sew/docs/reference/context-format/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/docs/guides/networking/</loc>
+    <loc>http://localhost:1313/sew/docs/guides/networking/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/docs/reference/</loc>
+    <loc>http://localhost:1313/sew/docs/reference/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/docs/guides/images/</loc>
+    <loc>http://localhost:1313/sew/docs/guides/images/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/docs/guides/ai-ready/</loc>
+    <loc>http://localhost:1313/sew/docs/guides/ai-ready/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/tags/api-management/</loc>
+    <loc>http://localhost:1313/sew/tags/api-management/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/oss/aio/mongodb/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/oss/aio/mongodb/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/oss/aio/postgres/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/oss/aio/postgres/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/oss/k8s/dbless/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/oss/k8s/dbless/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/oss/k8s/gateway/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/oss/k8s/gateway/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/ee/kafka/mongodb/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/ee/kafka/mongodb/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/ee/kafka/postgres/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/ee/kafka/postgres/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/categories/</loc>
+    <loc>http://localhost:1313/sew/categories/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/tags/database/</loc>
+    <loc>http://localhost:1313/sew/tags/database/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/docs/</loc>
+    <loc>http://localhost:1313/sew/docs/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/elastic/</loc>
+    <loc>http://localhost:1313/sew/registry/elastic/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/elastic/elasticsearch/</loc>
+    <loc>http://localhost:1313/sew/registry/elastic/elasticsearch/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/tags/gateway/</loc>
+    <loc>http://localhost:1313/sew/tags/gateway/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/ee/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/ee/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/ee/kafka/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/ee/kafka/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/oss/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/oss/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/oss/aio/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/oss/aio/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/gravitee.io/apim/oss/k8s/</loc>
+    <loc>http://localhost:1313/sew/registry/gravitee.io/apim/oss/k8s/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/kafka/</loc>
+    <loc>http://localhost:1313/sew/registry/kafka/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/kafka/standalone/</loc>
+    <loc>http://localhost:1313/sew/registry/kafka/standalone/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/tags/messaging/</loc>
+    <loc>http://localhost:1313/sew/tags/messaging/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/mongodb/</loc>
+    <loc>http://localhost:1313/sew/registry/mongodb/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/mongodb/standalone/</loc>
+    <loc>http://localhost:1313/sew/registry/mongodb/standalone/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/tags/operator/</loc>
+    <loc>http://localhost:1313/sew/tags/operator/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/postgresql/</loc>
+    <loc>http://localhost:1313/sew/registry/postgresql/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/postgresql/standalone/</loc>
+    <loc>http://localhost:1313/sew/registry/postgresql/standalone/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/registry/</loc>
+    <loc>http://localhost:1313/sew/registry/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/tags/search/</loc>
+    <loc>http://localhost:1313/sew/tags/search/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/</loc>
+    <loc>http://localhost:1313/sew/</loc>
   </url><url>
-    <loc>http://localhost:63548/sew/tags/</loc>
+    <loc>http://localhost:1313/sew/tags/</loc>
   </url>
 </urlset>
