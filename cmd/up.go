@@ -292,13 +292,15 @@ func ensureCPKController(_ *config.Config, gatewayEnabled bool) error {
 		// signal a root process, so killProcess (which uses os.Signal) is
 		// ineffective. Use sudo pkill to kill ALL root-owned CPK processes
 		// accumulated from prior sew create invocations.
-		cmd := exec.Command("sudo", "-p",
-			"\n  sew needs administrator privileges for network routing.\n  Password: ",
-			"pkill", "-f", "sew.*cpk serve")
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		_ = cmd.Run()
+		if cpkProcessRunning() {
+			cmd := exec.Command("sudo", "-p",
+				"\n  sew needs administrator privileges for network routing.\n  Password: ",
+				"pkill", "-f", "sew.*cpk serve")
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			_ = cmd.Run()
+		}
 	} else {
 		killProcess(pidPath)
 	}

@@ -227,6 +227,11 @@ func promptClusterSelection(stateDir string, names []string) (*deleteTarget, err
 	return loadStateTarget(stateDir, names[choice-1])
 }
 
+func cpkProcessRunning() bool {
+	out, err := exec.Command("pgrep", "-f", "sew.*cpk serve").Output()
+	return err == nil && len(strings.TrimSpace(string(out))) > 0
+}
+
 func stopDNSIfNoRecords() {
 	dnsDir := filepath.Join(sewHome, "dns")
 	entries, err := os.ReadDir(dnsDir)
@@ -269,16 +274,18 @@ func stopCPKIfNoKindClusters() {
 	pidPath := filepath.Join(sewHome, "pids", "cpk.pid")
 
 	if cloudprovider.NeedsTunnels() {
-		cmd := exec.Command("sudo", "-p",
-			"\n  sew needs administrator privileges to stop the cloud provider controller.\n  Password: ",
-			"pkill", "-f", "sew.*cpk serve")
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Run()
-		fmt.Println()
-		if err == nil {
-			logger.Success("Stopped cloud provider controller")
+		if cpkProcessRunning() {
+			cmd := exec.Command("sudo", "-p",
+				"\n  sew needs administrator privileges to stop the cloud provider controller.\n  Password: ",
+				"pkill", "-f", "sew.*cpk serve")
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			err := cmd.Run()
+			fmt.Println()
+			if err == nil {
+				logger.Success("Stopped cloud provider controller")
+			}
 		}
 	} else {
 		data, err := os.ReadFile(pidPath)
