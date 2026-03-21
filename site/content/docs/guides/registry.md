@@ -12,7 +12,7 @@ sew ships with a curated registry of contexts for common building blocks -- data
 
 ```yaml
 from:
-  - elastic/elasticsearch
+  - elastic/elasticsearch/standalone
 ```
 
 The default registry follows an `org/product/variant` convention:
@@ -24,7 +24,8 @@ registry/
       sew.yaml
   elastic/
     elasticsearch/
-      sew.yaml
+      standalone/
+        sew.yaml
   postgresql/
     standalone/
       sew.yaml

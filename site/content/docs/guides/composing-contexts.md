@@ -13,7 +13,7 @@ The `from` field lists registry paths to compose. Each context is resolved and m
 ```yaml
 registry: https://raw.githubusercontent.com/a-cordier/sew/refs/heads/main/registry
 from:
-  - elastic/elasticsearch
+  - elastic/elasticsearch/standalone
 
 kind:
   name: my-cluster
@@ -23,7 +23,7 @@ components:
     namespace: my-app
 ```
 
-This says: start from the `elastic/elasticsearch` context, rename the cluster, and move Elasticsearch into a different namespace.
+This says: start from the `elastic/elasticsearch/standalone` context, rename the cluster, and move Elasticsearch into a different namespace.
 
 ## Multi-context composition
 
@@ -32,7 +32,7 @@ You can compose multiple independent contexts into a single stack. This is how y
 ```yaml
 from:
   - mongodb/standalone
-  - elastic/elasticsearch
+  - elastic/elasticsearch/standalone
 
 kind:
   name: my-stack

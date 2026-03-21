@@ -82,7 +82,7 @@ Contexts can compose other contexts. List the parent paths in `from`:
 ```yaml
 from:
   - mongodb/standalone
-  - elastic/elasticsearch
+  - elastic/elasticsearch/standalone
 
 components:
   - name: my-app

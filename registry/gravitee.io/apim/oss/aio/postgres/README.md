@@ -30,5 +30,5 @@ sew create --from gravitee.io/apim/oss/aio/postgres
 This context composes from:
 
 - `postgresql/standalone` — PostgreSQL 17 database
-- `elastic/elasticsearch` — Elasticsearch for reporting
+- `elastic/elasticsearch/standalone` — Elasticsearch for reporting
 - `gravitee.io/apim/oss/aio/base` — shared APIM Helm configuration

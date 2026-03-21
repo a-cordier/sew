@@ -826,7 +826,7 @@ components:
 `)
 	writeFile(t, filepath.Join(root, "mongodb", "standalone", "mongodb.yaml"), "# mongo manifest")
 
-	writeFile(t, filepath.Join(root, "elastic", "elasticsearch", "sew.yaml"), `
+	writeFile(t, filepath.Join(root, "elastic", "elasticsearch", "standalone", "sew.yaml"), `
 helm:
   repos:
     - name: elastic-repo
@@ -845,12 +845,12 @@ components:
       valueFiles:
         - values-elasticsearch.yaml
 `)
-	writeFile(t, filepath.Join(root, "elastic", "elasticsearch", "values-elasticsearch.yaml"), "# elastic values")
+	writeFile(t, filepath.Join(root, "elastic", "elasticsearch", "standalone", "values-elasticsearch.yaml"), "# elastic values")
 
 	writeFile(t, filepath.Join(root, "app", "sew.yaml"), `
 from:
   - mongodb/standalone
-  - elastic/elasticsearch
+  - elastic/elasticsearch/standalone
 
 kind:
   name: app-cluster

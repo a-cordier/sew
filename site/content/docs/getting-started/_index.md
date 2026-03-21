@@ -19,7 +19,7 @@ Make sure you have [Docker](https://docs.docker.com/get-docker/) running -- sew 
 You don't even need a config file to get started. Pick a context from the registry and deploy it in one command:
 
 ```bash
-sew create --from elastic/elasticsearch
+sew create --from elastic/elasticsearch/standalone
 ```
 
 That's it. sew creates a Kind cluster, installs the Helm repos and components defined by the context, and gives you a running Elasticsearch instance. When you're done:
@@ -34,7 +34,7 @@ For anything beyond a quick test, you'll want a `sew.yaml` file. It lets you com
 
 ```yaml
 from:
-  - elastic/elasticsearch
+  - elastic/elasticsearch/standalone
 ```
 
 Then just run `sew create` without flags. The config file is where things get interesting -- you can layer contexts, override values, enable DNS, and more. See [Composing Contexts]({{< ref "/docs/guides/composing-contexts" >}}) for the full story.

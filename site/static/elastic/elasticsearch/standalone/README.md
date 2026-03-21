@@ -1,10 +1,10 @@
 ---
-title: "Elasticsearch"
+title: "Elasticsearch - Standalone"
 description: "Single-node Elasticsearch cluster"
 tags: [search]
 ---
 
-# Elasticsearch
+# Elasticsearch Standalone
 
 Deploys a single-node Elasticsearch cluster using the official Elastic
 Helm chart. Security and persistence are disabled for a lightweight development
@@ -13,7 +13,7 @@ setup. A NodePort Service exposes the cluster to both in-cluster and host client
 ## Usage
 
 ```bash
-sew create --from elastic/elasticsearch
+sew create --from elastic/elasticsearch/standalone
 ```
 
 ## Details

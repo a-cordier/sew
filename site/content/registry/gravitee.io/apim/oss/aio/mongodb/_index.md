@@ -9,7 +9,7 @@ tags:
     - gateway
 from:
     - mongodb/standalone
-    - elastic/elasticsearch
+    - elastic/elasticsearch/standalone
     - gravitee.io/apim/oss/aio/base
 components:
     - mongodb
@@ -53,5 +53,5 @@ sew create --from gravitee.io/apim/oss/aio/mongodb
 This context composes from:
 
 - `mongodb/standalone` — MongoDB 7 database
-- `elastic/elasticsearch` — Elasticsearch for reporting
+- `elastic/elasticsearch/standalone` — Elasticsearch for reporting
 - `gravitee.io/apim/oss/aio/base` — shared APIM Helm configuration

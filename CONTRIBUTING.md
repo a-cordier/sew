@@ -195,7 +195,7 @@ contexts:
 ```yaml
 from:
   - mongodb/standalone
-  - elastic/elasticsearch
+  - elastic/elasticsearch/standalone
   - gravitee.io/apim/oss/aio/base
 ```
 

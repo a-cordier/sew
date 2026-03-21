@@ -263,4 +263,4 @@ These flags are available on all commands:
 |------|-------------|
 | `--config <path>` | Project-level config file to merge on top of the user-level base (`$SEW_HOME/sew.yaml`). Defaults to `./sew.yaml` when present. |
 | `--registry <url>` | Registry URL (e.g. `file://./registry` or `https://…`). Overrides the value from config. |
-| `--from <path>` | Context path to compose (e.g. `elastic/elasticsearch`). Repeatable. Overrides the `from` list from config. |
+| `--from <path>` | Context path to compose (e.g. `elastic/elasticsearch/standalone`). Repeatable. Overrides the `from` list from config. |
