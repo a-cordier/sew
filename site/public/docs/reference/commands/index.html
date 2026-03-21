@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=63548&amp;path=sew/livereload" data-no-instant defer></script>
+<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
   <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Commands · sew</title>
@@ -209,7 +209,7 @@ function toggleTheme() {
 <li><strong>Resolve context</strong> &ndash; sew loads the config chain and resolves the registry context, exactly as <code>sew create</code> does.</li>
 <li><strong>Verify cluster</strong> &ndash; sew checks that the target Kind cluster is running.</li>
 <li><strong>Load patch file</strong> &ndash; the patch file is loaded (same format as <code>sew.yaml</code>).</li>
-<li><strong>Merge</strong> &ndash; patch components are merged on top of the resolved context using the standard <a href="http://localhost:63548/sew/docs/guides/composing-contexts/#merge-rules">merge rules</a>.</li>
+<li><strong>Merge</strong> &ndash; patch components are merged on top of the resolved context using the standard <a href="http://localhost:1313/sew/docs/guides/composing-contexts/#merge-rules">merge rules</a>.</li>
 <li><strong>Upgrade</strong> &ndash; only components named in the patch file are upgraded (Helm upgrade / kubectl apply), in dependency order.</li>
 <li><strong>Readiness</strong> &ndash; sew waits for patched components that have <code>conditions.ready: true</code>.</li>
 </ol>
