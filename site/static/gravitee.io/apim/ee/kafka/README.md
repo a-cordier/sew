@@ -15,12 +15,15 @@ database-specific AIO context. The default variant is **postgres**.
 
 ## Prerequisites
 
-The Kafka Gateway uses host-based routing on `*.kafka.sew.local`. Run the
-one-time DNS setup so these domains resolve locally:
+This context uses DNS for host-based routing (`*.kafka.sew.local`). After
+creating the cluster, run the one-time OS setup so these hostnames resolve
+on your machine (may require `sudo`):
 
 ```bash
 sew setup dns
 ```
+
+See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns) for details.
 
 ## Usage
 

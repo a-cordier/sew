@@ -135,6 +135,18 @@ tags: [relevant, tags]
 Include **Usage** (the `sew create` command), **Endpoints** (table of
 service URLs), and **Dependencies** (list of composed contexts).
 
+If the context uses DNS (directly or via a parent with
+`features.dns.enabled: true`), add a **Prerequisites** section before
+**Endpoints** explaining that `sew setup dns` must be run *after*
+creating the cluster, that it may require `sudo`, and linking to the
+[Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns).
+
+Concrete context READMEs must be **self-contained**. Abstract contexts
+don't get pages on the documentation site, so linking to a parent
+abstract README produces broken links. Inline any relevant
+documentation from the abstract parent directly into each concrete
+variant's README.
+
 #### Tags
 
 - Every context README must have at least one tag.

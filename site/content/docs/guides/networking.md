@@ -20,6 +20,8 @@ features:
 
 Once enabled, any Service of type `LoadBalancer` in your cluster gets an external IP that's reachable from your host machine.
 
+> **macOS note:** On macOS, Docker runs inside a lightweight VM, so container networks are not directly routable from the host. sew sets up a packet tunnel to bridge this gap, which requires `sudo` privileges. You will be prompted for your password when creating a cluster with load balancers enabled.
+
 ## Gateway API
 
 sew supports the [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) for managing ingress traffic. Enabling it automatically enables load balancers too (Gateway controllers need them):

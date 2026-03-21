@@ -16,6 +16,22 @@ sew comes with a [JSON Schema](https://github.com/a-cordier/sew/blob/main/schema
 - Always run `task lint` and `task test` before proposing changes.
 - When authoring or modifying `sew.yaml` files, validate against the schema.
 - After changing any file under `registry/` or `site/` (layouts, templates, CSS, config, generator), run `task site:build` before committing. The generated files in `site/content/registry/` and `site/static/` are tracked and must match their sources. `site/public/` is gitignored (rebuilt by CI).
+- When authoring a registry context that uses DNS (i.e. `features.dns.enabled: true` in its `sew.yaml` or any parent context), add a **Prerequisites** section to the README with the following template (adapt the first sentence to describe what DNS is used for in this context):
+
+  ```
+  ## Prerequisites
+
+  This context uses DNS for <purpose>. After creating the cluster, run the
+  one-time OS setup so these hostnames resolve on your machine (may require
+  `sudo`):
+
+  \```bash
+  sew setup dns
+  \```
+
+  See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns) for details.
+  ```
+- Concrete context READMEs must be **self-contained**. Never link to an abstract parent's README — abstract contexts don't get pages on the site and those links will be broken. Inline any relevant documentation from the parent directly into each concrete variant's README.
 
 ## Product-specific instructions
 

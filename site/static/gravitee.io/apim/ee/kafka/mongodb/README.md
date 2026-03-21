@@ -15,6 +15,18 @@ backed by MongoDB for persistence and Elasticsearch for analytics.
 sew create --from gravitee.io/apim/ee/kafka/mongodb
 ```
 
+## Prerequisites
+
+This context uses DNS for host-based routing (`*.kafka.sew.local`). After
+creating the cluster, run the one-time OS setup so these hostnames resolve
+on your machine (may require `sudo`):
+
+```bash
+sew setup dns
+```
+
+See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns) for details.
+
 ## Endpoints
 
 | Service        | URL                            |
@@ -25,15 +37,40 @@ sew create --from gravitee.io/apim/ee/kafka/mongodb
 | Management API | http://localhost:30083          |
 | Kafka Gateway  | `*.kafka.sew.local:9092` (TLS) |
 
+## Kafka Gateway details
+
+- **Routing mode:** host-based (`*.kafka.sew.local`)
+- **TLS:** enabled via a self-signed certificate stored as a Kubernetes Secret
+- **Upstream broker:** standalone Kafka at `kafka:9092` (ClusterIP)
+
+## Connecting a Kafka client
+
+Extract the TLS certificate from the running cluster:
+
+```bash
+kubectl get secret kafka-tls -n gravitee -o jsonpath='{.data.tls\.crt}' | base64 -d > kafka-tls.crt
+```
+
+Then configure your Kafka client properties:
+
+```properties
+security.protocol=SSL
+ssl.truststore.type=PEM
+ssl.truststore.location=/path/to/kafka-tls.crt
+ssl.endpoint.identification.algorithm=
+```
+
+The `ssl.endpoint.identification.algorithm` must be set to empty because the
+self-signed certificate covers `*.kafka.sew.local` but broker metadata
+addresses use two-level subdomains (e.g. `broker-0-acr.kafka.sew.local`)
+that don't match the single-level wildcard.
+
 ## Dependencies
 
 This context composes from:
 
 - `gravitee.io/apim/oss/aio/mongodb` — full APIM stack with MongoDB backend
 - `gravitee.io/apim/ee/kafka/base` — Kafka Gateway configuration
-
-See the [parent README](../README.md) for Kafka Gateway details, DNS setup,
-and TLS configuration.
 
 ## License
 
