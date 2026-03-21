@@ -33,8 +33,9 @@ Always run `task lint` and `task test` before submitting changes.
 When your changes touch files under `registry/` or `site/` (layouts,
 templates, CSS, config, the generator itself), run `task site:build`
 to regenerate the site before committing. The generated files under
-`site/content/registry/`, `site/static/`, and `site/public/` are
-tracked in git and must stay in sync with their sources.
+`site/content/registry/` and `site/static/` are tracked in git and
+must stay in sync with their sources. `site/public/` is gitignored
+and rebuilt by CI.
 
 ## Commit conventions
 

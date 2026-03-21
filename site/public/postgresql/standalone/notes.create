@@ -1,9 +1,0 @@
-Your cluster "{{ .Kind.Name }}" is ready.
-
-PostgreSQL is available at localhost:5432.
-
-  Database   gravitee
-  User       postgres
-  Password   postgres
-
-  PGPASSWORD=postgres psql -h localhost -p 5432 -U postgres -d gravitee

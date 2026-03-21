@@ -1,6 +1,0 @@
-Your cluster "{{ .Kind.Name }}" is ready.
-
-Elasticsearch is available at http://localhost:9200 (security disabled).
-
-  curl http://localhost:9200
-  curl http://localhost:9200/_cluster/health?pretty
