@@ -8,7 +8,7 @@ The registry is where you find ready-to-use application stacks. It's a structure
 
 ## The default registry
 
-sew ships with a curated registry of contexts for common building blocks -- databases, message brokers, search engines, and full application stacks. You can [browse it here](/registry/). It's used by default, so you don't need to set `registry` in your config -- just pick a context and go:
+sew ships with a curated registry of contexts for common building blocks -- databases, message brokers, search engines, and full application stacks. You can [browse it here]({{< ref "/registry" >}}). It's used by default, so you don't need to set `registry` in your config -- just pick a context and go:
 
 ```yaml
 from:
