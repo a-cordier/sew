@@ -1,182 +1,11 @@
-<!DOCTYPE html>
-<html lang="en-us">
-<head><script src="/sew/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=sew/livereload" data-no-instant defer></script>
-  <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Registry · sew</title>
-<meta name="description" content="Your local Kubernetes tailor shop">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="/sew/css/main.min.3b24b0d2a8e01a336429aa2fa9131617e7054260326bb04774b9768cd67e55f9.css" integrity="sha256-OySw0qjgGjNkKaovqRMWF&#43;cFQmAya7BHdLl2jNZ&#43;Vfk=">
-<link rel="icon" href="/sew/logo.svg" type="image/svg+xml">
-<script>
-(function() {
-  var t = localStorage.getItem('theme');
-  if (t === 'dark' || t === 'light') {
-    document.documentElement.setAttribute('data-theme', t);
-  }
-})();
-function toggleTheme() {
-  var root = document.documentElement;
-  var current = root.getAttribute('data-theme');
-  if (!current) {
-    current = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  var next = current === 'dark' ? 'light' : 'dark';
-  root.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-}
-</script>
-
-</head>
-<body>
-  <nav class="nav">
-  <div class="nav-inner">
-    <a class="nav-logo" href="/sew/">
-      <img src="/sew/logo.svg" alt="sew" width="56" height="20">
-    </a>
-    <button class="nav-hamburger" aria-label="Toggle menu" onclick="document.querySelector('.nav-links').classList.toggle('open')">
-      <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"/></svg>
-    </button>
-    <ul class="nav-links">
-      
-      <li>
-        <a href="/sew/docs/"
-           class="">
-          Docs
-          
-        </a>
-      </li>
-      
-      <li>
-        <a href="/sew/registry/"
-           class="">
-          Registry
-          
-        </a>
-      </li>
-      
-      <li>
-        <a href="https://github.com/a-cordier/sew" target="_blank" rel="noopener"
-           class="">
-          GitHub
-          
-          <svg class="icon-external" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M3.75 2A1.75 1.75 0 0 0 2 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0 0 14 12.25v-3.5a.75.75 0 0 0-1.5 0v3.5a.25.25 0 0 1-.25.25h-8.5a.25.25 0 0 1-.25-.25v-8.5a.25.25 0 0 1 .25-.25h3.5a.75.75 0 0 0 0-1.5h-3.5zm6.5 0a.75.75 0 0 0 0 1.5h1.19L7.22 7.72a.75.75 0 1 0 1.06 1.06l4.22-4.22v1.19a.75.75 0 0 0 1.5 0v-3A.75.75 0 0 0 13.25 2h-3z"/></svg>
-          
-        </a>
-      </li>
-      
-      <li>
-        <button class="theme-toggle" aria-label="Toggle theme" onclick="toggleTheme()">
-          <svg class="icon-sun" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 1.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11ZM8 0a.75.75 0 0 1 .75.75v1a.75.75 0 0 1-1.5 0v-1A.75.75 0 0 1 8 0Zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13Zm-8-5a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8Zm12.25-.75h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5Zm-9.6-4.6a.75.75 0 0 1 1.06 0l1 1a.75.75 0 1 1-1.06 1.06l-1-1a.75.75 0 0 1 0-1.06Zm9.35 9.35a.75.75 0 0 1-1.06 0l-1-1a.75.75 0 1 1 1.06-1.06l1 1a.75.75 0 0 1 0 1.06Zm-9.35 0a.75.75 0 0 1 0-1.06l1-1a.75.75 0 1 1 1.06 1.06l-1 1a.75.75 0 0 1-1.06 0ZM13 3.7a.75.75 0 0 1-1.06 0l-1-1a.75.75 0 1 1 1.06-1.06l1 1a.75.75 0 0 1 0 1.06Z"/></svg>
-          <svg class="icon-moon" viewBox="0 0 16 16" fill="currentColor"><path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.221-7.832Z"/></svg>
-        </button>
-      </li>
-    </ul>
-  </div>
-</nav>
-
-  <main class="main">
-    
-<div class="docs-layout">
-  <aside class="docs-sidebar">
-    <nav class="docs-nav">
-      
-      
-      <div class="docs-nav-section">
-        
-        <a href="/sew/docs/getting-started/" class="docs-nav-standalone">Getting Started</a>
-        
-      </div>
-      
-      <div class="docs-nav-section">
-        
-        <details open>
-          <summary>
-            <a href="/sew/docs/guides/" class="">Guides</a>
-          </summary>
-          <ul>
-            
-            <li>
-              <a href="/sew/docs/guides/registry/" class="active">
-                Registry
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/composing-contexts/" class="">
-                Composing Contexts
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/networking/" class="">
-                Networking
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/images/" class="">
-                Images
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/guides/ai-ready/" class="">
-                AI Toolchain
-              </a>
-            </li>
-            
-          </ul>
-        </details>
-        
-      </div>
-      
-      <div class="docs-nav-section">
-        
-        <details>
-          <summary>
-            <a href="/sew/docs/reference/" class="">Reference</a>
-          </summary>
-          <ul>
-            
-            <li>
-              <a href="/sew/docs/reference/configuration/" class="">
-                Configuration
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/reference/commands/" class="">
-                Commands
-              </a>
-            </li>
-            
-            <li>
-              <a href="/sew/docs/reference/context-format/" class="">
-                Context Format
-              </a>
-            </li>
-            
-          </ul>
-        </details>
-        
-      </div>
-      
-    </nav>
-  </aside>
-  <div class="docs-content">
-    <h1>Registry</h1>
-    <article class="content">
-      <p>The registry is where you find ready-to-use application stacks. It&rsquo;s a structured tree of <strong>contexts</strong> &ndash; each one a self-contained recipe for deploying a particular stack on a local Kind cluster.</p>
-<h2 id="the-default-registry">The default registry</h2>
-<p>sew ships with a curated registry of contexts for common building blocks &ndash; databases, message brokers, search engines, and full application stacks. You can <a href="/registry/">browse it here</a>. It&rsquo;s used by default, so you don&rsquo;t need to set <code>registry</code> in your config &ndash; just pick a context and go:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">from</span>:
-</span></span><span style="display:flex;"><span>  - elastic/elasticsearch
-</span></span></code></pre></div><p>The default registry follows an <code>org/product/variant</code> convention:</p>
-<pre tabindex="0"><code>registry/
+<!doctype html><html lang=en-us><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Registry · sew</title><meta name=description content="Your local Kubernetes tailor shop"><link rel=preconnect href=https://fonts.googleapis.com><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel=stylesheet><link rel=stylesheet href=/sew/css/main.min.3b24b0d2a8e01a336429aa2fa9131617e7054260326bb04774b9768cd67e55f9.css integrity="sha256-OySw0qjgGjNkKaovqRMWF+cFQmAya7BHdLl2jNZ+Vfk="><link rel=icon href=/sew/logo.svg type=image/svg+xml><script>(function(){var e=localStorage.getItem("theme");(e==="dark"||e==="light")&&document.documentElement.setAttribute("data-theme",e)})();function toggleTheme(){var t,n=document.documentElement,e=n.getAttribute("data-theme");e||(e=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"),t=e==="dark"?"light":"dark",n.setAttribute("data-theme",t),localStorage.setItem("theme",t)}</script></head><body><nav class=nav><div class=nav-inner><a class=nav-logo href=/sew/><img src=/sew/logo.svg alt=sew width=56 height=20>
+</a><button class=nav-hamburger aria-label="Toggle menu" onclick='document.querySelector(".nav-links").classList.toggle("open")'>
+<svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor"><path d="M1 2.75A.75.75.0 011.75 2h12.5a.75.75.0 010 1.5H1.75A.75.75.0 011 2.75zm0 5A.75.75.0 011.75 7h12.5a.75.75.0 010 1.5H1.75A.75.75.0 011 7.75zM1.75 12h12.5a.75.75.0 010 1.5H1.75a.75.75.0 010-1.5z"/></svg></button><ul class=nav-links><li><a href=/sew/docs/>Docs</a></li><li><a href=/sew/registry/>Registry</a></li><li><a href=https://github.com/a-cordier/sew target=_blank rel=noopener>GitHub
+<svg class="icon-external" viewBox="0 0 16 16" width="12" height="12"><path fill="currentColor" d="M3.75 2A1.75 1.75.0 002 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75.0 0014 12.25v-3.5a.75.75.0 00-1.5.0v3.5a.25.25.0 01-.25.25h-8.5a.25.25.0 01-.25-.25v-8.5a.25.25.0 01.25-.25h3.5a.75.75.0 000-1.5h-3.5zm6.5.0a.75.75.0 000 1.5h1.19L7.22 7.72a.75.75.0 101.06 1.06l4.22-4.22v1.19a.75.75.0 001.5.0v-3A.75.75.0 0013.25 2h-3z"/></svg></a></li><li><button class=theme-toggle aria-label="Toggle theme" onclick=toggleTheme()>
+<svg class="icon-sun" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12a4 4 0 100-8 4 4 0 000 8zm0 1.5a5.5 5.5.0 110-11 5.5 5.5.0 010 11zM8 0a.75.75.0 01.75.75v1a.75.75.0 01-1.5.0v-1A.75.75.0 018 0zm0 13a.75.75.0 01.75.75v1.5a.75.75.0 01-1.5.0v-1.5A.75.75.0 018 13zM0 8a.75.75.0 01.75-.75h1.5a.75.75.0 010 1.5H.75A.75.75.0 010 8zm12.25-.75h3a.75.75.0 010 1.5h-3a.75.75.0 010-1.5zm-9.6-4.6a.75.75.0 011.06.0l1 1A.75.75.0 113.65 4.71l-1-1a.75.75.0 010-1.06zM12 12a.75.75.0 01-1.06.0l-1-1A.75.75.0 1111 9.94l1 1A.75.75.0 0112 12zm-9.35.0a.75.75.0 010-1.06l1-1A.75.75.0 114.71 11l-1 1a.75.75.0 01-1.06.0zM13 3.7a.75.75.0 01-1.06.0l-1-1A.75.75.0 1112 1.64l1 1a.75.75.0 010 1.06z"/></svg>
+<svg class="icon-moon" viewBox="0 0 16 16" fill="currentColor"><path d="M9.598 1.591a.749.749.0 01.785-.175 7.001 7.001.0 11-8.967 8.967.75.75.0 01.961-.96 5.5 5.5.0 007.221-7.832z"/></svg></button></li></ul></div></nav><main class=main><div class=docs-layout><aside class=docs-sidebar><nav class=docs-nav><div class=docs-nav-section><a href=/sew/docs/getting-started/ class=docs-nav-standalone>Getting Started</a></div><div class=docs-nav-section><details open><summary><a href=/sew/docs/guides/>Guides</a></summary><ul><li><a href=/sew/docs/guides/registry/ class=active>Registry</a></li><li><a href=/sew/docs/guides/composing-contexts/>Composing Contexts</a></li><li><a href=/sew/docs/guides/networking/>Networking</a></li><li><a href=/sew/docs/guides/images/>Images</a></li><li><a href=/sew/docs/guides/ai-ready/>AI Toolchain</a></li></ul></details></div><div class=docs-nav-section><details><summary><a href=/sew/docs/reference/>Reference</a></summary><ul><li><a href=/sew/docs/reference/configuration/>Configuration</a></li><li><a href=/sew/docs/reference/commands/>Commands</a></li><li><a href=/sew/docs/reference/context-format/>Context Format</a></li></ul></details></div></nav></aside><div class=docs-content><h1>Registry</h1><article class=content><p>The registry is where you find ready-to-use application stacks. It&rsquo;s a structured tree of <strong>contexts</strong> &ndash; each one a self-contained recipe for deploying a particular stack on a local Kind cluster.</p><h2 id=the-default-registry>The default registry</h2><p>sew ships with a curated registry of contexts for common building blocks &ndash; databases, message brokers, search engines, and full application stacks. You can <a href=/registry/>browse it here</a>. It&rsquo;s used by default, so you don&rsquo;t need to set <code>registry</code> in your config &ndash; just pick a context and go:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#ff79c6>from</span>:
+</span></span><span style=display:flex><span>  - elastic/elasticsearch
+</span></span></code></pre></div><p>The default registry follows an <code>org/product/variant</code> convention:</p><pre tabindex=0><code>registry/
   mongodb/
     standalone/
       sew.yaml
@@ -189,59 +18,25 @@ function toggleTheme() {
   kafka/
     standalone/
       sew.yaml
-</code></pre><p>Each leaf directory with a <code>sew.yaml</code> is a deployable context. You pick a context path, and sew fetches the config, creates a cluster, and deploys everything it defines.</p>
-<h3 id="default-variants">Default variants</h3>
-<p>When a product has multiple variants, the registry can define a <strong>default</strong> so you don&rsquo;t have to spell out the full path. A <code>.default</code> file in a directory contains the name of the variant to use:</p>
-<pre tabindex="0"><code>registry/mycompany/myproduct/
+</code></pre><p>Each leaf directory with a <code>sew.yaml</code> is a deployable context. You pick a context path, and sew fetches the config, creates a cluster, and deploys everything it defines.</p><h3 id=default-variants>Default variants</h3><p>When a product has multiple variants, the registry can define a <strong>default</strong> so you don&rsquo;t have to spell out the full path. A <code>.default</code> file in a directory contains the name of the variant to use:</p><pre tabindex=0><code>registry/mycompany/myproduct/
 ├── .default          # contains &#34;dev&#34;
 ├── dev/
 │   └── sew.yaml
 └── staging/
     └── sew.yaml
-</code></pre><p>With this setup, <code>from: [mycompany/myproduct]</code> resolves to <code>mycompany/myproduct/dev</code>. Defaults can chain across multiple levels &ndash; sew reads <code>.default</code> at each level until it finds a <code>sew.yaml</code>.</p>
-<h2 id="hosting-your-own-registry">Hosting your own registry</h2>
-<p>A registry is just a directory tree served over HTTP. There&rsquo;s no server to run, no database to manage &ndash; just files. If you can host static files, you can host a registry.</p>
-<p>To create your own:</p>
-<ol>
-<li>Create a directory structure following the <code>org/product/variant</code> convention.</li>
-<li>Add a <code>sew.yaml</code> to each leaf context (see <a href="http://localhost:1313/sew/docs/reference/context-format/">Context Format</a>).</li>
-<li>Serve it however you like &ndash; a Git repo&rsquo;s raw URL, a static file server, or an internal CDN.</li>
-</ol>
-<p>Your team points their configs at your registry URL and uses your contexts just like the central ones:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">registry</span>: https://registry.mycompany.com/sew
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">from</span>:
-</span></span><span style="display:flex;"><span>  - myproduct/dev
-</span></span></code></pre></div><p>You can also compose across registries. A context in your private registry can reference contexts from the central registry (or any other) through cross-registry composition &ndash; see <a href="http://localhost:1313/sew/docs/guides/composing-contexts/">Composing Contexts</a>.</p>
-<h2 id="local-filesystem-registries">Local filesystem registries</h2>
-<p>During development, you don&rsquo;t need to push your registry to a server. Point sew at a directory on your machine using a <code>file://</code> URL:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#ff79c6">registry</span>: file://./my-registry
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">from</span>:
-</span></span><span style="display:flex;"><span>  - myproduct/dev
-</span></span></code></pre></div><p>This is the fastest way to iterate on new contexts. You edit your <code>sew.yaml</code>, run <code>sew create</code>, and see the result immediately &ndash; no deploy step, no HTTP server.</p>
-<p>A few common patterns:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#6272a4"># Relative to the current directory</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">registry</span>: file://./registry
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Absolute path</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">registry</span>: file:///home/me/sew-contexts
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#6272a4"># Navigate up from the project directory</span>
-</span></span><span style="display:flex;"><span><span style="color:#ff79c6">registry</span>: file://../shared-registry
-</span></span></code></pre></div><p>Local registries behave exactly like remote ones &ndash; composition, default variants, and all other features work the same way. Once your context is ready, push the directory tree to a server and switch the URL.</p>
-
-    </article>
-  </div>
-</div>
-
-  </main>
-  <footer class="footer">
-  <div class="footer-inner">
-    <p>
-      <a href="https://github.com/a-cordier/sew" target="_blank" rel="noopener">sew</a>
-      &mdash; Your local Kubernetes tailor shop
-    </p>
-  </div>
-</footer>
-
-</body>
-</html>
+</code></pre><p>With this setup, <code>from: [mycompany/myproduct]</code> resolves to <code>mycompany/myproduct/dev</code>. Defaults can chain across multiple levels &ndash; sew reads <code>.default</code> at each level until it finds a <code>sew.yaml</code>.</p><h2 id=hosting-your-own-registry>Hosting your own registry</h2><p>A registry is just a directory tree served over HTTP. There&rsquo;s no server to run, no database to manage &ndash; just files. If you can host static files, you can host a registry.</p><p>To create your own:</p><ol><li>Create a directory structure following the <code>org/product/variant</code> convention.</li><li>Add a <code>sew.yaml</code> to each leaf context (see <a href=https://a-cordier.github.io/sew/docs/reference/context-format/>Context Format</a>).</li><li>Serve it however you like &ndash; a Git repo&rsquo;s raw URL, a static file server, or an internal CDN.</li></ol><p>Your team points their configs at your registry URL and uses your contexts just like the central ones:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#ff79c6>registry</span>: https://registry.mycompany.com/sew
+</span></span><span style=display:flex><span><span style=color:#ff79c6>from</span>:
+</span></span><span style=display:flex><span>  - myproduct/dev
+</span></span></code></pre></div><p>You can also compose across registries. A context in your private registry can reference contexts from the central registry (or any other) through cross-registry composition &ndash; see <a href=https://a-cordier.github.io/sew/docs/guides/composing-contexts/>Composing Contexts</a>.</p><h2 id=local-filesystem-registries>Local filesystem registries</h2><p>During development, you don&rsquo;t need to push your registry to a server. Point sew at a directory on your machine using a <code>file://</code> URL:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#ff79c6>registry</span>: file://./my-registry
+</span></span><span style=display:flex><span><span style=color:#ff79c6>from</span>:
+</span></span><span style=display:flex><span>  - myproduct/dev
+</span></span></code></pre></div><p>This is the fastest way to iterate on new contexts. You edit your <code>sew.yaml</code>, run <code>sew create</code>, and see the result immediately &ndash; no deploy step, no HTTP server.</p><p>A few common patterns:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none><code class=language-yaml data-lang=yaml><span style=display:flex><span><span style=color:#6272a4># Relative to the current directory</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>registry</span>: file://./registry
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># Absolute path</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>registry</span>: file:///home/me/sew-contexts
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#6272a4># Navigate up from the project directory</span>
+</span></span><span style=display:flex><span><span style=color:#ff79c6>registry</span>: file://../shared-registry
+</span></span></code></pre></div><p>Local registries behave exactly like remote ones &ndash; composition, default variants, and all other features work the same way. Once your context is ready, push the directory tree to a server and switch the URL.</p></article></div></div></main><footer class=footer><div class=footer-inner><p><a href=https://github.com/a-cordier/sew target=_blank rel=noopener>sew</a>
+&mdash; Your local Kubernetes tailor shop</p></div></footer></body></html>
