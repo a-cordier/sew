@@ -40,4 +40,5 @@ sew comes with a [JSON Schema](https://github.com/a-cordier/sew/blob/main/schema
 | Product | Instructions | Applies to |
 |---|---|---|
 | Gravitee | [agents/gravitee-agent.md](agents/gravitee-agent.md) | `registry/gravitee.io/` |
+| Gravitee APIM | [agents/gravitee-apim-agent.md](agents/gravitee-apim-agent.md) | `registry/gravitee.io/apim/` |
 <!-- agents:end -->
