@@ -11,6 +11,14 @@ tags:
 from:
     - gravitee.io/apim/oss/aio/postgres
     - gravitee.io/apim/ee/kafka/base
+components:
+    - postgresql
+    - elasticsearch
+    - tls-server
+    - apim
+    - kafka
+    - license
+    - kafka-tls
 type: registry
 ---
 

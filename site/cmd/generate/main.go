@@ -60,6 +60,7 @@ func main() {
 
 	writeRegistryRoot(contentDir)
 
+	configs := map[string]*sewConfig{}
 	componentDirs := map[string]bool{}
 	intermediateDirs := map[string]bool{}
 
@@ -82,6 +83,8 @@ func main() {
 			return fmt.Errorf("parse %s: %w", path, err)
 		}
 
+		configs[relDir] = config
+
 		if config.Abstract {
 			fmt.Printf("skip abstract: %s\n", relDir)
 			return nil
@@ -89,6 +92,15 @@ func main() {
 
 		componentDirs[relDir] = true
 		collectIntermediateDirs(relDir, intermediateDirs)
+		return nil
+	})
+	if err != nil {
+		fatalf("walk registry: %v", err)
+	}
+
+	for relDir := range componentDirs {
+		config := configs[relDir]
+		dir := filepath.Join(registryDir, relDir)
 
 		readmeTitle, description, tags, body := parseReadme(filepath.Join(dir, "README.md"))
 
@@ -99,11 +111,6 @@ func main() {
 		notesCreate := readOptionalFile(filepath.Join(dir, "notes.create"))
 		notesCreate = strings.ReplaceAll(notesCreate, "{{ .Kind.Name }}", relDir)
 
-		var componentNames []string
-		for _, c := range config.Components {
-			componentNames = append(componentNames, c.Name)
-		}
-
 		page := componentPage{
 			Title:       title,
 			Layout:      "detail",
@@ -112,24 +119,20 @@ func main() {
 			Description: description,
 			Tags:        tags,
 			From:        config.From,
-			Components:  componentNames,
+			Components:  resolveComponents(relDir, configs),
 			NotesCreate: notesCreate,
 			Type:        "registry",
 		}
 
 		outDir := filepath.Join(contentDir, relDir)
 		if err := os.MkdirAll(outDir, 0755); err != nil {
-			return fmt.Errorf("mkdir %s: %w", outDir, err)
+			fatalf("mkdir %s: %v", outDir, err)
 		}
 		if err := writePage(filepath.Join(outDir, "_index.md"), page, body); err != nil {
-			return fmt.Errorf("write page %s: %w", relDir, err)
+			fatalf("write page %s: %v", relDir, err)
 		}
 
 		fmt.Printf("generated: %s\n", relDir)
-		return nil
-	})
-	if err != nil {
-		fatalf("walk registry: %v", err)
 	}
 
 	for dir := range intermediateDirs {
@@ -163,6 +166,29 @@ func main() {
 	generateSchemaDoc("schema/sew.schema.yaml", "site/content/docs/reference/configuration.md")
 
 	fmt.Println("done")
+}
+
+func resolveComponents(relDir string, configs map[string]*sewConfig) []string {
+	seen := map[string]bool{}
+	var result []string
+	var walk func(string)
+	walk = func(dir string) {
+		config, ok := configs[dir]
+		if !ok {
+			return
+		}
+		for _, parent := range config.From {
+			walk(parent)
+		}
+		for _, c := range config.Components {
+			if !seen[c.Name] {
+				seen[c.Name] = true
+				result = append(result, c.Name)
+			}
+		}
+	}
+	walk(relDir)
+	return result
 }
 
 func writeRegistryRoot(contentDir string) {
