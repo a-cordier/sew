@@ -1,6 +1,13 @@
 name: Publish Registry
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "registry/**"
+      - "site/**"
+      - "schema/**"
+      - "README.md"
   release:
     types: [published]
   workflow_dispatch:
