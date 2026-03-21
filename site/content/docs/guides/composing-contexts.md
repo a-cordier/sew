@@ -135,6 +135,22 @@ components:
 
 If a component name matches one from the context, your values are merged on top. If there's no match, the component is added as a new deployment.
 
+### Using value files
+
+For large overrides, you can use `valueFiles` instead of (or alongside) inline `values`. Paths are resolved relative to the `sew.yaml` directory:
+
+```yaml
+components:
+  - name: app
+    helm:
+      valueFiles:
+        - values-dev.yaml
+      values:
+        debug: true
+```
+
+Value files from composed contexts are appended in order, with later files taking higher precedence. Inline `values` are merged on top of everything.
+
 ### Kubernetes manifest components
 
 You can also deploy plain Kubernetes resources without a Helm chart by setting `type: k8s`:
@@ -160,6 +176,21 @@ components:
             selector:
               app: my-service
 ```
+
+For larger manifests, you can use `manifestFiles` to reference external YAML files instead of inlining them. Paths are resolved relative to the `sew.yaml` directory:
+
+```yaml
+components:
+  - name: routes
+    type: k8s
+    namespace: my-app
+    k8s:
+      manifestFiles:
+        - gateway.yaml
+        - routes.yaml
+```
+
+You can combine `manifestFiles` and inline `manifests` in the same component -- both are applied.
 
 ### Local secrets and ConfigMaps
 
