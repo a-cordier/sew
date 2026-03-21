@@ -68,7 +68,7 @@ This configures your OS to route `*.sew.local` queries to the local DNS server:
 - **macOS**: creates `/etc/resolver/sew.local` (persists across reboots)
 - **Linux**: configures `systemd-resolved` on the loopback interface (runtime only)
 
-> The setup step requires `sudo` because it writes to system directories (e.g. `/etc/resolver/` on macOS). Once done, day-to-day `sew create` and `sew delete` commands run without elevated privileges. To undo, just run `sew teardown dns`.
+> The setup command requires `sudo` because it writes to system directories: `/etc/resolver/` on macOS, and `systemd-resolved` configuration on Linux. Once done, day-to-day `sew create` and `sew delete` commands run without elevated privileges. To undo, just run `sew teardown dns`.
 
 ### Static records
 
