@@ -18,19 +18,52 @@ Common issues and how to fix them.
 docker info
 ```
 
-## Port already in use
+## Port conflict between two clusters
 
-**Symptom:** Container creation or the DNS server fails to start; the error mentions "address already in use" or "port is already allocated."
+**Symptom:** `sew create` fails with `command docker run failed with error: exit status 125` when creating a second cluster.
 
-**Cause:** sew uses fixed host ports: **15353** (DNS), **5000+** (mirror proxies), **5100** (preload registry). Kind contexts also bind host ports (e.g. 80, 443, 9200). There is no preflight port check.
+**Cause:** Both clusters use contexts that bind the same host ports via Kind's `extraPortMappings` (e.g. two API gateway stacks both claiming port 80 and 443). Docker can't bind the same host port twice.
 
-**Fix:** Identify what's using the port:
+**Fix:** Override the port mappings in your `sew.yaml` for the second cluster to use different host ports. You also need to update the service configuration (NodePort values, base URLs) in the component's Helm values to match:
 
-```bash
-lsof -i :<port>
+```yaml
+kind:
+  name: second-cluster
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30080
+          hostPort: 31080
+        - containerPort: 30082
+          hostPort: 31082
+
+components:
+  - name: apim
+    helm:
+      values:
+        ui:
+          service:
+            nodePort: 31080
+        gateway:
+          services:
+            core:
+              service:
+                nodePort: 31082
 ```
 
-Stop the conflicting process, or change the port in config (`features.dns.port` for DNS; Kind port mappings can be overridden in `sew.yaml`). Mirror and preload ports are currently not configurable — stop the conflicting service.
+The `extraPortMappings` control which ports Kind exposes on the host, while the `nodePort` values in the Helm chart control which ports the services bind inside the cluster. Both must match.
+
+Alternatively, delete the first cluster before creating the second one:
+
+```bash
+sew delete --name <first-cluster>
+```
+
+To see which ports are already bound by Docker containers:
+
+```bash
+docker ps --format "table {{.Names}}\t{{.Ports}}"
+```
 
 ## DNS not resolving after `sew create`
 
@@ -77,7 +110,7 @@ Or let sew auto-enable it by removing the explicit `lb` block entirely.
 
 **Cause:** A pod isn't reaching Ready state within the timeout (default 5 min). Common reasons: image pull failure, crash loop, missing dependency, resource limits.
 
-**Fix:** Check pod status and logs:
+**Fix:** Start with the sew install log -- it captures Helm and kubectl output that isn't shown in the terminal. See [Directory Layout -- logs/]({{< ref "/docs/reference/directory-layout#logs" >}}) for the file location. Then check pod status:
 
 ```bash
 kubectl get pods -A
@@ -107,7 +140,7 @@ For authenticated pulls, configure `~/.docker/config.json` — sew's mirror prox
 
 **Cause:** A previous `sew delete` didn't complete (crash, Ctrl+C, Docker restart).
 
-**Fix:** Run a clean teardown:
+**Fix:** Run a clean teardown (check `$SEW_HOME/logs/delete.log` if it fails -- see [Directory Layout]({{< ref "/docs/reference/directory-layout#logs" >}})):
 
 ```bash
 sew delete --name <cluster>

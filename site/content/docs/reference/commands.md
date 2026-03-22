@@ -188,27 +188,7 @@ sew delete --name my-cluster
 
 ### Target resolution
 
-`sew delete` doesn't need the original `sew.yaml` or registry to be available. It resolves the target cluster in this order:
-
-1. **`--name` flag** -- If provided, sew looks up the state file for that cluster directly. Works from any directory.
-2. **State files** -- If `--name` is omitted, sew scans `$SEW_HOME/clusters/` for existing state files. With one cluster, it's deleted automatically. With multiple clusters, you get an interactive prompt.
-3. **Config fallback** -- If no state files exist, sew reads `kind.name` from the config chain.
-
-#### State files
-
-A state file is created automatically at the end of a successful `sew create`. It captures the cluster name, enabled features, and image configuration -- everything `sew delete` needs for a clean teardown.
-
-State files live at `$SEW_HOME/clusters/<cluster-name>.yaml` and are removed after a successful delete.
-
-### Best-effort cleanup
-
-If you pass `--name` but no state file exists for that cluster, sew performs a best-effort cleanup:
-
-- Deletes the Kind cluster
-- Removes load balancer containers
-- Removes DNS records
-
-A warning is printed about mirrors and preload not being stopped, since the original configuration is unknown.
+`sew delete` doesn't need the original `sew.yaml` or registry to be available. It uses state files to find and clean up the cluster. See [Directory Layout -- clusters/]({{< ref "/docs/reference/directory-layout#clusters" >}}) for how target resolution and best-effort cleanup work.
 
 ### Flags
 
