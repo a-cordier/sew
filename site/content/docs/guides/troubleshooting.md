@@ -8,9 +8,9 @@ Common issues and how to fix them.
 
 ## Docker is not running
 
-**Symptom:** `sew create` fails with a Docker client or connection error.
+**Symptom:** `sew create` or `sew delete` fails with `"docker is not running — start Docker and try again"`.
 
-**Cause:** sew doesn't check Docker availability upfront; errors surface from the Docker API when creating containers or the Kind cluster.
+**Cause:** sew checks Docker availability before doing any work. If the Docker daemon is unreachable, the command exits immediately with this message.
 
 **Fix:** Start Docker Desktop (or `systemctl start docker` on Linux), then verify with:
 

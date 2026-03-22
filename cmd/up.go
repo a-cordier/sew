@@ -37,6 +37,10 @@ func init() {
 }
 
 func runUp(_ *cobra.Command, _ []string) error {
+	if err := requireDocker(); err != nil {
+		return err
+	}
+
 	start := time.Now()
 
 	if err := os.MkdirAll(sewHome, 0o755); err != nil {

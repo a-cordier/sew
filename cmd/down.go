@@ -46,6 +46,10 @@ type deleteTarget struct {
 }
 
 func runDown(_ *cobra.Command, _ []string) error {
+	if err := requireDocker(); err != nil {
+		return err
+	}
+
 	start := time.Now()
 
 	stateDir := filepath.Join(sewHome, "clusters")
