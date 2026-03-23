@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/a-cordier/sew/compare/v0.3.1...v0.4.0) (2026-03-23)
+
+
+### Features
+
+* add sew validate registry command ([7381dff](https://github.com/a-cordier/sew/commit/7381dffd00c275d0eaf5ca59c169f5656089da07))
+* introduce context flags for maintainers ([2c9b1de](https://github.com/a-cordier/sew/commit/2c9b1de32a5a1bc858c71733e5bd2229c5d388f4))
+
 ## [0.3.1](https://github.com/a-cordier/sew/compare/v0.3.0...v0.3.1) (2026-03-21)
 
 
