@@ -3,11 +3,21 @@ package main
 import (
 	_ "embed"
 	"os"
+	"runtime/debug"
 
 	"github.com/a-cordier/sew/cmd"
 )
 
 var version = "dev"
+
+func init() {
+	if version != "dev" {
+		return
+	}
+	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "(devel)" {
+		version = info.Main.Version
+	}
+}
 
 //go:embed sew.yaml
 var defaultConfigData []byte
