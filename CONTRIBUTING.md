@@ -99,6 +99,7 @@ registry/
 | File | Purpose |
 |---|---|
 | `sew.yaml` | Component definitions, Helm repos, Kind config, features, images |
+| `sew--{flag}.yaml` | Context flag patch file (optional, see [Context flags](#context-flags)) |
 | `README.md` | Human-readable documentation with Hugo YAML frontmatter |
 | `notes.create` | Go `text/template` rendered after `sew create` (connection info) |
 | `.default` | Points to the default child variant (one variant name per file) |
@@ -173,6 +174,19 @@ Your cluster "{{ .Kind.Name }}" is ready.
 Service A   http://localhost:30080
 Service B   http://localhost:30081
 ```
+
+When a context defines [context flags](#context-flags), use `hasFlag` to
+conditionally show endpoints that are disabled by a flag:
+
+```
+{{ if not (hasFlag "no-portal") -}}
+Portal       http://localhost:30081
+{{ end -}}
+```
+
+`hasFlag` returns `true` when the user passed the named flag on the CLI
+(e.g. `--no-portal`). It always returns `false` during `sew delete`
+(which has no flag context).
 
 ### Images
 
@@ -271,6 +285,55 @@ components:
         - name: gravitee-license
           fromFile: '$HOME/opt/gravitee/license.key'
           onMissing: ignore
+```
+
+### Context flags
+
+Context flags let users customize a deployment without requiring a
+separate context directory for every combination. Define a flag by
+creating a `sew--{flag-name}.yaml` patch file alongside the context's
+`sew.yaml`:
+
+```yaml
+# sew--no-portal.yaml
+description: "Disable the developer portal UI"
+components:
+  - name: apim
+    helm:
+      values:
+        portal:
+          enabled: false
+```
+
+**Naming convention**: flag names must be lowercase kebab-case
+(`^[a-z0-9]+(-[a-z0-9]+)*$`). The `description` field is required
+and is displayed on the registry site and in validation output.
+
+**Inheritance**: flags placed on an abstract context are automatically
+inherited by every concrete context that composes from it via `from`.
+A child can override an inherited flag by providing its own file with
+the same name.
+
+Flags can also fully exclude a component from deployment by setting
+`enabled: false`. Any `requires` entries referencing a disabled
+component are silently dropped:
+
+```yaml
+components:
+  - name: elasticsearch
+    enabled: false
+```
+
+**When to use flags vs separate contexts**: use flags for optional
+components that can be toggled without changing the fundamental nature
+of the deployment (e.g., disabling analytics or UIs). Use separate
+context directories for fundamentally different backends or topologies
+(e.g., MongoDB vs PostgreSQL).
+
+Users activate flags on the command line:
+
+```bash
+sew create --from gravitee.io/apim --no-portal --no-ui
 ```
 
 ## Schema

@@ -13,14 +13,15 @@ type HelmConfig struct {
 }
 
 type Config struct {
-	Registry   string         `yaml:"registry"`
-	From       []string       `yaml:"from,omitempty"`
-	Abstract   bool           `yaml:"abstract,omitempty"`
-	Kind       KindConfig     `yaml:"kind"`
-	Features   FeaturesConfig `yaml:"features,omitempty"`
-	Images     ImagesConfig   `yaml:"images,omitempty"`
-	Helm       HelmConfig     `yaml:"helm,omitempty"`
-	Components []Component    `yaml:"components,omitempty"`
+	Description string         `yaml:"description,omitempty"`
+	Registry    string         `yaml:"registry"`
+	From        []string       `yaml:"from,omitempty"`
+	Abstract    bool           `yaml:"abstract,omitempty"`
+	Kind        KindConfig     `yaml:"kind"`
+	Features    FeaturesConfig `yaml:"features,omitempty"`
+	Images      ImagesConfig   `yaml:"images,omitempty"`
+	Helm        HelmConfig     `yaml:"helm,omitempty"`
+	Components  []Component    `yaml:"components,omitempty"`
 
 	// Dir is set by Load to resolve relative paths in component value files.
 	Dir string `yaml:"-"`

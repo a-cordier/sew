@@ -10,6 +10,7 @@ import (
 	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/registry"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // Version is set by main from the build-time ldflags value.
@@ -153,4 +154,64 @@ func resolveContextConfig() (*config.ResolvedContext, error) {
 	cfg.Features = config.MergeFeatures(acc.Features, cfg.Features)
 	cfg.Images = config.MergeImages(acc.Images, cfg.Images)
 	return acc, nil
+}
+
+// applyContextFlags extracts context-specific flags from the CLI arguments
+// and applies their patch files to the resolved context. It returns the list
+// of active flag names (for use in notes rendering) and any error. Returns
+// nil, nil when no context flags are relevant.
+func applyContextFlags(cmd *cobra.Command, resolved *config.ResolvedContext) ([]string, error) {
+	if resolved == nil || len(resolved.Flags) == 0 {
+		return nil, nil
+	}
+	active, err := extractActiveFlags(os.Args, cmd.InheritedFlags(), cmd.LocalFlags(), resolved.Flags)
+	if err != nil {
+		return nil, err
+	}
+	if err := registry.ApplyFlags(resolved, active); err != nil {
+		return nil, err
+	}
+	return active, nil
+}
+
+// extractActiveFlags walks args looking for --flag-name tokens that are not
+// known Cobra flags and match one of the available context flags. It returns
+// the list of active flag names or an error if an unrecognized flag is found.
+func extractActiveFlags(args []string, inherited, local *pflag.FlagSet, available []config.ContextFlag) ([]string, error) {
+	availableByName := make(map[string]bool, len(available))
+	for _, f := range available {
+		availableByName[f.Name] = true
+	}
+
+	var active []string
+	for _, arg := range args {
+		if arg == "--" {
+			break
+		}
+		if !strings.HasPrefix(arg, "--") {
+			continue
+		}
+		name := strings.TrimPrefix(arg, "--")
+		if idx := strings.IndexByte(name, '='); idx >= 0 {
+			name = name[:idx]
+		}
+		if name == "" {
+			continue
+		}
+		if inherited.Lookup(name) != nil || local.Lookup(name) != nil {
+			continue
+		}
+		if name == "help" || name == "version" {
+			continue
+		}
+		if !availableByName[name] {
+			var known []string
+			for _, f := range available {
+				known = append(known, "--"+f.Name)
+			}
+			return nil, fmt.Errorf("unknown context flag --%s (available: %s)", name, strings.Join(known, ", "))
+		}
+		active = append(active, name)
+	}
+	return active, nil
 }

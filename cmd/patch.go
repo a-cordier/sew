@@ -38,8 +38,9 @@ Example:
 This resolves the current context (from sew.yaml / --from), merges the patch
 on top, and runs helm upgrade / kubectl apply for each component listed in the
 patch file.`,
-	Args: cobra.ExactArgs(1),
-	RunE: runPatch,
+	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+	Args:               cobra.ExactArgs(1),
+	RunE:               runPatch,
 }
 
 func init() {
@@ -48,7 +49,7 @@ func init() {
 	rootCmd.AddCommand(patchCmd)
 }
 
-func runPatch(_ *cobra.Command, args []string) error {
+func runPatch(cmd *cobra.Command, args []string) error {
 	start := time.Now()
 
 	resolved, err := resolveContextConfig()
@@ -57,6 +58,10 @@ func runPatch(_ *cobra.Command, args []string) error {
 	}
 	if resolved == nil {
 		return fmt.Errorf("no registry context configured; patch requires a resolved context (set registry and from in sew.yaml or via flags)")
+	}
+
+	if _, err := applyContextFlags(cmd, resolved); err != nil {
+		return err
 	}
 
 	clusterName := patchClusterName

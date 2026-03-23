@@ -59,6 +59,52 @@ func TestRegistryValidation(t *testing.T) {
 	}
 }
 
+// TestRegistryFlagValidation walks registry/**/sew--*.yaml and validates each
+// flag file against the JSON Schema and checks for a valid name and description.
+func TestRegistryFlagValidation(t *testing.T) {
+	sch := compileSchema(t)
+
+	registryDir := filepath.Join("..", "registry")
+	var files []string
+	err := filepath.Walk(registryDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasPrefix(info.Name(), "sew--") && strings.HasSuffix(info.Name(), ".yaml") {
+			files = append(files, path)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walking registry: %v", err)
+	}
+	if len(files) == 0 {
+		t.Skip("no flag files found in registry/")
+	}
+
+	for _, file := range files {
+		rel, _ := filepath.Rel(registryDir, file)
+		t.Run(rel, func(t *testing.T) {
+			if err := internalschema.ValidateFile(sch, file); err != nil {
+				t.Errorf("schema validation failed:\n%v", err)
+			}
+			data, err := os.ReadFile(file)
+			if err != nil {
+				t.Fatalf("reading flag file: %v", err)
+			}
+			var partial struct {
+				Description string `yaml:"description"`
+			}
+			if err := yaml.Unmarshal(data, &partial); err != nil {
+				t.Fatalf("parsing flag file: %v", err)
+			}
+			if strings.TrimSpace(partial.Description) == "" {
+				t.Error("flag file must have a non-empty 'description' field")
+			}
+		})
+	}
+}
+
 // TestStructCoverage reflects on config.Config and all nested types, collecting
 // every yaml tag, and asserts a corresponding property exists in the schema.
 // This catches drift when a Go field is added but not mirrored in the schema.

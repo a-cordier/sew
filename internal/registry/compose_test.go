@@ -1229,3 +1229,259 @@ from:
 		t.Fatal("expected kafka Service to be overridden to ClusterIP")
 	}
 }
+
+func TestFSResolver_NoParent_DiscoversFlagsInDir(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "ctx", "sew.yaml"), `
+components:
+  - name: app
+    helm:
+      chart: app/chart
+`)
+	writeFile(t, filepath.Join(root, "ctx", "sew--no-portal.yaml"), `
+description: "Disable portal"
+components: []
+`)
+	writeFile(t, filepath.Join(root, "ctx", "sew--no-ui.yaml"), `
+description: "Disable all UIs"
+components: []
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "ctx")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resolved.Flags) != 2 {
+		t.Fatalf("expected 2 flags, got %d", len(resolved.Flags))
+	}
+	names := map[string]bool{}
+	for _, f := range resolved.Flags {
+		names[f.Name] = true
+	}
+	if !names["no-portal"] || !names["no-ui"] {
+		t.Fatalf("expected no-portal and no-ui flags, got %v", names)
+	}
+}
+
+func TestFSResolver_ParentFlagsInherited(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "parent", "sew.yaml"), `
+components:
+  - name: app
+    helm:
+      chart: app/chart
+`)
+	writeFile(t, filepath.Join(root, "parent", "sew--no-portal.yaml"), `
+description: "Disable portal"
+components: []
+`)
+
+	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
+from:
+  - parent
+components: []
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "child")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resolved.Flags) != 1 {
+		t.Fatalf("expected 1 inherited flag, got %d", len(resolved.Flags))
+	}
+	if resolved.Flags[0].Name != "no-portal" {
+		t.Fatalf("expected flag %q, got %q", "no-portal", resolved.Flags[0].Name)
+	}
+	expectedDir := filepath.Join(root, "parent")
+	if resolved.Flags[0].Dir != expectedDir {
+		t.Fatalf("expected flag dir %q, got %q", expectedDir, resolved.Flags[0].Dir)
+	}
+}
+
+func TestFSResolver_ChildFlagOverridesParent(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "parent", "sew.yaml"), `
+components:
+  - name: app
+    helm:
+      chart: app/chart
+`)
+	writeFile(t, filepath.Join(root, "parent", "sew--no-portal.yaml"), `
+description: "Parent: disable portal"
+components: []
+`)
+
+	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
+from:
+  - parent
+components: []
+`)
+	writeFile(t, filepath.Join(root, "child", "sew--no-portal.yaml"), `
+description: "Child: disable portal with extras"
+components: []
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "child")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resolved.Flags) != 1 {
+		t.Fatalf("expected 1 flag, got %d", len(resolved.Flags))
+	}
+	if resolved.Flags[0].Description != "Child: disable portal with extras" {
+		t.Fatalf("expected child description to win, got %q", resolved.Flags[0].Description)
+	}
+	expectedDir := filepath.Join(root, "child")
+	if resolved.Flags[0].Dir != expectedDir {
+		t.Fatalf("expected child dir %q, got %q", expectedDir, resolved.Flags[0].Dir)
+	}
+}
+
+func TestFSResolver_ChildAddsFlagsToParent(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "parent", "sew.yaml"), `
+components:
+  - name: app
+    helm:
+      chart: app/chart
+`)
+	writeFile(t, filepath.Join(root, "parent", "sew--no-portal.yaml"), `
+description: "Disable portal"
+components: []
+`)
+
+	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
+from:
+  - parent
+components: []
+`)
+	writeFile(t, filepath.Join(root, "child", "sew--no-ui.yaml"), `
+description: "Disable all UIs"
+components: []
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "child")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resolved.Flags) != 2 {
+		t.Fatalf("expected 2 flags, got %d", len(resolved.Flags))
+	}
+	names := map[string]bool{}
+	for _, f := range resolved.Flags {
+		names[f.Name] = true
+	}
+	if !names["no-portal"] || !names["no-ui"] {
+		t.Fatalf("expected no-portal and no-ui, got %v", names)
+	}
+}
+
+func TestFSResolver_MultiFromFlagsMerged(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "parent-a", "sew.yaml"), `
+components:
+  - name: comp-a
+    helm:
+      chart: a/chart
+`)
+	writeFile(t, filepath.Join(root, "parent-a", "sew--flag-a.yaml"), `
+description: "Flag from A"
+components: []
+`)
+
+	writeFile(t, filepath.Join(root, "parent-b", "sew.yaml"), `
+components:
+  - name: comp-b
+    helm:
+      chart: b/chart
+`)
+	writeFile(t, filepath.Join(root, "parent-b", "sew--flag-b.yaml"), `
+description: "Flag from B"
+components: []
+`)
+
+	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
+from:
+  - parent-a
+  - parent-b
+components: []
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "child")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resolved.Flags) != 2 {
+		t.Fatalf("expected 2 flags from both parents, got %d", len(resolved.Flags))
+	}
+	names := map[string]bool{}
+	for _, f := range resolved.Flags {
+		names[f.Name] = true
+	}
+	if !names["flag-a"] || !names["flag-b"] {
+		t.Fatalf("expected flag-a and flag-b, got %v", names)
+	}
+}
+
+func TestFSResolver_ThreeLevelFlagInheritance(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "grandparent", "sew.yaml"), `
+components:
+  - name: gp-comp
+    helm:
+      chart: gp/chart
+`)
+	writeFile(t, filepath.Join(root, "grandparent", "sew--gp-flag.yaml"), `
+description: "Grandparent flag"
+components: []
+`)
+
+	writeFile(t, filepath.Join(root, "mid", "sew.yaml"), `
+from:
+  - grandparent
+components: []
+`)
+	writeFile(t, filepath.Join(root, "mid", "sew--mid-flag.yaml"), `
+description: "Mid-level flag"
+components: []
+`)
+
+	writeFile(t, filepath.Join(root, "leaf", "sew.yaml"), `
+from:
+  - mid
+components: []
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "leaf")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resolved.Flags) != 2 {
+		t.Fatalf("expected 2 flags inherited through chain, got %d", len(resolved.Flags))
+	}
+	names := map[string]bool{}
+	for _, f := range resolved.Flags {
+		names[f.Name] = true
+	}
+	if !names["gp-flag"] || !names["mid-flag"] {
+		t.Fatalf("expected gp-flag and mid-flag, got %v", names)
+	}
+}

@@ -124,7 +124,7 @@ func runDown(_ *cobra.Command, _ []string) error {
 	color.Blue("  Total: %s", time.Since(start).Round(time.Millisecond))
 
 	if target.Notes != "" {
-		printNotes(target.Notes, cfg)
+		printNotes(target.Notes, cfg, nil)
 	}
 
 	return nil

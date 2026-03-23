@@ -14,6 +14,7 @@ A `sew.yaml` file is a YAML document with the following top-level fields:
 |-------|------|-------------|
 | `abstract` | boolean | When true, marks this configuration as a shared base that cannot be deployed on its own. Abstract configs are meant to be referenced via 'from' by concrete contexts. |
 | `components` | object[] | Ordered list of components to deploy. Components are applied sequentially; use 'requires' to express inter-component dependencies. |
+| `description` | string | Human-readable description of this configuration. Used by context flag files to document what the flag does; ignored during deployment. |
 | `features` | map | Optional networking features. Each sub-key uses pointer semantics: setting a feature explicitly overrides the inherited context default; omitting it preserves the parent value. |
 | `from` | string[] | List of registry paths to compose from. Each referenced context is merged in order, allowing reuse of shared building blocks (databases, message brokers, etc.). |
 | `helm` | map | Global Helm configuration shared across all components. |
@@ -40,6 +41,7 @@ Each entry is an object with the following fields:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `conditions` | map | No | Readiness conditions for a component or dependency. |
+| `enabled` | boolean | No | When false, the component is excluded from deployment. Use in context flag files to disable components without removing them from the composition chain. Default: `true`. |
 | `helm` | map | No | Helm chart installation specification for a component of type "helm". The chart field may be omitted when the component inherits it from a parent context via 'from' composition. |
 | `k8s` | map | No | Raw Kubernetes resource specification for a component of type "k8s". |
 | `name` | string | Yes | Unique name identifying this component within the configuration. |
@@ -177,6 +179,12 @@ Label selector used to identify the pods to watch for readiness.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `matchLabels` | map | No | Map of label key-value pairs that pods must match. |
+
+## `description`
+
+Human-readable description of this configuration. Used by context flag files to document what the flag does; ignored during deployment.
+
+**Type:** `string`
 
 ## `features`
 

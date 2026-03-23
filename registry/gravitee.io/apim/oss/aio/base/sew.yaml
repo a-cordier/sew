@@ -6,6 +6,7 @@ images:
       - graviteeio/apim-management-api:latest-debian
       - graviteeio/apim-management-ui:latest
       - graviteeio/apim-portal-ui:latest
+      - alpine:latest
 kind:
   name: gravitee-apim
   nodes:
@@ -60,6 +61,8 @@ components:
           endpoints:
             - http://elasticsearch-master:9200
         ui:
+          image:
+            tag: latest
           ingress:
             enabled: false
           service:
@@ -70,6 +73,8 @@ components:
             - name: CONSOLE_BASE_HREF
               value: /
         portal:
+          image:
+            tag: latest
           enabled: true
           ingress:
             enabled: false
@@ -78,6 +83,8 @@ components:
             nodePort: 30081
           baseURL: http://localhost:30083/portal
         gateway:
+          image:
+            tag: latest-debian
           ingress:
             enabled: false
           ingressController:
@@ -114,6 +121,8 @@ components:
             elasticsearch:
               enabled: true
         api:
+          image:
+            tag: latest-debian
           ingress:
             enabled: false
           service:

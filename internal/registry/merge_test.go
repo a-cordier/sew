@@ -1726,3 +1726,56 @@ func TestMergeRepos_OrderPreserved(t *testing.T) {
 		t.Fatalf("expected delta fourth, got %q", result[3].Name)
 	}
 }
+
+func TestMergeComponents_EnabledPropagated(t *testing.T) {
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{Name: "elasticsearch", Helm: &config.HelmSpec{Chart: "elastic/elasticsearch"}},
+			{Name: "apim", Helm: &config.HelmSpec{Chart: "graviteeio/apim"}},
+		},
+	}
+	disabled := false
+	patch := []config.Component{
+		{Name: "elasticsearch", Enabled: &disabled},
+	}
+	MergeComponents(resolved, patch, "")
+	if resolved.Components[0].IsEnabled() {
+		t.Fatal("expected elasticsearch to be disabled after merge")
+	}
+	if !resolved.Components[1].IsEnabled() {
+		t.Fatal("expected apim to remain enabled")
+	}
+}
+
+func TestMergeComponents_EnabledNotSetDoesNotOverride(t *testing.T) {
+	disabled := false
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{Name: "elasticsearch", Enabled: &disabled, Helm: &config.HelmSpec{Chart: "elastic/elasticsearch"}},
+		},
+	}
+	patch := []config.Component{
+		{Name: "elasticsearch", Helm: &config.HelmSpec{Values: map[string]interface{}{"replicas": 3}}},
+	}
+	MergeComponents(resolved, patch, "")
+	if resolved.Components[0].IsEnabled() {
+		t.Fatal("expected elasticsearch to stay disabled when patch doesn't set enabled")
+	}
+}
+
+func TestMergeComponents_EnabledReEnabled(t *testing.T) {
+	disabled := false
+	resolved := &config.ResolvedContext{
+		Components: []config.Component{
+			{Name: "elasticsearch", Enabled: &disabled, Helm: &config.HelmSpec{Chart: "elastic/elasticsearch"}},
+		},
+	}
+	enabled := true
+	patch := []config.Component{
+		{Name: "elasticsearch", Enabled: &enabled},
+	}
+	MergeComponents(resolved, patch, "")
+	if !resolved.Components[0].IsEnabled() {
+		t.Fatal("expected elasticsearch to be re-enabled")
+	}
+}

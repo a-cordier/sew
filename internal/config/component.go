@@ -57,6 +57,7 @@ type Requirement struct {
 
 type Component struct {
 	Name       string        `yaml:"name"`
+	Enabled    *bool         `yaml:"enabled,omitempty"`
 	Type       string        `yaml:"type,omitempty"`
 	Namespace  string        `yaml:"namespace,omitempty"`
 	Conditions Conditions    `yaml:"conditions,omitempty"`
@@ -65,6 +66,12 @@ type Component struct {
 	Requires   []Requirement `yaml:"requires,omitempty"`
 	Helm       *HelmSpec     `yaml:"helm,omitempty"`
 	K8s        *K8sSpec      `yaml:"k8s,omitempty"`
+}
+
+// IsEnabled returns true when the component should be deployed.
+// A nil Enabled pointer means the component is enabled (default).
+func (c *Component) IsEnabled() bool {
+	return c.Enabled == nil || *c.Enabled
 }
 
 // EffectiveType returns Type, defaulting to "helm".
@@ -80,6 +87,14 @@ type ResolvedNotes struct {
 	Delete string
 }
 
+// ContextFlag represents an optional toggle defined by a sew--{name}.yaml
+// patch file in a context directory.
+type ContextFlag struct {
+	Name        string
+	Description string
+	Dir         string // directory containing the sew--{name}.yaml file
+}
+
 // ResolvedContext is a fully resolved context with all referenced files in Dir.
 type ResolvedContext struct {
 	Repos      []Repo
@@ -90,4 +105,5 @@ type ResolvedContext struct {
 	Images     ImagesConfig
 	Notes      ResolvedNotes
 	Abstract   bool
+	Flags      []ContextFlag
 }

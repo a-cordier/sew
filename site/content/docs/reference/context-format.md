@@ -166,10 +166,74 @@ components:
 
 For **k8s manifest components**, provide a full replacement Service manifest. Manifests are merged by resource identity, so your Service replaces the child's entirely.
 
+## Context flags
+
+Context flags let maintainers expose optional toggles without creating separate registry directories for every combination. A flag is defined by placing a `sew--{flag-name}.yaml` patch file alongside the context's `sew.yaml`.
+
+### File format
+
+Flag files use the same schema as `sew.yaml`, with a `description` field that documents what the flag does:
+
+```yaml
+description: "Disable the developer portal UI"
+components:
+  - name: apim
+    helm:
+      values:
+        portal:
+          enabled: false
+```
+
+### Naming convention
+
+Flag file names must follow the pattern `sew--{flag-name}.yaml` where `flag-name` is lowercase kebab-case: `^[a-z0-9]+(-[a-z0-9]+)*$`. Users activate flags with `--flag-name` on the CLI:
+
+```bash
+sew create --from gravitee.io/apim --no-portal --no-ui
+```
+
+### Inheritance from abstract parents
+
+Flags defined on an abstract context are inherited by all concrete contexts that compose from it via `from`. A child context can override an inherited flag by providing its own `sew--{name}.yaml` with the same name.
+
+### Cumulative application
+
+Multiple flags can be combined. Each flag's patch is merged on top of the resolved context in the order they appear on the command line, using the same [merge rules]({{< ref "/docs/guides/composing-contexts#merge-rules" >}}) as context composition.
+
+### Disabling components
+
+Flags can fully exclude a component from deployment by setting `enabled: false`. When a component is disabled, it is not installed and any `requires` entries referencing it are silently dropped:
+
+```yaml
+description: "Disable Elasticsearch and analytics reporters"
+components:
+  - name: elasticsearch
+    enabled: false
+  - name: apim
+    helm:
+      values:
+        es:
+          enabled: false
+```
+
+With this flag active, the `elasticsearch` component is skipped entirely and other components that declare `requires: [{component: elasticsearch}]` proceed without waiting for it.
+
+### When to use flags vs separate contexts
+
+Use **flags** for optional features within a context -- components that can be toggled on or off without changing the fundamental nature of the deployment (e.g., disabling analytics, removing UIs, enabling debug mode).
+
+Use **separate context directories** for fundamentally different backends or topologies (e.g., MongoDB vs PostgreSQL, standalone vs clustered).
+
 ## Registry organization tips
 
 - Use the `org/product/variant` convention for discoverability
 - Extract shared config into `abstract: true` base contexts
 - Set `.default` files so users can reference products without spelling out the full variant path
 - Include a `README.md` with front matter (`title`, `description`, `tags`) -- the site generator uses it for the registry browser
-- Add `notes.create` with post-deployment instructions that `sew create` prints after a successful deploy
+- Add `notes.create` with post-deployment instructions that `sew create` prints after a successful deploy. Templates can use `{{ hasFlag "flag-name" }}` to conditionally show content based on which context flags the user activated:
+
+```
+{{ if not (hasFlag "no-portal") -}}
+APIM Portal      http://localhost:30081
+{{ end -}}
+```

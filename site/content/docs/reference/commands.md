@@ -26,6 +26,18 @@ When features like load balancers, Gateway API, or DNS are enabled, sew sets the
 | `--registry <url>` | Registry URL. Overrides the value from config. |
 | `--from <path>` | Context path to compose. Repeatable. Overrides the `from` list from config. |
 
+### Context flags
+
+Contexts can define optional flags that customize the deployment. These are extra `--flag-name` options defined by the context maintainer as `sew--{flag-name}.yaml` patch files.
+
+```bash
+sew create --from gravitee.io/apim --no-portal --no-ui --no-es
+```
+
+Each flag merges a patch on top of the resolved context before deployment. Flags are cumulative -- you can combine as many as needed. Passing an unknown flag produces an error listing the available flags for that context.
+
+See [Context Format -- Context flags]({{< ref "/docs/reference/context-format#context-flags" >}}) for how to author flag files.
+
 ## sew patch
 
 Upgrade components on a running cluster by merging a patch file into the resolved context and re-deploying only the affected components. This is useful for testing upgrades (bumping image tags or chart versions), toggling feature flags, or applying configuration tweaks.
@@ -241,7 +253,7 @@ DNS
 
 ## sew validate
 
-Validate one or more `sew.yaml` files against the configuration schema. Catches typos, unknown fields, and type mismatches before you deploy.
+Validate `sew.yaml` and context flag files (`sew--*.yaml`) against the configuration schema. Catches typos, unknown fields, and type mismatches before you deploy.
 
 ```bash
 sew validate
@@ -249,7 +261,7 @@ sew validate registry/kafka/standalone/sew.yaml
 sew validate registry/
 ```
 
-When given a directory, sew walks it recursively and validates every `sew.yaml` it finds. When no argument is given, it validates `./sew.yaml` in the current directory.
+When given a directory, sew walks it recursively and validates every `sew.yaml` and `sew--*.yaml` file it finds. Context flag files are additionally checked for a valid naming convention and a non-empty `description` field. When no argument is given, it validates `./sew.yaml` in the current directory.
 
 Exit code is non-zero when any file fails validation, making it suitable for CI pipelines and pre-commit checks.
 

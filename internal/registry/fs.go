@@ -62,6 +62,11 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*config.R
 		return resolveFrom(ctx, ctxCfg, dir, selfRegistry, r.SewHome)
 	}
 
+	flags, err := DiscoverFlags(dir)
+	if err != nil {
+		return nil, fmt.Errorf("discovering flags: %w", err)
+	}
+
 	return &config.ResolvedContext{
 		Repos:      ctxCfg.Helm.Repos,
 		Components: ctxCfg.Components,
@@ -71,6 +76,7 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*config.R
 		Images:     ctxCfg.Images,
 		Notes:      readNotes(dir),
 		Abstract:   ctxCfg.Abstract,
+		Flags:      flags,
 	}, nil
 }
 

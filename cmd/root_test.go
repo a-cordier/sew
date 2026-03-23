@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/a-cordier/sew/internal/config"
+	"github.com/spf13/pflag"
 )
 
 func writeFile(t *testing.T, path, content string) {
@@ -522,5 +523,177 @@ components:
 
 	if cfg.Features.LB == nil || cfg.Features.LB.Enabled {
 		t.Fatal("expected user-level LB=false to override context LB=true")
+	}
+}
+
+func newFlagSet(t *testing.T, flags map[string]string) *pflag.FlagSet {
+	t.Helper()
+	fs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	for name, def := range flags {
+		fs.String(name, def, "")
+	}
+	return fs
+}
+
+func TestExtractActiveFlags_NoContextFlagsPassed(t *testing.T) {
+	inherited := newFlagSet(t, map[string]string{"config": "", "registry": ""})
+	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
+	available := []config.ContextFlag{{Name: "no-portal"}}
+
+	active, err := extractActiveFlags(
+		[]string{"sew", "create", "--config", "sew.yaml"},
+		inherited, local, available,
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(active) != 0 {
+		t.Fatalf("expected no active flags, got %v", active)
+	}
+}
+
+func TestExtractActiveFlags_RecognizesContextFlag(t *testing.T) {
+	inherited := newFlagSet(t, map[string]string{"from": ""})
+	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
+	available := []config.ContextFlag{
+		{Name: "no-portal"},
+		{Name: "no-ui"},
+	}
+
+	active, err := extractActiveFlags(
+		[]string{"sew", "create", "--from", "ctx", "--no-portal"},
+		inherited, local, available,
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(active) != 1 || active[0] != "no-portal" {
+		t.Fatalf("expected [no-portal], got %v", active)
+	}
+}
+
+func TestExtractActiveFlags_MultipleContextFlags(t *testing.T) {
+	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
+	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
+	available := []config.ContextFlag{
+		{Name: "no-portal"},
+		{Name: "no-ui"},
+		{Name: "no-es"},
+	}
+
+	active, err := extractActiveFlags(
+		[]string{"sew", "create", "--no-portal", "--no-es"},
+		inherited, local, available,
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(active) != 2 || active[0] != "no-portal" || active[1] != "no-es" {
+		t.Fatalf("expected [no-portal no-es], got %v", active)
+	}
+}
+
+func TestExtractActiveFlags_UnknownFlag(t *testing.T) {
+	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
+	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
+	available := []config.ContextFlag{{Name: "no-portal"}}
+
+	_, err := extractActiveFlags(
+		[]string{"sew", "create", "--no-such-flag"},
+		inherited, local, available,
+	)
+	if err == nil {
+		t.Fatal("expected error for unknown flag")
+	}
+	if !strings.Contains(err.Error(), "--no-such-flag") {
+		t.Fatalf("expected error to mention the unknown flag, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "--no-portal") {
+		t.Fatalf("expected error to list available flags, got: %v", err)
+	}
+}
+
+func TestExtractActiveFlags_SkipsKnownCobraFlags(t *testing.T) {
+	inherited := newFlagSet(t, map[string]string{"config": "", "registry": ""})
+	local := newFlagSet(t, map[string]string{"name": ""})
+	available := []config.ContextFlag{{Name: "no-portal"}}
+
+	active, err := extractActiveFlags(
+		[]string{"sew", "create", "--config", "sew.yaml", "--registry", "http://r", "--name", "test", "--no-portal"},
+		inherited, local, available,
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(active) != 1 || active[0] != "no-portal" {
+		t.Fatalf("expected [no-portal], got %v", active)
+	}
+}
+
+func TestExtractActiveFlags_StopsAtDoubleDash(t *testing.T) {
+	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
+	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
+	available := []config.ContextFlag{{Name: "no-portal"}}
+
+	active, err := extractActiveFlags(
+		[]string{"sew", "create", "--", "--no-portal"},
+		inherited, local, available,
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(active) != 0 {
+		t.Fatalf("expected no active flags after --, got %v", active)
+	}
+}
+
+func TestExtractActiveFlags_EqualsForm(t *testing.T) {
+	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
+	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
+	available := []config.ContextFlag{{Name: "no-portal"}}
+
+	active, err := extractActiveFlags(
+		[]string{"sew", "create", "--no-portal=true"},
+		inherited, local, available,
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(active) != 1 || active[0] != "no-portal" {
+		t.Fatalf("expected [no-portal], got %v", active)
+	}
+}
+
+func TestExtractActiveFlags_SkipsHelpAndVersion(t *testing.T) {
+	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
+	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
+	available := []config.ContextFlag{{Name: "no-portal"}}
+
+	active, err := extractActiveFlags(
+		[]string{"sew", "create", "--help"},
+		inherited, local, available,
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(active) != 0 {
+		t.Fatalf("expected --help skipped, got %v", active)
+	}
+}
+
+func TestExtractActiveFlags_IgnoresSingleDash(t *testing.T) {
+	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
+	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
+	available := []config.ContextFlag{{Name: "no-portal"}}
+
+	active, err := extractActiveFlags(
+		[]string{"sew", "create", "-v", "--no-portal"},
+		inherited, local, available,
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(active) != 1 || active[0] != "no-portal" {
+		t.Fatalf("expected [no-portal], got %v", active)
 	}
 }

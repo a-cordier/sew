@@ -96,6 +96,11 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*config
 		}
 	}
 
+	flags, err := r.fetchFlags(ctx, client, baseURL, contextPath, cacheDir)
+	if err != nil {
+		return nil, err
+	}
+
 	if len(parsed.From) > 0 {
 		return resolveFrom(ctx, parsed, cacheDir, r.BaseURL, r.SewHome)
 	}
@@ -109,6 +114,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*config
 		Images:     parsed.Images,
 		Notes:      readNotes(cacheDir),
 		Abstract:   parsed.Abstract,
+		Flags:      flags,
 	}, nil
 }
 
@@ -174,6 +180,60 @@ func (r *HTTPResolver) fetchAndCache(ctx context.Context, client *http.Client, b
 		return fmt.Errorf("writing %s: %w", filename, err)
 	}
 	return nil
+}
+
+type flagsManifest struct {
+	Flags []flagEntry `yaml:"flags"`
+}
+
+type flagEntry struct {
+	Name        string `yaml:"name"`
+	Description string `yaml:"description"`
+}
+
+// fetchFlags fetches the sew.flags.yaml manifest from the remote registry,
+// downloads each referenced flag patch file to cacheDir, and returns the
+// corresponding ContextFlag entries. A 404 on the manifest means no flags.
+func (r *HTTPResolver) fetchFlags(ctx context.Context, client *http.Client, baseURL, contextPath, cacheDir string) ([]config.ContextFlag, error) {
+	u := baseURL + "/" + contextPath + "/sew.flags.yaml"
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+	if err != nil {
+		return nil, fmt.Errorf("building request for flags manifest: %w", err)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("fetching flags manifest: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, nil
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("fetching flags manifest: %s", resp.Status)
+	}
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("reading flags manifest: %w", err)
+	}
+
+	var manifest flagsManifest
+	if err := yaml.Unmarshal(data, &manifest); err != nil {
+		return nil, fmt.Errorf("parsing flags manifest: %w", err)
+	}
+
+	var flags []config.ContextFlag
+	for _, entry := range manifest.Flags {
+		flagFile := flagFilePrefix + entry.Name + ".yaml"
+		if err := r.fetchAndCache(ctx, client, baseURL, contextPath, cacheDir, flagFile, true); err != nil {
+			return nil, err
+		}
+		flags = append(flags, config.ContextFlag{
+			Name:        entry.Name,
+			Description: entry.Description,
+			Dir:         cacheDir,
+		})
+	}
+	return flags, nil
 }
 
 // fetchContextFile fetches sew.yaml from the registry. It returns the body

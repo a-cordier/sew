@@ -27,16 +27,17 @@ import (
 )
 
 var upCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create the cluster and install the context",
-	RunE:  runUp,
+	Use:                "create",
+	Short:              "Create the cluster and install the context",
+	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+	RunE:               runUp,
 }
 
 func init() {
 	rootCmd.AddCommand(upCmd)
 }
 
-func runUp(_ *cobra.Command, _ []string) error {
+func runUp(cmd *cobra.Command, _ []string) error {
 	if err := requireDocker(); err != nil {
 		return err
 	}
@@ -48,6 +49,11 @@ func runUp(_ *cobra.Command, _ []string) error {
 	}
 
 	resolved, err := resolveContextConfig()
+	if err != nil {
+		return err
+	}
+
+	activeFlags, err := applyContextFlags(cmd, resolved)
 	if err != nil {
 		return err
 	}
@@ -190,7 +196,7 @@ func runUp(_ *cobra.Command, _ []string) error {
 	color.Blue("  Total: %s", time.Since(start).Round(time.Millisecond))
 
 	if resolved != nil {
-		printNotes(resolved.Notes.Create, cfg)
+		printNotes(resolved.Notes.Create, cfg, activeFlags)
 	}
 
 	return nil
@@ -478,11 +484,11 @@ func ensureDNSServerRunning(cfg *config.Config) error {
 	return startDNSServer(domain, port, dir)
 }
 
-func printNotes(templateContent string, cfg *config.Config) {
+func printNotes(templateContent string, cfg *config.Config, activeFlags []string) {
 	if templateContent == "" {
 		return
 	}
-	rendered, err := notes.Render(templateContent, cfg)
+	rendered, err := notes.RenderWithFlags(templateContent, cfg, activeFlags)
 	if err != nil {
 		logger.Warn("failed to render notes: %v", err)
 		return

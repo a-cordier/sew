@@ -720,6 +720,29 @@ func TestMergeWithDefaults_UnionDedupConflictOverrideWins(t *testing.T) {
 	}
 }
 
+func TestIsEnabled_NilDefaultsToTrue(t *testing.T) {
+	c := Component{Name: "app"}
+	if !c.IsEnabled() {
+		t.Fatal("expected nil Enabled to mean enabled")
+	}
+}
+
+func TestIsEnabled_ExplicitTrue(t *testing.T) {
+	v := true
+	c := Component{Name: "app", Enabled: &v}
+	if !c.IsEnabled() {
+		t.Fatal("expected explicit true to be enabled")
+	}
+}
+
+func TestIsEnabled_ExplicitFalse(t *testing.T) {
+	v := false
+	c := Component{Name: "app", Enabled: &v}
+	if c.IsEnabled() {
+		t.Fatal("expected explicit false to be disabled")
+	}
+}
+
 func TestResolveFeatureDependencies_DisabledGatewayNoAutoLB(t *testing.T) {
 	f := FeaturesConfig{
 		Gateway: &GatewayConfig{Enabled: false},

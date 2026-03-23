@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -32,18 +33,24 @@ type readmeFrontmatter struct {
 	Tags        []string `yaml:"tags"`
 }
 
+type flagInfo struct {
+	Name        string `yaml:"name"`
+	Description string `yaml:"description,omitempty"`
+}
+
 type componentPage struct {
-	Title       string   `yaml:"title"`
-	Layout      string   `yaml:"layout"`
-	Path        string   `yaml:"path"`
-	Context     bool     `yaml:"context"`
-	Description string   `yaml:"description,omitempty"`
-	Tags        []string `yaml:"tags,omitempty"`
-	From        []string `yaml:"from,omitempty"`
-	Components  []string `yaml:"components,omitempty"`
-	NotesCreate string   `yaml:"notes_create,omitempty"`
-	Icon        string   `yaml:"icon,omitempty"`
-	Type        string   `yaml:"type"`
+	Title       string     `yaml:"title"`
+	Layout      string     `yaml:"layout"`
+	Path        string     `yaml:"path"`
+	Context     bool       `yaml:"context"`
+	Description string     `yaml:"description,omitempty"`
+	Tags        []string   `yaml:"tags,omitempty"`
+	From        []string   `yaml:"from,omitempty"`
+	Components  []string   `yaml:"components,omitempty"`
+	Flags       []flagInfo `yaml:"flags,omitempty"`
+	NotesCreate string     `yaml:"notes_create,omitempty"`
+	Icon        string     `yaml:"icon,omitempty"`
+	Type        string     `yaml:"type"`
 }
 
 type sectionPage struct {
@@ -127,6 +134,7 @@ func main() {
 			Tags:        tags,
 			From:        config.From,
 			Components:  resolveComponents(relDir, configs),
+			Flags:       resolveFlags(relDir, configs, registryDir),
 			NotesCreate: notesCreate,
 			Icon:        resolveIcon(registryDir, relDir),
 			Type:        "registry",
@@ -173,6 +181,10 @@ func main() {
 
 	if err := copyToStatic(registryDir, staticDir); err != nil {
 		fatalf("copy to static: %v", err)
+	}
+
+	if err := generateFlagsManifests(registryDir, staticDir, configs); err != nil {
+		fatalf("generate flags manifests: %v", err)
 	}
 
 	generateSchemaDoc("schema/sew.schema.yaml", "site/content/docs/reference/configuration.md")
@@ -412,6 +424,134 @@ func generateContributingDoc(srcPath, outputPath string) {
 	}
 
 	fmt.Printf("generated contributing doc: %s\n", outputPath)
+}
+
+func generateFlagsManifests(registryDir, staticDir string, configs map[string]*sewConfig) error {
+	for relDir := range configs {
+		flags := resolveFlags(relDir, configs, registryDir)
+		if len(flags) == 0 {
+			continue
+		}
+
+		staticCtxDir := filepath.Join(staticDir, relDir)
+		if err := os.MkdirAll(staticCtxDir, 0755); err != nil {
+			return fmt.Errorf("mkdir %s: %w", staticCtxDir, err)
+		}
+
+		manifest := struct {
+			Flags []flagInfo `yaml:"flags"`
+		}{Flags: flags}
+		data, err := yaml.Marshal(manifest)
+		if err != nil {
+			return fmt.Errorf("marshal flags for %s: %w", relDir, err)
+		}
+		if err := os.WriteFile(filepath.Join(staticCtxDir, "sew.flags.yaml"), data, 0644); err != nil {
+			return fmt.Errorf("write flags manifest for %s: %w", relDir, err)
+		}
+
+		for _, f := range flags {
+			flagFile := "sew--" + f.Name + ".yaml"
+			destPath := filepath.Join(staticCtxDir, flagFile)
+			if _, err := os.Stat(destPath); err == nil {
+				continue
+			}
+			srcPath := findFlagSource(relDir, f.Name, configs, registryDir)
+			if srcPath == "" {
+				continue
+			}
+			srcData, err := os.ReadFile(srcPath)
+			if err != nil {
+				return fmt.Errorf("read flag source %s: %w", srcPath, err)
+			}
+			if err := os.WriteFile(destPath, srcData, 0644); err != nil {
+				return fmt.Errorf("write inherited flag %s: %w", destPath, err)
+			}
+			fmt.Printf("static (inherited flag): %s/%s\n", relDir, flagFile)
+		}
+
+		fmt.Printf("flags manifest: %s\n", relDir)
+	}
+	return nil
+}
+
+func discoverLocalFlags(dir string) []flagInfo {
+	matches, err := filepath.Glob(filepath.Join(dir, "sew--*.yaml"))
+	if err != nil || len(matches) == 0 {
+		return nil
+	}
+	sort.Strings(matches)
+	var flags []flagInfo
+	for _, path := range matches {
+		name := strings.TrimPrefix(filepath.Base(path), "sew--")
+		name = strings.TrimSuffix(name, ".yaml")
+		flags = append(flags, flagInfo{
+			Name:        name,
+			Description: readFlagDescription(path),
+		})
+	}
+	return flags
+}
+
+func readFlagDescription(path string) string {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	var partial struct {
+		Description string `yaml:"description"`
+	}
+	_ = yaml.Unmarshal(data, &partial)
+	return partial.Description
+}
+
+// resolveFlags walks the from chain for relDir, discovering flags at each
+// level and merging them (child overrides parent for the same name).
+func resolveFlags(relDir string, configs map[string]*sewConfig, registryDir string) []flagInfo {
+	seen := map[string]int{}
+	var result []flagInfo
+	var walk func(string)
+	walk = func(dir string) {
+		config, ok := configs[dir]
+		if !ok {
+			return
+		}
+		for _, parent := range config.From {
+			walk(parent)
+		}
+		for _, f := range discoverLocalFlags(filepath.Join(registryDir, dir)) {
+			if idx, ok := seen[f.Name]; ok {
+				result[idx] = f
+			} else {
+				seen[f.Name] = len(result)
+				result = append(result, f)
+			}
+		}
+	}
+	walk(relDir)
+	return result
+}
+
+// findFlagSource locates the sew--{flagName}.yaml file by walking the
+// from chain of relDir, returning the first match.
+func findFlagSource(relDir, flagName string, configs map[string]*sewConfig, registryDir string) string {
+	var find func(string) string
+	find = func(dir string) string {
+		path := filepath.Join(registryDir, dir, "sew--"+flagName+".yaml")
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+		config, ok := configs[dir]
+		if !ok {
+			return ""
+		}
+		for _, parent := range config.From {
+			if src := find(parent); src != "" {
+				return src
+			}
+		}
+		return ""
+	}
+	return find(relDir)
 }
 
 func fatalf(format string, args ...any) {

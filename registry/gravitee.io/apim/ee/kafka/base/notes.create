@@ -2,8 +2,12 @@ Your cluster "{{ .Kind.Name }}" is ready.
 
 Everything has been deployed in the `gravitee` namespace.
 
+{{ if not (hasFlag "no-ui") -}}
 APIM Console     http://localhost:30080
+{{ end -}}
+{{ if and (not (hasFlag "no-portal")) (not (hasFlag "no-ui")) -}}
 APIM Portal      http://localhost:30081
+{{ end -}}
 APIM Gateway     http://localhost:30082
 Management API   http://localhost:30083
 Kafka Gateway    *.kafka.sew.local:9092 (TLS)

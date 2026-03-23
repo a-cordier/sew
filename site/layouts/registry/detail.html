@@ -60,6 +60,29 @@
         {{ end }}
         {{ end }}
 
+        {{ with .Params.flags }}
+        <section class="registry-flags">
+          <h2>Context flags</h2>
+          <p class="flags-desc">Optional flags you can pass to <code>sew create</code> to customize this context:</p>
+          <table class="flags-table">
+            <thead>
+              <tr>
+                <th>Flag</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{ range . }}
+              <tr>
+                <td><code>--{{ .name }}</code></td>
+                <td>{{ .description }}</td>
+              </tr>
+              {{ end }}
+            </tbody>
+          </table>
+        </section>
+        {{ end }}
+
         {{ with .Params.notes_create }}
         <section class="registry-notes">
           <h2>Post-deploy notes</h2>
@@ -97,6 +120,17 @@
           <ul class="component-list">
             {{ range . }}
             <li>{{ . }}</li>
+            {{ end }}
+          </ul>
+        </div>
+        {{ end }}
+
+        {{ with .Params.flags }}
+        <div class="sidebar-section">
+          <h3>Flags</h3>
+          <ul class="flag-list">
+            {{ range . }}
+            <li><code>--{{ .name }}</code></li>
             {{ end }}
           </ul>
         </div>

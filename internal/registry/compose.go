@@ -73,6 +73,12 @@ func resolveFrom(ctx context.Context, childCfg config.Config, childDir, selfRegi
 	acc.Notes = mergeNotes(acc.Notes, readNotes(childDir))
 	acc.Abstract = childCfg.Abstract
 
+	childFlags, err := DiscoverFlags(childDir)
+	if err != nil {
+		return nil, fmt.Errorf("discovering flags: %w", err)
+	}
+	acc.Flags = MergeFlags(acc.Flags, childFlags)
+
 	return acc, nil
 }
 
@@ -85,6 +91,7 @@ func MergeInto(acc, src *config.ResolvedContext) {
 	acc.Kind = mergeKind(acc.Kind, src.Kind)
 	acc.Images = config.MergeImages(acc.Images, src.Images)
 	acc.Notes = mergeNotes(acc.Notes, src.Notes)
+	acc.Flags = MergeFlags(acc.Flags, src.Flags)
 }
 
 // mergeNotes merges child notes on top of base notes.

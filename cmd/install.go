@@ -25,6 +25,8 @@ func installComponents(
 	filter func(config.Component) bool,
 	opts installer.InstallOpts,
 ) error {
+	resolved.Components = filterDisabledComponents(resolved.Components)
+
 	if err := registry.Validate(resolved.Components); err != nil {
 		return fmt.Errorf("validating components: %w", err)
 	}
@@ -132,4 +134,37 @@ func installComponents(
 	}
 
 	return nil
+}
+
+// filterDisabledComponents removes components with enabled: false and prunes
+// any requires entries that reference disabled components so readiness waits
+// don't block on something that won't be deployed.
+func filterDisabledComponents(components []config.Component) []config.Component {
+	disabled := make(map[string]bool)
+	for i := range components {
+		if !components[i].IsEnabled() {
+			disabled[components[i].Name] = true
+		}
+	}
+	if len(disabled) == 0 {
+		return components
+	}
+
+	var result []config.Component
+	for _, c := range components {
+		if disabled[c.Name] {
+			continue
+		}
+		if len(c.Requires) > 0 {
+			var kept []config.Requirement
+			for _, r := range c.Requires {
+				if !disabled[r.Component] {
+					kept = append(kept, r)
+				}
+			}
+			c.Requires = kept
+		}
+		result = append(result, c)
+	}
+	return result
 }

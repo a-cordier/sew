@@ -1,0 +1,17 @@
+description: "Disable Elasticsearch and analytics reporters"
+components:
+  - name: elasticsearch
+    enabled: false
+  - name: apim
+    helm:
+      values:
+        es:
+          enabled: false
+        gateway:
+          reporters:
+            elasticsearch:
+              enabled: false
+        api:
+          env:
+          - name: ANALYTICS_TYPE
+            value: none

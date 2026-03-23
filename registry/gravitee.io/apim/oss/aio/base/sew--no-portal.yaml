@@ -1,0 +1,7 @@
+description: "Disable the developer portal UI"
+components:
+  - name: apim
+    helm:
+      values:
+        portal:
+          enabled: false

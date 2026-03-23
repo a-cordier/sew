@@ -9,6 +9,12 @@ type: object
 additionalProperties: false
 
 properties:
+  description:
+    type: string
+    description: >-
+      Human-readable description of this configuration. Used by context
+      flag files to document what the flag does; ignored during deployment.
+
   registry:
     type: string
     description: >-
@@ -340,6 +346,13 @@ $defs:
         description: >-
           Unique name identifying this component within the
           configuration.
+      enabled:
+        type: boolean
+        description: >-
+          When false, the component is excluded from deployment. Use
+          in context flag files to disable components without removing
+          them from the composition chain.
+        default: true
       type:
         type: string
         description: >-

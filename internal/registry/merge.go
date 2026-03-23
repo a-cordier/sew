@@ -52,6 +52,9 @@ func MergeComponents(resolved *config.ResolvedContext, components []config.Compo
 				}
 			}
 		}
+		if patch.Enabled != nil {
+			comp.Enabled = patch.Enabled
+		}
 		if patch.Namespace != "" {
 			comp.Namespace = patch.Namespace
 		}

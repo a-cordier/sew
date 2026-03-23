@@ -461,3 +461,201 @@ func TestHTTPResolver_NotFound(t *testing.T) {
 		t.Fatal("expected error for missing context")
 	}
 }
+
+func TestHTTPResolver_FlagsFromManifest(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, filepath.Join(root, "ctx", "sew.yaml"), `
+kind:
+  name: my-cluster
+components:
+  - name: app
+    helm:
+      chart: repo/app
+`)
+	writeFile(t, filepath.Join(root, "ctx", "sew.flags.yaml"), `
+flags:
+  - name: no-portal
+    description: "Disable the developer portal UI"
+  - name: no-ui
+    description: "Disable all UIs"
+`)
+	writeFile(t, filepath.Join(root, "ctx", "sew--no-portal.yaml"), `
+description: "Disable the developer portal UI"
+components:
+  - name: app
+    helm:
+      values:
+        portal:
+          enabled: false
+`)
+	writeFile(t, filepath.Join(root, "ctx", "sew--no-ui.yaml"), `
+description: "Disable all UIs"
+components:
+  - name: app
+    helm:
+      values:
+        ui:
+          enabled: false
+`)
+
+	srv := newTestServer(t, root)
+	resolver := newHTTPResolver(t, srv.URL)
+
+	resolved, err := resolver.Resolve(context.Background(), "ctx")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resolved.Flags) != 2 {
+		t.Fatalf("expected 2 flags, got %d", len(resolved.Flags))
+	}
+	names := map[string]bool{}
+	for _, f := range resolved.Flags {
+		names[f.Name] = true
+	}
+	if !names["no-portal"] || !names["no-ui"] {
+		t.Fatalf("expected no-portal and no-ui flags, got %v", names)
+	}
+}
+
+func TestHTTPResolver_NoFlagsManifest(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, filepath.Join(root, "ctx", "sew.yaml"), `
+components:
+  - name: app
+    helm:
+      chart: repo/app
+`)
+
+	srv := newTestServer(t, root)
+	resolver := newHTTPResolver(t, srv.URL)
+
+	resolved, err := resolver.Resolve(context.Background(), "ctx")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resolved.Flags) != 0 {
+		t.Fatalf("expected no flags, got %d", len(resolved.Flags))
+	}
+}
+
+func TestHTTPResolver_FlagsWithComposition(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "parent", "sew.yaml"), `
+components:
+  - name: app
+    helm:
+      chart: repo/app
+`)
+	writeFile(t, filepath.Join(root, "parent", "sew.flags.yaml"), `
+flags:
+  - name: parent-flag
+    description: "A flag from parent"
+`)
+	writeFile(t, filepath.Join(root, "parent", "sew--parent-flag.yaml"), `
+description: "A flag from parent"
+components:
+  - name: app
+    helm:
+      values:
+        debug: true
+`)
+
+	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `
+from:
+  - parent
+components:
+  - name: extra
+    helm:
+      chart: extra/chart
+`)
+	writeFile(t, filepath.Join(root, "child", "sew.flags.yaml"), `
+flags:
+  - name: parent-flag
+    description: "A flag from parent"
+  - name: child-flag
+    description: "A flag from child"
+`)
+	writeFile(t, filepath.Join(root, "child", "sew--parent-flag.yaml"), `
+description: "A flag from parent"
+components:
+  - name: app
+    helm:
+      values:
+        debug: true
+`)
+	writeFile(t, filepath.Join(root, "child", "sew--child-flag.yaml"), `
+description: "A flag from child"
+components:
+  - name: extra
+    helm:
+      values:
+        verbose: true
+`)
+
+	srv := newTestServer(t, root)
+	resolver := newHTTPResolver(t, srv.URL)
+
+	resolved, err := resolver.Resolve(context.Background(), "child")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resolved.Flags) != 2 {
+		t.Fatalf("expected 2 flags, got %d", len(resolved.Flags))
+	}
+	names := map[string]bool{}
+	for _, f := range resolved.Flags {
+		names[f.Name] = true
+	}
+	if !names["parent-flag"] || !names["child-flag"] {
+		t.Fatalf("expected parent-flag and child-flag, got %v", names)
+	}
+}
+
+func TestHTTPResolver_FlagsApply(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, filepath.Join(root, "ctx", "sew.yaml"), `
+components:
+  - name: app
+    helm:
+      chart: repo/app
+      values:
+        portal:
+          enabled: true
+`)
+	writeFile(t, filepath.Join(root, "ctx", "sew.flags.yaml"), `
+flags:
+  - name: no-portal
+    description: "Disable portal"
+`)
+	writeFile(t, filepath.Join(root, "ctx", "sew--no-portal.yaml"), `
+description: "Disable portal"
+components:
+  - name: app
+    helm:
+      values:
+        portal:
+          enabled: false
+`)
+
+	srv := newTestServer(t, root)
+	resolver := newHTTPResolver(t, srv.URL)
+
+	resolved, err := resolver.Resolve(context.Background(), "ctx")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	err = ApplyFlags(resolved, []string{"no-portal"})
+	if err != nil {
+		t.Fatalf("unexpected error applying flags: %v", err)
+	}
+
+	portal, ok := resolved.Components[0].Helm.Values["portal"].(map[string]interface{})
+	if !ok {
+		t.Fatal("expected portal values map")
+	}
+	if portal["enabled"] != false {
+		t.Fatalf("expected portal.enabled=false, got %v", portal["enabled"])
+	}
+}
