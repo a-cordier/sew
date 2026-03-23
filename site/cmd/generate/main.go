@@ -167,7 +167,7 @@ func main() {
 		fmt.Printf("generated section: %s\n", dir)
 	}
 
-	if err := cleanStaticRegistry(registryDir, staticDir); err != nil {
+	if err := cleanStaticRegistry(staticDir); err != nil {
 		fatalf("clean static: %v", err)
 	}
 
@@ -337,10 +337,13 @@ func writePage(path string, frontmatter any, body string) error {
 	return os.WriteFile(path, buf.Bytes(), 0644)
 }
 
-func cleanStaticRegistry(registryDir, staticDir string) error {
-	entries, err := os.ReadDir(registryDir)
+func cleanStaticRegistry(staticDir string) error {
+	entries, err := os.ReadDir(staticDir)
 	if err != nil {
-		return fmt.Errorf("read %s: %w", registryDir, err)
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("read %s: %w", staticDir, err)
 	}
 	for _, e := range entries {
 		if !e.IsDir() {

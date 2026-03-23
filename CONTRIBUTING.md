@@ -28,13 +28,10 @@ to keep it in sync.
 
 Always run `go tool task lint` and `go tool task test` before submitting any change.
 
-When your changes touch files under `registry/` or `site/` (layouts,
-templates, CSS, config, the generator itself), run `task site:generate`
-before committing. The generated files under `site/content/registry/`
-and `site/static/` are tracked in git and must stay in sync with their
-sources. If you are also changing layouts, templates, or CSS, run
-`task site:serve` to visually verify the site renders correctly.
-`site/public/` is gitignored and rebuilt by CI.
+The generated files under `site/content/registry/` and `site/static/`
+are gitignored and rebuilt by CI. When your changes touch files under
+`registry/` or `site/` (layouts, templates, CSS, config, the generator
+itself), run `task site:serve` to verify the site renders correctly.
 
 ## Commit conventions
 
