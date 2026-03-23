@@ -4,4 +4,7 @@ sew
 /site/public/
 /generate
 /site/public/
+/site/content/registry/
+/site/static/*
+!/site/static/logo.svg
 .test/

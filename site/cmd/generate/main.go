@@ -167,6 +167,10 @@ func main() {
 		fmt.Printf("generated section: %s\n", dir)
 	}
 
+	if err := cleanStaticRegistry(registryDir, staticDir); err != nil {
+		fatalf("clean static: %v", err)
+	}
+
 	if err := copyToStatic(registryDir, staticDir); err != nil {
 		fatalf("copy to static: %v", err)
 	}
@@ -331,6 +335,23 @@ func writePage(path string, frontmatter any, body string) error {
 	}
 
 	return os.WriteFile(path, buf.Bytes(), 0644)
+}
+
+func cleanStaticRegistry(registryDir, staticDir string) error {
+	entries, err := os.ReadDir(registryDir)
+	if err != nil {
+		return fmt.Errorf("read %s: %w", registryDir, err)
+	}
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		target := filepath.Join(staticDir, e.Name())
+		if err := os.RemoveAll(target); err != nil {
+			return fmt.Errorf("remove %s: %w", target, err)
+		}
+	}
+	return nil
 }
 
 func copyToStatic(registryDir, staticDir string) error {

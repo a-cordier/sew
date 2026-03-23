@@ -1,7 +1,0 @@
-Your cluster "{{ .Kind.Name }}" is ready.
-
-MongoDB is available at localhost:27017 (no authentication).
-
-If you have mongosh installed you can test the connection with:
-
-  mongosh mongodb://localhost:27017

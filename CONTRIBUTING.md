@@ -8,8 +8,6 @@ It applies to both human developers and AI agents working on the project.
 ### Prerequisites
 
 - **Go 1.25+** (the project uses `go tool` for managed tool dependencies)
-- **[Task](https://taskfile.dev)** — task runner (`go tool task` also works)
-- **yamlfmt** — YAML formatter (installed separately)
 
 ### Common commands
 
@@ -25,17 +23,18 @@ It applies to both human developers and AI agents working on the project.
 | `task site:serve` | Generate content and start the Hugo dev server |
 | `task site:build` | Generate content and build the Hugo site for production |
 
-When adding or modifying tasks in `taskfile.yml`, update the table above
+When adding or modifying tasks in `taskfile.yml`, please update the table above
 to keep it in sync.
 
-Always run `task lint` and `task test` before submitting changes.
+Always run `go tool task lint` and `go tool task test` before submitting any change.
 
 When your changes touch files under `registry/` or `site/` (layouts,
-templates, CSS, config, the generator itself), run `task site:build`
-to regenerate the site before committing. The generated files under
-`site/content/registry/` and `site/static/` are tracked in git and
-must stay in sync with their sources. `site/public/` is gitignored
-and rebuilt by CI.
+templates, CSS, config, the generator itself), run `task site:generate`
+before committing. The generated files under `site/content/registry/`
+and `site/static/` are tracked in git and must stay in sync with their
+sources. If you are also changing layouts, templates, or CSS, run
+`task site:serve` to visually verify the site renders correctly.
+`site/public/` is gitignored and rebuilt by CI.
 
 ## Commit conventions
 
@@ -180,7 +179,7 @@ Service B   http://localhost:30081
 
 ### Images
 
-- Use slim base images (Alpine, distroless) when possible.
+- Use slim base images (Alpine, distroless) whenever possible.
 - Pin image tags — avoid `:latest` in production contexts.
 - List images in `images.preload.refs` so they are pulled into the Kind
   node before Helm installs, reducing startup time:
@@ -279,5 +278,5 @@ components:
 ## Schema
 
 The machine-readable JSON Schema for `sew.yaml` lives at
-`schema/sew.schema.yaml`. Validate your context files against it and keep
+`schema/sew.schema.yaml`. Validate your context files against it and always keep
 it in sync when modifying config structs in `internal/config/`.
