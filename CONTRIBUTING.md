@@ -1,7 +1,6 @@
 # Contributing to sew
 
 This document is the single source of truth for contribution guidelines.
-It applies to both human developers and AI agents working on the project.
 
 ## Toolchain
 
@@ -19,6 +18,7 @@ It applies to both human developers and AI agents working on the project.
 | `task lint` | Run Go linter (`revive`) |
 | `task fmt:yaml` | Format YAML files in `registry/` and root |
 | `task lint:yaml` | Check YAML formatting (CI-safe, no writes) |
+| `task validate` | Validate all registry `sew.yaml` files against the schema |
 | `task site:generate` | Generate Hugo site content from the registry |
 | `task site:serve` | Generate content and start the Hugo dev server |
 | `task site:build` | Generate content and build the Hugo site for production |
@@ -145,7 +145,7 @@ variant's README.
 
 #### Tags
 
-- Every context README must have at least one tag.
+- Every context README **must** have at least one tag.
 - Do not use product or organization names as tags (e.g. `kafka`,
   `mongodb`, `gravitee`, `elasticsearch`). Tags describe *what the
   context does*, not *which product it uses* — the registry path already
@@ -157,7 +157,7 @@ Place an `icon.svg` file in the context directory (or any ancestor
 directory) to display a product logo on registry cards and detail pages.
 
 - SVG format, square aspect ratio recommended.
-- Icons **inherit** from parent directories: a single `icon.svg` at
+- Icons inherit from parent directories: a single `icon.svg` at
   `registry/org/` covers all contexts under that path.
 - When no icon is found anywhere in the ancestor chain, a generic
   fallback icon is rendered.
@@ -210,8 +210,9 @@ from:
 ### Abstract contexts
 
 Use `abstract: true` for shared base configurations that should not be
-deployed directly. Abstract contexts are meant to be composed into
-concrete variants via `from`:
+deployed directly. 
+
+Abstract contexts are meant to be composed into concrete variants via `from`:
 
 ```yaml
 abstract: true
@@ -274,6 +275,14 @@ components:
 
 ## Schema
 
-The machine-readable JSON Schema for `sew.yaml` lives at
-`schema/sew.schema.yaml`. Validate your context files against it and always keep
-it in sync when modifying config structs in `internal/config/`.
+The JSON Schema for `sew.yaml` lives at `schema/sew.schema.yaml`. 
+
+Validate your context files against it with `sew validate` (or `go run . validate`) and always keep it in sync when modifying config structs in `internal/config/`.
+
+```bash
+# Validate a single file
+sew validate registry/kafka/standalone/sew.yaml
+
+# Validate all contexts in the registry
+sew validate registry/
+```

@@ -239,6 +239,24 @@ DNS
     gateway.sew.local → 172.18.0.5 (gio-apim)
 ```
 
+## sew validate
+
+Validate one or more `sew.yaml` files against the configuration schema. Catches typos, unknown fields, and type mismatches before you deploy.
+
+```bash
+sew validate
+sew validate registry/kafka/standalone/sew.yaml
+sew validate registry/
+```
+
+When given a directory, sew walks it recursively and validates every `sew.yaml` it finds. When no argument is given, it validates `./sew.yaml` in the current directory.
+
+Exit code is non-zero when any file fails validation, making it suitable for CI pipelines and pre-commit checks.
+
+### Flags
+
+This command has no additional flags beyond the [global flags](#global-flags).
+
 ## sew setup dns
 
 Configure your operating system to forward `*.sew.local` queries to the local DNS server. This is a one-time setup that requires sudo.

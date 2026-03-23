@@ -23,6 +23,7 @@ It applies to both human developers and AI agents working on the project.
 | `task lint` | Run Go linter (`revive`) |
 | `task fmt:yaml` | Format YAML files in `registry/` and root |
 | `task lint:yaml` | Check YAML formatting (CI-safe, no writes) |
+| `task validate` | Validate all registry `sew.yaml` files against the schema |
 | `task site:generate` | Generate Hugo site content from the registry |
 | `task site:serve` | Generate content and start the Hugo dev server |
 | `task site:build` | Generate content and build the Hugo site for production |
@@ -279,5 +280,14 @@ components:
 ## Schema
 
 The machine-readable JSON Schema for `sew.yaml` lives at
-`schema/sew.schema.yaml`. Validate your context files against it and always keep
-it in sync when modifying config structs in `internal/config/`.
+`schema/sew.schema.yaml`. Validate your context files against it with
+`sew validate` (or `go run . validate`) and always keep it in sync when
+modifying config structs in `internal/config/`.
+
+```bash
+# Validate a single file
+sew validate registry/kafka/standalone/sew.yaml
+
+# Validate all contexts in the registry
+sew validate registry/
+```

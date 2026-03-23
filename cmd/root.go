@@ -19,6 +19,10 @@ var Version string
 // set by main before Execute().
 var DefaultConfigData []byte
 
+// SchemaData holds the embedded JSON Schema for sew.yaml,
+// set by main before Execute().
+var SchemaData []byte
+
 var (
 	cfgFile     string
 	registryURL string

@@ -1,7 +1,6 @@
 package schema_test
 
 import (
-	"bytes"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -9,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/a-cordier/sew/internal/config"
+	internalschema "github.com/a-cordier/sew/internal/schema"
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"gopkg.in/yaml.v3"
-	sigsyaml "sigs.k8s.io/yaml"
 )
 
 func compileSchema(t *testing.T) *jsonschema.Schema {
@@ -20,19 +19,7 @@ func compileSchema(t *testing.T) *jsonschema.Schema {
 	if err != nil {
 		t.Fatalf("reading schema: %v", err)
 	}
-	jsonBytes, err := sigsyaml.YAMLToJSON(yamlBytes)
-	if err != nil {
-		t.Fatalf("converting schema to JSON: %v", err)
-	}
-	doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(jsonBytes))
-	if err != nil {
-		t.Fatalf("unmarshaling schema: %v", err)
-	}
-	c := jsonschema.NewCompiler()
-	if err := c.AddResource("sew.schema.json", doc); err != nil {
-		t.Fatalf("adding schema resource: %v", err)
-	}
-	sch, err := c.Compile("sew.schema.json")
+	sch, err := internalschema.Compile(yamlBytes)
 	if err != nil {
 		t.Fatalf("compiling schema: %v", err)
 	}
@@ -65,19 +52,7 @@ func TestRegistryValidation(t *testing.T) {
 	for _, file := range files {
 		rel, _ := filepath.Rel(registryDir, file)
 		t.Run(rel, func(t *testing.T) {
-			yamlBytes, err := os.ReadFile(file)
-			if err != nil {
-				t.Fatalf("reading file: %v", err)
-			}
-			jsonBytes, err := sigsyaml.YAMLToJSON(yamlBytes)
-			if err != nil {
-				t.Fatalf("converting to JSON: %v", err)
-			}
-			inst, err := jsonschema.UnmarshalJSON(bytes.NewReader(jsonBytes))
-			if err != nil {
-				t.Fatalf("unmarshaling instance: %v", err)
-			}
-			if err := sch.Validate(inst); err != nil {
+			if err := internalschema.ValidateFile(sch, file); err != nil {
 				t.Errorf("schema validation failed:\n%v", err)
 			}
 		})

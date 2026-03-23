@@ -24,6 +24,11 @@ func Warn(format string, args ...interface{}) {
 	fmt.Printf("  %s %s\n", color.YellowString("⚠"), color.YellowString(msg))
 }
 
+func Error(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	fmt.Printf("  %s %s\n", color.RedString("✗"), color.RedString(msg))
+}
+
 func WithSpinner(message string, fn func() error) error {
 	s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
 	s.Suffix = " " + message

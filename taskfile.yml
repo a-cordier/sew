@@ -24,6 +24,11 @@ tasks:
     cmds:
       - go tool gotestsum ./...
 
+  validate:
+    desc: Validate all registry sew.yaml files against the schema
+    cmds:
+      - go run . validate registry/
+
   lint:yaml:
     desc: Check YAML formatting
     cmds:
