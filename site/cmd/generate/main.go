@@ -176,6 +176,7 @@ func main() {
 	}
 
 	generateSchemaDoc("schema/sew.schema.yaml", "site/content/docs/reference/configuration.md")
+	generateContributingDoc("CONTRIBUTING.md", "site/content/docs/reference/contributing.md")
 
 	fmt.Println("done")
 }
@@ -384,6 +385,33 @@ func copyToStatic(registryDir, staticDir string) error {
 		fmt.Printf("static: %s\n", relPath)
 		return os.WriteFile(dest, data, 0644)
 	})
+}
+
+func generateContributingDoc(srcPath, outputPath string) {
+	data, err := os.ReadFile(srcPath)
+	if err != nil {
+		fatalf("read %s: %v", srcPath, err)
+	}
+
+	body := stripLeadingH1(strings.TrimSpace(string(data)))
+
+	var buf bytes.Buffer
+	buf.WriteString("---\n")
+	buf.WriteString("title: \"Contributing\"\n")
+	buf.WriteString("weight: 4\n")
+	buf.WriteString("type: docs\n")
+	buf.WriteString("---\n\n")
+	buf.WriteString(body)
+	buf.WriteString("\n")
+
+	if err := os.MkdirAll(filepath.Dir(outputPath), 0755); err != nil {
+		fatalf("mkdir for %s: %v", outputPath, err)
+	}
+	if err := os.WriteFile(outputPath, buf.Bytes(), 0644); err != nil {
+		fatalf("write contributing doc: %v", err)
+	}
+
+	fmt.Printf("generated contributing doc: %s\n", outputPath)
 }
 
 func fatalf(format string, args ...any) {
