@@ -11,7 +11,7 @@ allowing the APIM Gateway to act as a Kafka proxy. Clients connect to the
 gateway using the Kafka protocol via `*.kafka.sew.local:9092` with TLS.
 
 This is an abstract base context. Concrete variants combine it with a
-database-specific AIO context. The default variant is **postgres**.
+database-specific APIM OSS context. The default variant is **postgres**.
 
 ## Prerequisites
 
@@ -43,7 +43,7 @@ sew create --from gravitee.io/apim/ee/kafka/mongodb
 | `postgres` | PostgreSQL | `gravitee.io/apim/ee/kafka/postgres`  |
 | `mongodb`  | MongoDB    | `gravitee.io/apim/ee/kafka/mongodb`   |
 
-Each variant composes the corresponding `gravitee.io/apim/oss/aio/*` context
+Each variant composes the corresponding `gravitee.io/apim/oss/*` context
 (which provides the full APIM stack) with the abstract kafka base (which
 adds Kafka Gateway configuration on top).
 
@@ -111,4 +111,4 @@ The abstract base (`gravitee.io/apim/ee/kafka/base`) composes from:
 
 Each concrete variant additionally composes from:
 
-- `gravitee.io/apim/oss/aio/postgres` or `gravitee.io/apim/oss/aio/mongodb` — full APIM stack with the chosen database backend
+- `gravitee.io/apim/oss/postgres` or `gravitee.io/apim/oss/mongodb` — full APIM stack with the chosen database backend

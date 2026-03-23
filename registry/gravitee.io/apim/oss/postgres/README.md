@@ -1,10 +1,10 @@
 ---
-title: "APIM - AIO PostgreSQL"
-description: "Gravitee APIM all-in-one with PostgreSQL backend and Elasticsearch"
+title: "APIM - PostgreSQL"
+description: "Gravitee APIM with PostgreSQL backend and Elasticsearch"
 tags: [api-management, gateway]
 ---
 
-# APIM AIO PostgreSQL
+# APIM PostgreSQL
 
 Deploys a full Gravitee API Management stack (Console, Portal, Gateway, and
 Management API) backed by PostgreSQL for persistence and Elasticsearch for
@@ -13,7 +13,7 @@ analytics. Management uses JDBC. Rate limiting is also stored in PostgreSQL.
 ## Usage
 
 ```bash
-sew create --from gravitee.io/apim/oss/aio/postgres
+sew create --from gravitee.io/apim/oss/postgres
 ```
 
 ## Endpoints
@@ -31,4 +31,4 @@ This context composes from:
 
 - `postgresql/standalone` — PostgreSQL 17 database
 - `elastic/elasticsearch/standalone` — Elasticsearch for reporting
-- `gravitee.io/apim/oss/aio/base` — shared APIM Helm configuration
+- `gravitee.io/apim/oss/base` — shared APIM Helm configuration

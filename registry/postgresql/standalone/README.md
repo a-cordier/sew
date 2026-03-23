@@ -30,4 +30,4 @@ From the host, connect to `localhost:5432`.
 
 This is a minimal, persistence-free PostgreSQL suitable for development and
 testing. It is used as a dependency by higher-level contexts such as
-`gravitee.io/apim/oss/aio/postgres`.
+`gravitee.io/apim/oss/postgres`.

@@ -69,7 +69,7 @@ that don't match the single-level wildcard.
 
 This context composes from:
 
-- `gravitee.io/apim/oss/aio/mongodb` — full APIM stack with MongoDB backend
+- `gravitee.io/apim/oss/mongodb` — full APIM stack with MongoDB backend
 - `gravitee.io/apim/ee/kafka/base` — Kafka Gateway configuration
 
 ## License

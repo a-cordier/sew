@@ -74,10 +74,9 @@ registry/
 ├── gravitee.io/
 │   └── apim/
 │       ├── oss/
-│       │   ├── aio/
-│       │   │   ├── base/       # abstract shared config
-│       │   │   ├── mongodb/    # concrete variant
-│       │   │   └── postgres/   # concrete variant
+│       │   ├── base/           # abstract shared config
+│       │   ├── mongodb/        # concrete variant
+│       │   ├── postgres/       # concrete variant
 │       │   └── k8s/
 │       │       ├── dbless/
 │       │       └── gateway/
@@ -218,7 +217,7 @@ contexts:
 from:
   - mongodb/standalone
   - elastic/elasticsearch/standalone
-  - gravitee.io/apim/oss/aio/base
+  - gravitee.io/apim/oss/base
 ```
 
 ### Abstract contexts

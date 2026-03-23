@@ -28,4 +28,4 @@ From the host, connect to `localhost:27017`.
 
 This is a minimal, persistence-free MongoDB suitable for development and
 testing. It is used as a dependency by higher-level contexts such as
-`gravitee.io/apim/oss/aio/mongodb`.
+`gravitee.io/apim/oss/mongodb`.

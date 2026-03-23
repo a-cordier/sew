@@ -1103,7 +1103,7 @@ components: []
 //	kafka/standalone (type: k8s, no namespace)
 //	  ↑ from
 //	ee/kafka/base (abstract, sets kafka namespace: gravitee)
-//	  ↑ from (with oss/aio/postgres)
+//	  ↑ from (with oss/postgres)
 //	ee/kafka/postgres (concrete, via .default)
 //	  ↑ .default
 //	ee/kafka
@@ -1151,7 +1151,7 @@ components:
               app: kafka
 `)
 
-	writeFile(t, filepath.Join(root, "oss", "aio", "postgres", "sew.yaml"), `
+	writeFile(t, filepath.Join(root, "oss", "postgres", "sew.yaml"), `
 components:
   - name: apim
     helm:
@@ -1187,7 +1187,7 @@ components:
 
 	writeFile(t, filepath.Join(root, "ee", "kafka", "postgres", "sew.yaml"), `
 from:
-  - oss/aio/postgres
+  - oss/postgres
   - ee/kafka/base
 `)
 
