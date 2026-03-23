@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/a-cordier/sew/compare/v0.4.0...v0.4.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* set info.Main.version during release builds ([a72ccf8](https://github.com/a-cordier/sew/commit/a72ccf84ad537f2d010b121fec198848a023f5a4))
+
 ## [0.4.0](https://github.com/a-cordier/sew/compare/v0.3.1...v0.4.0) (2026-03-23)
 
 
