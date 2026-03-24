@@ -16,6 +16,11 @@
               <a href="{{ .RelPermalink }}" class="{{ if eq $.RelPermalink .RelPermalink }}active{{ end }}">
                 {{ .Title }}
               </a>
+              {{ if and (eq $.RelPermalink .RelPermalink) .TableOfContents }}
+              <ul class="docs-toc">
+                {{ .TableOfContents }}
+              </ul>
+              {{ end }}
             </li>
             {{ end }}
           </ul>
