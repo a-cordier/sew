@@ -184,7 +184,7 @@ Tear down a cluster and clean up all associated resources: the Kind cluster, loa
 
 ```bash
 sew delete
-sew delete --name my-cluster
+sew delete my-cluster
 ```
 
 ### How it works
@@ -202,23 +202,38 @@ sew delete --name my-cluster
 
 `sew delete` doesn't need the original `sew.yaml` or registry to be available. It uses state files to find and clean up the cluster. See [Directory Layout -- clusters/]({{< ref "/docs/reference/directory-layout#clusters" >}}) for how target resolution and best-effort cleanup work.
 
-### Flags
+## sew list
 
-| Flag | Description |
-|------|-------------|
-| `--name <cluster>` | Name of the cluster to delete. When omitted, sew auto-selects from state files or falls back to config. |
-
-## sew status
-
-Show the status of your current sew environment at a glance: cluster name, enabled features, active load balancers, and DNS state.
+List all sew-managed clusters with their status.
 
 ```bash
-sew status
+sew list
 ```
+
+Shows a table with the cluster name, creation date, context paths, and whether the cluster is currently running.
+
+### Example output
+
+```
+NAME                 CREATED            FROM                              STATUS
+kind-gravitee-apim   2026-03-23 14:00   gravitee.io/apim/oss/postgres     running
+kind-gravitee-kafka  2026-03-22 10:30   gravitee.io/apim/ee/kafka         stopped
+```
+
+## sew describe
+
+Show detailed information about a cluster: features, active load balancers, and DNS state. Information is read from the persisted cluster state, not from the current config.
+
+```bash
+sew describe
+sew describe my-cluster
+```
+
+When no name is given and only one cluster exists, it is selected automatically. When multiple clusters exist, sew asks you to specify one (use `sew list` to see them).
 
 ### What it shows
 
-**Cluster** -- The cluster name from the resolved config.
+**Cluster** -- The cluster name, creation date, and context paths.
 
 **Features** -- Whether load balancers, Gateway API, and DNS are enabled. For Gateway API, shows the channel (`standard` or `experimental`). For DNS, shows the domain and port.
 
@@ -233,7 +248,9 @@ sew status
 
 ```
 Cluster
-  Name: gio-apim
+  Name:    gio-apim
+  Created: 2026-03-23 14:00
+  From:    gravitee.io/apim/oss/postgres
 
 Features
   lb:      enabled

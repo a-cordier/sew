@@ -8,7 +8,7 @@ kind:
     - role: control-plane
       extraPortMappings:
         - containerPort: 30920
-          hostPort: 9200
+          hostPort: 30920
 helm:
   repos:
     - name: elastic

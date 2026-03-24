@@ -8,7 +8,7 @@ kind:
     - role: control-plane
       extraPortMappings:
         - containerPort: 30017
-          hostPort: 27017
+          hostPort: 30017
 components:
   - name: mongodb
     type: k8s

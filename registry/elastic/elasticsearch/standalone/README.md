@@ -26,7 +26,7 @@ sew create --from elastic/elasticsearch/standalone
 
 ### Host access
 
-Kind maps `hostPort 9200` → `containerPort 30920` (NodePort) → `targetPort 9200`.
-From the host, connect to `localhost:9200`.
+Kind maps `hostPort 30920` → `containerPort 30920` (NodePort) → `targetPort 9200`.
+From the host, connect to `localhost:30920`.
 
 Used as a dependency by Gravitee APIM contexts for analytics and reporting.

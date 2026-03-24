@@ -56,7 +56,7 @@ The `extraPortMappings` control which ports Kind exposes on the host, while the 
 Alternatively, delete the first cluster before creating the second one:
 
 ```bash
-sew delete --name <first-cluster>
+sew delete <first-cluster>
 ```
 
 To see which ports are already bound by Docker containers:
@@ -75,10 +75,10 @@ docker ps --format "table {{.Names}}\t{{.Ports}}"
 
 ```bash
 sew setup dns
-sew status
+sew describe
 ```
 
-The DNS section of `sew status` shows resolver, server, and records state. See the [Networking guide]({{< ref "/docs/guides/networking/#local-dns" >}}) for details.
+The DNS section of `sew describe` shows resolver, server, and records state. See the [Networking guide]({{< ref "/docs/guides/networking/#local-dns" >}}) for details.
 
 ## `sudo` prompt on macOS when creating a cluster
 
@@ -117,7 +117,7 @@ kubectl get pods -A
 kubectl logs -n <ns> <pod>
 ```
 
-Increase the timeout in `sew.yaml` if the component just needs more time. Check `sew status` for image preloading or mirror issues.
+Increase the timeout in `sew.yaml` if the component just needs more time. Check `sew describe` for image preloading or mirror issues.
 
 ## Image pull errors / Docker Hub rate limiting
 
@@ -143,7 +143,7 @@ For authenticated pulls, configure `~/.docker/config.json` — sew's mirror prox
 **Fix:** Run a clean teardown (check `$SEW_HOME/logs/delete.log` if it fails -- see [Directory Layout]({{< ref "/docs/reference/directory-layout#logs" >}})):
 
 ```bash
-sew delete --name <cluster>
+sew delete <cluster>
 ```
 
 If no state file exists, sew does best-effort cleanup. As a last resort:

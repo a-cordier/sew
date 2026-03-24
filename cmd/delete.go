@@ -25,16 +25,14 @@ import (
 	kindcluster "sigs.k8s.io/kind/pkg/cluster"
 )
 
-var deleteClusterName string
-
 var downCmd = &cobra.Command{
-	Use:   "delete",
+	Use:   "delete [name]",
 	Short: "Delete a cluster and clean up associated resources",
+	Args:  cobra.MaximumNArgs(1),
 	RunE:  runDown,
 }
 
 func init() {
-	downCmd.Flags().StringVar(&deleteClusterName, "name", "", "name of the cluster to delete")
 	rootCmd.AddCommand(downCmd)
 }
 
@@ -45,7 +43,7 @@ type deleteTarget struct {
 	Notes  string
 }
 
-func runDown(_ *cobra.Command, _ []string) error {
+func runDown(_ *cobra.Command, args []string) error {
 	if err := requireDocker(); err != nil {
 		return err
 	}
@@ -54,7 +52,12 @@ func runDown(_ *cobra.Command, _ []string) error {
 
 	stateDir := filepath.Join(sewHome, "clusters")
 
-	target, err := resolveDeleteTarget(stateDir)
+	var clusterName string
+	if len(args) > 0 {
+		clusterName = args[0]
+	}
+
+	target, err := resolveDeleteTarget(stateDir, clusterName)
 	if err != nil {
 		return err
 	}
@@ -132,12 +135,12 @@ func runDown(_ *cobra.Command, _ []string) error {
 
 // resolveDeleteTarget determines which cluster to delete and returns the
 // teardown information. Resolution order:
-//  1. --name flag: load state file for that cluster, fall back to best-effort.
+//  1. Explicit name argument: load state file, fall back to best-effort.
 //  2. State files in ~/.sew/clusters/: auto-select if one, prompt if many.
 //  3. Config fallback: use cfg.Kind.Name from sew.yaml.
-func resolveDeleteTarget(stateDir string) (*deleteTarget, error) {
-	if deleteClusterName != "" {
-		return resolveByName(stateDir, deleteClusterName)
+func resolveDeleteTarget(stateDir, name string) (*deleteTarget, error) {
+	if name != "" {
+		return resolveByName(stateDir, name)
 	}
 
 	names, err := state.List(stateDir)
@@ -196,7 +199,7 @@ func targetFromState(cs *state.ClusterState) *deleteTarget {
 // config. This handles clusters created before the state file feature.
 func resolveFromConfig() (*deleteTarget, error) {
 	if cfg.Kind.Name == "" {
-		return nil, fmt.Errorf("no cluster state files found and no cluster name in config; use --name to specify the cluster")
+		return nil, fmt.Errorf("no cluster state files found and no cluster name in config; pass the cluster name as argument")
 	}
 	logger.Warn("No state file found; falling back to config (cluster %q)", cfg.Kind.Name)
 	return &deleteTarget{

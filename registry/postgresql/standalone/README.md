@@ -25,8 +25,8 @@ sew create --from postgresql/standalone
 
 ### Host access
 
-Kind maps `hostPort 5432` → `containerPort 30432` (NodePort) → `targetPort 5432`.
-From the host, connect to `localhost:5432`.
+Kind maps `hostPort 30432` → `containerPort 30432` (NodePort) → `targetPort 5432`.
+From the host, connect to `localhost:30432`.
 
 This is a minimal, persistence-free PostgreSQL suitable for development and
 testing. It is used as a dependency by higher-level contexts such as

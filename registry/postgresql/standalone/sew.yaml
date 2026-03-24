@@ -8,7 +8,7 @@ kind:
     - role: control-plane
       extraPortMappings:
         - containerPort: 30432
-          hostPort: 5432
+          hostPort: 30432
 components:
   - name: postgresql
     type: k8s

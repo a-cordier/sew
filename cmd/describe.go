@@ -12,70 +12,104 @@ import (
 	"github.com/a-cordier/sew/internal/cloudprovider"
 	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/dns"
+	"github.com/a-cordier/sew/internal/state"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
-var statusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "Show the status of the current sew environment",
-	RunE:  runStatus,
+var describeCmd = &cobra.Command{
+	Use:   "describe [name]",
+	Short: "Show detailed information about a cluster",
+	Args:  cobra.MaximumNArgs(1),
+	RunE:  runDescribe,
 }
 
 func init() {
-	rootCmd.AddCommand(statusCmd)
+	rootCmd.AddCommand(describeCmd)
 }
 
-func runStatus(_ *cobra.Command, _ []string) error {
-	if _, err := resolveContextConfig(); err != nil {
+func runDescribe(_ *cobra.Command, args []string) error {
+	stateDir := filepath.Join(sewHome, "clusters")
+
+	cs, err := resolveDescribeTarget(stateDir, args)
+	if err != nil {
 		return err
 	}
 
 	bold := color.New(color.Bold)
 
 	bold.Println("Cluster")
-	fmt.Printf("  Name: %s\n", cfg.Kind.Name)
+	fmt.Printf("  Name:    %s\n", cs.Name)
+	fmt.Printf("  Created: %s\n", cs.CreatedAt.Format("2006-01-02 15:04"))
+	if len(cs.From) == 1 {
+		fmt.Printf("  From:    %s\n", cs.From[0])
+	} else if len(cs.From) > 1 {
+		fmt.Println("  From:")
+		for _, f := range cs.From {
+			fmt.Printf("    - %s\n", f)
+		}
+	}
 	fmt.Println()
 
-	printFeatureStatus(bold)
-	printLBStatus(bold)
-	printDNSStatus(bold)
+	printDescribeFeatures(bold, cs.Features)
+	printDescribeLBs(bold, cs.Name)
+	printDescribeDNS(bold, cs.Features)
 	return nil
 }
 
-func printFeatureStatus(bold *color.Color) {
+func resolveDescribeTarget(stateDir string, args []string) (*state.ClusterState, error) {
+	if len(args) > 0 {
+		return state.Load(stateDir, args[0])
+	}
+
+	names, err := state.List(stateDir)
+	if err != nil {
+		return nil, fmt.Errorf("listing cluster states: %w", err)
+	}
+
+	switch len(names) {
+	case 0:
+		return nil, fmt.Errorf("no clusters found; create one with \"sew create\"")
+	case 1:
+		return state.Load(stateDir, names[0])
+	default:
+		return nil, fmt.Errorf("multiple clusters found; specify a name or run \"sew list\" to see them")
+	}
+}
+
+func printDescribeFeatures(bold *color.Color, features config.FeaturesConfig) {
 	bold.Println("Features")
 
-	lbEnabled := cfg.Features.LB != nil && cfg.Features.LB.Enabled
-	gwEnabled := cfg.Features.Gateway != nil && cfg.Features.Gateway.Enabled
-	dnsEnabled := cfg.Features.DNS != nil && cfg.Features.DNS.Enabled
+	lbEnabled := features.LB != nil && features.LB.Enabled
+	gwEnabled := features.Gateway != nil && features.Gateway.Enabled
+	dnsEnabled := features.DNS != nil && features.DNS.Enabled
 
 	fmt.Printf("  lb:      %s\n", enabledStr(lbEnabled))
 	gwLine := enabledStr(gwEnabled)
-	if gwEnabled && cfg.Features.Gateway.Channel != "" {
-		gwLine += fmt.Sprintf(" (channel: %s)", cfg.Features.Gateway.Channel)
+	if gwEnabled && features.Gateway.Channel != "" {
+		gwLine += fmt.Sprintf(" (channel: %s)", features.Gateway.Channel)
 	}
-	fmt.Printf("  gateway:       %s\n", gwLine)
+	fmt.Printf("  gateway: %s\n", gwLine)
 
 	dnsLine := enabledStr(dnsEnabled)
 	if dnsEnabled {
-		domain := cfg.Features.DNS.Domain
+		domain := features.DNS.Domain
 		if domain == "" {
-			domain = "sew.local"
+			domain = config.DNSDefaultDomain
 		}
-		port := cfg.Features.DNS.Port
+		port := features.DNS.Port
 		if port == 0 {
 			port = config.DNSDefaultPort
 		}
 		dnsLine += fmt.Sprintf(" (domain: %s, port: %d)", domain, port)
 	}
-	fmt.Printf("  dns:           %s\n", dnsLine)
+	fmt.Printf("  dns:     %s\n", dnsLine)
 	fmt.Println()
 }
 
-func printLBStatus(bold *color.Color) {
+func printDescribeLBs(bold *color.Color, clusterName string) {
 	bold.Println("Load Balancers")
-	ips, err := cloudprovider.ListLBIPs(cfg.Kind.Name)
+	ips, err := cloudprovider.ListLBIPs(clusterName)
 	if err != nil {
 		color.Yellow("  could not list LB containers: %v", err)
 		fmt.Println()
@@ -91,20 +125,20 @@ func printLBStatus(bold *color.Color) {
 	fmt.Println()
 }
 
-func printDNSStatus(bold *color.Color) {
+func printDescribeDNS(bold *color.Color, features config.FeaturesConfig) {
 	bold.Println("DNS")
 
-	dnsEnabled := cfg.Features.DNS != nil && cfg.Features.DNS.Enabled
+	dnsEnabled := features.DNS != nil && features.DNS.Enabled
 	if !dnsEnabled {
 		fmt.Println("  (disabled)")
 		return
 	}
 
-	domain := cfg.Features.DNS.Domain
+	domain := features.DNS.Domain
 	if domain == "" {
-		domain = "sew.local"
+		domain = config.DNSDefaultDomain
 	}
-	port := cfg.Features.DNS.Port
+	port := features.DNS.Port
 	if port == 0 {
 		port = config.DNSDefaultPort
 	}

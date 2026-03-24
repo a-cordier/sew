@@ -23,8 +23,8 @@ sew create --from mongodb/standalone
 
 ### Host access
 
-Kind maps `hostPort 27017` → `containerPort 30017` (NodePort) → `targetPort 27017`.
-From the host, connect to `localhost:27017`.
+Kind maps `hostPort 30017` → `containerPort 30017` (NodePort) → `targetPort 27017`.
+From the host, connect to `localhost:30017`.
 
 This is a minimal, persistence-free MongoDB suitable for development and
 testing. It is used as a dependency by higher-level contexts such as
