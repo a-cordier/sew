@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/a-cordier/sew/compare/v0.4.1...v0.5.0) (2026-03-24)
+
+
+### Features
+
+* add sew list command and refactor status and delete ([7569e2f](https://github.com/a-cordier/sew/commit/7569e2f415aebb70e83113017004bfdd59dd3df7))
+
 ## [0.4.1](https://github.com/a-cordier/sew/compare/v0.4.0...v0.4.1) (2026-03-23)
 
 
