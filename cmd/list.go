@@ -11,9 +11,10 @@ import (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all sew-managed clusters",
-	RunE:  runList,
+	Use:         "list",
+	Short:       "List all sew-managed clusters",
+	Annotations: map[string]string{"sew_skip_config": "true"},
+	RunE:        runList,
 }
 
 func init() {
@@ -49,12 +50,18 @@ func runList(_ *cobra.Command, _ []string) error {
 		cs, err := state.Load(stateDir, name)
 		if err != nil {
 			r.status = "unknown"
+			r.created = "-"
+			r.from = "-"
 		} else {
 			r.name = cs.Name
 			r.created = cs.CreatedAt.Format("2006-01-02 15:04")
-			r.from = cs.From[0]
-			if len(cs.From) > 1 {
-				r.from += fmt.Sprintf(" (+%d)", len(cs.From)-1)
+			if len(cs.From) > 0 {
+				r.from = cs.From[0]
+				if len(cs.From) > 1 {
+					r.from += fmt.Sprintf(" (+%d)", len(cs.From)-1)
+				}
+			} else {
+				r.from = "-"
 			}
 			ok, kerr := kind.Exists(cs.Name)
 			r.running = kerr == nil && ok
@@ -85,8 +92,6 @@ func runList(_ *cobra.Command, _ []string) error {
 		switch r.status {
 		case "running":
 			status = color.BlueString(r.status)
-		case "stopped":
-			status = color.YellowString(r.status)
 		default:
 			status = color.YellowString(r.status)
 		}

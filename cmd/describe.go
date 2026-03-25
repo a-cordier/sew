@@ -18,10 +18,11 @@ import (
 )
 
 var describeCmd = &cobra.Command{
-	Use:   "describe [name]",
-	Short: "Show detailed information about a cluster",
-	Args:  cobra.MaximumNArgs(1),
-	RunE:  runDescribe,
+	Use:         "describe [name]",
+	Short:       "Show detailed information about a cluster",
+	Annotations: map[string]string{"sew_skip_config": "true"},
+	Args:        cobra.MaximumNArgs(1),
+	RunE:        runDescribe,
 }
 
 func init() {
@@ -48,6 +49,8 @@ func runDescribe(_ *cobra.Command, args []string) error {
 		for _, f := range cs.From {
 			fmt.Printf("    - %s\n", f)
 		}
+	} else {
+		fmt.Println("  From:    -")
 	}
 	fmt.Println()
 
@@ -150,7 +153,7 @@ func printDescribeDNS(bold *color.Color, features config.FeaturesConfig) {
 		color.Yellow("  resolver: not configured (run \"sew setup dns\")")
 	}
 
-	serverRunning := isDNSServerRunning(port)
+	serverRunning := isDNSServerRunning()
 	if serverRunning {
 		color.Blue("  server:   running on 127.0.0.1:%d", port)
 	} else {
@@ -199,7 +202,7 @@ func printDNSRecords(dnsDir string) {
 	}
 }
 
-func isDNSServerRunning(_ int) bool {
+func isDNSServerRunning() bool {
 	pidPath := filepath.Join(sewHome, "pids", "dns.pid")
 	data, err := os.ReadFile(pidPath)
 	if err != nil {

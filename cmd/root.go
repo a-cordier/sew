@@ -35,7 +35,7 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "sew",
 	Short: "Kubernetes stacks for dev, test, and CI — easy to use, easy to maintain",
-	PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
+	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 		sewHome = os.Getenv("SEW_HOME")
 		if sewHome == "" {
 			home, err := os.UserHomeDir()
@@ -43,6 +43,9 @@ var rootCmd = &cobra.Command{
 				return fmt.Errorf("determining user home directory: %w", err)
 			}
 			sewHome = filepath.Join(home, ".sew")
+		}
+		if cmd.Annotations["sew_skip_config"] == "true" {
+			return nil
 		}
 		var err error
 		cfg, err = resolveConfig(cfgFile)
