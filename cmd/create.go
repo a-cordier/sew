@@ -144,10 +144,6 @@ func runUp(cmd *cobra.Command, _ []string) error {
 	); err != nil {
 		return err
 	}
-	if err := kind.RemoveControlPlaneTaint(cfg.Kind.Name); err != nil {
-		return err
-	}
-
 	saveClusterState(cfg, nil)
 
 	if cfg.Images.Mirrors != nil {
