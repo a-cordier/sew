@@ -66,8 +66,10 @@ As an alternative (or complement) to mirrors, you can preload specific images in
 ### How it works
 
 1. Before the Kind cluster is created, sew pulls each image listed in `images.preload.refs` on the host Docker daemon.
-2. A local `registry:2` container (`sew-preload`) is started. Pre-pulled images are re-tagged and pushed to this registry.
+2. A local `registry:2` container (`sew-preload`) is started, backed by persistent storage in `$SEW_HOME/preload`. Pre-pulled images are re-tagged and pushed to this registry.
 3. Kind nodes are configured to check the preload registry first for each upstream referenced by the listed images.
+
+Because the preload registry stores its data on the host filesystem, cached layers survive across cluster lifecycles. When you delete and recreate a cluster, only layers that have actually changed need to be re-pushed -- stable images like databases are available instantly. For mutable-tag images (snapshots, `latest`), sew re-pulls the upstream version and pushes only the changed layers.
 
 ### Enabling preloading
 

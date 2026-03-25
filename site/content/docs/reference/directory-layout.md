@@ -21,6 +21,7 @@ $SEW_HOME/
 ├── mirrors/
 │   ├── data/
 │   └── hosts/
+├── preload/
 └── pids/
     ├── cpk.pid
     └── dns.pid
@@ -76,6 +77,12 @@ Data and configuration for image mirror proxies.
 - **`hosts/`** -- Generated `hosts.toml` files that configure containerd on Kind nodes to pull through the local mirrors.
 
 See [Container Images]({{< ref "/docs/guides/container-images" >}}) for how to enable mirrors.
+
+## `preload/`
+
+Cached image layers for the preload registry. Like `mirrors/`, this data persists across cluster lifecycles -- when you delete and recreate a cluster, previously pushed images are still available, and only changed layers need to be re-pushed.
+
+See [Container Images -- Image preloading]({{< ref "/docs/guides/container-images#image-preloading" >}}) for details.
 
 ## `pids/`
 

@@ -99,7 +99,7 @@ func runUp(cmd *cobra.Command, _ []string) error {
 			return err
 		}
 		if err := logger.WithSpinner("Starting preload registry", func() error {
-			return cache.EnsurePreloadRegistry(ctx)
+			return cache.EnsurePreloadRegistry(ctx, sewHome)
 		}); err != nil {
 			return err
 		}

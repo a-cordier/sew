@@ -5,12 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/distribution/reference"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
@@ -91,7 +94,9 @@ func PullImages(ctx context.Context, images []string) error {
 // EnsurePreloadRegistry starts a plain registry:2 container for receiving
 // pre-pushed images. Unlike mirror proxies, this registry has no
 // proxy.remoteurl -- it only serves images that have been explicitly pushed.
-func EnsurePreloadRegistry(ctx context.Context) error {
+// Registry data is persisted to $SEW_HOME/preload so that cached layers
+// survive container removal across cluster lifecycles.
+func EnsurePreloadRegistry(ctx context.Context, sewHome string) error {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return fmt.Errorf("creating docker client: %w", err)
@@ -117,6 +122,11 @@ func EnsurePreloadRegistry(ctx context.Context) error {
 	_, _ = io.Copy(io.Discard, rc)
 	rc.Close()
 
+	dataDir := filepath.Join(sewHome, "preload")
+	if err := os.MkdirAll(dataDir, 0o755); err != nil {
+		return fmt.Errorf("creating preload data directory %s: %w", dataDir, err)
+	}
+
 	resp, err := cli.ContainerCreate(ctx,
 		&container.Config{
 			Image:        registryImage,
@@ -129,6 +139,13 @@ func EnsurePreloadRegistry(ctx context.Context) error {
 			PortBindings: nat.PortMap{
 				internalPort: []nat.PortBinding{
 					{HostIP: "127.0.0.1", HostPort: preloadPort},
+				},
+			},
+			Mounts: []mount.Mount{
+				{
+					Type:   mount.TypeBind,
+					Source: dataDir,
+					Target: "/var/lib/registry",
 				},
 			},
 			RestartPolicy: container.RestartPolicy{Name: "unless-stopped"},
