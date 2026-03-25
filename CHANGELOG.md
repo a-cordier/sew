@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.0](https://github.com/a-cordier/sew/compare/v0.5.0...v0.6.0) (2026-03-25)
+
+
+### Features
+
+* add skip-preload flag for create and patch ([b7b9f63](https://github.com/a-cordier/sew/commit/b7b9f636a8b459cd7900a26647cf685dbc92732c))
+* persist preload registry data across cluster lifecycles ([9f926a7](https://github.com/a-cordier/sew/commit/9f926a7dbe12bb5d269901301e3acb0ec5dc8957))
+
+
+### Bug Fixes
+
+* sew describe panicking on cluster without from ([05770b0](https://github.com/a-cordier/sew/commit/05770b08a5eaef0e2c1d49be0da8dcac179b570e))
+
 ## [0.5.0](https://github.com/a-cordier/sew/compare/v0.4.1...v0.5.0) (2026-03-24)
 
 
