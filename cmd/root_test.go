@@ -241,17 +241,17 @@ components:
 	}
 
 	if cfg.Images.Preload == nil {
-		t.Fatal("expected merged preload images")
+		t.Fatal("expected preload from last context")
+	}
+	if len(cfg.Images.Preload.Refs) != 2 {
+		t.Fatalf("expected 2 refs from last from entry (replace semantics), got %d: %v", len(cfg.Images.Preload.Refs), cfg.Images.Preload.Refs)
 	}
 	refs := make(map[string]bool)
 	for _, r := range cfg.Images.Preload.Refs {
 		refs[r] = true
 	}
-	if !refs["mongo:7"] || !refs["elastic:9"] || !refs["shared:latest"] {
-		t.Fatalf("expected all three image refs (deduplicated), got %v", cfg.Images.Preload.Refs)
-	}
-	if len(cfg.Images.Preload.Refs) != 3 {
-		t.Fatalf("expected 3 refs (shared:latest deduped), got %d", len(cfg.Images.Preload.Refs))
+	if !refs["elastic:9"] || !refs["shared:latest"] {
+		t.Fatalf("expected refs from img-b (last from entry), got %v", cfg.Images.Preload.Refs)
 	}
 }
 

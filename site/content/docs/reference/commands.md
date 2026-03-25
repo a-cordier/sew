@@ -25,6 +25,7 @@ When features like load balancers, Gateway API, or DNS are enabled, sew sets the
 | `--config <path>` | Project-level config file. Defaults to `./sew.yaml` when present. |
 | `--registry <url>` | Registry URL. Overrides the value from config. |
 | `--from <path>` | Context path to compose. Repeatable. Overrides the `from` list from config. |
+| `--skip-preload` | Skip image preloading even when `images.preload` is configured. |
 
 ### Context flags
 
@@ -177,6 +178,7 @@ sew patch upgrade.yaml
 |------|-------------|
 | `--name <cluster>` | Name of the cluster to patch. Defaults to `kind.name` from the resolved config. |
 | `--dry-run` | Preview changes without applying. Uses server-side dry-run for both Helm and Kubernetes resources. |
+| `--skip-preload` | Skip image preloading even when the patch file defines `images.preload`. |
 
 ## sew delete
 

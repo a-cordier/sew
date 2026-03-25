@@ -80,7 +80,7 @@ images:
       - bitnami/redis:7.4
 ```
 
-Context authors can ship the image list directly in the context `sew.yaml`, so you don't have to maintain it yourself. You can add extra images in your own config -- refs from the context and your config are merged (deduplicated union).
+Context authors can ship the image list directly in the context `sew.yaml`, so you don't have to maintain it yourself. If you set `images.preload` in your own config, your list **replaces** the context's -- you define exactly what gets preloaded. Omit it entirely to inherit the context's list as-is.
 
 ### Combining mirrors and preloading
 
@@ -96,3 +96,14 @@ images:
     upstreams:
       - docker.elastic.co
 ```
+
+## Skipping preload at runtime
+
+If a context defines preload images but you want to bypass preloading for a particular run, use `--skip-preload`:
+
+```bash
+sew create --skip-preload
+sew patch upgrade.yaml --skip-preload
+```
+
+This is useful when you plan to build and push images locally, when mirrors already cover the upstreams you need, or during iterative development where you want a faster cluster startup.

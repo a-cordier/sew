@@ -21,6 +21,7 @@ import (
 
 var patchClusterName string
 var patchDryRun bool
+var patchSkipPreload bool
 
 var patchCmd = &cobra.Command{
 	Use:   "patch <patch-file>",
@@ -46,6 +47,7 @@ patch file.`,
 func init() {
 	patchCmd.Flags().StringVar(&patchClusterName, "name", "", "name of the cluster to patch (default: from config)")
 	patchCmd.Flags().BoolVar(&patchDryRun, "dry-run", false, "show what would change without applying")
+	patchCmd.Flags().BoolVar(&patchSkipPreload, "skip-preload", false, "skip image preloading even when images.preload is configured")
 	rootCmd.AddCommand(patchCmd)
 }
 
@@ -118,7 +120,7 @@ func runPatch(cmd *cobra.Command, args []string) error {
 
 	ctx := context.Background()
 
-	if !patchDryRun {
+	if !patchDryRun && !patchSkipPreload {
 		preloadRefs := getPreloadRefs(patch)
 		if len(preloadRefs) > 0 {
 			running, _ := cache.IsPreloadRunning(ctx)

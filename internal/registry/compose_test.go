@@ -662,15 +662,15 @@ components: []
 	}
 
 	if resolved.Images.Preload == nil {
-		t.Fatal("expected Preload inherited from parent")
+		t.Fatal("expected Preload from child (replace semantics)")
 	}
-	if len(resolved.Images.Preload.Refs) != 3 {
-		t.Fatalf("expected 3 refs (deduped union), got %d: %v", len(resolved.Images.Preload.Refs), resolved.Images.Preload.Refs)
+	if len(resolved.Images.Preload.Refs) != 2 {
+		t.Fatalf("expected 2 refs from child (replace semantics), got %d: %v", len(resolved.Images.Preload.Refs), resolved.Images.Preload.Refs)
 	}
-	expected := map[string]bool{"img-a": true, "img-b": true, "img-c": true}
+	expected := map[string]bool{"img-b": true, "img-c": true}
 	for _, ref := range resolved.Images.Preload.Refs {
 		if !expected[ref] {
-			t.Fatalf("unexpected ref %q", ref)
+			t.Fatalf("unexpected ref %q; expected only child refs", ref)
 		}
 	}
 }
@@ -892,8 +892,11 @@ components:
 		t.Fatalf("expected mongodb, elasticsearch, and app-comp, got %v", compNames)
 	}
 
-	if len(resolved.Images.Preload.Refs) != 2 {
-		t.Fatalf("expected 2 preload image refs, got %d: %v", len(resolved.Images.Preload.Refs), resolved.Images.Preload.Refs)
+	if len(resolved.Images.Preload.Refs) != 1 {
+		t.Fatalf("expected 1 preload ref from last from entry (replace semantics), got %d: %v", len(resolved.Images.Preload.Refs), resolved.Images.Preload.Refs)
+	}
+	if resolved.Images.Preload.Refs[0] != "docker.elastic.co/elasticsearch/elasticsearch:9.3.1" {
+		t.Fatalf("expected elastic ref from last from entry, got %q", resolved.Images.Preload.Refs[0])
 	}
 }
 

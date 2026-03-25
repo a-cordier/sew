@@ -26,6 +26,8 @@ import (
 	"k8s.io/klog/v2"
 )
 
+var createSkipPreload bool
+
 var upCmd = &cobra.Command{
 	Use:                "create",
 	Short:              "Create the cluster and install the context",
@@ -34,6 +36,7 @@ var upCmd = &cobra.Command{
 }
 
 func init() {
+	upCmd.Flags().BoolVar(&createSkipPreload, "skip-preload", false, "skip image preloading even when images.preload is configured")
 	rootCmd.AddCommand(upCmd)
 }
 
@@ -84,7 +87,10 @@ func runUp(cmd *cobra.Command, _ []string) error {
 
 	ctx := context.Background()
 
-	preloadRefs := getPreloadRefs(cfg)
+	var preloadRefs []string
+	if !createSkipPreload {
+		preloadRefs = getPreloadRefs(cfg)
+	}
 
 	if len(preloadRefs) > 0 {
 		if err := logger.WithSpinner("Pulling images for preload", func() error {

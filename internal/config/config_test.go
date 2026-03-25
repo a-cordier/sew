@@ -308,7 +308,7 @@ func TestMergeImages_BasePreloadPreserved(t *testing.T) {
 	}
 }
 
-func TestMergeImages_OverrideRefsAppended(t *testing.T) {
+func TestMergeImages_OverridePreloadReplacesBase(t *testing.T) {
 	base := ImagesConfig{
 		Preload: &PreloadConfig{Refs: []string{"img-a", "img-b"}},
 	}
@@ -316,27 +316,24 @@ func TestMergeImages_OverrideRefsAppended(t *testing.T) {
 		Preload: &PreloadConfig{Refs: []string{"img-c"}},
 	}
 	result := MergeImages(base, override)
-	if len(result.Preload.Refs) != 3 {
-		t.Fatalf("expected 3 refs, got %d: %v", len(result.Preload.Refs), result.Preload.Refs)
+	if len(result.Preload.Refs) != 1 || result.Preload.Refs[0] != "img-c" {
+		t.Fatalf("expected override to replace base, got %v", result.Preload.Refs)
 	}
 }
 
-func TestMergeImages_RefsDeduplicated(t *testing.T) {
+func TestMergeImages_EmptyRefsOverrideClearsPreload(t *testing.T) {
 	base := ImagesConfig{
 		Preload: &PreloadConfig{Refs: []string{"img-a", "img-b"}},
 	}
 	override := ImagesConfig{
-		Preload: &PreloadConfig{Refs: []string{"img-b", "img-c"}},
+		Preload: &PreloadConfig{Refs: []string{}},
 	}
 	result := MergeImages(base, override)
-	if len(result.Preload.Refs) != 3 {
-		t.Fatalf("expected 3 refs (deduped), got %d: %v", len(result.Preload.Refs), result.Preload.Refs)
+	if result.Preload == nil {
+		t.Fatal("expected non-nil Preload from override")
 	}
-	expected := []string{"img-a", "img-b", "img-c"}
-	for i, v := range expected {
-		if result.Preload.Refs[i] != v {
-			t.Fatalf("expected ref[%d]=%q, got %q", i, v, result.Preload.Refs[i])
-		}
+	if len(result.Preload.Refs) != 0 {
+		t.Fatalf("expected empty refs (override clears base), got %v", result.Preload.Refs)
 	}
 }
 
