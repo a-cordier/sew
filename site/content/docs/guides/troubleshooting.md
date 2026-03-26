@@ -6,18 +6,6 @@ type: docs
 
 Common issues and how to fix them.
 
-## Docker is not running
-
-**Symptom:** `sew create` or `sew delete` fails with `"docker is not running — start Docker and try again"`.
-
-**Cause:** sew checks Docker availability before doing any work. If the Docker daemon is unreachable, the command exits immediately with this message.
-
-**Fix:** Start Docker Desktop (or `systemctl start docker` on Linux), then verify with:
-
-```bash
-docker info
-```
-
 ## Port conflict between two clusters
 
 **Symptom:** `sew create` fails with `command docker run failed with error: exit status 125` when creating a second cluster.
@@ -117,7 +105,15 @@ kubectl get pods -A
 kubectl logs -n <ns> <pod>
 ```
 
-Increase the timeout in `sew.yaml` if the component just needs more time. Check `sew describe` for image preloading or mirror issues.
+If the component just needs more time, increase its timeout in your `sew.yaml`:
+
+```yaml
+components:
+  - name: apim
+    timeout: 15m
+```
+
+The same field is available on dependency entries (`requires[].timeout`) to give a specific upstream more time. Check `sew describe` for image preloading or mirror issues.
 
 ## Image pull errors / Docker Hub rate limiting
 
@@ -125,14 +121,19 @@ Increase the timeout in `sew.yaml` if the component just needs more time. Check 
 
 **Cause:** Anonymous Docker Hub pulls are rate-limited (100 pulls / 6 hours). Heavy image contexts can hit this on first run.
 
-**Fix:** Enable image mirrors to cache layers locally:
+**Fix:** Enable image mirrors to cache layers locally. Mirrors run pull-through `registry:2` containers on your machine that survive cluster deletions, so layers are only downloaded once:
 
 ```yaml
 images:
-  mirrors: {}
+  mirrors:
+    upstreams:
+      - ghcr.io
+      - docker.elastic.co
 ```
 
-For authenticated pulls, configure `~/.docker/config.json` — sew's mirror proxies forward credentials.
+An empty `mirrors: {}` mirrors `docker.io` only (the default upstream). Adding `upstreams` extends the list with additional registries.
+
+For authenticated pulls, configure `~/.docker/config.json` — sew's mirror proxies forward credentials. See the [Container Images guide]({{< ref "/docs/guides/container-images/#image-mirrors" >}}) for the full reference.
 
 ## Stale cluster after a crash
 
