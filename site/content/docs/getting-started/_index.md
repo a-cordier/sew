@@ -17,7 +17,7 @@ Get sew installed and deploy your first application stack in under a minute.
 go install github.com/a-cordier/sew@latest
 ```
 
-Make sure Docker is running before you continue.
+For Homebrew, Linux packages, and other options, see [Installation]({{< ref "/docs/getting-started/installation" >}}).
 
 ## Create your first cluster
 

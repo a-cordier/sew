@@ -20,5 +20,25 @@ archives:
         formats:
           - zip
 
+brews:
+  - repository:
+      owner: a-cordier
+      name: sew
+      directory: HomebrewFormula
+    homepage: https://a-cordier.github.io/sew/
+    description: "Kubernetes application stacks for dev, test, and CI"
+    license: Apache-2.0
+    test: |
+      system "#{bin}/sew", "version"
+
+nfpms:
+  - package_name: sew
+    homepage: https://a-cordier.github.io/sew/
+    description: "Kubernetes application stacks for dev, test, and CI"
+    license: Apache-2.0
+    formats:
+      - deb
+      - rpm
+
 changelog:
   disable: true
