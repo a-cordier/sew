@@ -13,7 +13,7 @@ required — APIs are defined entirely through Kubernetes custom resources.
 ## Usage
 
 ```bash
-sew create --from gravitee.io/apim/oss/k8s/dbless
+sew create --from gravitee.io/apim/oss/dbless
 ```
 
 ## Endpoints

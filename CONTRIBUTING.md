@@ -75,11 +75,10 @@ registry/
 │   └── apim/
 │       ├── oss/
 │       │   ├── base/           # abstract shared config
+│       │   ├── dbless/
+│       │   ├── gateway/
 │       │   ├── mongodb/        # concrete variant
-│       │   ├── postgres/       # concrete variant
-│       │   └── k8s/
-│       │       ├── dbless/
-│       │       └── gateway/
+│       │   └── postgres/       # concrete variant
 │       └── ee/
 │           └── kafka/
 │               ├── base/       # abstract shared config
