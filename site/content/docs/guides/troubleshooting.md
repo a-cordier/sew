@@ -155,18 +155,22 @@ docker rm -f $(docker ps -aq --filter "name=sew-mirror-")
 docker rm -f sew-preload
 ```
 
-## Context not found (404)
+If things went really bad, sew may also have left background processes running (DNS server, cloud-provider-kind controller). Check for them:
 
-**Symptom:** `sew create` fails with "fetching context: 404 Not Found."
+```bash
+pgrep -af "sew.*(dns|cpk) serve"
+```
 
-**Cause:** Typo in the `from` path, or the registry URL doesn't point to a valid registry tree.
+Kill any orphaned processes:
 
-**Fix:** Check the path in `from` against the [registry browser]({{< ref "/registry" >}}). For custom registries, verify the URL is reachable and the directory structure contains a `sew.yaml` at the expected path.
+```bash
+kill $(pgrep -f "sew.*(dns|cpk) serve") 2>/dev/null
+```
 
-## `context is abstract and cannot be deployed directly`
+> On macOS, the cloud-provider controller runs as root. Use `sudo kill` if `kill` returns "Operation not permitted".
 
-**Symptom:** Error when running `sew create` with `--from` pointing to an abstract context.
+Then clean up stale PID files:
 
-**Cause:** Abstract contexts are shared bases; they must be composed via `from` in a concrete context.
-
-**Fix:** Use a concrete variant instead. Check the registry for available variants under the same product path.
+```bash
+rm -f ~/.sew/pids/dns.pid ~/.sew/pids/cpk.pid
+```

@@ -25,6 +25,7 @@ When writing or updating documentation:
 
 - Put content in the right section. A new CLI flag belongs in Reference. A walkthrough of how to use it belongs in Guides. If you're unsure, prefer Guides.
 - Keep the tone conversational but precise. Write like you're explaining to a colleague, not writing a spec. Avoid jargon that isn't Kubernetes-standard.
+- The target audience is experienced developers who work with Kubernetes daily. Do not document self-explanatory error messages or explain basic skills (starting Docker, fixing typos in paths, etc.). Troubleshooting entries should address problems where the cause or fix is genuinely non-obvious.
 - Every code block showing a command the user should run must be copyable (wrapped in a fenced code block).
 - Use blockquotes (`>`) for callouts and notes, not bold prefixes like "**Note:**" -- the styling already conveys that it's a note.
 
