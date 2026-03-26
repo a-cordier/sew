@@ -1,6 +1,6 @@
 ---
 title: "Why sew?"
-weight: 0
+weight: 2
 type: docs
 ---
 

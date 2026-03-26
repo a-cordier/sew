@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-🚀 <a href="#-quick-start">Quick Start</a> · 📖 <a href="https://a-cordier.github.io/sew/docs/">Documentation</a> · 🗂️ <a href="https://a-cordier.github.io/sew/registry/">Registry</a>
+<a href="#quick-start">Quick Start</a> · <a href="https://a-cordier.github.io/sew/docs/">Documentation</a> · <a href="https://a-cordier.github.io/sew/registry/">Registry</a>
 </p>
 
-## 🚀 Quick start
+## Quick start
 
 Install sew and make sure [Docker](https://docs.docker.com/get-docker/) is running:
 
@@ -32,19 +32,19 @@ That's it — sew creates a Kind cluster, installs all components, and gives you
 sew delete
 ```
 
-## ✨ Features
+## Features
 
-- 🔍 **Discoverable** — Browse available contexts in the [registry](https://a-cordier.github.io/sew/registry/) and deploy them with a single command.
-- 🧩 **Composable** — Contexts build on each other via `from`. Mix databases, brokers, and applications into a tailored stack without duplicating configuration.
-- ⚡ **Convenient** — Built-in image mirrors, preloading, local DNS, and readiness ordering get a full environment running with minimal effort.
-- 🤖 **Agent-friendly** — Machine-readable schema, structured registry, and `AGENTS.md` make sew a first-class target for AI-assisted workflows.
+- **Discoverable** — Browse available contexts in the [registry](https://a-cordier.github.io/sew/registry/) and deploy them with a single command.
+- **Composable** — Contexts build on each other via `from`. Mix databases, brokers, and applications into a tailored stack without duplicating configuration.
+- **Wired** — Load balancers, Gateway API, `*.sew.local` DNS — production-like networking on localhost, out of the box.
+- **Automatable** — JSON Schema, structured registry, and machine-readable config make sew a first-class target for automation — from CI pipelines to AI assistants.
 
-## 📋 Prerequisites
+## Prerequisites
 
 - **Go 1.25+**
 - **Docker**
 
-## 🤝 Contributing
+## Contributing
 
 ### Developers
 
@@ -61,6 +61,6 @@ task site:build    # rebuild the doc site after registry/ or site/ changes
 
 Contexts live under `registry/` following the `org/product/variant` convention. Each context has a `sew.yaml` describing Helm repos, components, and features. Refer to the [Context Format](https://a-cordier.github.io/sew/docs/reference/context-format/) and [AI Toolchain](https://a-cordier.github.io/sew/docs/guides/ai-toolchain/) docs for authoring guidelines.
 
-## ⚖️ License
+## License
 
 [Apache License 2.0](LICENSE)

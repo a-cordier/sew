@@ -6,6 +6,18 @@ type: docs
 
 sew gives you production-like networking on your local machine: load balancers, Gateway API support, and automatic DNS resolution. Say goodbye to `/etc/hosts` edits and IP hunting -- services are reachable by name out of the box.
 
+```mermaid
+flowchart TD
+    subgraph cluster ["Kind cluster"]
+        svc["LoadBalancer Services"]
+        gw["Gateway + HTTPRoutes"]
+    end
+    cpk["Cloud provider controller"] -. "assigns IPs" .-> svc
+    gw -- "exposes via" --> svc
+    dns["DNS server"] -- "resolves *.sew.local" --> cpk
+    os["OS resolver"] -- "forwards queries" --> dns
+```
+
 ## Load balancers
 
 By default, `LoadBalancer`-type Services in Kind stay in `Pending` state because there's no cloud provider to assign IPs. sew can emulate this with a local cloud provider controller that assigns real IPs from the Docker network range.

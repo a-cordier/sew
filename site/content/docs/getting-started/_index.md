@@ -6,13 +6,18 @@ type: docs
 
 Get sew installed and deploy your first application stack in under a minute.
 
+## Prerequisites
+
+- **Go 1.25+** -- sew is installed via `go install`
+- **Docker** -- sew uses it under the hood for Kind clusters
+
 ## Install
 
 ```bash
 go install github.com/a-cordier/sew@latest
 ```
 
-Make sure you have [Docker](https://docs.docker.com/get-docker/) running -- sew uses it under the hood for Kind clusters.
+Make sure Docker is running before you continue.
 
 ## Create your first cluster
 
@@ -22,7 +27,16 @@ You don't even need a config file to get started. Pick a context from the regist
 sew create --from gravitee.io/apim
 ```
 
-That's it. sew creates a Kind cluster, installs the Helm repos and components defined by the context, and gives you a full Gravitee API Management stack. When you're done:
+That's it. sew creates a Kind cluster, installs the Helm repos and components defined by the context, and gives you a full Gravitee API Management stack.
+
+Once the cluster is ready, you can inspect it:
+
+```bash
+sew list        # shows running clusters
+sew describe    # shows components, ports, and networking for the current cluster
+```
+
+When you're done:
 
 ```bash
 sew delete

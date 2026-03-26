@@ -110,3 +110,35 @@ All build output is written to `~/.sew/logs/build/build.log`. When a step fails,
   ✗ Running pre-build commands (failed after 12.3s)
     See logs: /home/user/.sew/logs/build/build.log
 ```
+
+## Patching a running cluster
+
+`sew build` is for local code changes. When you need to bump an upstream image tag, change a Helm chart version, or tweak values on a running cluster without recreating it, use `sew patch`.
+
+Write a patch file with the components you want to upgrade:
+
+```yaml
+components:
+  - name: apim
+    helm:
+      values:
+        gateway:
+          image:
+            tag: 4.7.0
+```
+
+Then apply it:
+
+```bash
+sew patch upgrade.yaml
+```
+
+sew merges the patch into the resolved context and upgrades only the named components -- everything else is left untouched. You can preview the changes before applying them:
+
+```bash
+sew patch upgrade.yaml --dry-run
+```
+
+This runs a server-side dry-run and prints a colored diff of what would change.
+
+See the [patch command reference]({{< ref "/docs/reference/commands#sew-patch" >}}) for the full set of flags and merge rules.
