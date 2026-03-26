@@ -2,6 +2,8 @@ package config
 
 import (
 	"testing"
+
+	"gopkg.in/yaml.v3"
 )
 
 func boolPtr(b bool) *bool { return &b }
@@ -891,5 +893,182 @@ func TestMergeImages_ReplaceDoesNotPropagate(t *testing.T) {
 		if !expected[r] {
 			t.Fatalf("unexpected ref %q in final result", r)
 		}
+	}
+}
+
+func TestMerge_BuildsOverrideWins(t *testing.T) {
+	base := Config{
+		Builds: []Build{
+			{Name: "gw", Image: "graviteeio/apim-gateway:latest"},
+		},
+	}
+	override := Config{
+		Builds: []Build{
+			{Name: "ui", Image: "graviteeio/apim-console-ui:latest"},
+		},
+	}
+	Merge(&base, &override)
+
+	if len(base.Builds) != 1 {
+		t.Fatalf("expected 1 build (last-writer-wins), got %d", len(base.Builds))
+	}
+	if base.Builds[0].Name != "ui" {
+		t.Fatalf("expected build name %q, got %q", "ui", base.Builds[0].Name)
+	}
+}
+
+func TestMerge_BuildsBasePreservedWhenOverrideEmpty(t *testing.T) {
+	base := Config{
+		Builds: []Build{
+			{Name: "gw", Image: "graviteeio/apim-gateway:latest"},
+		},
+	}
+	override := Config{}
+	Merge(&base, &override)
+
+	if len(base.Builds) != 1 || base.Builds[0].Name != "gw" {
+		t.Fatalf("expected base builds preserved, got %v", base.Builds)
+	}
+}
+
+func TestBuildImageRefs(t *testing.T) {
+	builds := []Build{
+		{Name: "gw", Image: "graviteeio/apim-gateway:latest"},
+		{Name: "ui", Image: "graviteeio/apim-console-ui:latest"},
+	}
+	refs := BuildImageRefs(builds)
+	if len(refs) != 2 {
+		t.Fatalf("expected 2 refs, got %d", len(refs))
+	}
+	if refs[0] != "graviteeio/apim-gateway:latest" || refs[1] != "graviteeio/apim-console-ui:latest" {
+		t.Fatalf("unexpected refs: %v", refs)
+	}
+}
+
+func TestBuildImageRefs_Empty(t *testing.T) {
+	refs := BuildImageRefs(nil)
+	if refs != nil {
+		t.Fatalf("expected nil for empty builds, got %v", refs)
+	}
+}
+
+func TestBuildImageRefs_SkipsEmptyImage(t *testing.T) {
+	builds := []Build{
+		{Name: "gw", Image: "graviteeio/apim-gateway:latest"},
+		{Name: "empty"},
+	}
+	refs := BuildImageRefs(builds)
+	if len(refs) != 1 {
+		t.Fatalf("expected 1 ref (empty image skipped), got %d", len(refs))
+	}
+	if refs[0] != "graviteeio/apim-gateway:latest" {
+		t.Fatalf("unexpected ref: %s", refs[0])
+	}
+}
+
+func TestConfigParsesBuildsFromYAML(t *testing.T) {
+	input := `
+builds:
+  - name: gateway
+    image: graviteeio/apim-gateway:latest-debian
+    dir: $HOME/src/gravitee
+    pre:
+      - mvn clean install -DskipTests
+      - echo done
+    context: target
+    dockerfile: docker/Dockerfile
+  - name: ui
+    image: graviteeio/apim-console-ui:latest
+`
+	var cfg Config
+	if err := yaml.Unmarshal([]byte(input), &cfg); err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
+	if len(cfg.Builds) != 2 {
+		t.Fatalf("expected 2 builds, got %d", len(cfg.Builds))
+	}
+
+	gw := cfg.Builds[0]
+	if gw.Name != "gateway" {
+		t.Fatalf("expected name %q, got %q", "gateway", gw.Name)
+	}
+	if gw.Image != "graviteeio/apim-gateway:latest-debian" {
+		t.Fatalf("expected image %q, got %q", "graviteeio/apim-gateway:latest-debian", gw.Image)
+	}
+	if gw.Dir != "$HOME/src/gravitee" {
+		t.Fatalf("expected dir %q, got %q", "$HOME/src/gravitee", gw.Dir)
+	}
+	if len(gw.Pre) != 2 || gw.Pre[0] != "mvn clean install -DskipTests" {
+		t.Fatalf("expected 2 pre commands, got %v", gw.Pre)
+	}
+	if gw.Context != "target" {
+		t.Fatalf("expected context %q, got %q", "target", gw.Context)
+	}
+	if gw.Dockerfile != "docker/Dockerfile" {
+		t.Fatalf("expected dockerfile %q, got %q", "docker/Dockerfile", gw.Dockerfile)
+	}
+
+	ui := cfg.Builds[1]
+	if ui.Name != "ui" || ui.Image != "graviteeio/apim-console-ui:latest" {
+		t.Fatalf("unexpected second build: %+v", ui)
+	}
+	if ui.Dir != "" || ui.Context != "" || ui.Dockerfile != "" || len(ui.Pre) != 0 {
+		t.Fatal("expected optional fields to be zero-valued for minimal build entry")
+	}
+}
+
+func TestConfigParsesBuildsWithComponents(t *testing.T) {
+	input := `
+from:
+  - gravitee.io/apim
+components:
+  - name: apim
+    type: helm
+builds:
+  - name: gateway
+    image: graviteeio/apim-gateway:latest
+`
+	var cfg Config
+	if err := yaml.Unmarshal([]byte(input), &cfg); err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
+	if len(cfg.From) != 1 || cfg.From[0] != "gravitee.io/apim" {
+		t.Fatalf("unexpected from: %v", cfg.From)
+	}
+	if len(cfg.Components) != 1 || cfg.Components[0].Name != "apim" {
+		t.Fatalf("unexpected components: %v", cfg.Components)
+	}
+	if len(cfg.Builds) != 1 || cfg.Builds[0].Name != "gateway" {
+		t.Fatalf("unexpected builds: %v", cfg.Builds)
+	}
+}
+
+func TestMerge_BuildsMergedWithOtherFields(t *testing.T) {
+	base := Config{
+		Registry: "gravitee.io/apim",
+		From:     []string{"mongodb/standalone"},
+		Builds: []Build{
+			{Name: "gw", Image: "graviteeio/apim-gateway:latest"},
+		},
+	}
+	override := Config{
+		Builds: []Build{
+			{Name: "ui", Image: "graviteeio/apim-console-ui:latest"},
+			{Name: "api", Image: "graviteeio/apim-rest-api:latest"},
+		},
+	}
+	Merge(&base, &override)
+
+	if base.Registry != "gravitee.io/apim" {
+		t.Fatalf("expected registry preserved, got %q", base.Registry)
+	}
+	if len(base.From) != 1 || base.From[0] != "mongodb/standalone" {
+		t.Fatalf("expected from preserved, got %v", base.From)
+	}
+	if len(base.Builds) != 2 {
+		t.Fatalf("expected 2 builds from override, got %d", len(base.Builds))
+	}
+	if base.Builds[0].Name != "ui" || base.Builds[1].Name != "api" {
+		t.Fatalf("unexpected build names: %v", base.Builds)
 	}
 }

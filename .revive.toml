@@ -29,3 +29,4 @@ disabled = true
 [rule.unused-parameter]
 [rule.var-declaration]
 [rule.var-naming]
+  Exclude = ["internal/build/**"]

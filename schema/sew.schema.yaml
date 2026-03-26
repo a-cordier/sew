@@ -59,6 +59,16 @@ properties:
     items:
       $ref: "#/$defs/Component"
 
+  builds:
+    type: array
+    description: >-
+      Local Docker builds for the inner development loop. Each entry
+      describes how to compile, build, and load a Docker image into the
+      Kind cluster, then restart matching workloads. Use with
+      'sew build' to iterate quickly on application code.
+    items:
+      $ref: "#/$defs/Build"
+
 $defs:
   KindConfig:
     type: object
@@ -349,6 +359,56 @@ $defs:
       url:
         type: string
         description: URL of the Helm chart repository.
+
+  Build:
+    type: object
+    description: >-
+      A local Docker image build. Defines the source directory,
+      optional pre-build commands (e.g. Maven/Gradle), Docker build
+      context, and Dockerfile. After building, the image is loaded into
+      the Kind cluster and matching workloads are restarted
+      automatically.
+    additionalProperties: false
+    required:
+      - name
+      - image
+    properties:
+      name:
+        type: string
+        description: >-
+          Short identifier for this build, used to select it in
+          'sew build <name>'.
+      image:
+        type: string
+        description: >-
+          Target Docker image tag (e.g.
+          "graviteeio/apim-gateway:latest-debian"). Images listed here
+          are automatically excluded from preload.
+      dir:
+        type: string
+        description: >-
+          Working directory for pre-build commands and base for relative
+          context/dockerfile paths. Supports environment variable
+          expansion (e.g. "$HOME/src/project").
+        default: "."
+      pre:
+        type: array
+        description: >-
+          Shell commands executed sequentially before 'docker build'
+          (e.g. compilation, packaging). Each command runs in 'dir'
+          with output streamed to the terminal.
+        items:
+          type: string
+      context:
+        type: string
+        description: >-
+          Docker build context directory, resolved relative to 'dir'.
+        default: "."
+      dockerfile:
+        type: string
+        description: >-
+          Path to the Dockerfile, resolved relative to 'dir'. When
+          omitted, defaults to 'Dockerfile' in the build context.
 
   Component:
     type: object

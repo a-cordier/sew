@@ -13,7 +13,7 @@ type: docs
   </span>
   <span class="docs-overview-card-body">
     <span class="docs-overview-card-title">Getting Started</span>
-    <span class="docs-overview-card-desc">Install sew and create your first cluster in under a minute.</span>
+    <span class="docs-overview-card-desc">Learn why sew exists, install it, and create your first cluster in under a minute.</span>
   </span>
 </a>
 

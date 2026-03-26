@@ -122,13 +122,31 @@ func fileExists(path string) bool {
 	return err == nil
 }
 
+var (
+	ctxResolved   *config.ResolvedContext
+	ctxResolvedOK bool
+)
+
+func resetContextConfigCache() {
+	ctxResolved = nil
+	ctxResolvedOK = false
+}
+
 // resolveContextConfig resolves the registry contexts (if configured) and
 // merges their Kind, Features and Images settings into the global cfg.
 // When multiple from entries are provided they are resolved left-to-right
 // and merged using the same accumulator pattern as registry-level
 // composition.  The returned ResolvedContext is nil when no
 // registry/context is set.
+//
+// The result is memoized so that multiple commands can call this safely
+// without double-merging into cfg.
 func resolveContextConfig() (*config.ResolvedContext, error) {
+	if ctxResolvedOK {
+		return ctxResolved, nil
+	}
+	ctxResolvedOK = true
+
 	if cfg.Registry == "" || len(cfg.From) == 0 {
 		return nil, nil
 	}
@@ -156,6 +174,7 @@ func resolveContextConfig() (*config.ResolvedContext, error) {
 	cfg.Kind.MergeWithContext(&acc.Kind)
 	cfg.Features = config.MergeFeatures(acc.Features, cfg.Features)
 	cfg.Images = config.MergeImages(acc.Images, cfg.Images)
+	ctxResolved = acc
 	return acc, nil
 }
 

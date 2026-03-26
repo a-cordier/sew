@@ -14,6 +14,8 @@ $SEW_HOME/
 ├── dns/
 │   └── <cluster-name>.yaml
 ├── logs/
+│   ├── build/
+│   │   └── build.log
 │   ├── delete.log
 │   └── <context-path>/
 │       ├── install.log
@@ -63,6 +65,7 @@ When a cluster is deleted, only its record file is removed -- records from other
 
 Log files from cluster operations. Helm and kubectl output that isn't shown in the terminal is captured here for debugging.
 
+- **`build/build.log`** -- Output from the most recent `sew build`: pre-build commands, Docker builds, registry pushes, and workload restarts. Check this file first when a build step fails.
 - **`delete.log`** -- Output from the most recent `sew delete`.
 - **`<context-path>/install.log`** -- Output from `sew create` for a given context. The context path uses `_` as a separator (e.g. `gravitee.io_apim/install.log`).
 - **`<context-path>/patch.log`** -- Output from `sew patch` for a given context.

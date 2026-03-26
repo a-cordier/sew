@@ -22,6 +22,7 @@ type Config struct {
 	Images      ImagesConfig   `yaml:"images,omitempty"`
 	Helm        HelmConfig     `yaml:"helm,omitempty"`
 	Components  []Component    `yaml:"components,omitempty"`
+	Builds      []Build        `yaml:"builds,omitempty"`
 
 	// Dir is set by Load to resolve relative paths in component value files.
 	Dir string `yaml:"-"`
@@ -61,6 +62,9 @@ func Merge(base, override *Config) {
 	}
 	if len(override.Components) > 0 {
 		base.Components = override.Components
+	}
+	if len(override.Builds) > 0 {
+		base.Builds = override.Builds
 	}
 	base.Images = MergeImages(base.Images, override.Images)
 	base.Features = MergeFeatures(base.Features, override.Features)

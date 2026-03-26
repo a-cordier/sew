@@ -45,12 +45,6 @@ func runUp(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	start := time.Now()
-
-	if err := os.MkdirAll(sewHome, 0o755); err != nil {
-		return fmt.Errorf("failed to create home directory %s: %w", sewHome, err)
-	}
-
 	resolved, err := resolveContextConfig()
 	if err != nil {
 		return err
@@ -59,6 +53,19 @@ func runUp(cmd *cobra.Command, _ []string) error {
 	activeFlags, err := applyContextFlags(cmd, resolved)
 	if err != nil {
 		return err
+	}
+
+	return createCluster(resolved, activeFlags)
+}
+
+// createCluster runs the full cluster creation flow: preload, mirrors,
+// Kind cluster, component install, DNS, and state saving. It is called
+// by both `sew create` and `sew build --create`.
+func createCluster(resolved *config.ResolvedContext, activeFlags []string) error {
+	start := time.Now()
+
+	if err := os.MkdirAll(sewHome, 0o755); err != nil {
+		return fmt.Errorf("failed to create home directory %s: %w", sewHome, err)
 	}
 
 	featWarnings, err := config.ResolveFeatureDependencies(&cfg.Features)
@@ -121,6 +128,9 @@ func runUp(cmd *cobra.Command, _ []string) error {
 	var preloadUpstreams []string
 	if len(preloadRefs) > 0 {
 		preloadUpstreams = cache.PreloadUpstreams(preloadRefs)
+	}
+	if len(cfg.Builds) > 0 {
+		preloadUpstreams = append(preloadUpstreams, cache.PreloadUpstreams(config.BuildImageRefs(cfg.Builds))...)
 	}
 
 	if cfg.Images.Mirrors != nil || len(preloadUpstreams) > 0 {
@@ -223,7 +233,25 @@ func saveClusterState(cfg *config.Config, resolved *config.ResolvedContext) {
 }
 
 func getPreloadRefs(cfg *config.Config) []string {
-	return cfg.Images.Preload.EffectiveRefs()
+	refs := cfg.Images.Preload.EffectiveRefs()
+	if len(refs) == 0 || len(cfg.Builds) == 0 {
+		return refs
+	}
+	buildSkip := config.BuildImageRefs(cfg.Builds)
+	if len(buildSkip) == 0 {
+		return refs
+	}
+	skip := make(map[string]bool, len(buildSkip))
+	for _, s := range buildSkip {
+		skip[s] = true
+	}
+	filtered := make([]string, 0, len(refs))
+	for _, r := range refs {
+		if !skip[r] {
+			filtered = append(filtered, r)
+		}
+	}
+	return filtered
 }
 
 // injectGatewayComponents prepends the shared sew-gateway Gateway resource to

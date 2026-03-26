@@ -51,7 +51,9 @@ You didn't need to write any Helm commands, manage chart repos, or wire up port 
 
 ## What's next?
 
+- **[Why sew?]({{< ref "/docs/getting-started/why-sew" >}})** -- the problems that motivated this tool and how each feature addresses them.
 - **[Browse the registry]({{< ref "/docs/guides/sew-registry" >}})** to find contexts for databases, API gateways, and full application stacks.
 - **[Compose contexts]({{< ref "/docs/guides/composing-contexts" >}})** to build complex stacks from simple building blocks.
 - **[Set up networking]({{< ref "/docs/guides/networking" >}})** with load balancers, Gateway API, and local DNS.
+- **[Build and iterate locally]({{< ref "/docs/guides/developer-loop" >}})** to rebuild images and reload them into the cluster in one command.
 - **[Explore the CLI]({{< ref "/docs/reference/commands" >}})** to see everything sew can do.

@@ -172,4 +172,4 @@ sew create --skip-preload
 sew patch upgrade.yaml --skip-preload
 ```
 
-This is useful when you plan to build and push images locally, when mirrors already cover the upstreams you need, or during iterative development where you want a faster cluster startup.
+This is useful when mirrors already cover the upstreams you need, or during iterative development where you want a faster cluster startup. If you're building images locally as part of a dev loop, see the [Developer Loop]({{< ref "/docs/guides/developer-loop" >}}) guide.

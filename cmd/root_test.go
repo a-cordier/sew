@@ -22,6 +22,7 @@ func writeFile(t *testing.T, path, content string) {
 
 func setupCfg(t *testing.T, registryRoot string, from []string) {
 	t.Helper()
+	resetContextConfigCache()
 	sewHome = t.TempDir()
 	cfg = &config.Config{
 		Registry: "file://" + registryRoot,
@@ -342,6 +343,7 @@ components:
 }
 
 func TestResolveContextConfig_NoRegistryReturnsNil(t *testing.T) {
+	resetContextConfigCache()
 	sewHome = t.TempDir()
 	cfg = &config.Config{
 		From: []string{"something"},
@@ -357,6 +359,7 @@ func TestResolveContextConfig_NoRegistryReturnsNil(t *testing.T) {
 }
 
 func TestResolveContextConfig_NoFromReturnsNil(t *testing.T) {
+	resetContextConfigCache()
 	sewHome = t.TempDir()
 	cfg = &config.Config{
 		Registry: "file:///some/path",
@@ -506,6 +509,7 @@ components:
       chart: b/chart
 `)
 
+	resetContextConfigCache()
 	sewHome = t.TempDir()
 	cfg = &config.Config{
 		Registry: "file://" + root,

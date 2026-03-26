@@ -13,6 +13,7 @@ A `sew.yaml` file is a YAML document with the following top-level fields:
 | Field | Type | Description |
 |-------|------|-------------|
 | `abstract` | boolean | When true, marks this configuration as a shared base that cannot be deployed on its own. Abstract configs are meant to be referenced via 'from' by concrete contexts. |
+| `builds` | object[] | Local Docker builds for the inner development loop. Each entry describes how to compile, build, and load a Docker image into the Kind cluster, then restart matching workloads. Use with 'sew build' to iterate quickly on application code. |
 | `components` | object[] | Ordered list of components to deploy. Components are applied sequentially; use 'requires' to express inter-component dependencies. |
 | `description` | string | Human-readable description of this configuration. Used by context flag files to document what the flag does; ignored during deployment. |
 | `features` | map | Optional networking features. Each sub-key uses pointer semantics: setting a feature explicitly overrides the inherited context default; omitting it preserves the parent value. |
@@ -29,6 +30,23 @@ A `sew.yaml` file is a YAML document with the following top-level fields:
 When true, marks this configuration as a shared base that cannot be deployed on its own. Abstract configs are meant to be referenced via 'from' by concrete contexts.
 
 **Type:** `boolean` | **Default:** `false`
+
+## `builds`
+
+Local Docker builds for the inner development loop. Each entry describes how to compile, build, and load a Docker image into the Kind cluster, then restart matching workloads. Use with 'sew build' to iterate quickly on application code.
+
+**Type:** `array`
+
+Each entry is an object with the following fields:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `context` | string | No | Docker build context directory, resolved relative to 'dir'. Default: `.`. |
+| `dir` | string | No | Working directory for pre-build commands and base for relative context/dockerfile paths. Supports environment variable expansion (e.g. "$HOME/src/project"). Default: `.`. |
+| `dockerfile` | string | No | Path to the Dockerfile, resolved relative to 'dir'. When omitted, defaults to 'Dockerfile' in the build context. |
+| `image` | string | Yes | Target Docker image tag (e.g. "graviteeio/apim-gateway:latest-debian"). Images listed here are automatically excluded from preload. |
+| `name` | string | Yes | Short identifier for this build, used to select it in 'sew build <name>'. |
+| `pre` | string[] | No | Shell commands executed sequentially before 'docker build' (e.g. compilation, packaging). Each command runs in 'dir' with output streamed to the terminal. |
 
 ## `components`
 

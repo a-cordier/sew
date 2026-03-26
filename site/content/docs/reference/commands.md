@@ -39,6 +39,31 @@ Each flag merges a patch on top of the resolved context before deployment. Flags
 
 See [Context Format -- Context flags]({{< ref "/docs/reference/context-format#context-flags" >}}) for how to author flag files.
 
+## sew build
+
+Build local Docker images, push them to the cluster's preload registry, and restart matching workloads. See the [Developer Loop]({{< ref "/docs/guides/developer-loop" >}}) guide for a walkthrough.
+
+```bash
+sew build
+sew build gateway console-ui
+sew build --create --skip-pre gateway
+```
+
+Build entries are defined in the `builds` section of `sew.yaml`. When called without arguments, all entries are built. Pass one or more names to build a subset.
+
+### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--create` | Create the cluster if it doesn't exist, then build. Context flags are forwarded to the creation step. |
+| `--skip-pre` | Skip pre-build commands (`pre`), go straight to `docker build`. |
+| `--no-restart` | Build and push but don't restart workloads. |
+| `--name <cluster>` | Target a specific cluster. Defaults to `kind.name` from the resolved config. |
+
+### Build logs
+
+All build output (pre-build commands, docker build) is written to `~/.sew/logs/build/build.log`. On failure, sew prints the path so you can inspect the full output.
+
 ## sew patch
 
 Upgrade components on a running cluster by merging a patch file into the resolved context and re-deploying only the affected components. This is useful for testing upgrades (bumping image tags or chart versions), toggling feature flags, or applying configuration tweaks.
