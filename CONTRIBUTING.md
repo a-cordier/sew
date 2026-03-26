@@ -322,11 +322,13 @@ components:
     enabled: false
 ```
 
-**When to use flags vs separate contexts**: use flags for optional
-components that can be toggled without changing the fundamental nature
-of the deployment (e.g., disabling analytics or UIs). Use separate
-context directories for fundamentally different backends or topologies
-(e.g., MongoDB vs PostgreSQL).
+**When to use flags vs separate contexts**:
+
+- **Can a user toggle this on or off without changing the stack's identity?** Use a **flag**. Examples: `--no-es` disables Elasticsearch, `--no-portal` hides the portal UI. The stack is still "APIM with Postgres" regardless.
+- **Does this change the storage backend, networking model, or deployment topology?** Use a **separate context directory**. Examples: `mongodb/` vs `postgres/` (different databases), `dbless/` vs `gateway/` (fundamentally different gateway modes).
+- **Is there shared config used by multiple sibling variants?** Extract it into an **abstract base** (`abstract: true`) and have variants compose from it via `from`. Example: `oss/base/` holds the shared Helm repo, component skeleton, and port mappings; `oss/mongodb/` and `oss/postgres/` both extend it.
+- **Does a feature layer apply across multiple existing contexts?** Create a **composable abstract context** that stacks on top via `from`. Example: `ee/kafka/base/` adds Kafka and license handling; `ee/kafka/mongodb/` and `ee/kafka/postgres/` compose it with the corresponding OSS DB context.
+- **When in doubt**: prefer a flag. Flags are cheaper to add, don't create new directories, and inherit automatically through `from`. A flag can always be promoted to a separate context later if the divergence grows.
 
 Users activate flags on the command line:
 
