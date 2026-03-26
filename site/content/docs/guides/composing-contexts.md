@@ -4,7 +4,7 @@ weight: 2
 type: docs
 ---
 
-One of sew's key strengths is composition. You can layer contexts together using `from` to build complex stacks from simple, reusable building blocks -- without duplicating configuration.
+One of sew's key strengths is composition. You can layer contexts together using `from` to build complex stacks from simple, reusable building blocks -- without duplicating configuration. The [Architecture]({{< ref "/docs/reference/architecture#context-composition" >}}) page illustrates how this works visually.
 
 ## The basics
 

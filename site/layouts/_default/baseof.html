@@ -14,7 +14,7 @@
   var copySvg = '<svg class="copy-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 5.5V3.5a1.5 1.5 0 0 0-1.5-1.5H3.5A1.5 1.5 0 0 0 2 3.5V9a1.5 1.5 0 0 0 1.5 1.5h2"/></svg>';
   var checkSvg = '<svg class="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3.5 8.5 6.5 11.5 12.5 4.5"/></svg>';
 
-  document.querySelectorAll('pre').forEach(function(pre) {
+  document.querySelectorAll('pre:not(.mermaid)').forEach(function(pre) {
     var wrapper = document.createElement('div');
     wrapper.className = 'code-block-wrapper';
     pre.parentNode.insertBefore(wrapper, pre);
@@ -41,5 +41,66 @@
   });
 })();
 </script>
+{{ if .Store.Get "hasMermaid" }}
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+  function isDark() {
+    var t = document.documentElement.getAttribute('data-theme');
+    if (t === 'dark') return true;
+    if (t === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  function themeVars() {
+    var dark = isDark();
+    return {
+      primaryColor: 'transparent',
+      primaryBorderColor: dark ? '#30363d' : '#d0d7de',
+      primaryTextColor:   dark ? '#e1e4e8' : '#1a1a2e',
+      lineColor:          dark ? '#30363d' : '#d0d7de',
+      secondaryColor: 'transparent',
+      tertiaryColor: 'transparent',
+      background: 'transparent',
+      mainBkg: 'transparent',
+      nodeBorder:         dark ? '#30363d' : '#d0d7de',
+      edgeLabelBackground: 'transparent',
+      titleColor:         dark ? '#e1e4e8' : '#1a1a2e',
+      clusterBkg: 'transparent',
+      clusterBorder:      dark ? '#30363d' : '#d0d7de',
+    };
+  }
+
+  var sources = [];
+  document.querySelectorAll('.mermaid').forEach(function(el, i) {
+    sources.push(el.textContent);
+    el.id = 'mermaid-' + i;
+  });
+
+  async function renderAll() {
+    mermaid.initialize({
+      startOnLoad: false,
+      look: 'handDrawn',
+      theme: 'base',
+      themeVariables: themeVars(),
+      fontSize: 18,
+      flowchart: { subGraphTitleMargin: { top: 5, bottom: 5 }, padding: 15 },
+    });
+    for (var i = 0; i < sources.length; i++) {
+      var el = document.getElementById('mermaid-' + i);
+      var { svg } = await mermaid.render('mermaid-svg-' + i + '-' + Date.now(), sources[i]);
+      el.innerHTML = svg;
+    }
+  }
+
+  renderAll();
+
+  new MutationObserver(function(mutations) {
+    for (var m of mutations) {
+      if (m.attributeName === 'data-theme') { renderAll(); break; }
+    }
+  }).observe(document.documentElement, { attributes: true });
+</script>
+{{ end }}
 </body>
 </html>

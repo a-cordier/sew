@@ -47,7 +47,7 @@ Whether you used `--from` or a config file, sew did the same thing behind the sc
 2. **Created a Kind cluster** with the port mappings, nodes, and settings specified by the context.
 3. **Installed components** in dependency order -- adding Helm repos, running `helm upgrade --install`, and applying Kubernetes manifests.
 
-You didn't need to write any Helm commands, manage chart repos, or wire up port mappings. The context handled it.
+You didn't need to write any Helm commands, manage chart repos, or wire up port mappings. The context handled it. See [Architecture]({{< ref "/docs/reference/architecture" >}}) for the full picture of how these components interact.
 
 ## What's next?
 

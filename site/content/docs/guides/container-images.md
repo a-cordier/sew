@@ -4,7 +4,7 @@ weight: 4
 type: docs
 ---
 
-Pulling container images over the network every time you recreate a cluster gets old fast. sew gives you two strategies to speed things up: **mirror proxies** that cache layers locally, and **image preloading** that stages images before the cluster starts.
+Pulling container images over the network every time you recreate a cluster gets old fast. sew gives you two strategies to speed things up: **mirror proxies** that cache layers locally, and **image preloading** that stages images before the cluster starts. The [Architecture]({{< ref "/docs/reference/architecture#component-interactions" >}}) page shows how these fit into the overall system.
 
 ## Image mirrors
 
