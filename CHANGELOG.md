@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0](https://github.com/a-cordier/sew/compare/v0.7.0...v0.8.0) (2026-03-26)
+
+
+### Features
+
+* add info command for contexts ([f58e462](https://github.com/a-cordier/sew/commit/f58e46294e300903d0f3c41ec6dcd58a6ff06847))
+* bring local docker build to the developer loop ([1faab7f](https://github.com/a-cordier/sew/commit/1faab7f8ddc9b73a7c655dd3a199b9a9073a2f51))
+
 ## [0.7.0](https://github.com/a-cordier/sew/compare/v0.6.0...v0.7.0) (2026-03-26)
 
 
