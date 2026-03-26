@@ -71,7 +71,7 @@ Push the image to the registry but don't trigger a rollout restart:
 sew build --no-restart gateway
 ```
 
-## One command from zero to dev loop
+## Creating and building in one step
 
 If you don't have a cluster yet, `--create` creates one before building. When the cluster already exists, the flag is silently ignored:
 
