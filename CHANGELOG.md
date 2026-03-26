@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/a-cordier/sew/compare/v0.8.0...v0.9.0) (2026-03-26)
+
+
+### Features
+
+* make sew available from well knowns pkg managers ([e982c71](https://github.com/a-cordier/sew/commit/e982c710b8aa3b1b4f3c0642ac842691cc8182f8))
+
 ## [0.8.0](https://github.com/a-cordier/sew/compare/v0.7.0...v0.8.0) (2026-03-26)
 
 
