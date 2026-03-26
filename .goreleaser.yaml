@@ -24,7 +24,7 @@ brews:
   - repository:
       owner: a-cordier
       name: sew
-      directory: HomebrewFormula
+    directory: HomebrewFormula
     homepage: https://a-cordier.github.io/sew/
     description: "Kubernetes application stacks for dev, test, and CI"
     license: Apache-2.0
