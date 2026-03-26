@@ -27,21 +27,23 @@
   var green = '#28c840', blue = '#58a6ff', white = '#e1e4e8';
 
   var script = [
-    { type: 'type', text: '$ sew create --from mongodb/standalone' },
+    { type: 'type', text: '$ sew create --from gravitee.io/apim/oss/dbless' },
     { type: 'pause', ms: 600 },
-    { type: 'line', text: '  \u2713 Pulling images for preload (1.204s)', color: green },
-    { type: 'line', text: '  \u2713 Starting preload registry (1.436s)', color: green },
-    { type: 'line', text: '  \u2713 Pushing images to preload registry (3.118s)', color: green },
-    { type: 'line', text: '  \u2713 Creating cluster "mongo-standalone" (28.751s)', color: green },
-    { type: 'line', text: '  \u2713 Connecting preload registry to Kind network (98ms)', color: green },
-    { type: 'line', text: '  \u2713 Installing "mongodb" (32ms)', color: green },
+    { type: 'line', text: '  \u2713 Pulling images for preload (52.649s)', color: green },
+    { type: 'line', text: '  \u2713 Starting preload registry (1.38s)', color: green },
+    { type: 'line', text: '  \u2713 Pushing images to preload registry (7.166s)', color: green },
+    { type: 'line', text: '  \u2713 Creating cluster "gravitee-dbless" (30.11s)', color: green },
+    { type: 'line', text: '  \u2713 Connecting preload registry to Kind network (142ms)', color: green },
+    { type: 'line', text: '  \u2713 Initializing Helm (2.796s)', color: green },
+    { type: 'line', text: '  \u2713 Installing "apim" (1.489s)', color: green },
+    { type: 'line', text: '  \u2713 Installing "gko" (757ms)', color: green },
     { type: 'pause', ms: 200 },
     { type: 'line', text: '' },
-    { type: 'line', text: '  Total: 34.639s', color: blue },
+    { type: 'line', text: '  Total: 1m36.489s', color: blue },
     { type: 'line', text: '' },
-    { type: 'line', text: 'Your cluster "mongo-standalone" is ready.', color: white },
+    { type: 'line', text: 'Your cluster "gravitee-dbless" is ready.', color: white },
     { type: 'line', text: '' },
-    { type: 'line', text: 'MongoDB   mongodb://localhost:30017', color: white },
+    { type: 'line', text: 'APIM Gateway   http://localhost:30082', color: white },
     { type: 'pause', ms: 4000 },
   ];
 
