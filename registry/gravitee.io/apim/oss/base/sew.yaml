@@ -6,7 +6,7 @@ images:
       - graviteeio/apim-management-api:latest-debian
       - graviteeio/apim-management-ui:latest
       - graviteeio/apim-portal-ui:latest
-      - alpine:latest
+      - alpine:latest # used by APIM Helm chart init containers
 kind:
   name: gravitee-apim
   nodes:

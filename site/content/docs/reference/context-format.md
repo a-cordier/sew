@@ -146,7 +146,7 @@ When contexts are composed, each top-level field is merged as follows:
 - **`components`** -- Matched by name. Helm chart/version: child wins. Value files: appended. Values: deep-merged. Manifest files: appended. Manifests: union by resource identity. Secrets/configMaps: appended. Requirements: appended and deduplicated. Unmatched components are appended.
 - **`helm.repos`** -- Deduplicated by name; child wins on conflict.
 - **`features`** -- Each feature block is replaced as a whole if the child defines it; otherwise inherited.
-- **`images`** -- `preload.refs`: deduplicated union. `mirrors`: child wins if set.
+- **`images`** -- `preload`: merge mode (default) unions `refs` and `skip`; replace mode uses only the child's `refs`. `mirrors`: child wins if set.
 
 ## Overriding service networking
 

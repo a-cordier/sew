@@ -301,7 +301,9 @@ Images to pull and preload into Kind nodes before deploying components, avoiding
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
+| `mode` | string | No | How this preload section combines with inherited preload. "merge" (default) unions refs and skip lists. "replace" discards inherited refs and uses only the listed refs. Default: `merge`. Values: `merge`, `replace`. |
 | `refs` | string[] | No | List of fully-qualified image references (e.g. "docker.io/library/nginx:1.27-alpine") to preload. |
+| `skip` | string[] | No | Image references to exclude from inherited preload (merge mode only). Useful in context flags that disable components whose images would otherwise be preloaded. |
 
 ## `kind`
 

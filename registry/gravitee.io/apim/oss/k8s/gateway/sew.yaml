@@ -50,7 +50,7 @@ components:
                   spec:
                     containers:
                       - name: gateway
-                        image: graviteeio/apim-gateway
+                        image: graviteeio/apim-gateway:latest-debian
                     securityContext:
                       runAsNonRoot: true
                       runAsUser: 1001

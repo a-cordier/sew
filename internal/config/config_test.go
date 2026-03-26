@@ -308,7 +308,7 @@ func TestMergeImages_BasePreloadPreserved(t *testing.T) {
 	}
 }
 
-func TestMergeImages_OverridePreloadReplacesBase(t *testing.T) {
+func TestMergeImages_OverridePreloadUnionsWithBase(t *testing.T) {
 	base := ImagesConfig{
 		Preload: &PreloadConfig{Refs: []string{"img-a", "img-b"}},
 	}
@@ -316,12 +316,18 @@ func TestMergeImages_OverridePreloadReplacesBase(t *testing.T) {
 		Preload: &PreloadConfig{Refs: []string{"img-c"}},
 	}
 	result := MergeImages(base, override)
-	if len(result.Preload.Refs) != 1 || result.Preload.Refs[0] != "img-c" {
-		t.Fatalf("expected override to replace base, got %v", result.Preload.Refs)
+	if len(result.Preload.Refs) != 3 {
+		t.Fatalf("expected 3 refs from union, got %v", result.Preload.Refs)
+	}
+	expected := map[string]bool{"img-a": true, "img-b": true, "img-c": true}
+	for _, r := range result.Preload.Refs {
+		if !expected[r] {
+			t.Fatalf("unexpected ref %q in union result", r)
+		}
 	}
 }
 
-func TestMergeImages_EmptyRefsOverrideClearsPreload(t *testing.T) {
+func TestMergeImages_EmptyRefsOverridePreservesBase(t *testing.T) {
 	base := ImagesConfig{
 		Preload: &PreloadConfig{Refs: []string{"img-a", "img-b"}},
 	}
@@ -330,10 +336,10 @@ func TestMergeImages_EmptyRefsOverrideClearsPreload(t *testing.T) {
 	}
 	result := MergeImages(base, override)
 	if result.Preload == nil {
-		t.Fatal("expected non-nil Preload from override")
+		t.Fatal("expected non-nil Preload")
 	}
-	if len(result.Preload.Refs) != 0 {
-		t.Fatalf("expected empty refs (override clears base), got %v", result.Preload.Refs)
+	if len(result.Preload.Refs) != 2 {
+		t.Fatalf("expected base refs preserved when override has empty refs, got %v", result.Preload.Refs)
 	}
 }
 
@@ -753,5 +759,137 @@ func TestResolveFeatureDependencies_DisabledGatewayNoAutoLB(t *testing.T) {
 	}
 	if f.LB != nil {
 		t.Fatal("expected LB to remain nil when gateway is disabled")
+	}
+}
+
+func TestMergeImages_MergeMode_UnionRefs(t *testing.T) {
+	base := ImagesConfig{
+		Preload: &PreloadConfig{Refs: []string{"img-a", "img-b"}},
+	}
+	override := ImagesConfig{
+		Preload: &PreloadConfig{Refs: []string{"img-b", "img-c"}},
+	}
+	result := MergeImages(base, override)
+
+	if len(result.Preload.Refs) != 3 {
+		t.Fatalf("expected 3 deduplicated refs, got %v", result.Preload.Refs)
+	}
+	expected := map[string]bool{"img-a": true, "img-b": true, "img-c": true}
+	for _, r := range result.Preload.Refs {
+		if !expected[r] {
+			t.Fatalf("unexpected ref %q", r)
+		}
+	}
+	if result.Preload.Mode != "" {
+		t.Fatalf("expected mode to be empty after merge, got %q", result.Preload.Mode)
+	}
+}
+
+func TestMergeImages_ReplaceMode_OverrideWins(t *testing.T) {
+	base := ImagesConfig{
+		Preload: &PreloadConfig{Refs: []string{"img-a", "img-b"}},
+	}
+	override := ImagesConfig{
+		Preload: &PreloadConfig{
+			Mode: PreloadModeReplace,
+			Refs: []string{"img-x"},
+		},
+	}
+	result := MergeImages(base, override)
+
+	if len(result.Preload.Refs) != 1 || result.Preload.Refs[0] != "img-x" {
+		t.Fatalf("expected only override refs [img-x], got %v", result.Preload.Refs)
+	}
+	if result.Preload.Mode != "" {
+		t.Fatalf("expected mode to be cleared after replace merge, got %q", result.Preload.Mode)
+	}
+}
+
+func TestMergeImages_SkipAccumulates(t *testing.T) {
+	layer0 := ImagesConfig{
+		Preload: &PreloadConfig{
+			Refs: []string{"img-a", "img-b", "img-c"},
+			Skip: []string{"img-a"},
+		},
+	}
+	layer1 := ImagesConfig{
+		Preload: &PreloadConfig{
+			Skip: []string{"img-b"},
+		},
+	}
+	result := MergeImages(layer0, layer1)
+
+	if len(result.Preload.Skip) != 2 {
+		t.Fatalf("expected 2 skip entries, got %v", result.Preload.Skip)
+	}
+	skipSet := make(map[string]bool)
+	for _, s := range result.Preload.Skip {
+		skipSet[s] = true
+	}
+	if !skipSet["img-a"] || !skipSet["img-b"] {
+		t.Fatalf("expected skip to contain img-a and img-b, got %v", result.Preload.Skip)
+	}
+}
+
+func TestEffectiveRefs_SubtractsSkip(t *testing.T) {
+	p := &PreloadConfig{
+		Refs: []string{"img-a", "img-b", "img-c"},
+		Skip: []string{"img-b"},
+	}
+	effective := p.EffectiveRefs()
+
+	if len(effective) != 2 {
+		t.Fatalf("expected 2 effective refs, got %v", effective)
+	}
+	for _, r := range effective {
+		if r == "img-b" {
+			t.Fatal("expected img-b to be excluded by skip")
+		}
+	}
+}
+
+func TestEffectiveRefs_NoSkip(t *testing.T) {
+	p := &PreloadConfig{
+		Refs: []string{"img-a", "img-b"},
+	}
+	effective := p.EffectiveRefs()
+
+	if len(effective) != 2 {
+		t.Fatalf("expected 2 effective refs, got %v", effective)
+	}
+	if effective[0] != "img-a" || effective[1] != "img-b" {
+		t.Fatalf("expected refs unchanged, got %v", effective)
+	}
+}
+
+func TestMergeImages_ReplaceDoesNotPropagate(t *testing.T) {
+	base := ImagesConfig{
+		Preload: &PreloadConfig{Refs: []string{"img-a", "img-b"}},
+	}
+	replaceLayer := ImagesConfig{
+		Preload: &PreloadConfig{
+			Mode: PreloadModeReplace,
+			Refs: []string{"img-x"},
+		},
+	}
+	afterReplace := MergeImages(base, replaceLayer)
+
+	if afterReplace.Preload.Mode != "" {
+		t.Fatalf("expected mode cleared after replace, got %q", afterReplace.Preload.Mode)
+	}
+
+	nextLayer := ImagesConfig{
+		Preload: &PreloadConfig{Refs: []string{"img-y"}},
+	}
+	final := MergeImages(afterReplace, nextLayer)
+
+	if len(final.Preload.Refs) != 2 {
+		t.Fatalf("expected 2 refs from union, got %v", final.Preload.Refs)
+	}
+	expected := map[string]bool{"img-x": true, "img-y": true}
+	for _, r := range final.Preload.Refs {
+		if !expected[r] {
+			t.Fatalf("unexpected ref %q in final result", r)
+		}
 	}
 }

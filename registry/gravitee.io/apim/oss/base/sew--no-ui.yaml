@@ -7,3 +7,8 @@ components:
           enabled: false
         portal:
           enabled: false
+images:
+  preload:
+    skip:
+      - graviteeio/apim-management-ui:latest
+      - graviteeio/apim-portal-ui:latest

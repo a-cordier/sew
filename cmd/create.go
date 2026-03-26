@@ -223,10 +223,7 @@ func saveClusterState(cfg *config.Config, resolved *config.ResolvedContext) {
 }
 
 func getPreloadRefs(cfg *config.Config) []string {
-	if cfg.Images.Preload == nil {
-		return nil
-	}
-	return cfg.Images.Preload.Refs
+	return cfg.Images.Preload.EffectiveRefs()
 }
 
 // injectGatewayComponents prepends the shared sew-gateway Gateway resource to

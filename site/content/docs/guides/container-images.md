@@ -82,7 +82,71 @@ images:
       - bitnami/redis:7.4
 ```
 
-Context authors can ship the image list directly in the context `sew.yaml`, so you don't have to maintain it yourself. If you set `images.preload` in your own config, your list **replaces** the context's -- you define exactly what gets preloaded. Omit it entirely to inherit the context's list as-is.
+Context authors can ship the image list directly in the context `sew.yaml`, so you don't have to maintain it yourself.
+
+### How preload merges across layers
+
+When a context composes from parents via `from`, or when you override preload in your own config, the preload lists are **merged** by default -- your refs are unioned with the inherited ones. This is controlled by the `mode` field.
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `mode` | `merge` | `merge` unions refs with inherited preload. `replace` discards inherited refs entirely. |
+| `refs` | *(none)* | Image references to preload |
+| `skip` | *(none)* | Image references to exclude from inherited preload (merge mode only) |
+
+#### Merge mode (default)
+
+In merge mode, refs from every layer are deduplicated and combined. If a context preloads `mongo:7` and you add `redis:7.4`, the cluster gets both:
+
+```yaml
+images:
+  preload:
+    refs:
+      - bitnami/redis:7.4
+```
+
+Omit `mode` (or set it to `merge`) to keep this behavior.
+
+#### Replace mode
+
+When you need full control over exactly which images are preloaded, set `mode: replace`. This discards every ref inherited from parent contexts and uses only the refs you list:
+
+```yaml
+images:
+  preload:
+    mode: replace
+    refs:
+      - docker.io/library/mongo:7
+      - bitnami/redis:7.4
+```
+
+#### Skipping inherited images
+
+Sometimes you want to keep most of the inherited preload list but remove a few images -- for example, when a context flag disables a component whose images would otherwise be pulled for nothing. Use `skip` instead of switching to replace mode:
+
+```yaml
+images:
+  preload:
+    skip:
+      - docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+```
+
+`skip` entries accumulate across layers the same way `refs` do: if a parent context skips an image and a child adds another skip, both are excluded.
+
+This is especially useful in context flags. A `--no-es` flag that disables Elasticsearch can skip its image in the same patch file:
+
+```yaml
+description: "Disable Elasticsearch and analytics reporters"
+images:
+  preload:
+    skip:
+      - docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+components:
+  - name: elasticsearch
+    enabled: false
+```
+
+> `skip` is ignored when `mode` is set to `replace`, since replace already gives you an explicit list.
 
 ### Combining mirrors and preloading
 

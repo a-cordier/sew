@@ -50,6 +50,7 @@ When writing or updating documentation:
 
   See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns) for details.
   ```
+- When a context flag disables a component, add `images.preload.skip` entries for that component's images so users who toggle the flag do not pay the pull cost. More broadly, design preload lists so every concrete context and flag combination preloads exactly the images it needs -- no more, no fewer.
 - Concrete context READMEs must be **self-contained**. Never link to an abstract parent's README — abstract contexts don't get pages on the site and those links will be broken. Inline any relevant documentation from the parent directly into each concrete variant's README.
 - Any change that affects the user — new feature, changed behavior, new CLI flag, new config field, registry restructure, etc. — **must** come with matching documentation updates. Update the relevant pages under `site/content/docs/` (guides, reference, getting started) and, when applicable, the `README.md` and `CONTRIBUTING.md`. Documentation is not optional; a feature without docs is not complete.
 - When a feature or command requires `sudo`, the documentation **must** explain *why* elevated privileges are needed (e.g. which system directories are written to) and clarify which commands can run without `sudo` afterwards. Use a blockquote for this, for example:
