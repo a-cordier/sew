@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/a-cordier/sew/compare/v0.9.0...v0.9.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* re-format go releaser config for packagge publishing ([3bf6780](https://github.com/a-cordier/sew/commit/3bf6780146c6209412dddbb0d3042744902ef548))
+
 ## [0.9.0](https://github.com/a-cordier/sew/compare/v0.8.0...v0.9.0) (2026-03-26)
 
 
