@@ -406,6 +406,26 @@ pre.mermaid .cluster path {
   z-index: 1;
 }
 
+.hero-split {
+  max-width: 1100px;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 3rem;
+  align-items: center;
+  text-align: left;
+}
+
+.hero-terminal .code-window {
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+
+.hero-terminal pre {
+  height: 420px;
+  overflow: hidden;
+  font-size: 0.64rem;
+  line-height: 1.55;
+}
+
 .hero-logo {
   margin-bottom: 1.5rem;
   filter: brightness(0) invert(1);
@@ -433,6 +453,10 @@ pre.mermaid .cluster path {
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+.hero-split .hero-actions {
+  justify-content: flex-start;
 }
 
 /* ─── Buttons ─── */
@@ -657,6 +681,16 @@ pre.mermaid .cluster path {
 
 .code-comment {
   color: #6a737d;
+}
+
+.term-cursor {
+  animation: blink 1s step-end infinite;
+  color: #58a6ff;
+  font-weight: normal;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1937,9 +1971,17 @@ h4:hover .heading-anchor {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .quickstart-inner {
+  .hero-split {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    text-align: center;
+  }
+
+  .hero-split .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-terminal {
+    display: none;
   }
 }
 
@@ -1977,8 +2019,8 @@ h4:hover .heading-anchor {
     padding: 3rem 0;
   }
 
-  .quickstart {
-    padding: 3rem 0;
+  .hero-terminal pre {
+    height: 320px;
   }
 
   .cta-registry {
