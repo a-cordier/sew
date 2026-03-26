@@ -27,23 +27,21 @@
   var green = '#28c840', blue = '#58a6ff', white = '#e1e4e8';
 
   var script = [
-    { type: 'type', text: '$ sew create --from gravitee.io/apim --no-es --no-ui' },
+    { type: 'type', text: '$ sew create --from mongodb/standalone' },
     { type: 'pause', ms: 600 },
-    { type: 'line', text: '  \u2713 Pulling images for preload (2.679s)', color: green },
+    { type: 'line', text: '  \u2713 Pulling images for preload (1.204s)', color: green },
     { type: 'line', text: '  \u2713 Starting preload registry (1.436s)', color: green },
-    { type: 'line', text: '  \u2713 Pushing images to preload registry (6.302s)', color: green },
-    { type: 'line', text: '  \u2713 Creating cluster "gravitee-apim" (32.992s)', color: green },
-    { type: 'line', text: '  \u2713 Connecting preload registry to Kind network (127ms)', color: green },
-    { type: 'line', text: '  \u2713 Initializing Helm (2.561s)', color: green },
-    { type: 'line', text: '  \u2713 Installing "postgresql" (48ms)', color: green },
-    { type: 'line', text: '  \u2713 Installing "tls-server" (15ms)', color: green },
-    { type: 'line', text: '  \u2713 Waiting for "postgresql" to be ready (8.042s)', color: green },
-    { type: 'line', text: '  \u2713 Installing "apim" (1.354s)', color: green },
+    { type: 'line', text: '  \u2713 Pushing images to preload registry (3.118s)', color: green },
+    { type: 'line', text: '  \u2713 Creating cluster "mongo-standalone" (28.751s)', color: green },
+    { type: 'line', text: '  \u2713 Connecting preload registry to Kind network (98ms)', color: green },
+    { type: 'line', text: '  \u2713 Installing "mongodb" (32ms)', color: green },
     { type: 'pause', ms: 200 },
     { type: 'line', text: '' },
-    { type: 'line', text: '  Total: 55.561s', color: blue },
+    { type: 'line', text: '  Total: 34.639s', color: blue },
     { type: 'line', text: '' },
-    { type: 'line', text: 'Your cluster "gravitee-apim" is ready.', color: white },
+    { type: 'line', text: 'Your cluster "mongo-standalone" is ready.', color: white },
+    { type: 'line', text: '' },
+    { type: 'line', text: 'MongoDB   mongodb://localhost:30017', color: white },
     { type: 'pause', ms: 4000 },
   ];
 
@@ -149,12 +147,40 @@
   </div>
 </section>
 
+{{/* ── How it works ── */}}
+<section class="how-it-works">
+  <div class="container">
+    <h2 class="how-it-works-title">How it works</h2>
+    <div class="how-it-works-grid">
+
+      <div class="how-it-works-step">
+        <span class="how-it-works-number">1</span>
+        <h3>Browse</h3>
+        <p>Find a ready-made stack in the <a href="{{ "registry/" | relURL }}">registry</a> &mdash; databases, message brokers, API gateways, or full application stacks.</p>
+      </div>
+
+      <div class="how-it-works-step">
+        <span class="how-it-works-number">2</span>
+        <h3>Compose</h3>
+        <p>Layer contexts with <code>from</code>, override values, and toggle features with flags. One config file describes your entire stack.</p>
+      </div>
+
+      <div class="how-it-works-step">
+        <span class="how-it-works-number">3</span>
+        <h3>Deploy</h3>
+        <p>One command creates a Kind cluster, installs components in dependency order, and wires up networking.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 {{/* ── Registry CTA ── */}}
 <section class="cta-registry">
   <div class="container">
     <div class="cta-inner">
       <h2 class="cta-title">Explore the registry</h2>
-      <p class="cta-desc">Browse pre-built contexts for databases, message brokers, API gateways, and full application stacks. Find the right starting point for your project.</p>
+      <p class="cta-desc">MongoDB, PostgreSQL, Kafka, Elasticsearch, Gravitee APIM &mdash; and more. Each context is a composable building block you can deploy in one command.</p>
       <a class="btn btn-primary-solid" href="{{ "registry/" | relURL }}">Browse Components</a>
     </div>
   </div>

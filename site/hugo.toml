@@ -4,7 +4,7 @@ title = "sew"
 
 [params]
   description = "Your local Kubernetes tailor shop"
-  tagline = "Discover, use and maintain Kubernetes application stacks for CI, test and dev workflows."
+  tagline = "Pick a stack from the registry. Deploy it in one command."
   githubRepo = "https://github.com/a-cordier/sew"
   pinnedGroups = ["gravitee.io"]
 

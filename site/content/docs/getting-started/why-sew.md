@@ -4,7 +4,7 @@ weight: 2
 type: docs
 ---
 
-sew came from day-to-day frictions faced by the Gravitee developer experience team while running local Kubernetes clusters for tests and demos. These are a few that kept coming back 👇
+sew came from day-to-day frictions faced by the Gravitee developer experience team while running local Kubernetes clusters for tests and demos. These are a few that kept coming back.
 
 ## Cluster setup is repetitive boilerplate
 

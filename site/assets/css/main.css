@@ -597,6 +597,70 @@ pre.mermaid .cluster path {
 }
 
 /* ═══════════════════════════════════════════════════
+   How it works
+   ═══════════════════════════════════════════════════ */
+
+.how-it-works {
+  padding: 4.5rem 0 4rem;
+  background: var(--color-bg-subtle);
+  border-top: 1px solid var(--color-border-muted);
+}
+
+.how-it-works-title {
+  font-size: 1.65rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: var(--color-text);
+}
+
+.how-it-works-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.how-it-works-step {
+  text-align: center;
+  padding: 1.5rem 1.25rem;
+}
+
+.how-it-works-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-gradient);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.how-it-works-step h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+}
+
+.how-it-works-step p {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.how-it-works-step p a {
+  font-weight: 500;
+}
+
+.how-it-works-step code {
+  font-size: 0.8em;
+}
+
+/* ═══════════════════════════════════════════════════
    Quick Start
    ═══════════════════════════════════════════════════ */
 
@@ -1982,6 +2046,12 @@ h4:hover .heading-anchor {
 
   .hero-terminal {
     display: none;
+  }
+
+  .how-it-works-grid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    margin: 0 auto;
   }
 }
 
