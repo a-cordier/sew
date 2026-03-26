@@ -14,32 +14,36 @@ Common issues and how to fix them.
 
 **Fix:** Override the port mappings in your `sew.yaml` for the second cluster to use different host ports. You also need to update the service configuration (NodePort values, base URLs) in the component's Helm values to match:
 
-```yaml
-kind:
-  name: second-cluster
-  nodes:
-    - role: control-plane
-      extraPortMappings:
-        - containerPort: 30080
-          hostPort: 31080
-        - containerPort: 30082
-          hostPort: 31082
-
-components:
-  - name: apim
-    helm:
-      values:
-        ui:
-          service:
-            nodePort: 31080
-        gateway:
-          services:
-            core:
-              service:
-                nodePort: 31082
+```diff
+ kind:
+   name: second-cluster
+   nodes:
+     - role: control-plane
+       extraPortMappings:
+         - containerPort: 30080
+-          hostPort: 30080
++          hostPort: 31080
+         - containerPort: 30082
+-          hostPort: 30082
++          hostPort: 31082
+ 
+ components:
+   - name: apim
+     helm:
+       values:
+         ui:
+           service:
+-            nodePort: 30080
++            nodePort: 31080
+         gateway:
+           services:
+             core:
+               service:
+-                nodePort: 30082
++                nodePort: 31082
 ```
 
-The `extraPortMappings` control which ports Kind exposes on the host, while the `nodePort` values in the Helm chart control which ports the services bind inside the cluster. Both must match.
+Both sides must stay in sync: `extraPortMappings` controls which ports Kind exposes on the host, `nodePort` controls which ports the services bind inside the cluster.
 
 Alternatively, delete the first cluster before creating the second one:
 
