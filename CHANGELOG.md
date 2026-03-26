@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/a-cordier/sew/compare/v0.6.0...v0.7.0) (2026-03-26)
+
+
+### Features
+
+* introduce preload mode and skip option ([2b634cc](https://github.com/a-cordier/sew/commit/2b634cc6e91eb1d00be0f83b99b394892bcd2c0a))
+
+
+### Performance
+
+* wait for node readiness before deploying ([d09491c](https://github.com/a-cordier/sew/commit/d09491c64074331f71ec6ae2614f901f1a98270f))
+
 ## [0.6.0](https://github.com/a-cordier/sew/compare/v0.5.0...v0.6.0) (2026-03-25)
 
 
