@@ -47,6 +47,22 @@ Each variant composes the corresponding `gravitee.io/apim/oss/*` context
 (which provides the full APIM stack) with the abstract kafka base (which
 adds Kafka Gateway configuration on top).
 
+## Context flags
+
+All concrete Kafka variants inherit optional flags from the APIM base context:
+
+| Flag           | Description                                    |
+|----------------|------------------------------------------------|
+| `--no-es`      | Disable Elasticsearch and analytics reporters  |
+| `--no-ui`      | Disable both Console and Portal UIs            |
+| `--no-portal`  | Disable the developer portal UI                |
+
+```bash
+sew create --from gravitee.io/apim/ee/kafka --no-es
+```
+
+Use `sew info` to see the full list of flags and components for a context.
+
 ## Endpoints
 
 | Service        | URL                          |

@@ -25,6 +25,22 @@ sew create --from gravitee.io/apim/oss/mongodb
 | APIM Gateway   | http://localhost:30082      |
 | Management API | http://localhost:30083      |
 
+## Context flags
+
+Optional flags you can pass to `sew create` to customize this deployment:
+
+| Flag           | Description                                    |
+|----------------|------------------------------------------------|
+| `--no-es`      | Disable Elasticsearch and analytics reporters  |
+| `--no-ui`      | Disable both Console and Portal UIs            |
+| `--no-portal`  | Disable the developer portal UI                |
+
+```bash
+sew create --from gravitee.io/apim/oss/mongodb --no-es --no-portal
+```
+
+Use `sew info` to see the full list of flags and components for this context.
+
 ## Dependencies
 
 This context composes from:

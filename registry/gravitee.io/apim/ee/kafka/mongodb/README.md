@@ -65,6 +65,22 @@ self-signed certificate covers `*.kafka.sew.local` but broker metadata
 addresses use two-level subdomains (e.g. `broker-0-acr.kafka.sew.local`)
 that don't match the single-level wildcard.
 
+## Context flags
+
+Optional flags inherited from the APIM base context:
+
+| Flag           | Description                                    |
+|----------------|------------------------------------------------|
+| `--no-es`      | Disable Elasticsearch and analytics reporters  |
+| `--no-ui`      | Disable both Console and Portal UIs            |
+| `--no-portal`  | Disable the developer portal UI                |
+
+```bash
+sew create --from gravitee.io/apim/ee/kafka/mongodb --no-es
+```
+
+Use `sew info` to see the full list of flags and components for this context.
+
 ## Dependencies
 
 This context composes from:

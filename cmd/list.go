@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/a-cordier/sew/internal/kind"
 	"github.com/a-cordier/sew/internal/state"
@@ -25,6 +26,7 @@ type listRow struct {
 	name    string
 	created string
 	from    string
+	flags   string
 	status  string
 	running bool
 }
@@ -43,7 +45,7 @@ func runList(_ *cobra.Command, _ []string) error {
 	}
 
 	rows := make([]listRow, 0, len(names))
-	nameW, createdW, fromW := len("NAME"), len("CREATED"), len("FROM")
+	nameW, createdW, fromW, flagsW := len("NAME"), len("CREATED"), len("FROM"), len("FLAGS")
 
 	for _, name := range names {
 		r := listRow{name: name}
@@ -52,6 +54,7 @@ func runList(_ *cobra.Command, _ []string) error {
 			r.status = "unknown"
 			r.created = "-"
 			r.from = "-"
+			r.flags = "-"
 		} else {
 			r.name = cs.Name
 			r.created = cs.CreatedAt.Format("2006-01-02 15:04")
@@ -62,6 +65,15 @@ func runList(_ *cobra.Command, _ []string) error {
 				}
 			} else {
 				r.from = "-"
+			}
+			if len(cs.Flags) > 0 {
+				flagStrs := make([]string, len(cs.Flags))
+				for i, f := range cs.Flags {
+					flagStrs[i] = "--" + f
+				}
+				r.flags = strings.Join(flagStrs, ", ")
+			} else {
+				r.flags = "-"
 			}
 			ok, kerr := kind.Exists(cs.Name)
 			r.running = kerr == nil && ok
@@ -80,13 +92,16 @@ func runList(_ *cobra.Command, _ []string) error {
 		if len(r.from) > fromW {
 			fromW = len(r.from)
 		}
+		if len(r.flags) > flagsW {
+			flagsW = len(r.flags)
+		}
 		rows = append(rows, r)
 	}
 
 	bold := color.New(color.Bold)
-	fmtStr := fmt.Sprintf("%%-%ds   %%-%ds   %%-%ds   %%s\n", nameW, createdW, fromW)
+	fmtStr := fmt.Sprintf("%%-%ds   %%-%ds   %%-%ds   %%-%ds   %%s\n", nameW, createdW, fromW, flagsW)
 
-	bold.Printf(fmtStr, "NAME", "CREATED", "FROM", "STATUS")
+	bold.Printf(fmtStr, "NAME", "CREATED", "FROM", "FLAGS", "STATUS")
 	for _, r := range rows {
 		var status string
 		switch r.status {
@@ -95,7 +110,7 @@ func runList(_ *cobra.Command, _ []string) error {
 		default:
 			status = color.YellowString(r.status)
 		}
-		fmt.Printf(fmtStr, r.name, r.created, r.from, status)
+		fmt.Printf(fmtStr, r.name, r.created, r.from, r.flags, status)
 	}
 
 	return nil

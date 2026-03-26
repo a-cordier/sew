@@ -29,8 +29,16 @@ import (
 var createSkipPreload bool
 
 var upCmd = &cobra.Command{
-	Use:                "create",
-	Short:              "Create the cluster and install the context",
+	Use:   "create",
+	Short: "Create the cluster and install the context",
+	Long: `Create the cluster and install the context defined in sew.yaml.
+
+Contexts may define optional flags that customize the deployment.
+Flags are passed directly on the command line:
+
+  sew create --no-es --no-portal
+
+Run "sew info" to see available flags for your context.`,
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 	RunE:               runUp,
 }
@@ -154,7 +162,7 @@ func createCluster(resolved *config.ResolvedContext, activeFlags []string) error
 	); err != nil {
 		return err
 	}
-	saveClusterState(cfg, nil)
+	saveClusterState(cfg, nil, nil)
 
 	if cfg.Images.Mirrors != nil {
 		if err := logger.WithSpinner("Connecting image mirrors to Kind network", func() error {
@@ -202,7 +210,7 @@ func createCluster(resolved *config.ResolvedContext, activeFlags []string) error
 		}
 	}
 
-	saveClusterState(cfg, resolved)
+	saveClusterState(cfg, resolved, activeFlags)
 
 	fmt.Println()
 	color.Blue("  Total: %s", time.Since(start).Round(time.Millisecond))
@@ -214,12 +222,13 @@ func createCluster(resolved *config.ResolvedContext, activeFlags []string) error
 	return nil
 }
 
-func saveClusterState(cfg *config.Config, resolved *config.ResolvedContext) {
+func saveClusterState(cfg *config.Config, resolved *config.ResolvedContext, activeFlags []string) {
 	cs := &state.ClusterState{
 		Name:      cfg.Kind.Name,
 		CreatedAt: time.Now(),
 		Registry:  cfg.Registry,
 		From:      cfg.From,
+		Flags:     activeFlags,
 		Features:  cfg.Features,
 		Images:    cfg.Images,
 	}

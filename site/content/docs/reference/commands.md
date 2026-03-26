@@ -39,6 +39,40 @@ Each flag merges a patch on top of the resolved context before deployment. Flags
 
 See [Context Format -- Context flags]({{< ref "/docs/reference/context-format#context-flags" >}}) for how to author flag files.
 
+## sew info
+
+Show information about the resolved context without creating a cluster. Displays the component list, available context flags, and enabled features. Use this to discover what flags a context supports before running `sew create`.
+
+```bash
+sew info
+sew info --from gravitee.io/apim/oss/postgres
+```
+
+### Example output
+
+```
+Context
+  Path: gravitee.io/apim/oss/postgres
+
+Components
+  - postgresql
+  - elasticsearch
+  - apim
+
+Flags
+  --no-es       Disable Elasticsearch and analytics reporters
+  --no-ui       Disable both Console and Portal UIs
+  --no-portal   Disable the developer portal UI
+
+Features
+  lb:      enabled
+  gateway: enabled
+  dns:     enabled (domain: sew.local, port: 15353)
+
+Usage
+  sew create --from gravitee.io/apim/oss/postgres
+```
+
 ## sew build
 
 Build local Docker images, push them to the cluster's preload registry, and restart matching workloads. See the [Developer Loop]({{< ref "/docs/guides/developer-loop" >}}) guide for a walkthrough.
@@ -237,14 +271,14 @@ List all sew-managed clusters with their status.
 sew list
 ```
 
-Shows a table with the cluster name, creation date, context paths, and whether the cluster is currently running.
+Shows a table with the cluster name, creation date, context paths, active context flags, and whether the cluster is currently running.
 
 ### Example output
 
 ```
-NAME                 CREATED            FROM                              STATUS
-kind-gravitee-apim   2026-03-23 14:00   gravitee.io/apim/oss/postgres     running
-kind-gravitee-kafka  2026-03-22 10:30   gravitee.io/apim/ee/kafka         stopped
+NAME                 CREATED            FROM                              FLAGS              STATUS
+kind-gravitee-apim   2026-03-23 14:00   gravitee.io/apim/oss/postgres     --no-es            running
+kind-gravitee-kafka  2026-03-22 10:30   gravitee.io/apim/ee/kafka         -                  stopped
 ```
 
 ## sew describe
@@ -260,7 +294,7 @@ When no name is given and only one cluster exists, it is selected automatically.
 
 ### What it shows
 
-**Cluster** -- The cluster name, creation date, and context paths.
+**Cluster** -- The cluster name, creation date, context paths, and any context flags that were active at creation time.
 
 **Features** -- Whether load balancers, Gateway API, and DNS are enabled. For Gateway API, shows the channel (`standard` or `experimental`). For DNS, shows the domain and port.
 
@@ -278,6 +312,7 @@ Cluster
   Name:    gio-apim
   Created: 2026-03-23 14:00
   From:    gravitee.io/apim/oss/postgres
+  Flags:   --no-es
 
 Features
   lb:      enabled

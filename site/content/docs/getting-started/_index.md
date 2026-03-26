@@ -33,8 +33,16 @@ Once the cluster is ready, you can inspect it:
 
 ```bash
 sew list        # shows running clusters
-sew describe    # shows components, ports, and networking for the current cluster
+sew describe    # shows features, networking, and active flags for the current cluster
 ```
+
+Before creating a cluster, you can preview what a context offers with `sew info`:
+
+```bash
+sew info --from gravitee.io/apim
+```
+
+This shows the component list, available context flags (optional toggles like `--no-es` to disable Elasticsearch), and enabled features.
 
 When you're done:
 

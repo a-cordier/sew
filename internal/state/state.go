@@ -18,6 +18,7 @@ type ClusterState struct {
 	CreatedAt time.Time            `yaml:"createdAt"`
 	Registry  string               `yaml:"registry,omitempty"`
 	From      []string             `yaml:"from,omitempty"`
+	Flags     []string             `yaml:"flags,omitempty"`
 	Features  config.FeaturesConfig `yaml:"features,omitempty"`
 	Images    config.ImagesConfig   `yaml:"images,omitempty"`
 	Notes     DeleteNotes          `yaml:"notes,omitempty"`

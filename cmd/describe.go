@@ -52,6 +52,13 @@ func runDescribe(_ *cobra.Command, args []string) error {
 	} else {
 		fmt.Println("  From:    -")
 	}
+	if len(cs.Flags) > 0 {
+		flagStrs := make([]string, len(cs.Flags))
+		for i, f := range cs.Flags {
+			flagStrs[i] = "--" + f
+		}
+		fmt.Printf("  Flags:   %s\n", strings.Join(flagStrs, ", "))
+	}
 	fmt.Println()
 
 	printDescribeFeatures(bold, cs.Features)
