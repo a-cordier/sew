@@ -1,0 +1,104 @@
+from:
+  - redis/standalone
+images:
+  preload:
+    refs:
+      - docker.io/datawire/aes:3.12.7
+kind:
+  name: gravitee-edge-stack
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30080
+          hostPort: 30080
+        - containerPort: 30443
+          hostPort: 30443
+helm:
+  repos:
+    - name: datawire
+      url: https://s3.amazonaws.com/datawire-static-files/charts
+components:
+  - name: crds
+    type: k8s
+    namespace: emissary-system
+    conditions:
+      ready: true
+    selector:
+      matchLabels:
+        app.kubernetes.io/instance: emissary-apiext
+    k8s:
+      manifestFiles:
+        - aes-crds.yaml
+  - name: license
+    type: k8s
+    namespace: ambassador
+    k8s:
+      secrets:
+        - name: ambassador-edge-stack
+          entries:
+            - key: license-key
+              fromFile: '$HOME/opt/gravitee/edge-stack/license.jwt'
+          onMissing: ignore
+  - name: redis
+    namespace: ambassador
+    k8s:
+      manifests:
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: redis
+            labels:
+              app: redis
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 6379
+                targetPort: 6379
+                name: redis
+            selector:
+              app: redis
+  - name: edge-stack
+    type: helm
+    namespace: ambassador
+    conditions:
+      ready: true
+    selector:
+      matchLabels:
+        app.kubernetes.io/instance: edge-stack
+    requires:
+      - component: crds
+        conditions:
+          ready: true
+        selector:
+          matchLabels:
+            app.kubernetes.io/instance: emissary-apiext
+      - component: redis
+        conditions:
+          ready: true
+        selector:
+          matchLabels:
+            app: redis
+    helm:
+      chart: datawire/edge-stack
+      values:
+        licenseKey:
+          createSecret: false
+        redis:
+          create: false
+          url: redis:6379
+        emissary-ingress:
+          createDefaultListeners: true
+          replicaCount: 1
+          service:
+            type: NodePort
+            ports:
+              - name: http
+                port: 80
+                targetPort: 8080
+                nodePort: 30080
+              - name: https
+                port: 443
+                targetPort: 8443
+                nodePort: 30443
+          image:
+            tag: 3.12.7

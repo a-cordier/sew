@@ -1,0 +1,60 @@
+images:
+  preload:
+    refs:
+      - redis:7
+kind:
+  name: redis-standalone
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30379
+          hostPort: 30379
+components:
+  - name: redis
+    type: k8s
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: redis
+            labels:
+              app: redis
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: redis
+            template:
+              metadata:
+                labels:
+                  app: redis
+              spec:
+                containers:
+                  - name: redis
+                    image: redis:7
+                    ports:
+                      - containerPort: 6379
+                        name: redis
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 128Mi
+                      limits:
+                        cpu: 250m
+                        memory: 256Mi
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: redis
+            labels:
+              app: redis
+          spec:
+            type: NodePort
+            ports:
+              - port: 6379
+                targetPort: 6379
+                nodePort: 30379
+                name: redis
+            selector:
+              app: redis
