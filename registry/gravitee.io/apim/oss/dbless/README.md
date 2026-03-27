@@ -7,8 +7,7 @@ tags: [api-management, gateway, kubernetes]
 # APIM DB-less
 
 Deploys the Gravitee API Management gateway in DB-less mode alongside the
-Gravitee Kubernetes Operator (GKO). No database or analytics backend is
-required — APIs are defined entirely through Kubernetes custom resources.
+Gravitee Kubernetes Operator (GKO). No database involved — APIs are defined entirely through Kubernetes custom resources.
 
 ## Usage
 
