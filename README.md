@@ -51,10 +51,10 @@ sew delete
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide. Key commands:
 
 ```bash
-task lint          # run Go linter
-task test          # run all tests
-task fmt:yaml      # format YAML files
-task site:build    # rebuild the doc site after registry/ or site/ changes
+go tool task lint          # run Go linter
+go tool task test          # run all tests
+go tool task fmt:yaml      # format YAML files
+go tool task site:build    # rebuild the doc site after registry/ or site/ changes
 ```
 
 ### Context maintainers
