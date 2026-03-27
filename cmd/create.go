@@ -85,6 +85,14 @@ func createCluster(resolved *config.ResolvedContext, activeFlags []string) error
 		logger.Warn("%s", w)
 	}
 
+	exists, err := kind.Exists(cfg.Kind.Name)
+	if err != nil {
+		return fmt.Errorf("checking cluster existence: %w", err)
+	}
+	if exists {
+		return fmt.Errorf("cluster %q already exists — delete it first with: sew delete %s", cfg.Kind.Name, cfg.Kind.Name)
+	}
+
 	logDir := filepath.Join(sewHome, "logs")
 	if len(cfg.From) > 0 {
 		logDir = filepath.Join(logDir, strings.Join(cfg.From, "_"))
