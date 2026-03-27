@@ -29,21 +29,21 @@ See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networkin
 
 ```bash
 # Uses the default variant (postgres)
-sew create --from gravitee.io/apim/ee/kafka
+sew create --from gravitee.io/ee/apim/kafka
 
 # Explicitly select a variant
-sew create --from gravitee.io/apim/ee/kafka/postgres
-sew create --from gravitee.io/apim/ee/kafka/mongodb
+sew create --from gravitee.io/ee/apim/kafka/postgres
+sew create --from gravitee.io/ee/apim/kafka/mongodb
 ```
 
 ## Variants
 
 | Variant    | Database   | Context path                          |
 |------------|------------|---------------------------------------|
-| `postgres` | PostgreSQL | `gravitee.io/apim/ee/kafka/postgres`  |
-| `mongodb`  | MongoDB    | `gravitee.io/apim/ee/kafka/mongodb`   |
+| `postgres` | PostgreSQL | `gravitee.io/ee/apim/kafka/postgres`  |
+| `mongodb`  | MongoDB    | `gravitee.io/ee/apim/kafka/mongodb`   |
 
-Each variant composes the corresponding `gravitee.io/apim/oss/*` context
+Each variant composes the corresponding `gravitee.io/oss/apim/*` context
 (which provides the full APIM stack) with the abstract kafka base (which
 adds Kafka Gateway configuration on top).
 
@@ -58,7 +58,7 @@ All concrete Kafka variants inherit optional flags from the APIM base context:
 | `--no-portal`  | Disable the developer portal UI                |
 
 ```bash
-sew create --from gravitee.io/apim/ee/kafka --no-es
+sew create --from gravitee.io/ee/apim/kafka --no-es
 ```
 
 Use `sew info` to see the full list of flags and components for a context.
@@ -121,10 +121,10 @@ components:
 
 ## Dependencies
 
-The abstract base (`gravitee.io/apim/ee/kafka/base`) composes from:
+The abstract base (`gravitee.io/ee/apim/kafka/base`) composes from:
 
 - `kafka/standalone` — single-node Kafka broker in KRaft mode
 
 Each concrete variant additionally composes from:
 
-- `gravitee.io/apim/oss/postgres` or `gravitee.io/apim/oss/mongodb` — full APIM stack with the chosen database backend
+- `gravitee.io/oss/apim/postgres` or `gravitee.io/oss/apim/mongodb` — full APIM stack with the chosen database backend

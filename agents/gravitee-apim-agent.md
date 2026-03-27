@@ -1,12 +1,13 @@
 ---
 product: Gravitee APIM
 paths:
-  - registry/gravitee.io/apim/
+  - registry/gravitee.io/oss/apim/
+  - registry/gravitee.io/ee/apim/
 ---
 
 # Gravitee APIM product rules
 
-These instructions apply when working on contexts under `registry/gravitee.io/apim/`.
+These instructions apply when working on contexts under `registry/gravitee.io/oss/apim/` and `registry/gravitee.io/ee/apim/`.
 
 ## Upstream repository
 

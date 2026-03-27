@@ -12,7 +12,7 @@ backed by MongoDB for persistence and Elasticsearch for analytics.
 ## Usage
 
 ```bash
-sew create --from gravitee.io/apim/ee/kafka/mongodb
+sew create --from gravitee.io/ee/apim/kafka/mongodb
 ```
 
 ## Prerequisites
@@ -76,7 +76,7 @@ Optional flags inherited from the APIM base context:
 | `--no-portal`  | Disable the developer portal UI                |
 
 ```bash
-sew create --from gravitee.io/apim/ee/kafka/mongodb --no-es
+sew create --from gravitee.io/ee/apim/kafka/mongodb --no-es
 ```
 
 Use `sew info` to see the full list of flags and components for this context.
@@ -85,8 +85,8 @@ Use `sew info` to see the full list of flags and components for this context.
 
 This context composes from:
 
-- `gravitee.io/apim/oss/mongodb` — full APIM stack with MongoDB backend
-- `gravitee.io/apim/ee/kafka/base` — Kafka Gateway configuration
+- `gravitee.io/oss/apim/mongodb` — full APIM stack with MongoDB backend
+- `gravitee.io/ee/apim/kafka/base` — Kafka Gateway configuration
 
 ## License
 

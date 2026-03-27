@@ -1020,7 +1020,7 @@ builds:
 func TestConfigParsesBuildsWithComponents(t *testing.T) {
 	input := `
 from:
-  - gravitee.io/apim
+  - gravitee.io/oss/apim
 components:
   - name: apim
     type: helm
@@ -1032,7 +1032,7 @@ builds:
 	if err := yaml.Unmarshal([]byte(input), &cfg); err != nil {
 		t.Fatalf("unmarshal failed: %v", err)
 	}
-	if len(cfg.From) != 1 || cfg.From[0] != "gravitee.io/apim" {
+	if len(cfg.From) != 1 || cfg.From[0] != "gravitee.io/oss/apim" {
 		t.Fatalf("unexpected from: %v", cfg.From)
 	}
 	if len(cfg.Components) != 1 || cfg.Components[0].Name != "apim" {
@@ -1045,7 +1045,7 @@ builds:
 
 func TestMerge_BuildsMergedWithOtherFields(t *testing.T) {
 	base := Config{
-		Registry: "gravitee.io/apim",
+		Registry: "gravitee.io/oss/apim",
 		From:     []string{"mongodb/standalone"},
 		Builds: []Build{
 			{Name: "gw", Image: "graviteeio/apim-gateway:latest"},
@@ -1059,7 +1059,7 @@ func TestMerge_BuildsMergedWithOtherFields(t *testing.T) {
 	}
 	Merge(&base, &override)
 
-	if base.Registry != "gravitee.io/apim" {
+	if base.Registry != "gravitee.io/oss/apim" {
 		t.Fatalf("expected registry preserved, got %q", base.Registry)
 	}
 	if len(base.From) != 1 || base.From[0] != "mongodb/standalone" {

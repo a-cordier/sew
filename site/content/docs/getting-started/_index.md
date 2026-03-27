@@ -24,7 +24,7 @@ For Homebrew, Linux packages, and other options, see [Installation]({{< ref "/do
 You don't even need a config file to get started. Pick a context from the registry and deploy it in one command:
 
 ```bash
-sew create --from gravitee.io/apim
+sew create --from gravitee.io/oss/apim
 ```
 
 That's it. sew creates a Kind cluster, installs the Helm repos and components defined by the context, and gives you a full Gravitee API Management stack.
@@ -39,7 +39,7 @@ sew describe    # shows features, networking, and active flags for the current c
 Before creating a cluster, you can preview what a context offers with `sew info`:
 
 ```bash
-sew info --from gravitee.io/apim
+sew info --from gravitee.io/oss/apim
 ```
 
 This shows the component list, available context flags (optional toggles like `--no-es` to disable Elasticsearch), and enabled features.
@@ -56,7 +56,7 @@ For anything beyond a quick test, you'll want a `sew.yaml` file. It lets you com
 
 ```yaml
 from:
-  - gravitee.io/apim
+  - gravitee.io/oss/apim
 ```
 
 Then just run `sew create` without flags. The config file is where things get interesting -- you can layer contexts, override values, enable DNS, and more. See [Composing Contexts]({{< ref "/docs/guides/composing-contexts" >}}) for the full story.

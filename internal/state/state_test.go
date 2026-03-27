@@ -63,7 +63,7 @@ func TestSaveAndLoadWithContextInfo(t *testing.T) {
 		Name:      "gio-apim",
 		CreatedAt: time.Date(2026, 3, 18, 14, 0, 0, 0, time.UTC),
 		Registry:  "file://./registry",
-		From:      []string{"gravitee.io/apim/oss/postgres"},
+		From:      []string{"gravitee.io/oss/apim/postgres"},
 		Features: config.FeaturesConfig{
 			DNS: &config.DNSConfig{Enabled: true, Domain: "sew.local"},
 		},

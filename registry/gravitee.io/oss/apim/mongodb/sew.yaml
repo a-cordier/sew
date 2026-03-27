@@ -1,7 +1,7 @@
 from:
   - mongodb/standalone
   - elastic/elasticsearch/standalone
-  - gravitee.io/apim/oss/base
+  - gravitee.io/oss/apim/base
 components:
   - name: mongodb
     namespace: gravitee

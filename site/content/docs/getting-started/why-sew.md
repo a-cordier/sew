@@ -13,7 +13,7 @@ Every developer on the team had their own approach: a shell script here, a Kind 
 We wanted a single command that would produce a known-good cluster from a known-good definition. That's the core idea behind **registry contexts** -- curated stack descriptions that capture everything: Kind configuration, Helm charts, raw manifests, port mappings, networking. Pick one and deploy it:
 
 ```bash
-sew create --from gravitee.io/apim
+sew create --from gravitee.io/oss/apim
 ```
 
 No scripts, no "follow the README and hope it's up to date."
@@ -26,11 +26,11 @@ sew solves this with **composable contexts**. A MongoDB context lives in one pla
 
 The result: one source of truth for each building block, reused everywhere it's needed.
 
-## Pulling images takes forever
+## Image caching requires manual plumbing
 
-Destroy a cluster, recreate it, and wait 5 minutes for Docker to re-pull the same 2 GB of images you had 30 seconds ago. On a shared office connection, multiply that by the number of developers doing the same thing.
+You can set up pull-through caches, pre-pull images, run a local registry -- the building blocks exist. But wiring them together, keeping them running across cluster lifecycles, and making sure every developer on the team has the same setup is real work that nobody wants to own.
 
-sew attacks this from two angles. **Image mirrors** are persistent pull-through cache containers that survive cluster restarts -- once an image is cached, it stays cached. **Preloading** pulls images on the host and pushes them to a local registry inside the cluster, so Kind nodes don't hit the network at all. Between the two, a second `sew create` is dramatically faster than the first.
+sew handles all of it out of the box. **Image mirrors** are persistent pull-through cache containers that survive cluster restarts -- once an image is cached, it stays cached. **Preloading** pulls images on the host and pushes them to a local registry inside the cluster, so Kind nodes don't hit the network at all. No manual setup, no per-developer differences -- it just works from the first `sew create`.
 
 ## The edit-build-deploy loop is too slow
 

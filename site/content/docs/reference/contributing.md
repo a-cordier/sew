@@ -69,21 +69,22 @@ style: improve terminal output
 ## Registry structure
 
 The registry is a tree of **context** directories under `registry/`, following
-the convention `org/product/variant`:
+the convention `org/edition/product/variant`:
 
 ```
 registry/
 ├── elastic/
 │   └── elasticsearch/          # standalone context
 ├── gravitee.io/
-│   └── apim/
-│       ├── oss/
-│       │   ├── base/           # abstract shared config
-│       │   ├── dbless/
-│       │   ├── gateway/
-│       │   ├── mongodb/        # concrete variant
-│       │   └── postgres/       # concrete variant
-│       └── ee/
+│   ├── oss/
+│   │   └── apim/
+│   │       ├── base/           # abstract shared config
+│   │       ├── dbless/
+│   │       ├── gateway/
+│   │       ├── mongodb/        # concrete variant
+│   │       └── postgres/       # concrete variant
+│   └── ee/
+│       └── apim/
 │           └── kafka/
 │               ├── base/       # abstract shared config
 │               ├── mongodb/
@@ -108,13 +109,13 @@ registry/
 
 ### `.default` files
 
-When a user specifies a partial path (e.g. `gravitee.io/apim`), sew walks
+When a user specifies a partial path (e.g. `gravitee.io/oss/apim`), sew walks
 `.default` files to resolve the full path. Each `.default` file contains a
 single line with the name of the default child directory:
 
 ```
-# registry/gravitee.io/apim/.default
-oss
+# registry/gravitee.io/oss/apim/.default
+postgres
 ```
 
 ## Authoring a good context
@@ -220,7 +221,7 @@ contexts:
 from:
   - mongodb/standalone
   - elastic/elasticsearch/standalone
-  - gravitee.io/apim/oss/base
+  - gravitee.io/oss/apim/base
 ```
 
 ### Abstract contexts
@@ -337,7 +338,7 @@ components:
 Users activate flags on the command line:
 
 ```bash
-sew create --from gravitee.io/apim --no-portal --no-ui
+sew create --from gravitee.io/oss/apim --no-portal --no-ui
 ```
 
 ## Schema

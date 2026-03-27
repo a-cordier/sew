@@ -12,7 +12,7 @@ Gravitee Kubernetes Operator (GKO). No database involved — APIs are defined en
 ## Usage
 
 ```bash
-sew create --from gravitee.io/apim/oss/dbless
+sew create --from gravitee.io/oss/apim/dbless
 ```
 
 ## Endpoints

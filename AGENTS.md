@@ -69,5 +69,5 @@ When writing or updating documentation:
 | Product | Instructions | Applies to |
 |---|---|---|
 | Gravitee | [agents/gravitee-agent.md](agents/gravitee-agent.md) | `registry/gravitee.io/` |
-| Gravitee APIM | [agents/gravitee-apim-agent.md](agents/gravitee-apim-agent.md) | `registry/gravitee.io/apim/` |
+| Gravitee APIM | [agents/gravitee-apim-agent.md](agents/gravitee-apim-agent.md) | `registry/gravitee.io/oss/apim/`, `registry/gravitee.io/ee/apim/` |
 <!-- agents:end -->

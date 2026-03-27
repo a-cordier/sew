@@ -12,7 +12,7 @@ backed by PostgreSQL for persistence and Elasticsearch for analytics.
 ## Usage
 
 ```bash
-sew create --from gravitee.io/apim/ee/kafka/postgres
+sew create --from gravitee.io/ee/apim/kafka/postgres
 ```
 
 ## Prerequisites
@@ -76,7 +76,7 @@ Optional flags inherited from the APIM base context:
 | `--no-portal`  | Disable the developer portal UI                |
 
 ```bash
-sew create --from gravitee.io/apim/ee/kafka/postgres --no-es
+sew create --from gravitee.io/ee/apim/kafka/postgres --no-es
 ```
 
 Use `sew info` to see the full list of flags and components for this context.
@@ -85,8 +85,8 @@ Use `sew info` to see the full list of flags and components for this context.
 
 This context composes from:
 
-- `gravitee.io/apim/oss/postgres` — full APIM stack with PostgreSQL backend
-- `gravitee.io/apim/ee/kafka/base` — Kafka Gateway configuration
+- `gravitee.io/oss/apim/postgres` — full APIM stack with PostgreSQL backend
+- `gravitee.io/ee/apim/kafka/base` — Kafka Gateway configuration
 
 ## License
 

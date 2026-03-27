@@ -1,19 +1,19 @@
 ---
-title: "APIM - MongoDB"
-description: "Gravitee APIM with MongoDB backend and Elasticsearch"
+title: "APIM - PostgreSQL"
+description: "Gravitee APIM with PostgreSQL backend and Elasticsearch"
 tags: [api-management, gateway]
 ---
 
-# APIM MongoDB
+# APIM PostgreSQL
 
 Deploys a full Gravitee API Management stack (Console, Portal, Gateway, and
-Management API) backed by MongoDB for persistence and Elasticsearch for
-analytics.
+Management API) backed by PostgreSQL for persistence and Elasticsearch for
+analytics. Management uses JDBC. Rate limiting is also stored in PostgreSQL.
 
 ## Usage
 
 ```bash
-sew create --from gravitee.io/apim/oss/mongodb
+sew create --from gravitee.io/oss/apim/postgres
 ```
 
 ## Endpoints
@@ -36,7 +36,7 @@ Optional flags you can pass to `sew create` to customize this deployment:
 | `--no-portal`  | Disable the developer portal UI                |
 
 ```bash
-sew create --from gravitee.io/apim/oss/mongodb --no-es --no-portal
+sew create --from gravitee.io/oss/apim/postgres --no-es --no-portal
 ```
 
 Use `sew info` to see the full list of flags and components for this context.
@@ -45,6 +45,6 @@ Use `sew info` to see the full list of flags and components for this context.
 
 This context composes from:
 
-- `mongodb/standalone` — MongoDB 7 database
+- `postgresql/standalone` — PostgreSQL 17 database
 - `elastic/elasticsearch/standalone` — Elasticsearch for reporting
-- `gravitee.io/apim/oss/base` — shared APIM Helm configuration
+- `gravitee.io/oss/apim/base` — shared APIM Helm configuration
