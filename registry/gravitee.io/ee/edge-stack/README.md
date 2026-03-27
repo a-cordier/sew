@@ -44,10 +44,11 @@ This context composes from:
 
 ## License
 
-This is an Enterprise Edition (EE) context. Place your Gravitee license
-key at `$HOME/opt/gravitee/license.key` and sew will automatically mount
-it into the cluster. If the file is missing, the license component is
-silently skipped (`onMissing: ignore`).
+This is an Enterprise Edition (EE) context. Place your Edge Stack license
+at `$HOME/src/gravitee/edge-stack/license.jwt` and sew will automatically
+mount it into the cluster as the `ambassador-edge-stack` Secret. If the
+file is missing, the license component is silently skipped
+(`onMissing: ignore`).
 
 To use a different path, override it in your `sew.yaml`:
 
@@ -56,6 +57,8 @@ components:
   - name: license
     k8s:
       secrets:
-        - name: gravitee-license
-          fromFile: '/custom/path/to/license.key'
+        - name: ambassador-edge-stack
+          entries:
+            - key: license-key
+              fromFile: '/custom/path/to/license.jwt'
 ```

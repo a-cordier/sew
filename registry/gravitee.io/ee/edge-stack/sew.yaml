@@ -37,7 +37,7 @@ components:
         - name: ambassador-edge-stack
           entries:
             - key: license-key
-              fromFile: '$HOME/opt/gravitee/edge-stack/license.jwt'
+              fromFile: '$HOME/src/gravitee/edge-stack/license.jwt'
           onMissing: ignore
   - name: redis
     namespace: ambassador

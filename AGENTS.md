@@ -70,4 +70,5 @@ When writing or updating documentation:
 |---|---|---|
 | Gravitee | [agents/gravitee-agent.md](agents/gravitee-agent.md) | `registry/gravitee.io/` |
 | Gravitee APIM | [agents/gravitee-apim-agent.md](agents/gravitee-apim-agent.md) | `registry/gravitee.io/oss/apim/`, `registry/gravitee.io/ee/apim/` |
+| Gravitee Edge Stack | [agents/gravitee-edge-stack-agent.md](agents/gravitee-edge-stack-agent.md) | `registry/gravitee.io/ee/edge-stack/` |
 <!-- agents:end -->
