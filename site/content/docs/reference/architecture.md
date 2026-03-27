@@ -15,12 +15,13 @@ flowchart TD
     subgraph machine ["User machine"]
         sew["sew CLI"]
         dns["DNS server"]
+        cpk["Cloud provider\ncontroller"]
 
         subgraph docker ["Docker"]
             kind["Kind cluster"]
             mirrors["Mirror proxies"]
             preload["Preload registry"]
-            cpk["Cloud provider\ncontroller"]
+            lbs["LB proxies\n(envoy)"]
         end
     end
 
@@ -31,8 +32,9 @@ flowchart TD
     kind -- "pull-through cache" --> mirrors -- "cache miss" --> upstream
     kind -- "pre-pushed images" --> preload
 
-    cpk -- "assigns LB IPs" --> kind
-    dns -- "resolves *.sew.local" --> cpk
+    cpk -- "manages" --> lbs
+    lbs -- "assigns LB IPs" --> kind
+    dns -- "resolves *.sew.local" --> lbs
 ```
 
 **Kind cluster** -- Kubernetes nodes running inside Docker via [Kind](https://kind.sigs.k8s.io/). sew generates the Kind config (node roles, port mappings, containerd patches) and installs Helm charts and raw manifests in dependency order.
@@ -41,7 +43,9 @@ flowchart TD
 
 **Preload registry** -- A `registry:2` container where sew pushes images pre-pulled on the host. Kind nodes check this registry first, before hitting mirrors or upstream. Data persists in `~/.sew/preload/`.
 
-**Cloud provider controller** -- Provides LoadBalancer support on Kind. When Gateway API is enabled, it also manages the Envoy data-plane container.
+**Cloud provider controller** -- A host process (`sew cpk serve`) that provides LoadBalancer support on Kind. It creates and manages the LB proxy containers (envoy) inside Docker. When Gateway API is enabled, it also handles the Envoy data-plane.
+
+**LB proxies** -- Docker containers (envoy) created by the cloud provider controller. Each one maps a Kubernetes Service of type LoadBalancer to a routable IP on the host.
 
 **DNS server** -- Resolves `*.sew.local` hostnames to cluster service IPs. It discovers records from Gateway resources and static config, and hot-reloads when records are updated by `sew refresh dns`. Runs on the user machine so that the OS resolver can reach it.
 
@@ -62,17 +66,16 @@ The user-level base config (`~/.sew/sew.yaml`) provides personal defaults -- mir
 
 ## Context composition
 
-When a `sew.yaml` lists multiple `from` entries, sew resolves each context from the registry and merges them into a single stack. Each registry context can itself chain further contexts via its own `from` field.
+Registry contexts compose other contexts via the `from` field. sew resolves each entry from the registry and merges them into a single stack. A context can itself chain further contexts via its own `from` field, forming a dependency tree.
 
 ```mermaid
 flowchart TD
-    A["Project sew.yaml"] --> B["from: mongodb/standalone"]
-    A --> C["from: gravitee.io/apim"]
-    C --> D["from: gravitee.io/apim/oss/base (abstract)"]
-    D --> E["from: mongodb/standalone"]
-    D --> F["from: elastic/elasticsearch/standalone"]
-    B --> G["Merged config"]
-    C --> G
+    A["Project sew.yaml"] -- from --> B["gravitee.io/apim"]
+    B -- from --> C["mongodb"]
+    B -- from --> D["elastic/elasticsearch"]
+    B -- from --> E["gravitee.io/apim/oss/base\n(abstract)"]
 ```
 
-Abstract contexts (`abstract: true`) cannot be deployed directly -- they exist to capture shared configuration that concrete contexts extend. Duplicate components from overlapping `from` chains are deduplicated during merge.
+Here the project pulls in `gravitee.io/apim`, which resolves to the default concrete context (`gravitee.io/apim/oss/mongodb` via `.default`). That context composes three dependencies: two standalone data stores and an abstract base that provides the APIM Helm chart and shared configuration. sew walks the full tree, merges every layer, and deduplicates overlapping components.
+
+Abstract contexts (`abstract: true`) cannot be deployed directly -- they exist to capture shared configuration that concrete contexts extend.
