@@ -45,7 +45,7 @@ This context composes from:
 ## License
 
 This is an Enterprise Edition (EE) context. Place your Edge Stack license
-at `$HOME/src/gravitee/edge-stack/license.jwt` and sew will automatically
+at `$HOME/opt/gravitee/edge-stack/license.jwt` and sew will automatically
 mount it into the cluster as the `ambassador-edge-stack` Secret. If the
 file is missing, the license component is silently skipped
 (`onMissing: ignore`).

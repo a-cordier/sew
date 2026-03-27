@@ -29,7 +29,7 @@ Key differences:
 
 | | APIM | Edge Stack |
 |---|---|---|
-| **Conventional path** | `$HOME/opt/gravitee/license.key` | `$HOME/src/gravitee/edge-stack/license.jwt` |
+| **Conventional path** | `$HOME/opt/gravitee/license.key` | `$HOME/opt/gravitee/edge-stack/license.jwt` |
 | **Secret name** | `gravitee-license` | `ambassador-edge-stack` |
 | **Secret format** | `fromFile` (whole file) | `entries` with `key: license-key` |
 | **Namespace** | `gravitee` | `ambassador` |
@@ -49,7 +49,7 @@ components:
         - name: ambassador-edge-stack
           entries:
             - key: license-key
-              fromFile: '$HOME/src/gravitee/edge-stack/license.jwt'
+              fromFile: '$HOME/opt/gravitee/edge-stack/license.jwt'
           onMissing: ignore
 ```
 
@@ -89,7 +89,7 @@ the following content:
 ## License
 
 This is an Enterprise Edition (EE) context. Place your Edge Stack license
-at `$HOME/src/gravitee/edge-stack/license.jwt` and sew will automatically
+at `$HOME/opt/gravitee/edge-stack/license.jwt` and sew will automatically
 mount it into the cluster as the `ambassador-edge-stack` Secret. If the
 file is missing, the license component is silently skipped
 (`onMissing: ignore`).
