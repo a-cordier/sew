@@ -84,11 +84,12 @@ registry/
 │   │       ├── mongodb/        # concrete variant
 │   │       └── postgres/       # concrete variant
 │   └── ee/
-│       └── apim/
-│           └── kafka/
-│               ├── base/       # abstract shared config
-│               ├── mongodb/
-│               └── postgres/
+│       ├── apim/
+│       │   └── kafka/
+│       │       ├── base/       # abstract shared config
+│       │       ├── mongodb/
+│       │       └── postgres/
+│       └── edge-stack/         # Ambassador Edge Stack
 ├── kafka/
 │   └── standalone/
 ├── mongodb/

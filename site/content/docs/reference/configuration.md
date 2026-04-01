@@ -41,6 +41,7 @@ Each entry is an object with the following fields:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
+| `buildArgs` | map | No | Docker build arguments passed to 'docker build --build-arg'. Keys are argument names, values are argument values. Supports environment variable expansion in values. |
 | `context` | string | No | Docker build context directory, resolved relative to 'dir'. Default: `.`. |
 | `dir` | string | No | Working directory for pre-build commands and base for relative context/dockerfile paths. Supports environment variable expansion (e.g. "$HOME/src/project"). Default: `.`. |
 | `dockerfile` | string | No | Path to the Dockerfile, resolved relative to 'dir'. When omitted, defaults to 'Dockerfile' in the build context. |

@@ -2,12 +2,14 @@ package config
 
 // Build describes a local Docker image build for the inner dev loop.
 type Build struct {
-	Name       string   `yaml:"name"`
-	Image      string   `yaml:"image"`
-	Dir        string   `yaml:"dir,omitempty"`
-	Pre        []string `yaml:"pre,omitempty"`
-	Context    string   `yaml:"context,omitempty"`
-	Dockerfile string   `yaml:"dockerfile,omitempty"`
+	Name       string            `yaml:"name"`
+	Image      string            `yaml:"image"`
+	Dir        string            `yaml:"dir,omitempty"`
+	Pre        []string          `yaml:"pre,omitempty"`
+	Context    string            `yaml:"context,omitempty"`
+	Dockerfile string            `yaml:"dockerfile,omitempty"`
+	BuildArgs  map[string]string `yaml:"buildArgs,omitempty"`
+	Platform   string            `yaml:"platform,omitempty"`
 }
 
 // BuildImageRefs returns the image references from a list of builds,

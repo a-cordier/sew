@@ -3,24 +3,17 @@
 package build
 
 import (
-	"archive/tar"
-	"bufio"
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/a-cordier/sew/internal/cache"
 	"github.com/a-cordier/sew/internal/config"
 	"github.com/a-cordier/sew/internal/logger"
-	dockertypes "github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8stypes "k8s.io/apimachinery/pkg/types"
@@ -72,13 +65,15 @@ func Run(ctx context.Context, b config.Build, opts Options) error {
 		}
 	}
 
-	if err := logger.WithSpinner(
-		fmt.Sprintf("Building image %s", b.Image),
-		func() error {
-			return dockerBuild(ctx, dir, expandEnv(b.Context), expandEnv(b.Dockerfile), b.Image, logw)
-		},
-	); err != nil {
-		return err
+	if shouldDockerBuild(dir, expandEnv(b.Context), expandEnv(b.Dockerfile)) {
+		if err := logger.WithSpinner(
+			fmt.Sprintf("Building image %s", b.Image),
+			func() error {
+				return dockerBuild(ctx, dir, expandEnv(b.Context), expandEnv(b.Dockerfile), b.Image, b.Platform, expandBuildArgs(b.BuildArgs), logw)
+			},
+		); err != nil {
+			return err
+		}
 	}
 
 	if err := logger.WithSpinner(
@@ -106,6 +101,18 @@ func expandEnv(s string) string {
 	return os.ExpandEnv(s)
 }
 
+func expandBuildArgs(args map[string]string) map[string]*string {
+	if len(args) == 0 {
+		return nil
+	}
+	out := make(map[string]*string, len(args))
+	for k, v := range args {
+		expanded := expandEnv(v)
+		out[k] = &expanded
+	}
+	return out
+}
+
 func runCommand(dir, command string, w io.Writer) error {
 	fmt.Fprintf(w, "\n  $ %s\n\n", command)
 	cmd := exec.Command("sh", "-c", command)
@@ -119,161 +126,51 @@ func runCommand(dir, command string, w io.Writer) error {
 	return nil
 }
 
-func dockerBuild(ctx context.Context, dir, buildContext, dockerfile, imageName string, logw io.Writer) error {
+func shouldDockerBuild(dir, buildContext, dockerfile string) bool {
+	if dockerfile != "" {
+		return true
+	}
+	contextDir := dir
+	if buildContext != "" {
+		contextDir = filepath.Join(dir, buildContext)
+	}
+	_, err := os.Stat(filepath.Join(contextDir, "Dockerfile"))
+	return err == nil
+}
+
+func dockerBuild(ctx context.Context, dir, buildContext, dockerfile, imageName, platform string, buildArgs map[string]*string, logw io.Writer) error {
 	contextDir := dir
 	if buildContext != "" {
 		contextDir = filepath.Join(dir, buildContext)
 	}
 
-	dockerfilePath := filepath.Join(contextDir, "Dockerfile")
+	args := []string{"build", "-t", imageName}
+
+	if platform != "" {
+		args = append(args, "--platform", platform)
+	}
+
 	if dockerfile != "" {
-		dockerfilePath = filepath.Join(dir, dockerfile)
+		args = append(args, "-f", filepath.Join(dir, dockerfile))
 	}
 
-	tarBuf, dockerfileInTar, err := createBuildContext(contextDir, dockerfilePath)
-	if err != nil {
-		return fmt.Errorf("creating build context: %w", err)
-	}
-
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		return fmt.Errorf("creating docker client: %w", err)
-	}
-	defer cli.Close()
-
-	resp, err := cli.ImageBuild(ctx, tarBuf, dockertypes.ImageBuildOptions{
-		Tags:       []string{imageName},
-		Dockerfile: dockerfileInTar,
-		Remove:     true,
-	})
-	if err != nil {
-		return fmt.Errorf("starting docker build: %w", err)
-	}
-	defer resp.Body.Close()
-
-	return drainBuildOutput(resp.Body, logw)
-}
-
-// createBuildContext creates a tar archive of contextDir. If the Dockerfile
-// lives outside contextDir it is added to the tar at a synthetic path.
-func createBuildContext(contextDir, dockerfilePath string) (io.Reader, string, error) {
-	rel, err := filepath.Rel(contextDir, dockerfilePath)
-	insideContext := err == nil && !strings.HasPrefix(rel, "..")
-
-	var dockerfileInTar string
-	if insideContext {
-		dockerfileInTar = filepath.ToSlash(rel)
-	} else {
-		dockerfileInTar = ".sew.Dockerfile"
-	}
-
-	buf := new(bytes.Buffer)
-	tw := tar.NewWriter(buf)
-
-	if err := addDirectoryToTar(tw, contextDir); err != nil {
-		tw.Close()
-		return nil, "", err
-	}
-
-	if !insideContext {
-		data, err := os.ReadFile(dockerfilePath)
-		if err != nil {
-			tw.Close()
-			return nil, "", fmt.Errorf("reading Dockerfile %s: %w", dockerfilePath, err)
-		}
-		if err := tw.WriteHeader(&tar.Header{
-			Name: dockerfileInTar,
-			Mode: 0o644,
-			Size: int64(len(data)),
-		}); err != nil {
-			tw.Close()
-			return nil, "", err
-		}
-		if _, err := tw.Write(data); err != nil {
-			tw.Close()
-			return nil, "", err
+	for k, v := range buildArgs {
+		if v != nil {
+			args = append(args, "--build-arg", fmt.Sprintf("%s=%s", k, *v))
 		}
 	}
 
-	if err := tw.Close(); err != nil {
-		return nil, "", err
+	args = append(args, contextDir)
+
+	cmd := exec.CommandContext(ctx, "docker", args...)
+	cmd.Env = append(os.Environ(), "DOCKER_BUILDKIT=1")
+	cmd.Stdout = logw
+	cmd.Stderr = logw
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("docker build: %w", err)
 	}
-
-	return buf, dockerfileInTar, nil
-}
-
-func addDirectoryToTar(tw *tar.Writer, dir string) error {
-	return filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		rel, err := filepath.Rel(dir, path)
-		if err != nil {
-			return err
-		}
-		if rel == "." {
-			return nil
-		}
-
-		info, err := d.Info()
-		if err != nil {
-			return err
-		}
-
-		var link string
-		if d.Type()&os.ModeSymlink != 0 {
-			link, err = os.Readlink(path)
-			if err != nil {
-				return err
-			}
-		}
-
-		header, err := tar.FileInfoHeader(info, link)
-		if err != nil {
-			return err
-		}
-		header.Name = filepath.ToSlash(rel)
-
-		if err := tw.WriteHeader(header); err != nil {
-			return err
-		}
-
-		if info.Mode().IsRegular() {
-			f, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-			if _, err := io.Copy(tw, f); err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-}
-
-func drainBuildOutput(r io.Reader, logw io.Writer) error {
-	scanner := bufio.NewScanner(r)
-	scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
-	for scanner.Scan() {
-		var msg struct {
-			Stream string `json:"stream"`
-			Error  string `json:"error"`
-		}
-		if err := json.Unmarshal(scanner.Bytes(), &msg); err != nil {
-			continue
-		}
-		if msg.Error != "" {
-			fmt.Fprintf(logw, "ERROR: %s\n", msg.Error)
-			return fmt.Errorf("docker build: %s", msg.Error)
-		}
-		if msg.Stream != "" {
-			fmt.Fprint(logw, msg.Stream)
-		}
-	}
-	return scanner.Err()
+	return nil
 }
 
 // restartWorkloads finds Deployments and StatefulSets that reference the

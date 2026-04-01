@@ -19,7 +19,7 @@ properties:
     type: string
     description: >-
       Registry path that identifies this configuration context
-      (org/product/variant convention).
+      (org/edition/product/variant convention).
 
   from:
     type: array
@@ -409,6 +409,20 @@ $defs:
         description: >-
           Path to the Dockerfile, resolved relative to 'dir'. When
           omitted, defaults to 'Dockerfile' in the build context.
+      buildArgs:
+        type: object
+        description: >-
+          Docker build arguments passed to 'docker build --build-arg'.
+          Keys are argument names, values are argument values. Supports
+          environment variable expansion in values.
+        additionalProperties:
+          type: string
+      platform:
+        type: string
+        description: >-
+          Target platform for 'docker build --platform' (e.g.
+          "linux/amd64"). Useful when the base image is only available
+          for a specific architecture.
 
   Component:
     type: object

@@ -1007,13 +1007,120 @@ builds:
 	if gw.Dockerfile != "docker/Dockerfile" {
 		t.Fatalf("expected dockerfile %q, got %q", "docker/Dockerfile", gw.Dockerfile)
 	}
+	if gw.BuildArgs != nil {
+		t.Fatal("expected buildArgs to be nil when not specified")
+	}
 
 	ui := cfg.Builds[1]
 	if ui.Name != "ui" || ui.Image != "graviteeio/apim-console-ui:latest" {
 		t.Fatalf("unexpected second build: %+v", ui)
 	}
-	if ui.Dir != "" || ui.Context != "" || ui.Dockerfile != "" || len(ui.Pre) != 0 {
+	if ui.Dir != "" || ui.Context != "" || ui.Dockerfile != "" || len(ui.Pre) != 0 || ui.BuildArgs != nil {
 		t.Fatal("expected optional fields to be zero-valued for minimal build entry")
+	}
+}
+
+func TestConfigParsesBuildArgs(t *testing.T) {
+	input := `
+builds:
+  - name: aes
+    image: docker.io/datawire/aes:3.12.7
+    dir: $HOME/src/edge-stack
+    buildArgs:
+      EMISSARY_BASE: docker.io/datawire/aes:3.12.7
+      BUILD_VERSION: "1.0.0"
+`
+	var cfg Config
+	if err := yaml.Unmarshal([]byte(input), &cfg); err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
+	if len(cfg.Builds) != 1 {
+		t.Fatalf("expected 1 build, got %d", len(cfg.Builds))
+	}
+	b := cfg.Builds[0]
+	if len(b.BuildArgs) != 2 {
+		t.Fatalf("expected 2 build args, got %d", len(b.BuildArgs))
+	}
+	if v := b.BuildArgs["EMISSARY_BASE"]; v != "docker.io/datawire/aes:3.12.7" {
+		t.Fatalf("expected EMISSARY_BASE %q, got %q", "docker.io/datawire/aes:3.12.7", v)
+	}
+	if v := b.BuildArgs["BUILD_VERSION"]; v != "1.0.0" {
+		t.Fatalf("expected BUILD_VERSION %q, got %q", "1.0.0", v)
+	}
+}
+
+func TestConfigParsesBuildArgs_EnvVarSyntaxPreserved(t *testing.T) {
+	input := `
+builds:
+  - name: aes
+    image: docker.io/datawire/aes:3.12.7
+    buildArgs:
+      EMISSARY_BASE: $HOME/images/aes:3.12.7
+      BUILD_COMMIT: ${GIT_SHA}
+`
+	var cfg Config
+	if err := yaml.Unmarshal([]byte(input), &cfg); err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
+	b := cfg.Builds[0]
+	if v := b.BuildArgs["EMISSARY_BASE"]; v != "$HOME/images/aes:3.12.7" {
+		t.Fatalf("expected env var syntax preserved, got %q", v)
+	}
+	if v := b.BuildArgs["BUILD_COMMIT"]; v != "${GIT_SHA}" {
+		t.Fatalf("expected brace env var syntax preserved, got %q", v)
+	}
+}
+
+func TestConfigParsesBuildArgs_EmptyMap(t *testing.T) {
+	input := `
+builds:
+  - name: aes
+    image: docker.io/datawire/aes:3.12.7
+    buildArgs: {}
+`
+	var cfg Config
+	if err := yaml.Unmarshal([]byte(input), &cfg); err != nil {
+		t.Fatalf("unmarshal failed: %v", err)
+	}
+	b := cfg.Builds[0]
+	if b.BuildArgs == nil {
+		t.Fatal("expected non-nil empty map for explicit empty buildArgs")
+	}
+	if len(b.BuildArgs) != 0 {
+		t.Fatalf("expected 0 build args, got %d", len(b.BuildArgs))
+	}
+}
+
+func TestMerge_BuildArgsPreservedInOverride(t *testing.T) {
+	base := Config{
+		Builds: []Build{
+			{Name: "gw", Image: "graviteeio/apim-gateway:latest"},
+		},
+	}
+	override := Config{
+		Builds: []Build{
+			{
+				Name:  "aes",
+				Image: "docker.io/datawire/aes:3.12.7",
+				BuildArgs: map[string]string{
+					"EMISSARY_BASE": "docker.io/datawire/aes:3.12.7",
+				},
+			},
+		},
+	}
+	Merge(&base, &override)
+
+	if len(base.Builds) != 1 {
+		t.Fatalf("expected 1 build, got %d", len(base.Builds))
+	}
+	if base.Builds[0].Name != "aes" {
+		t.Fatalf("expected build name %q, got %q", "aes", base.Builds[0].Name)
+	}
+	if len(base.Builds[0].BuildArgs) != 1 {
+		t.Fatalf("expected 1 build arg, got %d", len(base.Builds[0].BuildArgs))
+	}
+	if v := base.Builds[0].BuildArgs["EMISSARY_BASE"]; v != "docker.io/datawire/aes:3.12.7" {
+		t.Fatalf("expected EMISSARY_BASE preserved, got %q", v)
 	}
 }
 

@@ -226,7 +226,7 @@ Use **separate context directories** for fundamentally different backends or top
 
 ## Registry organization tips
 
-- Use the `org/product/variant` convention for discoverability
+- Use the `org/edition/product/variant` convention for discoverability
 - Extract shared config into `abstract: true` base contexts
 - Set `.default` files so users can reference products without spelling out the full variant path
 - Include a `README.md` with front matter (`title`, `description`, `tags`) -- the site generator uses it for the registry browser
