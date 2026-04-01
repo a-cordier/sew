@@ -1,0 +1,169 @@
+---
+title: "CI/CD"
+weight: 6
+type: docs
+---
+
+sew is built for dev, test, and CI. This guide covers the basics of running sew in a CI pipeline, image caching strategies for different platforms, and complete configuration examples for CircleCI, GitHub Actions, and GitLab CI.
+
+## Integration testing
+
+A typical integration test pipeline creates a cluster, runs tests against it, and tears it down:
+
+```bash
+sew create --from gravitee.io/oss/apim/dbless
+make test
+sew delete gravitee-dbless
+```
+
+When something fails, check `$SEW_HOME/logs/`. Helm and kubectl output that isn't shown in the terminal is captured there. Start with the install log for the context -- it usually contains the error that explains why a component failed. See [Directory Layout -- logs/]({{< ref "/docs/reference/directory-layout#logs" >}}) for the full layout.
+
+## Validating your own registry
+
+If you maintain your own registry of contexts, add a validation step to catch schema errors on every push. `sew validate` checks `sew.yaml` and context flag files (`sew--*.yaml`) against the configuration schema -- typos, unknown fields, type mismatches, and missing flag descriptions all produce a non-zero exit code:
+
+```bash
+sew validate registry/
+```
+
+When given a directory, sew walks it recursively and validates every context and flag file it finds. Add this as a standalone CI job or a pre-merge check -- it runs in seconds and doesn't need Docker. See the [validate command reference]({{< ref "/docs/reference/commands#sew-validate" >}}) and the [Context Format]({{< ref "/docs/reference/context-format" >}}) reference for authoring guidelines.
+
+## Speeding up image pulls
+
+Image pulls are usually the slowest part of cluster creation. sew offers two strategies -- **preload** and **mirrors** -- and the right choice depends on whether your CI platform provides Docker Layer Caching (DLC). See the [Container Images]({{< ref "/docs/guides/container-images" >}}) guide for the full reference on both strategies.
+
+### Preload + DLC
+
+Image preloading works by running `docker pull` on the host daemon for every image in the `images.preload.refs` list, then pushing them to a local registry that Kind nodes pull from. The host `docker pull` is the expensive, network-bound step.
+
+On CI platforms that offer Docker Layer Caching -- such as CircleCI -- the host daemon's layer store is persisted between runs. Once an image is cached by DLC, subsequent pulls are effectively free: DLC serves the layers from its cache instead of hitting the upstream registry. This makes preload the simplest and fastest CI image strategy on those platforms, with no explicit cache configuration needed from you.
+
+> Caching `$SEW_HOME/preload/` on top of DLC is not worth the complexity. The preload directory backs the local registry (the fast local-push step), not the host pulls (the slow step that DLC already handles).
+
+### Mirrors + cache
+
+On platforms without DLC, preload's host `docker pull` hits the network on every run and there is nothing sew-side to cache it. A better strategy here is **image mirrors**.
+
+Mirror proxies are pull-through `registry:2` containers that cache layers in `$SEW_HOME/mirrors/`. Kind nodes pull through the mirrors instead of going to upstream registries -- and the host Docker daemon is not involved at all. By caching the `$SEW_HOME/mirrors/` directory between CI runs, mirror containers start with a warm layer cache and serve images locally:
+
+1. Restore `$SEW_HOME/mirrors/` from the CI cache
+2. `sew create` starts mirror containers mounted to the cached data directory
+3. Kind nodes pull through mirrors -- cached layers are served locally
+4. Save `$SEW_HOME/mirrors/` for the next run
+
+The first run still pulls everything from upstream, but every subsequent run benefits from the cached layers.
+
+## CircleCI
+
+CircleCI's `machine` executor gives you a full VM with Docker pre-installed -- exactly what Kind needs. More importantly, CircleCI offers **Docker Layer Caching**, which caches the host Docker daemon's layer store between runs. This makes `images.preload` the ideal strategy: sew pulls images via `docker pull` on the host, and DLC ensures those pulls are near-instant on repeat jobs.
+
+```yaml
+version: 2.1
+
+orbs:
+  go: circleci/go@3.0.3
+
+jobs:
+  test:
+    machine:
+      image: ubuntu-2404:current
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - go/install:
+          version: "1.25"
+      - run:
+          name: Install sew
+          command: go install github.com/a-cordier/sew@latest
+      - run:
+          name: Create cluster
+          command: sew create --from gravitee.io/oss/apim/dbless
+      - run:
+          name: Verify
+          command: kubectl get pods -n gravitee
+      - run:
+          name: Delete cluster
+          command: sew delete gravitee-dbless
+          when: always
+
+workflows:
+  ci:
+    jobs:
+      - test
+```
+
+No explicit cache configuration is needed. The dbless context already defines `images.preload.refs`, and DLC caches the host `docker pull` layers transparently. The local push to the preload registry is fast regardless.
+
+## GitHub Actions
+
+GitHub Actions runners have Docker pre-installed but do not offer Docker Layer Caching for image pulls. Use **mirrors** with `actions/cache` to avoid re-downloading images on every run.
+
+```yaml
+name: Integration tests
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - run: go install github.com/a-cordier/sew@latest
+
+      - name: Restore mirror cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.sew/mirrors
+          key: sew-mirrors-${{ hashFiles('sew.yaml') }}
+          restore-keys: sew-mirrors-
+
+      - name: Create cluster
+        run: sew create --from gravitee.io/oss/apim/dbless
+
+      - name: Verify
+        run: kubectl get pods -n gravitee
+
+      - name: Delete cluster
+        if: always()
+        run: sew delete gravitee-dbless
+```
+
+The `sew.yaml` for this pipeline would use mirrors instead of preload:
+
+```yaml
+from:
+  - gravitee.io/oss/apim/dbless
+
+images:
+  mirrors: {}
+```
+
+## GitLab CI
+
+GitLab CI does not offer DLC for image pulls. Use a **shell executor** on a runner with Docker installed, and cache `$SEW_HOME/mirrors/` between runs.
+
+> The shell executor runs jobs directly on the runner machine, which gives sew native access to Docker -- no Docker-in-Docker nesting. Your GitLab runner must have Docker and Go installed.
+
+```yaml
+test:
+  tags: [shell]
+  cache:
+    key: sew-mirrors
+    paths:
+      - .sew/mirrors/
+  variables:
+    SEW_HOME: $CI_PROJECT_DIR/.sew
+  script:
+    - go install github.com/a-cordier/sew@latest
+    - sew create --from gravitee.io/oss/apim/dbless
+    - kubectl get pods -n gravitee
+  after_script:
+    - sew delete gravitee-dbless
+```
+
+> Setting `SEW_HOME` to a path inside the project directory lets GitLab's `cache` directive pick up the mirror data. By default, sew uses `~/.sew`, which falls outside the cacheable project directory.
+
+For the full reference on image strategies, see the [Container Images]({{< ref "/docs/guides/container-images" >}}) guide. For all CLI flags and commands mentioned here, see the [Commands]({{< ref "/docs/reference/commands" >}}) reference.

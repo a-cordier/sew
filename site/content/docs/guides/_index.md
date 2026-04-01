@@ -11,5 +11,6 @@ These guides walk you through the main features of sew, from discovering context
 - **[Networking]({{< ref "/docs/guides/networking" >}})** -- Load balancers, Gateway API, and local DNS
 - **[Container Images]({{< ref "/docs/guides/container-images" >}})** -- Mirror proxies and image preloading
 - **[Developer Loop]({{< ref "/docs/guides/developer-loop" >}})** -- Build, push, and restart local images in one command
+- **[CI/CD]({{< ref "/docs/guides/ci-cd" >}})** -- Integrate sew into CI pipelines with schema validation, image caching, and upgrade testing
 - **[AI Toolchain]({{< ref "/docs/guides/ai-toolchain" >}})** -- How sew works with AI agents, and how to extend it for your product
 - **[Troubleshooting]({{< ref "/docs/guides/troubleshooting" >}})** -- Common issues and how to fix them
