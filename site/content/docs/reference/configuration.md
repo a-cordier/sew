@@ -21,7 +21,7 @@ A `sew.yaml` file is a YAML document with the following top-level fields:
 | `helm` | map | Global Helm configuration shared across all components. |
 | `images` | map | Container image management: preloading images into Kind nodes and configuring registry mirrors. |
 | `kind` | map | Configuration for the Kind (Kubernetes-in-Docker) cluster. |
-| `registry` | string | Registry path that identifies this configuration context (org/product/variant convention). |
+| `registry` | string | Registry path that identifies this configuration context (org/edition/product/variant convention). |
 
 ---
 
@@ -47,6 +47,7 @@ Each entry is an object with the following fields:
 | `dockerfile` | string | No | Path to the Dockerfile, resolved relative to 'dir'. When omitted, defaults to 'Dockerfile' in the build context. |
 | `image` | string | Yes | Target Docker image tag (e.g. "graviteeio/apim-gateway:latest-debian"). Images listed here are automatically excluded from preload. |
 | `name` | string | Yes | Short identifier for this build, used to select it in 'sew build <name>'. |
+| `platform` | string | No | Target platform for 'docker build --platform' (e.g. "linux/amd64"). Useful when the base image is only available for a specific architecture. |
 | `pre` | string[] | No | Shell commands executed sequentially before 'docker build' (e.g. compilation, packaging). Each command runs in 'dir' with output streamed to the terminal. |
 
 ## `components`
@@ -377,7 +378,7 @@ Maps a port from the Kind node container to the host.
 
 ## `registry`
 
-Registry path that identifies this configuration context (org/product/variant convention).
+Registry path that identifies this configuration context (org/edition/product/variant convention).
 
 **Type:** `string`
 

@@ -8,18 +8,35 @@ When you're iterating on application code, the last thing you want is a slow fee
 
 ## Defining builds
 
-Add a `builds` section to your `sew.yaml`. Each entry describes one image you build locally:
+Add a `builds` section to your `sew.yaml`. Each entry describes one image you build locally. Here is a real-world example that builds Ambassador Edge Stack from source:
 
 ```yaml
+from:
+  - gravitee.io/ee/edge-stack
+
 builds:
+  - name: emissary
+    image: emissary-base:local
+    dir: $HOME/src/gravitee/edge-stack
+    pre:
+      - EMISSARY=$(make -C apro env BUILD_VERSION=dev 2>/dev/null | sed -n 's/^EMISSARY_IMAGE=//p') && docker pull --platform linux/amd64 $EMISSARY && docker tag $EMISSARY emissary-base:local
   - name: aes
     image: docker.io/datawire/aes:3.12.7
     dir: $HOME/src/gravitee/edge-stack/apro
     pre:
-      - make -C $HOME/src/gravitee/edge-stack/emissary docker/emissary.docker.tag.local
+      - make $PWD/vendor
+    platform: linux/amd64
     buildArgs:
-      EMISSARY_BASE: emissary.local/emissary
+      EMISSARY_BASE: emissary-base:local
 ```
+
+The `from` field pulls the edge-stack registry context, which brings in the Kind cluster config, Helm chart, CRDs, and preload images. The `builds` section adds two local builds on top.
+
+Builds run sequentially in declaration order, which matters here because the two entries form a chain:
+
+1. **`emissary`** has no Dockerfile in its context directory. sew detects this and skips `docker build`, but still runs the `pre` command -- which pulls the upstream Emissary image for `linux/amd64` and tags it as `emissary-base:local` -- then pushes that image to the cluster. This pattern is useful for preparing base images from upstream without writing a Dockerfile.
+
+2. **`aes`** builds the actual Edge Stack image. It references the locally-tagged base via `buildArgs.EMISSARY_BASE`, vendorizes Go dependencies in its `pre` step, and forces `platform: linux/amd64` so the build works on Apple Silicon machines where the base image is only published for amd64.
 
 | Field | Required | Description |
 |-------|----------|-------------|
@@ -27,10 +44,12 @@ builds:
 | `image` | yes | Docker image tag to build (e.g. `myapp:latest`) |
 | `dir` | no | Working directory for `pre` commands and base for relative paths. Supports env vars (`$HOME`). Defaults to `.` |
 | `pre` | no | Shell commands run sequentially before `docker build` (compilation, packaging, etc.) |
-| `buildArgs` | no | Docker build arguments passed to `docker build --build-arg`. Keys are argument names, values are argument values. Supports env var expansion |
+| `buildArgs` | no | Docker build arguments passed to `docker build --build-arg`. Values support `$VAR` / `${VAR}` env-var expansion |
 | `context` | no | Docker build context, relative to `dir`. Defaults to `.` |
 | `dockerfile` | no | Path to the Dockerfile, relative to `dir`. Defaults to `Dockerfile` in the context |
 | `platform` | no | Target platform for `docker build --platform` (e.g. `linux/amd64`). Useful when the base image is only available for a specific architecture |
+
+> When neither `dockerfile` is set nor a `Dockerfile` exists in the resolved context directory, sew skips `docker build` entirely but still pushes the image to the cluster and restarts workloads. Use this for pre-only builds that pull or tag images without building them.
 
 ## Running builds
 
@@ -38,7 +57,7 @@ builds:
 sew build
 ```
 
-This builds every entry, pushes each image to the cluster's preload registry, and restarts any Deployment or StatefulSet that references the image. Build output (pre-build commands, docker build logs) is captured in `~/.sew/logs/build/build.log` and the terminal shows a clean progress view.
+This builds every entry in declaration order, pushes each image to the cluster's preload registry, and restarts any Deployment or StatefulSet that references the image. In the example above, `sew build` runs `emissary` first (pull + tag + push) then `aes` (vendorize + docker build + push). Build output is captured in `~/.sew/logs/build/build.log` and the terminal shows a clean progress view.
 
 ### Building a subset
 
@@ -48,9 +67,15 @@ Pass one or more names to build only what you need:
 sew build aes
 ```
 
+Once the Emissary base image is cached in the cluster, you typically only rebuild `aes` during iteration. You can also pass multiple names:
+
+```bash
+sew build emissary aes
+```
+
 ### Skipping pre-build commands
 
-When you've already compiled locally and just want to rebuild the Docker image:
+When you've already vendorized locally and just want to rebuild the Docker image:
 
 ```bash
 sew build --skip-pre aes
@@ -82,7 +107,7 @@ This is the fastest way to go from a clean machine to running your local code on
 
 ## How builds interact with preloading
 
-When `builds` is configured, sew automatically excludes build images from the preload list during `sew create`. If your context preloads `docker.io/datawire/aes:3.12.7` and you define a build for the same image, sew won't waste time pulling it from a remote registry -- it knows you'll push a local version.
+When `builds` is configured, sew automatically excludes build images from the preload list during `sew create`. The edge-stack context preloads `docker.io/datawire/aes:3.12.7`, but since the `aes` build targets the same image tag, sew skips pulling it from the remote registry -- it knows a local build will replace it.
 
 This works transparently with both merge and replace preload modes. You don't need to manually add `skip` entries for your build images.
 
