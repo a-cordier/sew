@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.0](https://github.com/a-cordier/sew/compare/v0.9.1...v0.10.0) (2026-04-11)
+
+
+### Features
+
+* add buildArgs and platform to builds ([9fe1fc5](https://github.com/a-cordier/sew/commit/9fe1fc56b27ffcc0f53d45d1e348097ccd825507))
+* add edge-stack and redis contexts ([e28b942](https://github.com/a-cordier/sew/commit/e28b942c2d6e986fef5aaff437e5a8bb32f43b29))
+
+
+### Bug Fixes
+
+* fail fast on cluster name collision ([59355a8](https://github.com/a-cordier/sew/commit/59355a87c729726102fca646980a83bb30bc1c59))
+
 ## [0.9.1](https://github.com/a-cordier/sew/compare/v0.9.0...v0.9.1) (2026-03-26)
 
 
