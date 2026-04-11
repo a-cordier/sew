@@ -68,7 +68,7 @@ jobs:
           command: sew create --from gravitee.io/oss/apim/dbless
       - run:
           name: Verify
-          command: kubectl get pods -n gravitee
+          command: sew describe gravitee-dbless
       - run:
           name: Delete cluster
           command: sew delete gravitee-dbless
@@ -112,7 +112,7 @@ jobs:
         run: sew create --from gravitee.io/oss/apim/dbless
 
       - name: Verify
-        run: kubectl get pods -n gravitee
+        run: sew describe gravitee-dbless
 
       - name: Delete cluster
         if: always()
