@@ -59,7 +59,7 @@ jobs:
     steps:
       - checkout
       - go/install:
-          version: "1.25"
+          version: "1.25.9"
       - run:
           name: Install sew
           command: go install github.com/a-cordier/sew@latest
