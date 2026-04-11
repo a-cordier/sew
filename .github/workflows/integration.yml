@@ -1,6 +1,7 @@
 name: Integration tests
 
 on:
+  push:
   pull_request:
 
 jobs:
@@ -24,7 +25,7 @@ jobs:
         run: sew create --from gravitee.io/oss/apim/dbless
 
       - name: Verify
-        run: kubectl get pods -n gravitee
+        run: sew describe gravitee-dbless
 
       - name: Delete cluster
         if: always()
