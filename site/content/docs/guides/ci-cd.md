@@ -4,7 +4,7 @@ weight: 6
 type: docs
 ---
 
-This guide covers the basics of running sew in a CI pipeline, image caching strategies for different platforms, and complete configuration examples for CircleCI, GitHub Actions, and GitLab CI.
+This guide covers the basics of running sew in a CI pipeline, image caching strategies for different platforms, and complete configuration examples for CircleCI and GitHub Actions.
 
 ## Integration testing
 
@@ -128,31 +128,6 @@ from:
 images:
   mirrors: {}
 ```
-
-## GitLab CI
-
-GitLab CI does not offer DLC for image pulls. Use a **shell executor** on a runner with Docker installed, and cache `$SEW_HOME/mirrors/` between runs.
-
-> The shell executor runs jobs directly on the runner machine, which gives sew native access to Docker -- no Docker-in-Docker nesting. Your GitLab runner must have Docker and Go installed.
-
-```yaml
-test:
-  tags: [shell]
-  cache:
-    key: sew-mirrors
-    paths:
-      - .sew/mirrors/
-  variables:
-    SEW_HOME: $CI_PROJECT_DIR/.sew
-  script:
-    - go install github.com/a-cordier/sew@latest
-    - sew create --from gravitee.io/oss/apim/dbless
-    - kubectl get pods -n gravitee
-  after_script:
-    - sew delete gravitee-dbless
-```
-
-> Setting `SEW_HOME` to a path inside the project directory lets GitLab's `cache` directive pick up the mirror data. By default, sew uses `~/.sew`, which falls outside the cacheable project directory.
 
 ## Validating your own registry
 
