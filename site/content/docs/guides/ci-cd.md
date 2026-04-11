@@ -4,7 +4,7 @@ weight: 6
 type: docs
 ---
 
-sew is built for dev, test, and CI. This guide covers the basics of running sew in a CI pipeline, image caching strategies for different platforms, and complete configuration examples for CircleCI, GitHub Actions, and GitLab CI.
+This guide covers the basics of running sew in a CI pipeline, image caching strategies for different platforms, and complete configuration examples for CircleCI, GitHub Actions, and GitLab CI.
 
 ## Integration testing
 
@@ -15,18 +15,6 @@ sew create --from gravitee.io/oss/apim/dbless
 make test
 sew delete gravitee-dbless
 ```
-
-When something fails, check `$SEW_HOME/logs/`. Helm and kubectl output that isn't shown in the terminal is captured there. Start with the install log for the context -- it usually contains the error that explains why a component failed. See [Directory Layout -- logs/]({{< ref "/docs/reference/directory-layout#logs" >}}) for the full layout.
-
-## Validating your own registry
-
-If you maintain your own registry of contexts, add a validation step to catch schema errors on every push. `sew validate` checks `sew.yaml` and context flag files (`sew--*.yaml`) against the configuration schema -- typos, unknown fields, type mismatches, and missing flag descriptions all produce a non-zero exit code:
-
-```bash
-sew validate registry/
-```
-
-When given a directory, sew walks it recursively and validates every context and flag file it finds. Add this as a standalone CI job or a pre-merge check -- it runs in seconds and doesn't need Docker. See the [validate command reference]({{< ref "/docs/reference/commands#sew-validate" >}}) and the [Context Format]({{< ref "/docs/reference/context-format" >}}) reference for authoring guidelines.
 
 ## Speeding up image pulls
 
@@ -166,4 +154,18 @@ test:
 
 > Setting `SEW_HOME` to a path inside the project directory lets GitLab's `cache` directive pick up the mirror data. By default, sew uses `~/.sew`, which falls outside the cacheable project directory.
 
+## Validating your own registry
+
+If you maintain your own registry of contexts, add a validation step to catch schema errors on every push. `sew validate` checks `sew.yaml` and context flag files (`sew--*.yaml`) against the configuration schema -- typos, unknown fields, type mismatches, and missing flag descriptions all produce a non-zero exit code:
+
+```bash
+sew validate registry/
+```
+
+When given a directory, sew walks it recursively and validates every context and flag file it finds. Add this as a standalone CI job or a pre-merge check -- it runs in seconds and doesn't need Docker. See the [validate command reference]({{< ref "/docs/reference/commands#sew-validate" >}}) and the [Context Format]({{< ref "/docs/reference/context-format" >}}) reference for authoring guidelines.
+
 For the full reference on image strategies, see the [Container Images]({{< ref "/docs/guides/container-images" >}}) guide. For all CLI flags and commands mentioned here, see the [Commands]({{< ref "/docs/reference/commands" >}}) reference.
+
+## Debugging
+
+When something fails, check `$SEW_HOME/logs/`. Helm and kubectl output that isn't shown in the terminal is captured there. Start with the install log for the context -- it usually contains the error that explains why a component failed. See [Directory Layout -- logs/]({{< ref "/docs/reference/directory-layout#logs" >}}) for the full layout.

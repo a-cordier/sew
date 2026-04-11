@@ -1,0 +1,31 @@
+name: Integration tests
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go install github.com/a-cordier/sew@latest
+
+      - name: Restore mirror cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.sew/mirrors
+          key: sew-mirrors-${{ hashFiles('sew.yaml') }}
+          restore-keys: sew-mirrors-
+
+      - name: Create cluster
+        run: sew create --from gravitee.io/oss/apim/dbless
+
+      - name: Verify
+        run: kubectl get pods -n gravitee
+
+      - name: Delete cluster
+        if: always()
+        run: sew delete gravitee-dbless

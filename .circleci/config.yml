@@ -1,0 +1,32 @@
+version: 2.1
+
+orbs:
+  go: circleci/go@3.0.3
+
+jobs:
+  test:
+    machine:
+      image: ubuntu-2404:current
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - go/install:
+          version: "1.25"
+      - run:
+          name: Install sew
+          command: go install github.com/a-cordier/sew@latest
+      - run:
+          name: Create cluster
+          command: sew create --from gravitee.io/oss/apim/dbless
+      - run:
+          name: Verify
+          command: kubectl get pods -n gravitee
+      - run:
+          name: Delete cluster
+          command: sew delete gravitee-dbless
+          when: always
+
+workflows:
+  ci:
+    jobs:
+      - test

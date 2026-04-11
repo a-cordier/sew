@@ -1,0 +1,14 @@
+test:
+  tags: [shell]
+  cache:
+    key: sew-mirrors
+    paths:
+      - .sew/mirrors/
+  variables:
+    SEW_HOME: $CI_PROJECT_DIR/.sew
+  script:
+    - go install github.com/a-cordier/sew@latest
+    - sew create --from gravitee.io/oss/apim/dbless
+    - kubectl get pods -n gravitee
+  after_script:
+    - sew delete gravitee-dbless
