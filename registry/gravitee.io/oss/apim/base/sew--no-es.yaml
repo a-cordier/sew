@@ -17,5 +17,5 @@ components:
               enabled: false
         api:
           env:
-          - name: ANALYTICS_TYPE
-            value: none
+            - name: ANALYTICS_TYPE
+              value: none
