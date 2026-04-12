@@ -542,7 +542,7 @@ func newFlagSet(t *testing.T, flags map[string]string) *pflag.FlagSet {
 func TestExtractActiveFlags_NoContextFlagsPassed(t *testing.T) {
 	inherited := newFlagSet(t, map[string]string{"config": "", "registry": ""})
 	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
-	available := []config.ContextFlag{{Name: "no-portal"}}
+	available := []config.ContextFlag{{Name: "disable-portal"}}
 
 	active, err := extractActiveFlags(
 		[]string{"sew", "create", "--config", "sew.yaml"},
@@ -560,19 +560,19 @@ func TestExtractActiveFlags_RecognizesContextFlag(t *testing.T) {
 	inherited := newFlagSet(t, map[string]string{"from": ""})
 	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
 	available := []config.ContextFlag{
-		{Name: "no-portal"},
-		{Name: "no-ui"},
+		{Name: "disable-portal"},
+		{Name: "disable-ui"},
 	}
 
 	active, err := extractActiveFlags(
-		[]string{"sew", "create", "--from", "ctx", "--no-portal"},
+		[]string{"sew", "create", "--from", "ctx", "--disable-portal"},
 		inherited, local, available,
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(active) != 1 || active[0] != "no-portal" {
-		t.Fatalf("expected [no-portal], got %v", active)
+	if len(active) != 1 || active[0] != "disable-portal" {
+		t.Fatalf("expected [disable-portal], got %v", active)
 	}
 }
 
@@ -580,27 +580,27 @@ func TestExtractActiveFlags_MultipleContextFlags(t *testing.T) {
 	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
 	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
 	available := []config.ContextFlag{
-		{Name: "no-portal"},
-		{Name: "no-ui"},
-		{Name: "no-es"},
+		{Name: "disable-portal"},
+		{Name: "disable-ui"},
+		{Name: "disable-es"},
 	}
 
 	active, err := extractActiveFlags(
-		[]string{"sew", "create", "--no-portal", "--no-es"},
+		[]string{"sew", "create", "--disable-portal", "--disable-es"},
 		inherited, local, available,
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(active) != 2 || active[0] != "no-portal" || active[1] != "no-es" {
-		t.Fatalf("expected [no-portal no-es], got %v", active)
+	if len(active) != 2 || active[0] != "disable-portal" || active[1] != "disable-es" {
+		t.Fatalf("expected [disable-portal disable-es], got %v", active)
 	}
 }
 
 func TestExtractActiveFlags_UnknownFlag(t *testing.T) {
 	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
 	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
-	available := []config.ContextFlag{{Name: "no-portal"}}
+	available := []config.ContextFlag{{Name: "disable-portal"}}
 
 	_, err := extractActiveFlags(
 		[]string{"sew", "create", "--no-such-flag"},
@@ -612,7 +612,7 @@ func TestExtractActiveFlags_UnknownFlag(t *testing.T) {
 	if !strings.Contains(err.Error(), "--no-such-flag") {
 		t.Fatalf("expected error to mention the unknown flag, got: %v", err)
 	}
-	if !strings.Contains(err.Error(), "--no-portal") {
+	if !strings.Contains(err.Error(), "--disable-portal") {
 		t.Fatalf("expected error to list available flags, got: %v", err)
 	}
 }
@@ -620,27 +620,27 @@ func TestExtractActiveFlags_UnknownFlag(t *testing.T) {
 func TestExtractActiveFlags_SkipsKnownCobraFlags(t *testing.T) {
 	inherited := newFlagSet(t, map[string]string{"config": "", "registry": ""})
 	local := newFlagSet(t, map[string]string{"name": ""})
-	available := []config.ContextFlag{{Name: "no-portal"}}
+	available := []config.ContextFlag{{Name: "disable-portal"}}
 
 	active, err := extractActiveFlags(
-		[]string{"sew", "create", "--config", "sew.yaml", "--registry", "http://r", "--name", "test", "--no-portal"},
+		[]string{"sew", "create", "--config", "sew.yaml", "--registry", "http://r", "--name", "test", "--disable-portal"},
 		inherited, local, available,
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(active) != 1 || active[0] != "no-portal" {
-		t.Fatalf("expected [no-portal], got %v", active)
+	if len(active) != 1 || active[0] != "disable-portal" {
+		t.Fatalf("expected [disable-portal], got %v", active)
 	}
 }
 
 func TestExtractActiveFlags_StopsAtDoubleDash(t *testing.T) {
 	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
 	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
-	available := []config.ContextFlag{{Name: "no-portal"}}
+	available := []config.ContextFlag{{Name: "disable-portal"}}
 
 	active, err := extractActiveFlags(
-		[]string{"sew", "create", "--", "--no-portal"},
+		[]string{"sew", "create", "--", "--disable-portal"},
 		inherited, local, available,
 	)
 	if err != nil {
@@ -654,24 +654,24 @@ func TestExtractActiveFlags_StopsAtDoubleDash(t *testing.T) {
 func TestExtractActiveFlags_EqualsForm(t *testing.T) {
 	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
 	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
-	available := []config.ContextFlag{{Name: "no-portal"}}
+	available := []config.ContextFlag{{Name: "disable-portal"}}
 
 	active, err := extractActiveFlags(
-		[]string{"sew", "create", "--no-portal=true"},
+		[]string{"sew", "create", "--disable-portal=true"},
 		inherited, local, available,
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(active) != 1 || active[0] != "no-portal" {
-		t.Fatalf("expected [no-portal], got %v", active)
+	if len(active) != 1 || active[0] != "disable-portal" {
+		t.Fatalf("expected [disable-portal], got %v", active)
 	}
 }
 
 func TestExtractActiveFlags_SkipsHelpAndVersion(t *testing.T) {
 	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
 	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
-	available := []config.ContextFlag{{Name: "no-portal"}}
+	available := []config.ContextFlag{{Name: "disable-portal"}}
 
 	active, err := extractActiveFlags(
 		[]string{"sew", "create", "--help"},
@@ -688,16 +688,16 @@ func TestExtractActiveFlags_SkipsHelpAndVersion(t *testing.T) {
 func TestExtractActiveFlags_IgnoresSingleDash(t *testing.T) {
 	inherited := pflag.NewFlagSet("inherited", pflag.ContinueOnError)
 	local := pflag.NewFlagSet("local", pflag.ContinueOnError)
-	available := []config.ContextFlag{{Name: "no-portal"}}
+	available := []config.ContextFlag{{Name: "disable-portal"}}
 
 	active, err := extractActiveFlags(
-		[]string{"sew", "create", "-v", "--no-portal"},
+		[]string{"sew", "create", "-v", "--disable-portal"},
 		inherited, local, available,
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(active) != 1 || active[0] != "no-portal" {
-		t.Fatalf("expected [no-portal], got %v", active)
+	if len(active) != 1 || active[0] != "disable-portal" {
+		t.Fatalf("expected [disable-portal], got %v", active)
 	}
 }

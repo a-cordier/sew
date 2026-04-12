@@ -29,14 +29,15 @@ sew create --from gravitee.io/oss/apim/mongodb
 
 Optional flags you can pass to `sew create` to customize this deployment:
 
-| Flag           | Description                                    |
-|----------------|------------------------------------------------|
-| `--no-es`      | Disable Elasticsearch and analytics reporters  |
-| `--no-ui`      | Disable both Console and Portal UIs            |
-| `--no-portal`  | Disable the developer portal UI                |
+| Flag                 | Description                                          |
+|----------------------|------------------------------------------------------|
+| `--disable-es`       | Disable Elasticsearch and analytics reporters        |
+| `--disable-ui`       | Disable both Console and Portal UIs                  |
+| `--disable-portal`   | Disable the developer portal UI                      |
+| `--enable-hc-vault`  | Deploy HashiCorp Vault and configure it as a secret provider |
 
 ```bash
-sew create --from gravitee.io/oss/apim/mongodb --no-es --no-portal
+sew create --from gravitee.io/oss/apim/mongodb --disable-es --disable-portal
 ```
 
 Use `sew info` to see the full list of flags and components for this context.

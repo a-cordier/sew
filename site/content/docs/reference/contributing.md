@@ -183,13 +183,13 @@ When a context defines [context flags](#context-flags), use `hasFlag` to
 conditionally show endpoints that are disabled by a flag:
 
 ```
-{{ if not (hasFlag "no-portal") -}}
+{{ if not (hasFlag "disable-portal") -}}
 Portal       http://localhost:30081
 {{ end -}}
 ```
 
 `hasFlag` returns `true` when the user passed the named flag on the CLI
-(e.g. `--no-portal`). It always returns `false` during `sew delete`
+(e.g. `--disable-portal`). It always returns `false` during `sew delete`
 (which has no flag context).
 
 ### Images
@@ -299,7 +299,7 @@ creating a `sew--{flag-name}.yaml` patch file alongside the context's
 `sew.yaml`:
 
 ```yaml
-# sew--no-portal.yaml
+# sew--disable-portal.yaml
 description: "Disable the developer portal UI"
 components:
   - name: apim
@@ -330,7 +330,7 @@ components:
 
 **When to use flags vs separate contexts**:
 
-- **Can a user toggle this on or off without changing the stack's identity?** Use a **flag**. Examples: `--no-es` disables Elasticsearch, `--no-portal` hides the portal UI. The stack is still "APIM with Postgres" regardless.
+- **Can a user toggle this on or off without changing the stack's identity?** Use a **flag**. Examples: `--disable-es` disables Elasticsearch, `--disable-portal` hides the portal UI. The stack is still "APIM with Postgres" regardless.
 - **Does this change the storage backend, networking model, or deployment topology?** Use a **separate context directory**. Examples: `mongodb/` vs `postgres/` (different databases), `dbless/` vs `gateway/` (fundamentally different gateway modes).
 - **Is there shared config used by multiple sibling variants?** Extract it into an **abstract base** (`abstract: true`) and have variants compose from it via `from`. Example: `oss/base/` holds the shared Helm repo, component skeleton, and port mappings; `oss/mongodb/` and `oss/postgres/` both extend it.
 - **Does a feature layer apply across multiple existing contexts?** Create a **composable abstract context** that stacks on top via `from`. Example: `ee/kafka/base/` adds Kafka and license handling; `ee/kafka/mongodb/` and `ee/kafka/postgres/` compose it with the corresponding OSS DB context.
@@ -339,7 +339,7 @@ components:
 Users activate flags on the command line:
 
 ```bash
-sew create --from gravitee.io/oss/apim --no-portal --no-ui
+sew create --from gravitee.io/oss/apim --disable-portal --disable-ui
 ```
 
 ## Schema

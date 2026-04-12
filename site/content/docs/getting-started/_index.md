@@ -42,7 +42,7 @@ Before creating a cluster, you can preview what a context offers with `sew info`
 sew info --from gravitee.io/oss/apim
 ```
 
-This shows the component list, available context flags (optional toggles like `--no-es` to disable Elasticsearch), and enabled features.
+This shows the component list, available context flags (optional toggles like `--disable-es` to disable Elasticsearch), and enabled features.
 
 When you're done:
 

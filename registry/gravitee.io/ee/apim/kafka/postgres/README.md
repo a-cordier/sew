@@ -69,14 +69,15 @@ that don't match the single-level wildcard.
 
 Optional flags inherited from the APIM base context:
 
-| Flag           | Description                                    |
-|----------------|------------------------------------------------|
-| `--no-es`      | Disable Elasticsearch and analytics reporters  |
-| `--no-ui`      | Disable both Console and Portal UIs            |
-| `--no-portal`  | Disable the developer portal UI                |
+| Flag                 | Description                                          |
+|----------------------|------------------------------------------------------|
+| `--disable-es`       | Disable Elasticsearch and analytics reporters        |
+| `--disable-ui`       | Disable both Console and Portal UIs                  |
+| `--disable-portal`   | Disable the developer portal UI                      |
+| `--enable-hc-vault`  | Deploy HashiCorp Vault and configure it as a secret provider |
 
 ```bash
-sew create --from gravitee.io/ee/apim/kafka/postgres --no-es
+sew create --from gravitee.io/ee/apim/kafka/postgres --disable-es
 ```
 
 Use `sew info` to see the full list of flags and components for this context.

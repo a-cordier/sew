@@ -1,0 +1,37 @@
+images:
+  preload:
+    refs:
+      - hashicorp/vault:1.21.2
+kind:
+  name: vault-standalone
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30820
+          hostPort: 30820
+helm:
+  repos:
+    - name: hashicorp
+      url: https://helm.releases.hashicorp.com
+components:
+  - name: vault
+    type: helm
+    helm:
+      chart: hashicorp/vault
+      values:
+        server:
+          dev:
+            enabled: true
+            devRootToken: root
+          service:
+            type: NodePort
+            nodePort: 30820
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+        injector:
+          enabled: false

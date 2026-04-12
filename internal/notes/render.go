@@ -23,7 +23,7 @@ func Render(templateContent string, data any) (string, error) {
 // RenderWithFlags is like Render but registers a hasFlag template function
 // that returns true when the named context flag was activated on the CLI.
 // This lets notes.create templates conditionally show content based on
-// which flags the user passed (e.g. {{ if not (hasFlag "no-portal") }}).
+// which flags the user passed (e.g. {{ if not (hasFlag "disable-portal") }}).
 func RenderWithFlags(templateContent string, data any, activeFlags []string) (string, error) {
 	flagSet := make(map[string]bool, len(activeFlags))
 	for _, f := range activeFlags {

@@ -57,7 +57,7 @@ When sew starts, it assembles a final configuration by merging multiple layers. 
 flowchart LR
     A["~/.sew/sew.yaml"] --> B["./sew.yaml"]
     B --> C["--from contexts\n(left to right)"]
-    C --> D["Context flags\n(--no-es, --no-ui, ...)"]
+    C --> D["Context flags\n(--disable-es, --disable-ui, ...)"]
     D --> E["CLI overrides\n(--registry, --from)"]
     E --> F["Embedded defaults"]
 ```

@@ -32,7 +32,7 @@ When features like load balancers, Gateway API, or DNS are enabled, sew sets the
 Contexts can define optional flags that customize the deployment. These are extra `--flag-name` options defined by the context maintainer as `sew--{flag-name}.yaml` patch files.
 
 ```bash
-sew create --from gravitee.io/oss/apim --no-portal --no-ui --no-es
+sew create --from gravitee.io/oss/apim --disable-portal --disable-ui --disable-es
 ```
 
 Each flag merges a patch on top of the resolved context before deployment. Flags are cumulative -- you can combine as many as needed. Passing an unknown flag produces an error listing the available flags for that context.
@@ -60,9 +60,9 @@ Components
   - apim
 
 Flags
-  --no-es       Disable Elasticsearch and analytics reporters
-  --no-ui       Disable both Console and Portal UIs
-  --no-portal   Disable the developer portal UI
+  --disable-es       Disable Elasticsearch and analytics reporters
+  --disable-ui       Disable both Console and Portal UIs
+  --disable-portal   Disable the developer portal UI
 
 Features
   lb:      enabled
@@ -277,7 +277,7 @@ Shows a table with the cluster name, creation date, context paths, active contex
 
 ```
 NAME                 CREATED            FROM                              FLAGS              STATUS
-kind-gravitee-apim   2026-03-23 14:00   gravitee.io/oss/apim/postgres     --no-es            running
+kind-gravitee-apim   2026-03-23 14:00   gravitee.io/oss/apim/postgres     --disable-es       running
 kind-gravitee-kafka  2026-03-22 10:30   gravitee.io/ee/apim/kafka         -                  stopped
 ```
 
@@ -312,7 +312,7 @@ Cluster
   Name:    gio-apim
   Created: 2026-03-23 14:00
   From:    gravitee.io/oss/apim/postgres
-  Flags:   --no-es
+  Flags:   --disable-es
 
 Features
   lb:      enabled

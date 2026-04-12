@@ -474,12 +474,12 @@ components:
 `)
 	writeFile(t, filepath.Join(root, "ctx", "sew.flags.yaml"), `
 flags:
-  - name: no-portal
+  - name: disable-portal
     description: "Disable the developer portal UI"
-  - name: no-ui
+  - name: disable-ui
     description: "Disable all UIs"
 `)
-	writeFile(t, filepath.Join(root, "ctx", "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(root, "ctx", "sew--disable-portal.yaml"), `
 description: "Disable the developer portal UI"
 components:
   - name: app
@@ -488,7 +488,7 @@ components:
         portal:
           enabled: false
 `)
-	writeFile(t, filepath.Join(root, "ctx", "sew--no-ui.yaml"), `
+	writeFile(t, filepath.Join(root, "ctx", "sew--disable-ui.yaml"), `
 description: "Disable all UIs"
 components:
   - name: app
@@ -512,8 +512,8 @@ components:
 	for _, f := range resolved.Flags {
 		names[f.Name] = true
 	}
-	if !names["no-portal"] || !names["no-ui"] {
-		t.Fatalf("expected no-portal and no-ui flags, got %v", names)
+	if !names["disable-portal"] || !names["disable-ui"] {
+		t.Fatalf("expected disable-portal and disable-ui flags, got %v", names)
 	}
 }
 
@@ -625,10 +625,10 @@ components:
 `)
 	writeFile(t, filepath.Join(root, "ctx", "sew.flags.yaml"), `
 flags:
-  - name: no-portal
+  - name: disable-portal
     description: "Disable portal"
 `)
-	writeFile(t, filepath.Join(root, "ctx", "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(root, "ctx", "sew--disable-portal.yaml"), `
 description: "Disable portal"
 components:
   - name: app
@@ -646,7 +646,7 @@ components:
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	err = ApplyFlags(resolved, []string{"no-portal"})
+	err = ApplyFlags(resolved, []string{"disable-portal"})
 	if err != nil {
 		t.Fatalf("unexpected error applying flags: %v", err)
 	}

@@ -36,7 +36,7 @@ var upCmd = &cobra.Command{
 Contexts may define optional flags that customize the deployment.
 Flags are passed directly on the command line:
 
-  sew create --no-es --no-portal
+  sew create --disable-es --disable-portal
 
 Run "sew info" to see available flags for your context.`,
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},

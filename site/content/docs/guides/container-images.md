@@ -133,7 +133,7 @@ images:
 
 `skip` entries accumulate across layers the same way `refs` do: if a parent context skips an image and a child adds another skip, both are excluded.
 
-This is especially useful in context flags. A `--no-es` flag that disables Elasticsearch can skip its image in the same patch file:
+This is especially useful in context flags. A `--disable-es` flag that disables Elasticsearch can skip its image in the same patch file:
 
 ```yaml
 description: "Disable Elasticsearch and analytics reporters"

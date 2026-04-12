@@ -1,0 +1,71 @@
+description: "Deploy HashiCorp Vault and configure it as a secret provider"
+helm:
+  repos:
+    - name: hashicorp
+      url: https://helm.releases.hashicorp.com
+images:
+  preload:
+    refs:
+      - hashicorp/vault:1.21.2
+components:
+  - name: vault
+    type: helm
+    namespace: gravitee
+    conditions:
+      ready: true
+    selector:
+      matchLabels:
+        app.kubernetes.io/name: vault
+    helm:
+      chart: hashicorp/vault
+      values:
+        server:
+          dev:
+            enabled: true
+            devRootToken: root
+          service:
+            type: ClusterIP
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+        injector:
+          enabled: false
+  - name: apim
+    requires:
+      - component: vault
+        conditions:
+          ready: true
+        selector:
+          matchLabels:
+            app.kubernetes.io/name: vault
+        timeout: 5m
+    helm:
+      values:
+        gateway:
+          env:
+            - name: gravitee_secrets_vault_enabled
+              value: "true"
+            - name: gravitee_secrets_vault_host
+              value: vault
+            - name: gravitee_secrets_vault_port
+              value: "8200"
+            - name: gravitee_secrets_vault_authentication_token_token
+              value: root
+            - name: gravitee_secrets_vault_ssl_enabled
+              value: "false"
+        api:
+          env:
+            - name: gravitee_secrets_vault_enabled
+              value: "true"
+            - name: gravitee_secrets_vault_host
+              value: vault
+            - name: gravitee_secrets_vault_port
+              value: "8200"
+            - name: gravitee_secrets_vault_authentication_token_token
+              value: root
+            - name: gravitee_secrets_vault_ssl_enabled
+              value: "false"

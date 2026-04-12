@@ -115,7 +115,7 @@ func ApplyFlags(resolved *config.ResolvedContext, activeFlags []string) error {
 }
 
 // FlagNameFromFile extracts and validates the flag name from a filename like
-// "sew--no-portal.yaml". Returns an error if the name doesn't match the
+// "sew--disable-portal.yaml". Returns an error if the name doesn't match the
 // kebab-case convention.
 func FlagNameFromFile(basename string) (string, error) {
 	name := strings.TrimPrefix(basename, flagFilePrefix)

@@ -23,7 +23,7 @@ func TestDiscoverFlags_NoFlagFiles(t *testing.T) {
 
 func TestDiscoverFlags_SingleFlag(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(dir, "sew--disable-portal.yaml"), `
 description: "Disable the developer portal UI"
 components:
   - name: apim
@@ -40,8 +40,8 @@ components:
 	if len(flags) != 1 {
 		t.Fatalf("expected 1 flag, got %d", len(flags))
 	}
-	if flags[0].Name != "no-portal" {
-		t.Fatalf("expected flag name %q, got %q", "no-portal", flags[0].Name)
+	if flags[0].Name != "disable-portal" {
+		t.Fatalf("expected flag name %q, got %q", "disable-portal", flags[0].Name)
 	}
 	if flags[0].Description != "Disable the developer portal UI" {
 		t.Fatalf("expected description %q, got %q", "Disable the developer portal UI", flags[0].Description)
@@ -53,15 +53,15 @@ components:
 
 func TestDiscoverFlags_MultipleFlags(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, "sew--no-es.yaml"), `
+	writeFile(t, filepath.Join(dir, "sew--disable-es.yaml"), `
 description: "Disable Elasticsearch"
 components: []
 `)
-	writeFile(t, filepath.Join(dir, "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(dir, "sew--disable-portal.yaml"), `
 description: "Disable portal"
 components: []
 `)
-	writeFile(t, filepath.Join(dir, "sew--no-ui.yaml"), `
+	writeFile(t, filepath.Join(dir, "sew--disable-ui.yaml"), `
 description: "Disable all UIs"
 components: []
 `)
@@ -77,7 +77,7 @@ components: []
 	for i, f := range flags {
 		names[i] = f.Name
 	}
-	expected := []string{"no-es", "no-portal", "no-ui"}
+	expected := []string{"disable-es", "disable-portal", "disable-ui"}
 	for i, name := range names {
 		if name != expected[i] {
 			t.Fatalf("expected sorted order %v, got %v", expected, names)
@@ -146,20 +146,20 @@ components: []
 
 func TestMergeFlags_EmptyBase(t *testing.T) {
 	child := []config.ContextFlag{
-		{Name: "no-portal", Description: "Disable portal", Dir: "/child"},
+		{Name: "disable-portal", Description: "Disable portal", Dir: "/child"},
 	}
 	result := MergeFlags(nil, child)
 	if len(result) != 1 {
 		t.Fatalf("expected 1 flag, got %d", len(result))
 	}
-	if result[0].Name != "no-portal" {
-		t.Fatalf("expected %q, got %q", "no-portal", result[0].Name)
+	if result[0].Name != "disable-portal" {
+		t.Fatalf("expected %q, got %q", "disable-portal", result[0].Name)
 	}
 }
 
 func TestMergeFlags_EmptyChild(t *testing.T) {
 	base := []config.ContextFlag{
-		{Name: "no-portal", Description: "Disable portal", Dir: "/base"},
+		{Name: "disable-portal", Description: "Disable portal", Dir: "/base"},
 	}
 	result := MergeFlags(base, nil)
 	if len(result) != 1 {
@@ -172,11 +172,11 @@ func TestMergeFlags_EmptyChild(t *testing.T) {
 
 func TestMergeFlags_ChildOverridesBase(t *testing.T) {
 	base := []config.ContextFlag{
-		{Name: "no-portal", Description: "Base description", Dir: "/base"},
-		{Name: "no-es", Description: "Disable ES", Dir: "/base"},
+		{Name: "disable-portal", Description: "Base description", Dir: "/base"},
+		{Name: "disable-es", Description: "Disable ES", Dir: "/base"},
 	}
 	child := []config.ContextFlag{
-		{Name: "no-portal", Description: "Child description", Dir: "/child"},
+		{Name: "disable-portal", Description: "Child description", Dir: "/child"},
 	}
 	result := MergeFlags(base, child)
 	if len(result) != 2 {
@@ -188,36 +188,36 @@ func TestMergeFlags_ChildOverridesBase(t *testing.T) {
 	if result[0].Dir != "/child" {
 		t.Fatalf("expected child dir to win, got %q", result[0].Dir)
 	}
-	if result[1].Name != "no-es" {
-		t.Fatalf("expected no-es preserved, got %q", result[1].Name)
+	if result[1].Name != "disable-es" {
+		t.Fatalf("expected disable-es preserved, got %q", result[1].Name)
 	}
 }
 
 func TestMergeFlags_ChildAddsNew(t *testing.T) {
 	base := []config.ContextFlag{
-		{Name: "no-portal", Description: "Disable portal", Dir: "/base"},
+		{Name: "disable-portal", Description: "Disable portal", Dir: "/base"},
 	}
 	child := []config.ContextFlag{
-		{Name: "no-ui", Description: "Disable all UIs", Dir: "/child"},
+		{Name: "disable-ui", Description: "Disable all UIs", Dir: "/child"},
 	}
 	result := MergeFlags(base, child)
 	if len(result) != 2 {
 		t.Fatalf("expected 2 flags, got %d", len(result))
 	}
-	if result[0].Name != "no-portal" {
-		t.Fatalf("expected no-portal first, got %q", result[0].Name)
+	if result[0].Name != "disable-portal" {
+		t.Fatalf("expected disable-portal first, got %q", result[0].Name)
 	}
-	if result[1].Name != "no-ui" {
-		t.Fatalf("expected no-ui appended, got %q", result[1].Name)
+	if result[1].Name != "disable-ui" {
+		t.Fatalf("expected disable-ui appended, got %q", result[1].Name)
 	}
 }
 
 func TestMergeFlags_BaseNotMutated(t *testing.T) {
 	base := []config.ContextFlag{
-		{Name: "no-portal", Description: "Base", Dir: "/base"},
+		{Name: "disable-portal", Description: "Base", Dir: "/base"},
 	}
 	child := []config.ContextFlag{
-		{Name: "no-portal", Description: "Child", Dir: "/child"},
+		{Name: "disable-portal", Description: "Child", Dir: "/child"},
 	}
 	MergeFlags(base, child)
 	if base[0].Description != "Base" {
@@ -231,7 +231,7 @@ func TestApplyFlags_NoActiveFlags(t *testing.T) {
 			{Name: "app", Helm: &config.HelmSpec{Chart: "app/chart"}},
 		},
 		Flags: []config.ContextFlag{
-			{Name: "no-portal", Dir: "/some/dir"},
+			{Name: "disable-portal", Dir: "/some/dir"},
 		},
 	}
 	err := ApplyFlags(resolved, nil)
@@ -246,7 +246,7 @@ func TestApplyFlags_NoActiveFlags(t *testing.T) {
 func TestApplyFlags_UnknownFlag(t *testing.T) {
 	resolved := &config.ResolvedContext{
 		Flags: []config.ContextFlag{
-			{Name: "no-portal", Dir: "/some/dir"},
+			{Name: "disable-portal", Dir: "/some/dir"},
 		},
 	}
 	err := ApplyFlags(resolved, []string{"no-such-flag"})
@@ -256,14 +256,14 @@ func TestApplyFlags_UnknownFlag(t *testing.T) {
 	if !strings.Contains(err.Error(), "unknown context flag --no-such-flag") {
 		t.Fatalf("expected unknown flag error, got: %v", err)
 	}
-	if !strings.Contains(err.Error(), "--no-portal") {
+	if !strings.Contains(err.Error(), "--disable-portal") {
 		t.Fatalf("expected available flags listed, got: %v", err)
 	}
 }
 
 func TestApplyFlags_AppliesPatch(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(dir, "sew--disable-portal.yaml"), `
 description: "Disable the developer portal UI"
 components:
   - name: apim
@@ -289,11 +289,11 @@ components:
 			},
 		},
 		Flags: []config.ContextFlag{
-			{Name: "no-portal", Description: "Disable the developer portal UI", Dir: dir},
+			{Name: "disable-portal", Description: "Disable the developer portal UI", Dir: dir},
 		},
 	}
 
-	err := ApplyFlags(resolved, []string{"no-portal"})
+	err := ApplyFlags(resolved, []string{"disable-portal"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -315,7 +315,7 @@ components:
 
 func TestApplyFlags_MultipleFlags(t *testing.T) {
 	dir := t.TempDir()
-	writeFile(t, filepath.Join(dir, "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(dir, "sew--disable-portal.yaml"), `
 description: "Disable portal"
 components:
   - name: apim
@@ -324,7 +324,7 @@ components:
         portal:
           enabled: false
 `)
-	writeFile(t, filepath.Join(dir, "sew--no-es.yaml"), `
+	writeFile(t, filepath.Join(dir, "sew--disable-es.yaml"), `
 description: "Disable Elasticsearch"
 components:
   - name: apim
@@ -348,12 +348,12 @@ components:
 			},
 		},
 		Flags: []config.ContextFlag{
-			{Name: "no-portal", Dir: dir},
-			{Name: "no-es", Dir: dir},
+			{Name: "disable-portal", Dir: dir},
+			{Name: "disable-es", Dir: dir},
 		},
 	}
 
-	err := ApplyFlags(resolved, []string{"no-portal", "no-es"})
+	err := ApplyFlags(resolved, []string{"disable-portal", "disable-es"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -405,7 +405,7 @@ func TestApplyFlags_FlagFromDifferentDir(t *testing.T) {
 	parentDir := t.TempDir()
 	childDir := t.TempDir()
 
-	writeFile(t, filepath.Join(parentDir, "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(parentDir, "sew--disable-portal.yaml"), `
 description: "Disable portal (from parent)"
 components:
   - name: apim
@@ -414,7 +414,7 @@ components:
         portal:
           enabled: false
 `)
-	writeFile(t, filepath.Join(childDir, "sew--no-ui.yaml"), `
+	writeFile(t, filepath.Join(childDir, "sew--disable-ui.yaml"), `
 description: "Disable all UIs"
 components:
   - name: apim
@@ -438,12 +438,12 @@ components:
 			},
 		},
 		Flags: []config.ContextFlag{
-			{Name: "no-portal", Dir: parentDir},
-			{Name: "no-ui", Dir: childDir},
+			{Name: "disable-portal", Dir: parentDir},
+			{Name: "disable-ui", Dir: childDir},
 		},
 	}
 
-	err := ApplyFlags(resolved, []string{"no-portal", "no-ui"})
+	err := ApplyFlags(resolved, []string{"disable-portal", "disable-ui"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -464,9 +464,9 @@ func TestFlagNameFromFile_Valid(t *testing.T) {
 		filename string
 		expected string
 	}{
-		{"sew--no-portal.yaml", "no-portal"},
-		{"sew--no-ui.yaml", "no-ui"},
-		{"sew--no-es.yaml", "no-es"},
+		{"sew--disable-portal.yaml", "disable-portal"},
+		{"sew--disable-ui.yaml", "disable-ui"},
+		{"sew--disable-es.yaml", "disable-es"},
 		{"sew--debug.yaml", "debug"},
 		{"sew--v2.yaml", "v2"},
 		{"sew--my-long-flag-name.yaml", "my-long-flag-name"},

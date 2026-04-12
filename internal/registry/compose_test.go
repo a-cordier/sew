@@ -1247,11 +1247,11 @@ components:
     helm:
       chart: app/chart
 `)
-	writeFile(t, filepath.Join(root, "ctx", "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(root, "ctx", "sew--disable-portal.yaml"), `
 description: "Disable portal"
 components: []
 `)
-	writeFile(t, filepath.Join(root, "ctx", "sew--no-ui.yaml"), `
+	writeFile(t, filepath.Join(root, "ctx", "sew--disable-ui.yaml"), `
 description: "Disable all UIs"
 components: []
 `)
@@ -1268,8 +1268,8 @@ components: []
 	for _, f := range resolved.Flags {
 		names[f.Name] = true
 	}
-	if !names["no-portal"] || !names["no-ui"] {
-		t.Fatalf("expected no-portal and no-ui flags, got %v", names)
+	if !names["disable-portal"] || !names["disable-ui"] {
+		t.Fatalf("expected disable-portal and disable-ui flags, got %v", names)
 	}
 }
 
@@ -1283,7 +1283,7 @@ components:
     helm:
       chart: app/chart
 `)
-	writeFile(t, filepath.Join(root, "parent", "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(root, "parent", "sew--disable-portal.yaml"), `
 description: "Disable portal"
 components: []
 `)
@@ -1302,8 +1302,8 @@ components: []
 	if len(resolved.Flags) != 1 {
 		t.Fatalf("expected 1 inherited flag, got %d", len(resolved.Flags))
 	}
-	if resolved.Flags[0].Name != "no-portal" {
-		t.Fatalf("expected flag %q, got %q", "no-portal", resolved.Flags[0].Name)
+	if resolved.Flags[0].Name != "disable-portal" {
+		t.Fatalf("expected flag %q, got %q", "disable-portal", resolved.Flags[0].Name)
 	}
 	expectedDir := filepath.Join(root, "parent")
 	if resolved.Flags[0].Dir != expectedDir {
@@ -1321,7 +1321,7 @@ components:
     helm:
       chart: app/chart
 `)
-	writeFile(t, filepath.Join(root, "parent", "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(root, "parent", "sew--disable-portal.yaml"), `
 description: "Parent: disable portal"
 components: []
 `)
@@ -1331,7 +1331,7 @@ from:
   - parent
 components: []
 `)
-	writeFile(t, filepath.Join(root, "child", "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(root, "child", "sew--disable-portal.yaml"), `
 description: "Child: disable portal with extras"
 components: []
 `)
@@ -1363,7 +1363,7 @@ components:
     helm:
       chart: app/chart
 `)
-	writeFile(t, filepath.Join(root, "parent", "sew--no-portal.yaml"), `
+	writeFile(t, filepath.Join(root, "parent", "sew--disable-portal.yaml"), `
 description: "Disable portal"
 components: []
 `)
@@ -1373,7 +1373,7 @@ from:
   - parent
 components: []
 `)
-	writeFile(t, filepath.Join(root, "child", "sew--no-ui.yaml"), `
+	writeFile(t, filepath.Join(root, "child", "sew--disable-ui.yaml"), `
 description: "Disable all UIs"
 components: []
 `)
@@ -1390,8 +1390,8 @@ components: []
 	for _, f := range resolved.Flags {
 		names[f.Name] = true
 	}
-	if !names["no-portal"] || !names["no-ui"] {
-		t.Fatalf("expected no-portal and no-ui, got %v", names)
+	if !names["disable-portal"] || !names["disable-ui"] {
+		t.Fatalf("expected disable-portal and disable-ui, got %v", names)
 	}
 }
 

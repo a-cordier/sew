@@ -19,8 +19,8 @@ func TestRender_BasicTemplate(t *testing.T) {
 }
 
 func TestRenderWithFlags_FlagPresent(t *testing.T) {
-	tmpl := `{{ if hasFlag "no-portal" }}hidden{{ else }}visible{{ end }}`
-	out, err := RenderWithFlags(tmpl, nil, []string{"no-portal"})
+	tmpl := `{{ if hasFlag "disable-portal" }}hidden{{ else }}visible{{ end }}`
+	out, err := RenderWithFlags(tmpl, nil, []string{"disable-portal"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -30,8 +30,8 @@ func TestRenderWithFlags_FlagPresent(t *testing.T) {
 }
 
 func TestRenderWithFlags_FlagAbsent(t *testing.T) {
-	tmpl := `{{ if hasFlag "no-portal" }}hidden{{ else }}visible{{ end }}`
-	out, err := RenderWithFlags(tmpl, nil, []string{"no-es"})
+	tmpl := `{{ if hasFlag "disable-portal" }}hidden{{ else }}visible{{ end }}`
+	out, err := RenderWithFlags(tmpl, nil, []string{"disable-es"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -41,7 +41,7 @@ func TestRenderWithFlags_FlagAbsent(t *testing.T) {
 }
 
 func TestRenderWithFlags_NoFlags(t *testing.T) {
-	tmpl := `{{ if hasFlag "no-portal" }}hidden{{ else }}visible{{ end }}`
+	tmpl := `{{ if hasFlag "disable-portal" }}hidden{{ else }}visible{{ end }}`
 	out, err := RenderWithFlags(tmpl, nil, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -52,22 +52,22 @@ func TestRenderWithFlags_NoFlags(t *testing.T) {
 }
 
 func TestRenderWithFlags_MultipleFlags(t *testing.T) {
-	tmpl := `{{ if not (hasFlag "no-ui") }}Console{{ end }}{{ if not (hasFlag "no-portal") }}Portal{{ end }}`
-	out, err := RenderWithFlags(tmpl, nil, []string{"no-ui"})
+	tmpl := `{{ if not (hasFlag "disable-ui") }}Console{{ end }}{{ if not (hasFlag "disable-portal") }}Portal{{ end }}`
+	out, err := RenderWithFlags(tmpl, nil, []string{"disable-ui"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if strings.Contains(out, "Console") {
-		t.Fatal("expected Console hidden when no-ui active")
+		t.Fatal("expected Console hidden when disable-ui active")
 	}
 	if !strings.Contains(out, "Portal") {
-		t.Fatal("expected Portal visible when only no-ui active")
+		t.Fatal("expected Portal visible when only disable-ui active")
 	}
 }
 
 func TestRenderWithFlags_UnknownFlagReturnsFalse(t *testing.T) {
 	tmpl := `{{ if hasFlag "nonexistent" }}yes{{ else }}no{{ end }}`
-	out, err := RenderWithFlags(tmpl, nil, []string{"no-portal"})
+	out, err := RenderWithFlags(tmpl, nil, []string{"disable-portal"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -80,8 +80,8 @@ func TestRenderWithFlags_WithDotData(t *testing.T) {
 	type cfg struct {
 		Name string
 	}
-	tmpl := `{{ .Name }}{{ if not (hasFlag "no-portal") }} with portal{{ end }}`
-	out, err := RenderWithFlags(tmpl, cfg{Name: "cluster"}, []string{"no-portal"})
+	tmpl := `{{ .Name }}{{ if not (hasFlag "disable-portal") }} with portal{{ end }}`
+	out, err := RenderWithFlags(tmpl, cfg{Name: "cluster"}, []string{"disable-portal"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -93,10 +93,10 @@ func TestRenderWithFlags_WithDotData(t *testing.T) {
 func TestRenderWithFlags_RealisticNotesTemplate(t *testing.T) {
 	tmpl := `Your cluster is ready.
 
-{{ if not (hasFlag "no-ui") -}}
+{{ if not (hasFlag "disable-ui") -}}
 Console     http://localhost:30080
 {{ end -}}
-{{ if and (not (hasFlag "no-portal")) (not (hasFlag "no-ui")) -}}
+{{ if and (not (hasFlag "disable-portal")) (not (hasFlag "disable-ui")) -}}
 Portal      http://localhost:30081
 {{ end -}}
 Gateway     http://localhost:30082
@@ -115,20 +115,20 @@ Gateway     http://localhost:30082
 			wantOut: nil,
 		},
 		{
-			name:    "no-portal",
-			flags:   []string{"no-portal"},
+			name:    "disable-portal",
+			flags:   []string{"disable-portal"},
 			wantIn:  []string{"Console", "Gateway"},
 			wantOut: []string{"Portal"},
 		},
 		{
-			name:    "no-ui",
-			flags:   []string{"no-ui"},
+			name:    "disable-ui",
+			flags:   []string{"disable-ui"},
 			wantIn:  []string{"Gateway"},
 			wantOut: []string{"Console", "Portal"},
 		},
 		{
-			name:    "no-portal and no-ui",
-			flags:   []string{"no-portal", "no-ui"},
+			name:    "disable-portal and disable-ui",
+			flags:   []string{"disable-portal", "disable-ui"},
 			wantIn:  []string{"Gateway"},
 			wantOut: []string{"Console", "Portal"},
 		},
