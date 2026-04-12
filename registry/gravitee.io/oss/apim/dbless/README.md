@@ -30,6 +30,7 @@ This context inherits flags from `base`. Optional flags you can pass to
 | Flag                 | Description                                          |
 |----------------------|------------------------------------------------------|
 | `--enable-hc-vault`  | Deploy HashiCorp Vault and configure it as a secret provider |
+| `--enable-redis`     | Deploy Redis and use it for gateway rate limiting             |
 
 ```bash
 sew create --from gravitee.io/oss/apim/dbless --enable-hc-vault

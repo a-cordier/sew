@@ -57,6 +57,7 @@ All concrete Kafka variants inherit optional flags from the APIM base context:
 | `--disable-ui`       | Disable both Console and Portal UIs                  |
 | `--disable-portal`   | Disable the developer portal UI                      |
 | `--enable-hc-vault`  | Deploy HashiCorp Vault and configure it as a secret provider |
+| `--enable-redis`     | Deploy Redis and use it for gateway rate limiting             |
 
 ```bash
 sew create --from gravitee.io/ee/apim/kafka --disable-es

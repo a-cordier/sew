@@ -35,6 +35,7 @@ Optional flags you can pass to `sew create` to customize this deployment:
 | `--disable-ui`       | Disable both Console and Portal UIs                  |
 | `--disable-portal`   | Disable the developer portal UI                      |
 | `--enable-hc-vault`  | Deploy HashiCorp Vault and configure it as a secret provider |
+| `--enable-redis`     | Deploy Redis and use it for gateway rate limiting             |
 
 ```bash
 sew create --from gravitee.io/oss/apim/mongodb --disable-es --disable-portal
