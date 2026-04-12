@@ -7,7 +7,8 @@ tags: [api-management, gateway, kubernetes]
 # APIM DB-less
 
 Deploys the Gravitee API Management gateway in DB-less mode alongside the
-Gravitee Kubernetes Operator (GKO). No database involved — APIs are defined entirely through Kubernetes custom resources.
+Gravitee Kubernetes Operator (GKO). No database involved — APIs are defined
+entirely through Kubernetes custom resources.
 
 ## Usage
 
@@ -21,10 +22,24 @@ sew create --from gravitee.io/oss/apim/dbless
 |----------------|----------------------------|
 | APIM Gateway   | http://localhost:30082      |
 
+## Context flags
+
+This context inherits flags from `base`. Optional flags you can pass to
+`sew create` to customize this deployment:
+
+| Flag                 | Description                                          |
+|----------------------|------------------------------------------------------|
+| `--enable-hc-vault`  | Deploy HashiCorp Vault and configure it as a secret provider |
+
+```bash
+sew create --from gravitee.io/oss/apim/dbless --enable-hc-vault
+```
+
+Use `sew info` to see the full list of flags and components for this context.
 
 ## Details
 
-- **Kind cluster:** `gio-dbless`
+- **Kind cluster:** `gravitee-dbless`
 - **Gateway port:** `http://localhost:30082`
 - **Components:** `apim` (Helm), `gko` (Helm)
 - **Database:** none (DB-less mode)
@@ -32,3 +47,10 @@ sew create --from gravitee.io/oss/apim/dbless
 
 This is the lightest Gravitee APIM setup, ideal for testing gateway
 functionality and GKO-managed API definitions without any persistence layer.
+
+## Dependencies
+
+This context composes from:
+
+- `gravitee.io/oss/apim/base` — shared APIM Helm configuration and flags
+- `gravitee.io/oss/gko` — Gravitee Kubernetes Operator

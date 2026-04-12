@@ -1,5 +1,8 @@
+from:
+  - gravitee.io/oss/gko
 images:
   preload:
+    mode: replace
     refs:
       - graviteeio/apim-gateway:latest-debian
       - graviteeio/kubernetes-operator:latest
@@ -19,16 +22,9 @@ features:
     enabled: true
   dns:
     enabled: true
-helm:
-  repos:
-    - name: graviteeio
-      url: https://helm.gravitee.io
 components:
   - name: gko
-    type: helm
-    namespace: gravitee
     helm:
-      chart: graviteeio/gko
       values:
         gatewayAPI:
           controller:

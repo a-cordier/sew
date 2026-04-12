@@ -1,0 +1,3 @@
+Your cluster "{{ .Kind.Name }}" is ready.
+
+GKO is deployed in the `gravitee` namespace.

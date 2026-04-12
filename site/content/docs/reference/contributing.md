@@ -77,12 +77,13 @@ registry/
 │   └── elasticsearch/          # standalone context
 ├── gravitee.io/
 │   ├── oss/
-│   │   └── apim/
-│   │       ├── base/           # abstract shared config
-│   │       ├── dbless/
-│   │       ├── gateway/
-│   │       ├── mongodb/        # concrete variant
-│   │       └── postgres/       # concrete variant
+│   │   ├── apim/
+│   │   │   ├── base/           # abstract shared config
+│   │   │   ├── dbless/
+│   │   │   ├── gateway/
+│   │   │   ├── mongodb/        # concrete variant
+│   │   │   └── postgres/       # concrete variant
+│   │   └── gko/                # standalone GKO deployment
 │   └── ee/
 │       ├── apim/
 │       │   └── kafka/
@@ -312,6 +313,10 @@ components:
 **Naming convention**: flag names must be lowercase kebab-case
 (`^[a-z0-9]+(-[a-z0-9]+)*$`). The `description` field is required
 and is displayed on the registry site and in validation output.
+Use the `disable-` prefix for flags that remove a default component
+(e.g. `--disable-es`, `--disable-portal`) and the `enable-` prefix for
+flags that add an optional component that is off by default
+(e.g. `--enable-hc-vault`).
 
 **Inheritance**: flags placed on an abstract context are automatically
 inherited by every concrete context that composes from it via `from`.
@@ -330,7 +335,7 @@ components:
 
 **When to use flags vs separate contexts**:
 
-- **Can a user toggle this on or off without changing the stack's identity?** Use a **flag**. Examples: `--disable-es` disables Elasticsearch, `--disable-portal` hides the portal UI. The stack is still "APIM with Postgres" regardless.
+- **Can a user toggle this on or off without changing the stack's identity?** Use a **flag**. Examples: `--disable-es` disables Elasticsearch, `--disable-portal` hides the portal UI, `--enable-hc-vault` adds a HashiCorp Vault instance. The stack is still "APIM with Postgres" regardless.
 - **Does this change the storage backend, networking model, or deployment topology?** Use a **separate context directory**. Examples: `mongodb/` vs `postgres/` (different databases), `dbless/` vs `gateway/` (fundamentally different gateway modes).
 - **Is there shared config used by multiple sibling variants?** Extract it into an **abstract base** (`abstract: true`) and have variants compose from it via `from`. Example: `oss/base/` holds the shared Helm repo, component skeleton, and port mappings; `oss/mongodb/` and `oss/postgres/` both extend it.
 - **Does a feature layer apply across multiple existing contexts?** Create a **composable abstract context** that stacks on top via `from`. Example: `ee/kafka/base/` adds Kafka and license handling; `ee/kafka/mongodb/` and `ee/kafka/postgres/` compose it with the corresponding OSS DB context.
@@ -339,7 +344,7 @@ components:
 Users activate flags on the command line:
 
 ```bash
-sew create --from gravitee.io/oss/apim --disable-portal --disable-ui
+sew create --from gravitee.io/oss/apim --disable-portal --enable-hc-vault
 ```
 
 ## Schema

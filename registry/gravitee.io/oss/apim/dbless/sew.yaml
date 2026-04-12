@@ -1,32 +1,19 @@
+from:
+  - gravitee.io/oss/apim/base
+  - gravitee.io/oss/gko
 images:
   preload:
+    mode: replace
     refs:
       - graviteeio/apim-gateway:latest-debian
       - graviteeio/kubernetes-operator:latest
 kind:
   name: gravitee-dbless
-  nodes:
-    - role: control-plane
-      extraPortMappings:
-        - containerPort: 30082
-          hostPort: 30082
-        - containerPort: 30084
-          hostPort: 30084
-helm:
-  repos:
-    - name: graviteeio
-      url: https://helm.gravitee.io
 components:
+  - name: tls-server
+    enabled: false
   - name: apim
-    type: helm
-    namespace: gravitee
-    conditions:
-      ready: true
-    selector:
-      matchLabels:
-        app.kubernetes.io/instance: apim
     helm:
-      chart: graviteeio/apim
       values:
         api:
           enabled: false
@@ -42,15 +29,6 @@ components:
           replicaCount: 1
           autoscaling:
             enabled: false
-          image:
-            repository: graviteeio/apim-gateway
-            tag: latest-debian
-          ingress:
-            enabled: false
-          services:
-            sync:
-              kubernetes:
-                enabled: true
           dbLess: true
           reporters:
             elasticsearch:
@@ -59,10 +37,7 @@ components:
             type: NodePort
             nodePort: 30082
   - name: gko
-    type: helm
-    namespace: gravitee
     helm:
-      chart: graviteeio/gko
       values:
         manager:
           scope:

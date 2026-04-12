@@ -30,7 +30,7 @@ See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networkin
 
 ## Details
 
-- **Kind cluster:** `gio-gateway-api`
+- **Kind cluster:** `gravitee-gateway`
 - **Ports:** 80 (HTTP), 443 (HTTPS), 9092
 - **Features:** load balancer, DNS
 - **Components:** `gko` (Helm), `gateway-class-parameters` (CRD), `gateway-class` (GatewayClass)
@@ -38,3 +38,9 @@ See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networkin
 This context enables the Kubernetes Gateway API flow: create `Gateway` and
 `HTTPRoute` resources and let GKO provision Gravitee gateway instances
 automatically.
+
+## Dependencies
+
+This context composes from:
+
+- `gravitee.io/oss/gko` — Gravitee Kubernetes Operator

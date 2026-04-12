@@ -1,0 +1,16 @@
+images:
+  preload:
+    refs:
+      - graviteeio/kubernetes-operator:latest
+kind:
+  name: gravitee-gko
+helm:
+  repos:
+    - name: graviteeio
+      url: https://helm.gravitee.io
+components:
+  - name: gko
+    type: helm
+    namespace: gravitee
+    helm:
+      chart: graviteeio/gko

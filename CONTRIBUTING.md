@@ -73,12 +73,13 @@ registry/
 │   └── elasticsearch/          # standalone context
 ├── gravitee.io/
 │   ├── oss/
-│   │   └── apim/
-│   │       ├── base/           # abstract shared config
-│   │       ├── dbless/
-│   │       ├── gateway/
-│   │       ├── mongodb/        # concrete variant
-│   │       └── postgres/       # concrete variant
+│   │   ├── apim/
+│   │   │   ├── base/           # abstract shared config
+│   │   │   ├── dbless/
+│   │   │   ├── gateway/
+│   │   │   ├── mongodb/        # concrete variant
+│   │   │   └── postgres/       # concrete variant
+│   │   └── gko/                # standalone GKO deployment
 │   └── ee/
 │       ├── apim/
 │       │   └── kafka/
