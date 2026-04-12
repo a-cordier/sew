@@ -1,7 +1,7 @@
 ---
 title: "APIM - MongoDB"
 description: "Gravitee APIM with MongoDB backend and Elasticsearch"
-tags: [api-management, gateway]
+tags: [networking]
 ---
 
 # APIM MongoDB

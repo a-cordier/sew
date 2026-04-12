@@ -1,7 +1,7 @@
 ---
 title: "Redis - Standalone"
 description: "Single-node Redis 7 deployment for Kubernetes"
-tags: [cache, database]
+tags: [database]
 ---
 
 # Redis Standalone

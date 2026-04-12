@@ -20,5 +20,8 @@ jobs:
       - name: Lint YAML
         run: go tool task lint:yaml
 
+      - name: Validate registry
+        run: go tool task validate
+
       - name: Test
         run: go tool task test

@@ -1,7 +1,7 @@
 ---
 title: "GKO"
 description: "Gravitee Kubernetes Operator standalone deployment"
-tags: [operator, kubernetes]
+tags: [networking]
 ---
 
 # GKO

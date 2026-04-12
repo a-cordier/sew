@@ -1,7 +1,7 @@
 ---
 title: "Gateway API"
 description: "Gravitee implementation of the Kubernetes Gateway API"
-tags: [gateway, networking, kubernetes]
+tags: [networking]
 ---
 
 # APIM Gateway API

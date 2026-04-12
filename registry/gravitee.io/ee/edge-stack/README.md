@@ -1,7 +1,7 @@
 ---
 title: "Edge Stack"
 description: "Ambassador Edge Stack API gateway"
-tags: [api-gateway, edge, ingress]
+tags: [networking]
 ---
 
 # Edge Stack

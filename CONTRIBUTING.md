@@ -148,6 +148,19 @@ variant's README.
 #### Tags
 
 - Every context README **must** have at least one tag.
+- Tags come from a fixed vocabulary defined in `registry/tags.yaml`:
+
+| Tag | Description |
+|---|---|
+| `database` | Persistent data stores |
+| `messaging` | Message brokers and event streaming |
+| `networking` | API gateways, proxies, ingress, service mesh |
+| `observability` | Logging, metrics, tracing |
+| `search` | Search and indexing engines |
+| `security` | Secrets management, auth, certificates |
+
+- `sew validate --tags registry/tags.yaml` enforces this vocabulary;
+  CI rejects unknown tags.
 - Do not use product or organization names as tags (e.g. `kafka`,
   `mongodb`, `gravitee`, `elasticsearch`). Tags describe *what the
   context does*, not *which product it uses* — the registry path already

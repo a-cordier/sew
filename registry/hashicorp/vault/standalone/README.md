@@ -1,7 +1,7 @@
 ---
 title: "Vault - Standalone"
 description: "Single-node HashiCorp Vault in dev mode"
-tags: [secrets]
+tags: [security]
 ---
 
 # Vault Standalone

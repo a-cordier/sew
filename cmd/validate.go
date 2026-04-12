@@ -23,11 +23,19 @@ directory is given, all sew.yaml and sew--*.yaml (context flag) files
 under it are validated recursively. Context flag files are additionally
 checked for a valid naming convention and a non-empty description field.
 
+When --tags is provided with a path to a tags vocabulary file, README.md
+files that sit alongside a sew.yaml are also checked: every tag in the
+README's YAML frontmatter must belong to the allowed set. When --tags is
+omitted, tag validation is skipped entirely.
+
 When no argument is given, validates ./sew.yaml in the current directory.`,
 	RunE: runValidate,
 }
 
+var tagsFile string
+
 func init() {
+	validateCmd.Flags().StringVar(&tagsFile, "tags", "", "path to a tags vocabulary file for README tag validation")
 	rootCmd.AddCommand(validateCmd)
 }
 
@@ -45,6 +53,10 @@ func runValidate(_ *cobra.Command, args []string) error {
 	if len(targets) == 0 {
 		targets = []string{"sew.yaml"}
 	}
+
+	// sewDirs tracks directories that contain a sew.yaml so we can locate
+	// README.md files sitting alongside them for tag validation.
+	sewDirs := make(map[string]bool)
 
 	var configFiles []string
 	var flagFiles []string
@@ -71,6 +83,7 @@ func runValidate(_ *cobra.Command, args []string) error {
 			name := fi.Name()
 			if name == "sew.yaml" {
 				configFiles = append(configFiles, path)
+				sewDirs[filepath.Dir(path)] = true
 			} else if isFlagFile(name) {
 				flagFiles = append(flagFiles, path)
 			}
@@ -98,11 +111,31 @@ func runValidate(_ *cobra.Command, args []string) error {
 			failed++
 		}
 	}
+
+	var readmeCount int
+	if tagsFile != "" {
+		allowed, err := registry.LoadTags(tagsFile)
+		if err != nil {
+			return fmt.Errorf("loading tags: %w", err)
+		}
+		for dir := range sewDirs {
+			readme := filepath.Join(dir, "README.md")
+			if _, err := os.Stat(readme); err != nil {
+				continue
+			}
+			readmeCount++
+			if err := registry.ValidateReadmeTags(readme, allowed); err != nil {
+				logger.Error("%s: %v", readme, err)
+				failed++
+			}
+		}
+	}
+
 	if failed > 0 {
 		return fmt.Errorf("%d file(s) failed validation", failed)
 	}
 
-	logger.Success("%d file(s) valid", len(configFiles)+len(flagFiles))
+	logger.Success("%d file(s) valid", len(configFiles)+len(flagFiles)+readmeCount)
 	return nil
 }
 

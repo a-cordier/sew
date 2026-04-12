@@ -1,7 +1,7 @@
 ---
 title: "APIM - PostgreSQL"
 description: "Gravitee APIM with PostgreSQL backend and Elasticsearch"
-tags: [api-management, gateway]
+tags: [networking]
 ---
 
 # APIM PostgreSQL

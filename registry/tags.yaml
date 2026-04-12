@@ -1,0 +1,12 @@
+- name: database
+  description: Persistent data stores
+- name: messaging
+  description: Message brokers and event streaming
+- name: networking
+  description: API gateways, proxies, ingress, service mesh
+- name: observability
+  description: Logging, metrics, tracing
+- name: search
+  description: Search and indexing engines
+- name: security
+  description: Secrets management, auth, certificates
