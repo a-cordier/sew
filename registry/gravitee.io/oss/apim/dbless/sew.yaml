@@ -33,6 +33,15 @@ components:
           reporters:
             elasticsearch:
               enabled: false
+          servers:
+            - type: http
+              port: 8082
+              service:
+                type: NodePort
+                nodePort: 30082
+                externalPort: 82
+              ingress:
+                enabled: false
           service:
             type: NodePort
             nodePort: 30082
