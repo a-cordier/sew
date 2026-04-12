@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.0](https://github.com/a-cordier/sew/compare/v0.11.0...v0.12.0) (2026-04-12)
+
+
+### Features
+
+* add enable-redis flag for apim contexts ([0fb0497](https://github.com/a-cordier/sew/commit/0fb0497255f00aa4877900306ded43bd17f0d3ad))
+* make apim context flag available for all contexts ([3adfbbf](https://github.com/a-cordier/sew/commit/3adfbbf8e6d7897dbdddae1ddfc2fa638253aabf))
+* restrict tag set and validate registry tags ([a5aa46f](https://github.com/a-cordier/sew/commit/a5aa46fd6aa1629fc3ca85fe45598373556eaf62))
+
+
+### Bug Fixes
+
+* override gateway servers for dbless ([3d3144b](https://github.com/a-cordier/sew/commit/3d3144b515481d7f21b5c005602b8a725fd37c9d))
+
 ## [0.11.0](https://github.com/a-cordier/sew/compare/v0.10.0...v0.11.0) (2026-04-12)
 
 
