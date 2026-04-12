@@ -65,18 +65,13 @@
   {{ end }}
   {{ $groups = $ordered }}
 
-  <div id="registry-grid">
+  <div id="registry-grid" class="registry-grid">
     {{ range $group := $groups }}
-    <div class="registry-group" data-group="{{ $group }}">
-      <h2 class="registry-group-title">{{ $group }}</h2>
-      <div class="registry-grid">
-        {{ range $pages }}
-          {{ if eq (index (split .Params.path "/") 0) $group }}
-            {{ partial "registry-card.html" . }}
-          {{ end }}
+      {{ range $pages }}
+        {{ if eq (index (split .Params.path "/") 0) $group }}
+          {{ partial "registry-card.html" . }}
         {{ end }}
-      </div>
-    </div>
+      {{ end }}
     {{ end }}
   </div>
 
@@ -102,7 +97,6 @@
   var empty = document.getElementById('registry-empty');
   var countEl = document.getElementById('registry-count');
   var cards = Array.prototype.slice.call(grid.querySelectorAll('.registry-card'));
-  var groups = Array.prototype.slice.call(grid.querySelectorAll('.registry-group'));
   var filterBtns = Array.prototype.slice.call(document.querySelectorAll('.tag-filter'));
   var activeTags = {};
   var totalCount = cards.length;
@@ -136,14 +130,6 @@
       var show = matchText && matchTags;
       card.style.display = show ? '' : 'none';
       if (show) visible++;
-    });
-
-    groups.forEach(function(group) {
-      var groupCards = Array.prototype.slice.call(group.querySelectorAll('.registry-card'));
-      var anyVisible = groupCards.some(function(card) {
-        return card.style.display !== 'none';
-      });
-      group.style.display = anyVisible ? '' : 'none';
     });
 
     empty.hidden = visible > 0;

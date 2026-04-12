@@ -1319,34 +1319,13 @@ h4:hover .heading-anchor {
   border-color: var(--color-border);
 }
 
-/* Grouped card grid */
-
-.registry-group {
-  margin-bottom: 2.5rem;
-}
-
-.registry-group:last-child {
-  margin-bottom: 0;
-  padding-bottom: 3rem;
-}
-
-.registry-group-title {
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--color-text-faint);
-  margin-bottom: 0.85rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--color-border-muted);
-}
-
 /* Card grid */
 
 .registry-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.15rem;
+  padding-bottom: 3rem;
 }
 
 .registry-card {
