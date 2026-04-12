@@ -5,21 +5,21 @@
 class Sew < Formula
   desc "Kubernetes application stacks for dev, test, and CI"
   homepage "https://a-cordier.github.io/sew/"
-  version "0.11.0"
+  version "0.12.0"
   license "Apache-2.0"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/a-cordier/sew/releases/download/v0.11.0/sew_0.11.0_darwin_amd64.zip"
-      sha256 "5becc6a8ba9efaba621383868f53fb610055876864c8abef96bacffab5c9be94"
+      url "https://github.com/a-cordier/sew/releases/download/v0.12.0/sew_0.12.0_darwin_amd64.zip"
+      sha256 "48ca1d87615723c08260ad4fca2135203e4c35d0436ff86cd325b26f0955bfbc"
 
       define_method(:install) do
         bin.install "sew"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/a-cordier/sew/releases/download/v0.11.0/sew_0.11.0_darwin_arm64.zip"
-      sha256 "853af0dc7b19a0e4eaa2d14f424a13ff04e3869a43c3ea5b0991c1a113497980"
+      url "https://github.com/a-cordier/sew/releases/download/v0.12.0/sew_0.12.0_darwin_arm64.zip"
+      sha256 "3732a2e3099a646969d9c5f0cc9ffadac3f25321f087cc2de3b2b5c35327b67b"
 
       define_method(:install) do
         bin.install "sew"
@@ -29,15 +29,15 @@ class Sew < Formula
 
   on_linux do
     if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
-      url "https://github.com/a-cordier/sew/releases/download/v0.11.0/sew_0.11.0_linux_amd64.tar.gz"
-      sha256 "c2286d88588e5c326fcbae728f019db7acf70934de07b3af8c9b2cc851ef535d"
+      url "https://github.com/a-cordier/sew/releases/download/v0.12.0/sew_0.12.0_linux_amd64.tar.gz"
+      sha256 "e45b5f050b07763a21ee43e490bd6ac99233fd6d232dcfa5bec6a92bdaaefa0f"
       define_method(:install) do
         bin.install "sew"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/a-cordier/sew/releases/download/v0.11.0/sew_0.11.0_linux_arm64.tar.gz"
-      sha256 "62b9ea7b379714bf052d2185c6b0a1044ebe8d72df0090a6e062bb4c91d67477"
+      url "https://github.com/a-cordier/sew/releases/download/v0.12.0/sew_0.12.0_linux_arm64.tar.gz"
+      sha256 "8f31e89bf2024eb5065877e91aeb41293e2f086196309b0d5123fc6fc31234eb"
       define_method(:install) do
         bin.install "sew"
       end
