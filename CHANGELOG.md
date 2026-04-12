@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/a-cordier/sew/compare/v0.10.0...v0.11.0) (2026-04-12)
+
+
+### Features
+
+* add vault context ([30cb0cc](https://github.com/a-cordier/sew/commit/30cb0cc099a12287976707f7e21f31915c687200))
+
 ## [0.10.0](https://github.com/a-cordier/sew/compare/v0.9.1...v0.10.0) (2026-04-11)
 
 
