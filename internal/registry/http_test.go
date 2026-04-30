@@ -612,6 +612,64 @@ components:
 	}
 }
 
+func TestHTTPResolver_NetrcAuth(t *testing.T) {
+	var authHeader string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader = r.Header.Get("Authorization")
+		if r.URL.Path == "/ctx/sew.yaml" {
+			w.Write([]byte("components:\n  - name: app\n    helm:\n      chart: repo/app\n"))
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	t.Cleanup(srv.Close)
+
+	dir := t.TempDir()
+	netrcFile := filepath.Join(dir, "netrc")
+	writeFile(t, netrcFile, "machine 127.0.0.1 login deploy password tok3n\n")
+	t.Setenv("NETRC", netrcFile)
+
+	sewHome := t.TempDir()
+	resolver := NewResolver(srv.URL, sewHome)
+
+	_, err := resolver.Resolve(context.Background(), "ctx")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if authHeader == "" {
+		t.Fatal("expected Authorization header to be set from .netrc credentials")
+	}
+	if !strings.HasPrefix(authHeader, "Basic ") {
+		t.Fatalf("expected Basic auth, got %q", authHeader)
+	}
+}
+
+func TestHTTPResolver_NoNetrcNoAuth(t *testing.T) {
+	var authHeader string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader = r.Header.Get("Authorization")
+		if r.URL.Path == "/ctx/sew.yaml" {
+			w.Write([]byte("components:\n  - name: app\n    helm:\n      chart: repo/app\n"))
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	t.Cleanup(srv.Close)
+
+	t.Setenv("NETRC", filepath.Join(t.TempDir(), "does-not-exist"))
+
+	sewHome := t.TempDir()
+	resolver := NewResolver(srv.URL, sewHome)
+
+	_, err := resolver.Resolve(context.Background(), "ctx")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if authHeader != "" {
+		t.Fatalf("expected no Authorization header, got %q", authHeader)
+	}
+}
+
 func TestHTTPResolver_FlagsApply(t *testing.T) {
 	root := t.TempDir()
 	writeFile(t, filepath.Join(root, "ctx", "sew.yaml"), `

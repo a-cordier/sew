@@ -16,6 +16,17 @@ make test
 sew delete gravitee-dbless
 ```
 
+## Private registries
+
+If your pipeline uses a private sew registry, write a `~/.netrc` file with the registry host's credentials before running `sew create`. sew reads `.netrc` automatically -- no extra flags needed:
+
+```bash
+echo "machine registry.mycompany.com login deploy password ${REGISTRY_TOKEN}" > ~/.netrc
+chmod 600 ~/.netrc
+```
+
+Store the token as a CI secret (`REGISTRY_TOKEN` above). See [Private registry authentication]({{< ref "/docs/guides/sew-registry#private-registry-authentication" >}}) for details on the `.netrc` format.
+
 ## Speeding up image pulls
 
 Image pulls are usually the slowest part of cluster creation. sew offers two strategies -- **preload** and **mirrors** -- and the right choice depends on whether your CI platform provides Docker Layer Caching (DLC). See the [Container Images]({{< ref "/docs/guides/container-images" >}}) guide for the full reference on both strategies.

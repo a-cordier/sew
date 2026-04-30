@@ -24,8 +24,9 @@ func NewResolver(registry string, sewHome string) Resolver {
 		}
 	}
 	return &HTTPResolver{
-		BaseURL:   registry,
-		CacheRoot: filepath.Join(sewHome, "cache"),
-		SewHome:   sewHome,
+		BaseURL:    registry,
+		CacheRoot:  filepath.Join(sewHome, "cache"),
+		SewHome:    sewHome,
+		HTTPClient: newAuthenticatedClient(registry),
 	}
 }

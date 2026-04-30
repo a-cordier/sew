@@ -71,6 +71,40 @@ from:
 
 You can also compose across registries. A context in your private registry can reference contexts from the central registry (or any other) through cross-registry composition -- see [Composing Contexts]({{< ref "/docs/guides/composing-contexts" >}}).
 
+## Private registry authentication
+
+When your registry requires authentication (e.g. a private GitHub Pages site, a corporate HTTP server behind Basic auth), sew reads credentials from your `~/.netrc` file -- the same mechanism Go modules and curl use.
+
+Add an entry for your registry's hostname:
+
+```
+machine registry.mycompany.com
+  login deploy
+  password your-token-here
+```
+
+sew will send these credentials as HTTP Basic auth on every request to that host. For GitHub Personal Access Tokens, set `login` to any non-empty value and `password` to the token:
+
+```
+machine raw.githubusercontent.com
+  login x-token
+  password ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+A few things to keep in mind:
+
+- Credentials are never written to cluster state or logs.
+- The `$NETRC` environment variable overrides the default file location, which is useful in CI where you might write a temporary file:
+
+```bash
+echo "machine registry.mycompany.com login deploy password ${REGISTRY_TOKEN}" > /tmp/.netrc
+chmod 600 /tmp/.netrc
+export NETRC=/tmp/.netrc
+sew create --from myproduct/dev
+```
+
+- On Windows, sew also checks `~/_netrc` if `~/.netrc` does not exist.
+
 ## Local filesystem registries
 
 During development, you don't need to push your registry to a server. Point sew at a directory on your machine using a `file://` URL:
