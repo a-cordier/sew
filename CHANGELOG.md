@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/a-cordier/sew/compare/v0.12.0...v0.13.0) (2026-04-30)
+
+
+### Features
+
+* add support for authenticated registries ([af265f2](https://github.com/a-cordier/sew/commit/af265f227e7bd204bd05fad72c5bda1a3d7c6fe7))
+
 ## [0.12.0](https://github.com/a-cordier/sew/compare/v0.11.0...v0.12.0) (2026-04-12)
 
 
