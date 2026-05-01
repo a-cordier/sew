@@ -166,6 +166,65 @@ components:
 
 For **k8s manifest components**, provide a full replacement Service manifest. Manifests are merged by resource identity, so your Service replaces the child's entirely.
 
+## Template variables
+
+Context authors can parameterize their sew.yaml with Go template expressions. Declare variable defaults in a `vars` block and reference them with `{{ .variableName }}`:
+
+```yaml
+vars:
+  helmVersion: ""
+  imageTag: "latest"
+
+components:
+  - name: apim
+    helm:
+      chart: graviteeio/apim
+      version: "{{ .helmVersion }}"
+      values:
+        gateway:
+          image:
+            tag: "{{ .imageTag }}-debian"
+        api:
+          image:
+            tag: "{{ .imageTag }}-debian"
+        ui:
+          image:
+            tag: "{{ .imageTag }}"
+
+images:
+  preload:
+    refs:
+      - "graviteeio/apim-gateway:{{ .imageTag }}-debian"
+      - "graviteeio/apim-management-api:{{ .imageTag }}-debian"
+      - "graviteeio/apim-management-ui:{{ .imageTag }}"
+```
+
+Users override defaults at deploy time:
+
+```bash
+sew create --set imageTag=4.12.0
+```
+
+### Rules
+
+- Variable names use **camelCase** (`imageTag`, `helmVersion`, not `image_tag`).
+- `vars` is a flat `map[string]string` -- no nesting.
+- The `vars` block itself must not contain template expressions.
+- Undefined variables with no default cause an error.
+- Use the `env` function to reference environment variables: `{{ env "HOME" }}`.
+- Use `default` for inline fallbacks: `{{ .myVar | default "fallback" }}`.
+- Use `required` for mandatory variables: `{{ .licenseKey | required "licenseKey must be set via --set" }}`.
+
+### Templating in composed contexts
+
+Each context is templated independently during resolution. Parent contexts don't see child vars and vice versa. Only `--set` flows globally across all levels:
+
+```yaml
+# Parent: vars: { dbVersion: "15" } uses {{ .dbVersion }}
+# Child:  vars: { imageTag: "latest" } uses {{ .imageTag }}
+# --set dbVersion=16 --set imageTag=v2 overrides both
+```
+
 ## Context flags
 
 Context flags let maintainers expose optional toggles without creating separate registry directories for every combination. A flag is defined by placing a `sew--{flag-name}.yaml` patch file alongside the context's `sew.yaml`.

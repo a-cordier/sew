@@ -67,7 +67,7 @@ that don't match the single-level wildcard.
 
 ## Context flags
 
-Optional flags inherited from the APIM base context:
+Optional flags you can pass to `sew create` to customize this deployment:
 
 | Flag                 | Description                                          |
 |----------------------|------------------------------------------------------|

@@ -6,7 +6,7 @@ import (
 )
 
 func TestNewResolver_FileURL(t *testing.T) {
-	r := NewResolver("file:///some/path", "/sew-home")
+	r := NewResolver("file:///some/path", "/sew-home", nil)
 	fs, ok := r.(*FSResolver)
 	if !ok {
 		t.Fatal("expected FSResolver for file:// URL")
@@ -20,7 +20,7 @@ func TestNewResolver_FileURL(t *testing.T) {
 }
 
 func TestNewResolver_HTTPURL(t *testing.T) {
-	r := NewResolver("https://example.com/registry", "/sew-home")
+	r := NewResolver("https://example.com/registry", "/sew-home", nil)
 	h, ok := r.(*HTTPResolver)
 	if !ok {
 		t.Fatal("expected HTTPResolver for HTTP URL")

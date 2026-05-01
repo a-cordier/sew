@@ -30,6 +30,7 @@ Key differences:
 | | APIM | Edge Stack |
 |---|---|---|
 | **Conventional path** | `$HOME/opt/gravitee/license.key` | `$HOME/opt/gravitee/edge-stack/license.jwt` |
+| **Template syntax**   | `{{ env "HOME" }}/opt/gravitee/license.key` | `{{ env "HOME" }}/opt/gravitee/edge-stack/license.jwt` |
 | **Secret name** | `gravitee-license` | `ambassador-edge-stack` |
 | **Secret format** | `fromFile` (whole file) | `entries` with `key: license-key` |
 | **Namespace** | `gravitee` | `ambassador` |
@@ -49,7 +50,7 @@ components:
         - name: ambassador-edge-stack
           entries:
             - key: license-key
-              fromFile: '$HOME/opt/gravitee/edge-stack/license.jwt'
+              fromFile: '{{ env "HOME" }}/opt/gravitee/edge-stack/license.jwt'
           onMissing: ignore
 ```
 

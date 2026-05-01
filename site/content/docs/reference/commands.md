@@ -100,24 +100,28 @@ All build output (pre-build commands, docker build) is written to `~/.sew/logs/b
 
 ## sew patch
 
-Upgrade components on a running cluster by merging a patch file into the resolved context and re-deploying only the affected components. This is useful for testing upgrades (bumping image tags or chart versions), toggling feature flags, or applying configuration tweaks.
+Upgrade components on a running cluster. There are two modes:
+
+- **With a patch file** -- merges the file into the resolved context and upgrades only the components listed in the file.
+- **With `--set` only** -- re-renders the resolved context with new template variable values and upgrades all components.
+
+Both modes can be combined.
 
 ```bash
 sew patch upgrade.yaml
-sew patch upgrade.yaml --name my-cluster
 sew patch upgrade.yaml --dry-run
+sew patch --set imageTag=4.11.0 --set helmVersion=4.11.0
+sew patch upgrade.yaml --set imageTag=4.11.0
 ```
 
 ### How it works
 
-1. **Resolve context** -- sew loads the config chain and resolves the registry context, exactly as `sew create` does.
+1. **Resolve context** -- sew loads the config chain and resolves the registry context, exactly as `sew create` does. When `--set` is provided, template variables are overridden during resolution.
 2. **Verify cluster** -- sew checks that the target Kind cluster is running.
-3. **Load patch file** -- the patch file is loaded (same format as `sew.yaml`).
-4. **Merge** -- patch components are merged on top of the resolved context using the standard [merge rules]({{< ref "/docs/guides/composing-contexts#merge-rules" >}}).
-5. **Upgrade** -- only components named in the patch file are upgraded (Helm upgrade / kubectl apply), in dependency order.
-6. **Readiness** -- sew waits for patched components that have `conditions.ready: true`.
-
-Components not mentioned in the patch file are left untouched.
+3. **Load patch file** (when provided) -- the patch file is loaded (same format as `sew.yaml`).
+4. **Merge** -- patch components (if any) are merged on top of the resolved context using the standard [merge rules]({{< ref "/docs/guides/composing-contexts#merge-rules" >}}).
+5. **Upgrade** -- when a patch file is given, only components named in it are upgraded. When using `--set` alone, all components are upgraded.
+6. **Readiness** -- sew waits for upgraded components that have `conditions.ready: true`.
 
 ### Patch file format
 
@@ -169,17 +173,32 @@ components:
         - ./updated-routes.yaml
 ```
 
+### Set-only mode
+
+When the registry context uses template variables (see [Composing Contexts -- Template variable overrides]({{< ref "/docs/guides/composing-contexts#template-variable-overrides" >}})), you can upgrade without a patch file by passing new `--set` values:
+
+```bash
+# Create the cluster at version 4.10
+sew create --from gravitee.io/oss/apim/postgres \
+  --set imageTag=4.10.0 --set helmVersion=4.10.0
+
+# Upgrade to 4.11 -- no patch file needed
+sew patch --set imageTag=4.11.0 --set helmVersion=4.11.0
+```
+
+In this mode, the resolved context is re-rendered with the new variable values and all components are upgraded. Use `--dry-run` to preview the changes first.
+
 ### Typical workflow
 
 ```bash
 # Create the cluster with the current version
-sew create
+sew create --set imageTag=4.10.0
 
 # Run tests against the current version
 ./run-tests.sh
 
-# Patch: upgrade to the new version
-sew patch upgrade.yaml
+# Upgrade to the new version
+sew patch --set imageTag=4.11.0
 
 # Run tests against the new version
 ./run-tests.sh
@@ -236,8 +255,9 @@ sew patch upgrade.yaml
 | Flag | Description |
 |------|-------------|
 | `--name <cluster>` | Name of the cluster to patch. Defaults to `kind.name` from the resolved config. |
+| `--set <key=value>` | Override a template variable. Repeatable. When used without a patch file, all components are upgraded. |
 | `--dry-run` | Preview changes without applying. Uses server-side dry-run for both Helm and Kubernetes resources. |
-| `--skip-preload` | Skip image preloading even when the patch file defines `images.preload`. |
+| `--skip-preload` | Skip image preloading even when `images.preload` is configured. |
 
 ## sew delete
 
@@ -388,3 +408,52 @@ These flags are available on all commands:
 | `--config <path>` | Project-level config file to merge on top of the user-level base (`$SEW_HOME/sew.yaml`). Defaults to `./sew.yaml` when present. |
 | `--registry <url>` | Registry URL (e.g. `file://./registry` or `https://…`). Overrides the value from config. |
 | `--from <path>` | Context path to compose (e.g. `elastic/elasticsearch/standalone`). Repeatable. Overrides the `from` list from config. |
+| `--set <key=value>` | Set a template variable. Repeatable. Overrides defaults declared in the `vars` block of any sew.yaml. See [Template variables](#template-variables). |
+
+## Template variables
+
+sew.yaml files support Go template expressions. Declare variables with defaults in a `vars` block and reference them with `{{ .variableName }}`:
+
+```yaml
+vars:
+  helmVersion: ""
+  imageTag: "latest"
+
+components:
+  - name: apim
+    helm:
+      chart: graviteeio/apim
+      version: "{{ .helmVersion }}"
+      values:
+        gateway:
+          image:
+            tag: "{{ .imageTag }}-debian"
+        ui:
+          image:
+            tag: "{{ .imageTag }}"
+```
+
+Override at deploy time with `--set`:
+
+```bash
+sew create --set imageTag=4.12.0
+sew patch --set imageTag=4.12.0 --set helmVersion=4.12.0
+sew patch upgrade.yaml --set imageTag=4.12.0
+```
+
+### Precedence
+
+1. `vars` defaults in the sew.yaml file (lowest)
+2. `--set` values from the CLI (highest)
+
+### Template functions
+
+| Function | Usage | Description |
+|----------|-------|-------------|
+| `env` | `{{ env "HOME" }}` | Returns the value of an environment variable. |
+| `default` | `{{ .myVar \| default "fallback" }}` | Returns the fallback when the pipeline value is empty. |
+| `required` | `{{ .myVar \| required "myVar must be set" }}` | Returns the value or fails with the given message when empty. |
+
+### Scope
+
+Templating applies to every sew.yaml in the pipeline: user config, `$SEW_HOME/sew.yaml`, patch files, context flag overlays, and registry context files. Each file is templated independently with its own `vars` defaults merged with the shared `--set` overrides.

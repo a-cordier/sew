@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	sewtmpl "github.com/a-cordier/sew/internal/template"
 	"gopkg.in/yaml.v3"
 )
 
@@ -13,16 +14,17 @@ type HelmConfig struct {
 }
 
 type Config struct {
-	Description string         `yaml:"description,omitempty"`
-	Registry    string         `yaml:"registry"`
-	From        []string       `yaml:"from,omitempty"`
-	Abstract    bool           `yaml:"abstract,omitempty"`
-	Kind        KindConfig     `yaml:"kind"`
-	Features    FeaturesConfig `yaml:"features,omitempty"`
-	Images      ImagesConfig   `yaml:"images,omitempty"`
-	Helm        HelmConfig     `yaml:"helm,omitempty"`
-	Components  []Component    `yaml:"components,omitempty"`
-	Builds      []Build        `yaml:"builds,omitempty"`
+	Vars        map[string]string `yaml:"vars,omitempty"`
+	Description string            `yaml:"description,omitempty"`
+	Registry    string            `yaml:"registry"`
+	From        []string          `yaml:"from,omitempty"`
+	Abstract    bool              `yaml:"abstract,omitempty"`
+	Kind        KindConfig        `yaml:"kind"`
+	Features    FeaturesConfig    `yaml:"features,omitempty"`
+	Images      ImagesConfig      `yaml:"images,omitempty"`
+	Helm        HelmConfig        `yaml:"helm,omitempty"`
+	Components  []Component       `yaml:"components,omitempty"`
+	Builds      []Build           `yaml:"builds,omitempty"`
 
 	// Dir is set by Load to resolve relative paths in component value files.
 	Dir string `yaml:"-"`
@@ -72,17 +74,23 @@ func Merge(base, override *Config) {
 	base.Kind = override.Kind
 }
 
-func Load(path string) (*Config, error) {
+func Load(path string, setOverrides map[string]string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("reading config file %s: %w", path, err)
 	}
 
+	rendered, err := sewtmpl.Render(data, setOverrides)
+	if err != nil {
+		return nil, fmt.Errorf("templating config file %s: %w", path, err)
+	}
+
 	var cfg Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
+	if err := yaml.Unmarshal(rendered, &cfg); err != nil {
 		return nil, fmt.Errorf("parsing config file %s: %w", path, err)
 	}
 
+	cfg.Vars = nil
 	cfg.Kind.ApplyDefaults()
 	cfg.Dir = filepath.Dir(path)
 	return &cfg, nil

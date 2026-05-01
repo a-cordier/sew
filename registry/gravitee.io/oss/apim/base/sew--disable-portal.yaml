@@ -8,4 +8,4 @@ components:
 images:
   preload:
     skip:
-      - graviteeio/apim-portal-ui:latest
+      - "graviteeio/apim-portal-ui:{{ .imageTag }}"

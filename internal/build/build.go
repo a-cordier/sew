@@ -35,7 +35,7 @@ type Options struct {
 // Run executes the full build pipeline for a single Build entry:
 // env expansion, pre-build commands, Docker build, push to preload registry, and rollout restart.
 func Run(ctx context.Context, b config.Build, opts Options) error {
-	dir := expandEnv(b.Dir)
+	dir := b.Dir
 	if dir == "" {
 		dir = "."
 	}
@@ -65,11 +65,11 @@ func Run(ctx context.Context, b config.Build, opts Options) error {
 		}
 	}
 
-	if shouldDockerBuild(dir, expandEnv(b.Context), expandEnv(b.Dockerfile)) {
+	if shouldDockerBuild(dir, b.Context, b.Dockerfile) {
 		if err := logger.WithSpinner(
 			fmt.Sprintf("Building image %s", b.Image),
 			func() error {
-				return dockerBuild(ctx, dir, expandEnv(b.Context), expandEnv(b.Dockerfile), b.Image, b.Platform, expandBuildArgs(b.BuildArgs), logw)
+				return dockerBuild(ctx, dir, b.Context, b.Dockerfile, b.Image, b.Platform, buildArgPointers(b.BuildArgs), logw)
 			},
 		); err != nil {
 			return err
@@ -97,18 +97,14 @@ func Run(ctx context.Context, b config.Build, opts Options) error {
 	return nil
 }
 
-func expandEnv(s string) string {
-	return os.ExpandEnv(s)
-}
-
-func expandBuildArgs(args map[string]string) map[string]*string {
+func buildArgPointers(args map[string]string) map[string]*string {
 	if len(args) == 0 {
 		return nil
 	}
 	out := make(map[string]*string, len(args))
 	for k, v := range args {
-		expanded := expandEnv(v)
-		out[k] = &expanded
+		v := v
+		out[k] = &v
 	}
 	return out
 }

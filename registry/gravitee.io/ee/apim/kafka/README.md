@@ -49,7 +49,7 @@ adds Kafka Gateway configuration on top).
 
 ## Context flags
 
-All concrete Kafka variants inherit optional flags from the APIM base context:
+Optional flags you can pass to `sew create` to customize this deployment:
 
 | Flag                 | Description                                          |
 |----------------------|------------------------------------------------------|
@@ -120,13 +120,3 @@ components:
         - name: gravitee-license
           fromFile: '/custom/path/to/license.key'
 ```
-
-## Dependencies
-
-The abstract base (`gravitee.io/ee/apim/kafka/base`) composes from:
-
-- `kafka/standalone` — single-node Kafka broker in KRaft mode
-
-Each concrete variant additionally composes from:
-
-- `gravitee.io/oss/apim/postgres` or `gravitee.io/oss/apim/mongodb` — full APIM stack with the chosen database backend

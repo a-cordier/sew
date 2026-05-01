@@ -24,8 +24,7 @@ sew create --from gravitee.io/oss/apim/dbless
 
 ## Context flags
 
-This context inherits flags from `base`. Optional flags you can pass to
-`sew create` to customize this deployment:
+Optional flags you can pass to `sew create` to customize this deployment:
 
 | Flag                 | Description                                          |
 |----------------------|------------------------------------------------------|

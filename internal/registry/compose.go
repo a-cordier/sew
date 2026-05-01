@@ -48,7 +48,7 @@ func resolveRegistryURL(rawURL, contextDir string) string {
 // left-to-right into an accumulator, then applies the child's local overrides
 // on top. selfRegistryURL is used as the parent registry when childCfg.Registry
 // is empty.
-func resolveFrom(ctx context.Context, childCfg config.Config, childDir, selfRegistryURL, sewHome string) (*config.ResolvedContext, error) {
+func resolveFrom(ctx context.Context, childCfg config.Config, childDir, selfRegistryURL, sewHome string, setOverrides map[string]string) (*config.ResolvedContext, error) {
 	registryURL := selfRegistryURL
 	if childCfg.Registry != "" {
 		registryURL = resolveRegistryURL(childCfg.Registry, childDir)
@@ -56,7 +56,7 @@ func resolveFrom(ctx context.Context, childCfg config.Config, childDir, selfRegi
 
 	acc := &config.ResolvedContext{}
 	for _, ref := range childCfg.From {
-		resolver := NewResolver(registryURL, sewHome)
+		resolver := NewResolver(registryURL, sewHome, setOverrides)
 		parent, err := resolver.Resolve(ctx, ref)
 		if err != nil {
 			return nil, fmt.Errorf("resolving from %q: %w", ref, err)

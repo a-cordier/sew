@@ -232,6 +232,58 @@ components:
 
 The `onMissing` field controls behavior when a source file or env var is missing: `fail` (default) aborts the deployment, `ignore` skips the resource with a warning.
 
+## Template variable overrides
+
+Registry contexts can declare template variables with defaults using a `vars` block. As a user, you override these at deploy time with `--set` -- no files to edit:
+
+```bash
+sew create --from gravitee.io/oss/apim/postgres --set imageTag=4.6.0 --set helmVersion=4.6.0
+```
+
+This works because the APIM base context declares `vars` with defaults (`imageTag: "latest"`, `helmVersion: ""`), and `--set` values take precedence. Check a context's README or run `sew info` to discover which variables it supports.
+
+### Declaring your own variables
+
+You can also declare `vars` in your project-level `sew.yaml` and use template expressions anywhere in the file:
+
+```yaml
+vars:
+  appVersion: "2.0.0"
+
+from:
+  - mycompany/myproduct/dev
+
+components:
+  - name: app
+    helm:
+      version: "{{ .appVersion }}"
+      values:
+        image:
+          tag: "{{ .appVersion }}"
+```
+
+Then deploy with:
+
+```bash
+sew create --set appVersion=2.1.0
+```
+
+### How --set flows through composition
+
+`--set` overrides are global -- they flow into every sew.yaml in the pipeline (user config, registry contexts, flag overlays). Each file is templated independently with its own `vars` defaults merged with the shared `--set` values. Parent contexts don't see child vars and vice versa; only `--set` bridges across levels.
+
+### Template functions
+
+Beyond variable substitution, a few built-in functions are available in template expressions:
+
+| Function | Usage | Description |
+|----------|-------|-------------|
+| `env` | `{{ env "HOME" }}` | Returns the value of an environment variable |
+| `default` | `{{ .myVar \| default "fallback" }}` | Returns the fallback when the value is empty |
+| `required` | `{{ .myVar \| required "must be set" }}` | Fails with a message when the value is empty |
+
+See [Commands -- Template variables]({{< ref "/docs/reference/commands#template-variables" >}}) for the full reference.
+
 ## Dependencies between components
 
 Use `requires` to express inter-component dependencies. sew installs components in dependency order and can wait for readiness:

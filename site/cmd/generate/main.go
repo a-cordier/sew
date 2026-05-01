@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 
+	sewtmpl "github.com/a-cordier/sew/internal/template"
 	"gopkg.in/yaml.v3"
 )
 
@@ -38,6 +39,12 @@ type flagInfo struct {
 	Description string `yaml:"description,omitempty"`
 }
 
+type varInfo struct {
+	Name        string `yaml:"name"`
+	Default     string `yaml:"default"`
+	Description string `yaml:"description,omitempty"`
+}
+
 type componentPage struct {
 	Title       string     `yaml:"title"`
 	Layout      string     `yaml:"layout"`
@@ -48,6 +55,7 @@ type componentPage struct {
 	From        []string   `yaml:"from,omitempty"`
 	Components  []string   `yaml:"components,omitempty"`
 	Flags       []flagInfo `yaml:"flags,omitempty"`
+	Vars        []varInfo  `yaml:"vars,omitempty"`
 	NotesCreate string     `yaml:"notes_create,omitempty"`
 	Icon        string     `yaml:"icon,omitempty"`
 	Type        string     `yaml:"type"`
@@ -135,6 +143,7 @@ func main() {
 			From:        config.From,
 			Components:  resolveComponents(relDir, configs),
 			Flags:       resolveFlags(relDir, configs, registryDir),
+			Vars:        resolveVars(relDir, configs, registryDir),
 			NotesCreate: notesCreate,
 			Icon:        resolveIcon(registryDir, relDir),
 			Type:        "registry",
@@ -524,6 +533,42 @@ func resolveFlags(relDir string, configs map[string]*sewConfig, registryDir stri
 			} else {
 				seen[f.Name] = len(result)
 				result = append(result, f)
+			}
+		}
+	}
+	walk(relDir)
+	return result
+}
+
+// resolveVars walks the from chain for relDir, extracting var definitions
+// from each sew.yaml and merging them (child overrides parent for same name).
+func resolveVars(relDir string, configs map[string]*sewConfig, registryDir string) []varInfo {
+	seen := map[string]int{}
+	var result []varInfo
+	var walk func(string)
+	walk = func(dir string) {
+		if _, ok := configs[dir]; !ok {
+			return
+		}
+		for _, parent := range configs[dir].From {
+			walk(parent)
+		}
+		path := filepath.Join(registryDir, dir, "sew.yaml")
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return
+		}
+		defs, err := sewtmpl.ExtractVarDefs(data)
+		if err != nil {
+			return
+		}
+		for _, d := range defs {
+			vi := varInfo{Name: d.Name, Default: d.Default, Description: d.Description}
+			if idx, ok := seen[d.Name]; ok {
+				result[idx] = vi
+			} else {
+				seen[d.Name] = len(result)
+				result = append(result, vi)
 			}
 		}
 	}

@@ -83,6 +83,31 @@
         </section>
         {{ end }}
 
+        {{ with .Params.vars }}
+        <section class="registry-vars">
+          <h2>Variables</h2>
+          <p class="vars-desc">Template variables overridable with <code>--set</code>:</p>
+          <table class="vars-table">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{ range . }}
+              <tr>
+                <td><code>{{ .name }}</code></td>
+                <td>{{ if .default }}<code>{{ .default }}</code>{{ else }}<em>(empty)</em>{{ end }}</td>
+                <td>{{ .description }}</td>
+              </tr>
+              {{ end }}
+            </tbody>
+          </table>
+        </section>
+        {{ end }}
+
         {{ with .Params.notes_create }}
         <section class="registry-notes">
           <h2>Post-deploy notes</h2>
@@ -131,6 +156,17 @@
           <ul class="flag-list">
             {{ range . }}
             <li><code>--{{ .name }}</code></li>
+            {{ end }}
+          </ul>
+        </div>
+        {{ end }}
+
+        {{ with .Params.vars }}
+        <div class="sidebar-section">
+          <h3>Variables</h3>
+          <ul class="var-list">
+            {{ range . }}
+            <li><code>{{ .name }}</code></li>
             {{ end }}
           </ul>
         </div>

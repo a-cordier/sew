@@ -9,13 +9,15 @@ import (
 	"strings"
 
 	"github.com/a-cordier/sew/internal/config"
+	sewtmpl "github.com/a-cordier/sew/internal/template"
 	"gopkg.in/yaml.v3"
 )
 
 // FSResolver resolves contexts from a local filesystem directory.
 type FSResolver struct {
-	Root    string // absolute path to the registry root
-	SewHome string
+	Root         string // absolute path to the registry root
+	SewHome      string
+	SetOverrides map[string]string
 }
 
 // Resolve reads {Root}/{contextPath}/sew.yaml and returns a
@@ -53,13 +55,18 @@ func (r *FSResolver) Resolve(ctx context.Context, contextPath string) (*config.R
 		return r.Resolve(ctx, filepath.Join(contextPath, name))
 	}
 
+	rendered, err := sewtmpl.Render(data, r.SetOverrides)
+	if err != nil {
+		return nil, fmt.Errorf("templating context file: %w", err)
+	}
+
 	var ctxCfg config.Config
-	if err := yaml.Unmarshal(data, &ctxCfg); err != nil {
+	if err := yaml.Unmarshal(rendered, &ctxCfg); err != nil {
 		return nil, fmt.Errorf("parsing context file: %w", err)
 	}
 
 	if len(ctxCfg.From) > 0 {
-		return resolveFrom(ctx, ctxCfg, dir, selfRegistry, r.SewHome)
+		return resolveFrom(ctx, ctxCfg, dir, selfRegistry, r.SewHome, r.SetOverrides)
 	}
 
 	flags, err := DiscoverFlags(dir)

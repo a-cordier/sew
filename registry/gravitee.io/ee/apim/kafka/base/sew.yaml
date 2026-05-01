@@ -17,7 +17,7 @@ components:
     k8s:
       secrets:
         - name: gravitee-license
-          fromFile: '$HOME/opt/gravitee/license.key'
+          fromFile: '{{ env "HOME" }}/opt/gravitee/license.key'
           onMissing: ignore
   - name: kafka
     namespace: gravitee

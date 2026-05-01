@@ -10,15 +10,17 @@ import (
 	"strings"
 
 	"github.com/a-cordier/sew/internal/config"
+	sewtmpl "github.com/a-cordier/sew/internal/template"
 	"gopkg.in/yaml.v3"
 )
 
 // HTTPResolver resolves contexts by fetching files from an HTTP registry.
 type HTTPResolver struct {
-	BaseURL    string
-	CacheRoot  string
-	SewHome    string
-	HTTPClient *http.Client
+	BaseURL      string
+	CacheRoot    string
+	SewHome      string
+	HTTPClient   *http.Client
+	SetOverrides map[string]string
 }
 
 // Resolve fetches {BaseURL}/{contextPath}/sew.yaml, downloads referenced
@@ -53,8 +55,13 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*config
 		return nil, fmt.Errorf("fetching context: %d", status)
 	}
 
+	rendered, err := sewtmpl.Render(data, r.SetOverrides)
+	if err != nil {
+		return nil, fmt.Errorf("templating context file: %w", err)
+	}
+
 	var parsed config.Config
-	if err := yaml.Unmarshal(data, &parsed); err != nil {
+	if err := yaml.Unmarshal(rendered, &parsed); err != nil {
 		return nil, fmt.Errorf("parsing context file: %w", err)
 	}
 
@@ -102,7 +109,7 @@ func (r *HTTPResolver) Resolve(ctx context.Context, contextPath string) (*config
 	}
 
 	if len(parsed.From) > 0 {
-		return resolveFrom(ctx, parsed, cacheDir, r.BaseURL, r.SewHome)
+		return resolveFrom(ctx, parsed, cacheDir, r.BaseURL, r.SewHome, r.SetOverrides)
 	}
 
 	return &config.ResolvedContext{

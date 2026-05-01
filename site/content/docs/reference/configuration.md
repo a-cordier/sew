@@ -22,6 +22,7 @@ A `sew.yaml` file is a YAML document with the following top-level fields:
 | `images` | map | Container image management: preloading images into Kind nodes and configuring registry mirrors. |
 | `kind` | map | Configuration for the Kind (Kubernetes-in-Docker) cluster. |
 | `registry` | string | Registry path that identifies this configuration context (org/edition/product/variant convention). |
+| `vars` | map | Template variables with default values. Each key becomes available as {{ .key }} in the rest of the file. Values can be plain strings (default only) or objects with default and description fields. Defaults can be overridden at deploy time with --set key=value. |
 
 ---
 
@@ -41,9 +42,9 @@ Each entry is an object with the following fields:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `buildArgs` | map | No | Docker build arguments passed to 'docker build --build-arg'. Keys are argument names, values are argument values. Supports environment variable expansion in values. |
+| `buildArgs` | map | No | Docker build arguments passed to 'docker build --build-arg'. Keys are argument names, values are argument values. Use the {{ env "VAR" }} template function to reference environment variables in values. |
 | `context` | string | No | Docker build context directory, resolved relative to 'dir'. Default: `.`. |
-| `dir` | string | No | Working directory for pre-build commands and base for relative context/dockerfile paths. Supports environment variable expansion (e.g. "$HOME/src/project"). Default: `.`. |
+| `dir` | string | No | Working directory for pre-build commands and base for relative context/dockerfile paths. Use the {{ env "VAR" }} template function to reference environment variables (e.g. '{{ env "HOME" }}/src/project'). Default: `.`. |
 | `dockerfile` | string | No | Path to the Dockerfile, resolved relative to 'dir'. When omitted, defaults to 'Dockerfile' in the build context. |
 | `image` | string | Yes | Target Docker image tag (e.g. "graviteeio/apim-gateway:latest-debian"). Images listed here are automatically excluded from preload. |
 | `name` | string | Yes | Short identifier for this build, used to select it in 'sew build <name>'. |
@@ -116,7 +117,7 @@ A Kubernetes Secret or ConfigMap created from local files or environment variabl
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `entries` | object[] | No | Multiple data entries for the resource, each sourced from a file or environment variable. |
-| `fromFile` | string | No | Path to a single file whose contents become the resource data. Supports environment variable expansion (e.g. "$HOME/opt/license.key"). Shorthand for a single-entry resource. |
+| `fromFile` | string | No | Path to a single file whose contents become the resource data. Use the {{ env "VAR" }} template function to reference environment variables in the path (e.g. '{{ env "HOME" }}/opt/license.key'). Shorthand for a single-entry resource. |
 | `name` | string | Yes | Name of the Kubernetes Secret or ConfigMap to create. |
 | `onMissing` | string | No | Behavior when a referenced file or env var is missing. "fail" aborts deployment; "ignore" skips the resource silently. Default: `fail`. Values: `fail`, `ignore`. |
 
@@ -129,7 +130,7 @@ A single data entry in a LocalResource, sourced from a file or environment varia
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `fromEnv` | string | No | Name of an environment variable whose value becomes this entry's value. |
-| `fromFile` | string | No | Path to a file whose contents become this entry's value. Supports environment variable expansion. |
+| `fromFile` | string | No | Path to a file whose contents become this entry's value. Use the {{ env "VAR" }} template function to reference environment variables in the path. |
 | `key` | string | No | Key name in the resulting Secret or ConfigMap data map. |
 
 #### `components[*].k8s.secrets[*]`
@@ -141,7 +142,7 @@ A Kubernetes Secret or ConfigMap created from local files or environment variabl
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `entries` | object[] | No | Multiple data entries for the resource, each sourced from a file or environment variable. |
-| `fromFile` | string | No | Path to a single file whose contents become the resource data. Supports environment variable expansion (e.g. "$HOME/opt/license.key"). Shorthand for a single-entry resource. |
+| `fromFile` | string | No | Path to a single file whose contents become the resource data. Use the {{ env "VAR" }} template function to reference environment variables in the path (e.g. '{{ env "HOME" }}/opt/license.key'). Shorthand for a single-entry resource. |
 | `name` | string | Yes | Name of the Kubernetes Secret or ConfigMap to create. |
 | `onMissing` | string | No | Behavior when a referenced file or env var is missing. "fail" aborts deployment; "ignore" skips the resource silently. Default: `fail`. Values: `fail`, `ignore`. |
 
@@ -154,7 +155,7 @@ A single data entry in a LocalResource, sourced from a file or environment varia
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `fromEnv` | string | No | Name of an environment variable whose value becomes this entry's value. |
-| `fromFile` | string | No | Path to a file whose contents become this entry's value. Supports environment variable expansion. |
+| `fromFile` | string | No | Path to a file whose contents become this entry's value. Use the {{ env "VAR" }} template function to reference environment variables in the path. |
 | `key` | string | No | Key name in the resulting Secret or ConfigMap data map. |
 
 ### `components[*].requires[*]`
@@ -381,4 +382,10 @@ Maps a port from the Kind node container to the host.
 Registry path that identifies this configuration context (org/edition/product/variant convention).
 
 **Type:** `string`
+
+## `vars`
+
+Template variables with default values. Each key becomes available as {{ .key }} in the rest of the file. Values can be plain strings (default only) or objects with default and description fields. Defaults can be overridden at deploy time with --set key=value.
+
+**Type:** `object`
 
