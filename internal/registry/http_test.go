@@ -630,7 +630,7 @@ func TestHTTPResolver_NetrcAuth(t *testing.T) {
 	t.Setenv("NETRC", netrcFile)
 
 	sewHome := t.TempDir()
-	resolver := NewResolver(srv.URL, sewHome)
+	resolver := NewResolver(srv.URL, sewHome, nil)
 
 	_, err := resolver.Resolve(context.Background(), "ctx")
 	if err != nil {
@@ -659,7 +659,7 @@ func TestHTTPResolver_NoNetrcNoAuth(t *testing.T) {
 	t.Setenv("NETRC", filepath.Join(t.TempDir(), "does-not-exist"))
 
 	sewHome := t.TempDir()
-	resolver := NewResolver(srv.URL, sewHome)
+	resolver := NewResolver(srv.URL, sewHome, nil)
 
 	_, err := resolver.Resolve(context.Background(), "ctx")
 	if err != nil {
@@ -704,7 +704,7 @@ components:
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	err = ApplyFlags(resolved, []string{"disable-portal"})
+	err = ApplyFlags(resolved, []string{"disable-portal"}, nil)
 	if err != nil {
 		t.Fatalf("unexpected error applying flags: %v", err)
 	}

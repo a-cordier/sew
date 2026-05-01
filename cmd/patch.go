@@ -24,23 +24,25 @@ var patchDryRun bool
 var patchSkipPreload bool
 
 var patchCmd = &cobra.Command{
-	Use:   "patch <patch-file>",
+	Use:   "patch [patch-file]",
 	Short: "Patch a running cluster by upgrading components with overrides",
-	Long: `Patch merges a partial configuration file into the current resolved context
-and upgrades only the affected components on a running Kind cluster.
+	Long: `Patch upgrades components on a running Kind cluster.
 
-The patch file uses the same format as sew.yaml. The "components", "helm.repos",
-and "images.preload" sections are relevant; other fields are ignored.
+There are two ways to use patch:
 
-Example:
+  1. With a patch file — merges the file into the resolved context and upgrades
+     only the components listed in the file:
 
-  sew patch upgrade.yaml
+       sew patch upgrade.yaml
 
-This resolves the current context (from sew.yaml / --from), merges the patch
-on top, and runs helm upgrade / kubectl apply for each component listed in the
-patch file.`,
+  2. With --set only — re-renders the resolved context with new template variable
+     values and upgrades all components:
+
+       sew patch --set imageTag=4.11.0
+
+Both modes can be combined: a patch file with --set overrides.`,
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-	Args:               cobra.ExactArgs(1),
+	Args:               cobra.MaximumNArgs(1),
 	RunE:               runPatch,
 }
 
@@ -53,6 +55,11 @@ func init() {
 
 func runPatch(cmd *cobra.Command, args []string) error {
 	start := time.Now()
+
+	hasPatchFile := len(args) == 1
+	if !hasPatchFile && len(setOverrides) == 0 {
+		return fmt.Errorf("patch requires either a patch file or --set overrides (or both)")
+	}
 
 	resolved, err := resolveContextConfig()
 	if err != nil {
@@ -100,28 +107,38 @@ func runPatch(cmd *cobra.Command, args []string) error {
 	registry.MergeComponents(resolved, cfg.Components, cfg.Dir)
 	resolved.Repos = registry.MergeRepos(resolved.Repos, cfg.Helm.Repos)
 
-	patchFile := args[0]
-	patch, err := config.Load(patchFile)
-	if err != nil {
-		return fmt.Errorf("loading patch file %s: %w", patchFile, err)
-	}
+	var filter func(config.Component) bool
+	preloadSource := cfg
 
-	patchedNames := make(map[string]bool, len(patch.Components))
-	for _, c := range patch.Components {
-		patchedNames[c.Name] = true
-	}
-	if len(patchedNames) == 0 {
-		logger.Warn("patch file contains no components; nothing to do")
-		return nil
-	}
+	if hasPatchFile {
+		patchFile := args[0]
+		patch, err := config.Load(patchFile, setOverrides)
+		if err != nil {
+			return fmt.Errorf("loading patch file %s: %w", patchFile, err)
+		}
 
-	registry.MergeComponents(resolved, patch.Components, patch.Dir)
-	resolved.Repos = registry.MergeRepos(resolved.Repos, patch.Helm.Repos)
+		patchedNames := make(map[string]bool, len(patch.Components))
+		for _, c := range patch.Components {
+			patchedNames[c.Name] = true
+		}
+		if len(patchedNames) == 0 {
+			logger.Warn("patch file contains no components; nothing to do")
+			return nil
+		}
+
+		registry.MergeComponents(resolved, patch.Components, patch.Dir)
+		resolved.Repos = registry.MergeRepos(resolved.Repos, patch.Helm.Repos)
+		preloadSource = patch
+
+		filter = func(c config.Component) bool {
+			return patchedNames[c.Name]
+		}
+	}
 
 	ctx := context.Background()
 
 	if !patchDryRun && !patchSkipPreload {
-		preloadRefs := getPreloadRefs(patch)
+		preloadRefs := getPreloadRefs(preloadSource)
 		if len(preloadRefs) > 0 {
 			running, _ := cache.IsPreloadRunning(ctx)
 			if running {
@@ -139,10 +156,6 @@ func runPatch(cmd *cobra.Command, args []string) error {
 				color.Yellow("  preload refs specified but no preload registry running; images will be pulled on demand")
 			}
 		}
-	}
-
-	filter := func(c config.Component) bool {
-		return patchedNames[c.Name]
 	}
 
 	if err := installComponents(ctx, resolved, filter, installer.InstallOpts{DryRun: patchDryRun}); err != nil {

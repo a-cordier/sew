@@ -1,7 +1,6 @@
 package build
 
 import (
-	"os"
 	"testing"
 
 	"github.com/a-cordier/sew/internal/config"
@@ -99,28 +98,26 @@ func TestPodSpecReferencesImage_BothContainersAndInitContainers(t *testing.T) {
 }
 
 
-func TestExpandBuildArgs_Nil(t *testing.T) {
-	result := expandBuildArgs(nil)
+func TestBuildArgPointers_Nil(t *testing.T) {
+	result := buildArgPointers(nil)
 	if result != nil {
 		t.Fatalf("expected nil for nil input, got %v", result)
 	}
 }
 
-func TestExpandBuildArgs_Empty(t *testing.T) {
-	result := expandBuildArgs(map[string]string{})
+func TestBuildArgPointers_Empty(t *testing.T) {
+	result := buildArgPointers(map[string]string{})
 	if result != nil {
 		t.Fatalf("expected nil for empty input, got %v", result)
 	}
 }
 
-func TestExpandBuildArgs_ExpandsEnvVars(t *testing.T) {
-	t.Setenv("SEW_TEST_VAR", "expanded-value")
-
+func TestBuildArgPointers_ValuesPassedThrough(t *testing.T) {
 	args := map[string]string{
 		"LITERAL":  "plain",
-		"FROM_ENV": "$SEW_TEST_VAR",
+		"WITH_VAR": "$SEW_TEST_VAR",
 	}
-	result := expandBuildArgs(args)
+	result := buildArgPointers(args)
 
 	if len(result) != 2 {
 		t.Fatalf("expected 2 build args, got %d", len(result))
@@ -128,102 +125,55 @@ func TestExpandBuildArgs_ExpandsEnvVars(t *testing.T) {
 	if result["LITERAL"] == nil || *result["LITERAL"] != "plain" {
 		t.Fatalf("expected LITERAL %q, got %v", "plain", result["LITERAL"])
 	}
-	if result["FROM_ENV"] == nil || *result["FROM_ENV"] != "expanded-value" {
-		t.Fatalf("expected FROM_ENV %q, got %v", "expanded-value", result["FROM_ENV"])
+	if result["WITH_VAR"] == nil || *result["WITH_VAR"] != "$SEW_TEST_VAR" {
+		t.Fatalf("expected WITH_VAR %q (no expansion), got %v", "$SEW_TEST_VAR", result["WITH_VAR"])
 	}
 }
 
-func TestExpandBuildArgs_BraceSyntax(t *testing.T) {
-	t.Setenv("SEW_BRACE_VAR", "braced")
-
-	result := expandBuildArgs(map[string]string{
-		"ARG": "${SEW_BRACE_VAR}",
-	})
-	if result["ARG"] == nil || *result["ARG"] != "braced" {
-		t.Fatalf("expected brace syntax expanded to %q, got %v", "braced", result["ARG"])
-	}
-}
-
-func TestExpandBuildArgs_UnsetVarExpandsEmpty(t *testing.T) {
-	t.Setenv("SEW_UNSET_GUARD", "")
-	os.Unsetenv("SEW_DEFINITELY_UNSET_VAR_12345")
-
-	result := expandBuildArgs(map[string]string{
-		"MISSING": "$SEW_DEFINITELY_UNSET_VAR_12345",
-	})
-	if result["MISSING"] == nil || *result["MISSING"] != "" {
-		t.Fatalf("expected unset var to expand to empty string, got %v", result["MISSING"])
-	}
-}
-
-func TestExpandBuildArgs_CompoundValue(t *testing.T) {
-	t.Setenv("SEW_TAG", "3.12.7")
-
-	result := expandBuildArgs(map[string]string{
-		"IMAGE": "docker.io/datawire/aes:$SEW_TAG",
-	})
-	if result["IMAGE"] == nil || *result["IMAGE"] != "docker.io/datawire/aes:3.12.7" {
-		t.Fatalf("expected compound expansion, got %v", result["IMAGE"])
-	}
-}
-
-func TestExpandBuildArgs_MultipleVarsInValue(t *testing.T) {
-	t.Setenv("SEW_REPO", "datawire")
-	t.Setenv("SEW_NAME", "aes")
-	t.Setenv("SEW_VER", "3.12.7")
-
-	result := expandBuildArgs(map[string]string{
-		"FULL_REF": "docker.io/$SEW_REPO/$SEW_NAME:$SEW_VER",
-	})
-	want := "docker.io/datawire/aes:3.12.7"
-	if result["FULL_REF"] == nil || *result["FULL_REF"] != want {
-		t.Fatalf("expected %q, got %v", want, result["FULL_REF"])
-	}
-}
-
-func TestExpandBuildArgs_AllKeysPreserved(t *testing.T) {
+func TestBuildArgPointers_AllKeysPreserved(t *testing.T) {
 	args := map[string]string{
 		"A": "1",
 		"B": "2",
 		"C": "3",
 	}
-	result := expandBuildArgs(args)
+	result := buildArgPointers(args)
 	if len(result) != 3 {
 		t.Fatalf("expected 3 keys, got %d", len(result))
 	}
-	for k := range args {
+	for k, v := range args {
 		if _, ok := result[k]; !ok {
 			t.Fatalf("expected key %q to be present in result", k)
 		}
 		if result[k] == nil {
 			t.Fatalf("expected non-nil pointer for key %q", k)
 		}
+		if *result[k] != v {
+			t.Fatalf("expected key %q value %q, got %q", k, v, *result[k])
+		}
 	}
 }
 
-func TestExpandBuildArgs_PointersAreDistinct(t *testing.T) {
+func TestBuildArgPointers_PointersAreDistinct(t *testing.T) {
 	args := map[string]string{
 		"A": "same",
 		"B": "same",
 	}
-	result := expandBuildArgs(args)
+	result := buildArgPointers(args)
 	if result["A"] == result["B"] {
 		t.Fatal("expected distinct pointers for each key even with identical values")
 	}
 }
 
-func TestExpandBuildArgs_IntegrationWithConfig(t *testing.T) {
-	t.Setenv("HOME", "/home/dev")
-
+func TestBuildArgPointers_IntegrationWithConfig(t *testing.T) {
 	input := `
 builds:
   - name: aes
     image: docker.io/datawire/aes:3.12.7
-    dir: $HOME/src/edge-stack
+    dir: /home/dev/src/edge-stack
     buildArgs:
       EMISSARY_BASE: docker.io/datawire/aes:3.12.7
       BUILD_VERSION: "1.0.0"
-      SRC_DIR: $HOME/src
+      SRC_DIR: /home/dev/src
 `
 	var cfg config.Config
 	if err := yaml.Unmarshal([]byte(input), &cfg); err != nil {
@@ -231,7 +181,7 @@ builds:
 	}
 	b := cfg.Builds[0]
 
-	result := expandBuildArgs(b.BuildArgs)
+	result := buildArgPointers(b.BuildArgs)
 	if len(result) != 3 {
 		t.Fatalf("expected 3 build args, got %d", len(result))
 	}
@@ -242,7 +192,7 @@ builds:
 		t.Fatalf("expected BUILD_VERSION %q, got %q", "1.0.0", v)
 	}
 	if v := *result["SRC_DIR"]; v != "/home/dev/src" {
-		t.Fatalf("expected SRC_DIR expanded to %q, got %q", "/home/dev/src", v)
+		t.Fatalf("expected SRC_DIR %q, got %q", "/home/dev/src", v)
 	}
 }
 

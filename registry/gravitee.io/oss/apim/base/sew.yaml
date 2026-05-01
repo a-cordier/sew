@@ -1,12 +1,19 @@
 abstract: true
+vars:
+  helmVersion:
+    default: ""
+    description: "Helm chart version constraint"
+  imageTag:
+    default: "latest"
+    description: "Docker image tag for all APIM components"
 images:
   preload:
     refs:
-      - graviteeio/apim-gateway:latest-debian
-      - graviteeio/apim-management-api:latest-debian
-      - graviteeio/apim-management-ui:latest
-      - graviteeio/apim-portal-ui:latest
-      - alpine:latest # used by APIM Helm chart init containers
+      - "graviteeio/apim-gateway:{{ .imageTag }}-debian"
+      - "graviteeio/apim-management-api:{{ .imageTag }}-debian"
+      - "graviteeio/apim-management-ui:{{ .imageTag }}"
+      - "graviteeio/apim-portal-ui:{{ .imageTag }}"
+      - alpine:latest
 kind:
   name: gravitee-apim
   nodes:
@@ -53,6 +60,7 @@ components:
       - component: tls-server
     helm:
       chart: graviteeio/apim
+      version: "{{ .helmVersion }}"
       values:
         secrets:
           kubernetes:
@@ -62,7 +70,7 @@ components:
             - http://elasticsearch-master:9200
         ui:
           image:
-            tag: latest
+            tag: "{{ .imageTag }}"
           ingress:
             enabled: false
           service:
@@ -74,7 +82,7 @@ components:
               value: /
         portal:
           image:
-            tag: latest
+            tag: "{{ .imageTag }}"
           enabled: true
           ingress:
             enabled: false
@@ -84,7 +92,7 @@ components:
           baseURL: http://localhost:30083/portal
         gateway:
           image:
-            tag: latest-debian
+            tag: "{{ .imageTag }}-debian"
           ingress:
             enabled: false
           ingressController:
@@ -122,7 +130,7 @@ components:
               enabled: true
         api:
           image:
-            tag: latest-debian
+            tag: "{{ .imageTag }}-debian"
           ingress:
             enabled: false
           service:

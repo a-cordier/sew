@@ -80,7 +80,9 @@ func MergeFlags(base, child []config.ContextFlag) []config.ContextFlag {
 // ApplyFlags loads each active flag's patch file and merges it into the
 // resolved context using the same merge semantics as context composition.
 // Active flags are validated against the available flags on the context.
-func ApplyFlags(resolved *config.ResolvedContext, activeFlags []string) error {
+// setOverrides are forwarded to the template engine when rendering flag
+// patch files.
+func ApplyFlags(resolved *config.ResolvedContext, activeFlags []string, setOverrides map[string]string) error {
 	if len(activeFlags) == 0 {
 		return nil
 	}
@@ -100,7 +102,7 @@ func ApplyFlags(resolved *config.ResolvedContext, activeFlags []string) error {
 			return fmt.Errorf("unknown context flag --%s (available: %s)", name, strings.Join(known, ", "))
 		}
 
-		patch, err := loadFlagConfig(flag)
+		patch, err := loadFlagConfig(flag, setOverrides)
 		if err != nil {
 			return fmt.Errorf("loading flag --%s: %w", name, err)
 		}
@@ -160,7 +162,7 @@ func ValidateFlagDescription(data []byte) error {
 
 // loadFlagConfig loads and parses a flag's sew--{name}.yaml file into a
 // Config struct ready for merging.
-func loadFlagConfig(flag config.ContextFlag) (*config.Config, error) {
+func loadFlagConfig(flag config.ContextFlag, setOverrides map[string]string) (*config.Config, error) {
 	path := filepath.Join(flag.Dir, flagFilePrefix+flag.Name+".yaml")
-	return config.Load(path)
+	return config.Load(path, setOverrides)
 }

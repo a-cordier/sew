@@ -17,12 +17,12 @@ from:
 builds:
   - name: emissary
     image: emissary-base:local
-    dir: $HOME/src/gravitee/edge-stack
+    dir: '{{ env "HOME" }}/src/gravitee/edge-stack'
     pre:
       - EMISSARY=$(make -C apro env BUILD_VERSION=dev 2>/dev/null | sed -n 's/^EMISSARY_IMAGE=//p') && docker pull --platform linux/amd64 $EMISSARY && docker tag $EMISSARY emissary-base:local
   - name: aes
     image: docker.io/datawire/aes:3.12.7
-    dir: $HOME/src/gravitee/edge-stack/apro
+    dir: '{{ env "HOME" }}/src/gravitee/edge-stack/apro'
     pre:
       - make $PWD/vendor
     platform: linux/amd64
@@ -42,9 +42,9 @@ Builds run sequentially in declaration order, which matters here because the two
 |-------|----------|-------------|
 | `name` | yes | Short identifier, used to select builds on the CLI |
 | `image` | yes | Docker image tag to build (e.g. `myapp:latest`) |
-| `dir` | no | Working directory for `pre` commands and base for relative paths. Supports env vars (`$HOME`). Defaults to `.` |
+| `dir` | no | Working directory for `pre` commands and base for relative paths. Use `{{ env "HOME" }}` for env vars. Defaults to `.` |
 | `pre` | no | Shell commands run sequentially before `docker build` (compilation, packaging, etc.) |
-| `buildArgs` | no | Docker build arguments passed to `docker build --build-arg`. Values support `$VAR` / `${VAR}` env-var expansion |
+| `buildArgs` | no | Docker build arguments passed to `docker build --build-arg`. Use `{{ env "VAR" }}` for env-var expansion |
 | `context` | no | Docker build context, relative to `dir`. Defaults to `.` |
 | `dockerfile` | no | Path to the Dockerfile, relative to `dir`. Defaults to `Dockerfile` in the context |
 | `platform` | no | Target platform for `docker build --platform` (e.g. `linux/amd64`). Useful when the base image is only available for a specific architecture |

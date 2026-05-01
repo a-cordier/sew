@@ -9,6 +9,27 @@ type: object
 additionalProperties: false
 
 properties:
+  vars:
+    type: object
+    description: >-
+      Template variables with default values. Each key becomes available
+      as {{ .key }} in the rest of the file. Values can be plain strings
+      (default only) or objects with default and description fields.
+      Defaults can be overridden at deploy time with --set key=value.
+    additionalProperties:
+      oneOf:
+        - type: string
+        - type: object
+          properties:
+            default:
+              type: string
+              description: Default value for the variable.
+            description:
+              type: string
+              description: Human-readable description shown in generated documentation.
+          required: [default]
+          additionalProperties: false
+
   description:
     type: string
     description: >-
@@ -388,8 +409,9 @@ $defs:
         type: string
         description: >-
           Working directory for pre-build commands and base for relative
-          context/dockerfile paths. Supports environment variable
-          expansion (e.g. "$HOME/src/project").
+          context/dockerfile paths. Use the {{ env "VAR" }} template
+          function to reference environment variables
+          (e.g. '{{ env "HOME" }}/src/project').
         default: "."
       pre:
         type: array
@@ -413,8 +435,9 @@ $defs:
         type: object
         description: >-
           Docker build arguments passed to 'docker build --build-arg'.
-          Keys are argument names, values are argument values. Supports
-          environment variable expansion in values.
+          Keys are argument names, values are argument values. Use
+          the {{ env "VAR" }} template function to reference
+          environment variables in values.
         additionalProperties:
           type: string
       platform:
@@ -622,9 +645,10 @@ $defs:
         type: string
         description: >-
           Path to a single file whose contents become the resource
-          data. Supports environment variable expansion (e.g.
-          "$HOME/opt/license.key"). Shorthand for a single-entry
-          resource.
+          data. Use the {{ env "VAR" }} template function to
+          reference environment variables in the path
+          (e.g. '{{ env "HOME" }}/opt/license.key'). Shorthand for
+          a single-entry resource.
       entries:
         type: array
         description: >-
@@ -648,7 +672,8 @@ $defs:
         type: string
         description: >-
           Path to a file whose contents become this entry's value.
-          Supports environment variable expansion.
+          Use the {{ env "VAR" }} template function to reference
+          environment variables in the path.
       fromEnv:
         type: string
         description: >-

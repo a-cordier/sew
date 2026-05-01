@@ -314,7 +314,7 @@ components:
     k8s:
       secrets:
         - name: gravitee-license
-          fromFile: '$HOME/opt/gravitee/license.key'
+          fromFile: '{{ env "HOME" }}/opt/gravitee/license.key'
           onMissing: ignore
 ```
 
@@ -372,6 +372,78 @@ Users activate flags on the command line:
 ```bash
 sew create --from gravitee.io/oss/apim --disable-portal --enable-hc-vault
 ```
+
+## Template variables
+
+sew.yaml files support Go `text/template` expressions. Declare variable
+defaults in a top-level `vars` block and reference them with
+`{{ .variableName }}`:
+
+```yaml
+vars:
+  helmVersion: ""
+  imageTag: "latest"
+
+components:
+  - name: apim
+    helm:
+      chart: graviteeio/apim
+      version: "{{ .helmVersion }}"
+      values:
+        gateway:
+          image:
+            tag: "{{ .imageTag }}-debian"
+```
+
+Users override defaults at deploy time with `--set`:
+
+```bash
+sew create --set imageTag=4.12.0
+```
+
+### Conventions
+
+- Variable names use **camelCase** (`imageTag`, `helmVersion`).
+- `vars` is a flat string map -- no nesting.
+- The `vars` block must not itself contain template expressions.
+- Undefined variables with no default cause a clear error
+  (`missingkey=error`).
+
+### Standard variable names
+
+| Variable | Controls | Default |
+|---|---|---|
+| `helmVersion` | `helm.version` (chart version) | `""` (latest) |
+| `imageTag` | Image tags in helm values | `"latest"` |
+| `imageRepository` | Image repository (optional) | chart default |
+
+### Template functions
+
+| Function | Usage | Description |
+|---|---|---|
+| `env` | `{{ env "HOME" }}` | Returns the value of an environment variable. |
+| `default` | `{{ .myVar \| default "fallback" }}` | Returns the fallback when the pipeline value is empty. |
+| `required` | `{{ .myVar \| required "msg" }}` | Returns the value or fails with the given message when empty. |
+
+### Environment variables
+
+The `env` template function replaces the old `$VAR` / `${VAR}` shell
+expansion that was previously supported in `fromFile` paths and build
+fields. Use `{{ env "HOME" }}` instead of `$HOME`:
+
+```yaml
+builds:
+  - name: gateway
+    image: graviteeio/apim-gateway:latest
+    dir: '{{ env "HOME" }}/src/gravitee'
+```
+
+### Scope
+
+Templating applies to every sew.yaml in the pipeline: user config,
+`$SEW_HOME/sew.yaml`, patch files, flag overlays, and registry context
+files. Each file is templated independently with its own `vars` defaults
+merged with the shared `--set` overrides.
 
 ## Schema
 

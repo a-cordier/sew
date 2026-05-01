@@ -1,7 +1,6 @@
 package registry
 
 import (
-	"os"
 	"path/filepath"
 
 	"github.com/a-cordier/sew/internal/config"
@@ -254,18 +253,12 @@ func resolveLocalResourcePaths(c *config.Component, configDir string) {
 	}
 	resolveResources := func(resources []config.LocalResource) {
 		for i := range resources {
-			if resources[i].FromFile != "" {
-				resources[i].FromFile = os.ExpandEnv(resources[i].FromFile)
-				if !filepath.IsAbs(resources[i].FromFile) {
-					resources[i].FromFile = filepath.Join(configDir, resources[i].FromFile)
-				}
+			if resources[i].FromFile != "" && !filepath.IsAbs(resources[i].FromFile) {
+				resources[i].FromFile = filepath.Join(configDir, resources[i].FromFile)
 			}
 			for j := range resources[i].Entries {
-				if resources[i].Entries[j].FromFile != "" {
-					resources[i].Entries[j].FromFile = os.ExpandEnv(resources[i].Entries[j].FromFile)
-					if !filepath.IsAbs(resources[i].Entries[j].FromFile) {
-						resources[i].Entries[j].FromFile = filepath.Join(configDir, resources[i].Entries[j].FromFile)
-					}
+				if resources[i].Entries[j].FromFile != "" && !filepath.IsAbs(resources[i].Entries[j].FromFile) {
+					resources[i].Entries[j].FromFile = filepath.Join(configDir, resources[i].Entries[j].FromFile)
 				}
 			}
 		}

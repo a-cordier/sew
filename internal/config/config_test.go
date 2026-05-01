@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"gopkg.in/yaml.v3"
@@ -963,6 +965,104 @@ func TestBuildImageRefs_SkipsEmptyImage(t *testing.T) {
 	}
 	if refs[0] != "graviteeio/apim-gateway:latest" {
 		t.Fatalf("unexpected ref: %s", refs[0])
+	}
+}
+
+func TestLoad_TemplatesVarsBeforeParsing(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "sew.yaml")
+	if err := os.WriteFile(path, []byte(`vars:
+  imageTag: "latest"
+
+kind:
+  name: test-cluster
+
+components:
+  - name: app
+    helm:
+      chart: repo/app
+      values:
+        image:
+          tag: "{{ .imageTag }}"
+`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := Load(path, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.Components[0].Helm.Values["image"].(map[string]interface{})["tag"] != "latest" {
+		t.Fatalf("expected default imageTag, got %v", cfg.Components[0].Helm.Values)
+	}
+	if cfg.Vars != nil {
+		t.Fatal("expected Vars to be cleared after Load")
+	}
+}
+
+func TestLoad_SetOverridesVars(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "sew.yaml")
+	if err := os.WriteFile(path, []byte(`vars:
+  imageTag: "latest"
+
+components:
+  - name: app
+    helm:
+      chart: repo/app
+      values:
+        image:
+          tag: "{{ .imageTag }}"
+`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := Load(path, map[string]string{"imageTag": "4.12.0"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	tag := cfg.Components[0].Helm.Values["image"].(map[string]interface{})["tag"]
+	if tag != "4.12.0" {
+		t.Fatalf("expected overridden imageTag 4.12.0, got %v", tag)
+	}
+}
+
+func TestLoad_NoTemplatePassthrough(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "sew.yaml")
+	if err := os.WriteFile(path, []byte(`kind:
+  name: plain-cluster
+`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := Load(path, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.Kind.Name != "plain-cluster" {
+		t.Fatalf("expected plain-cluster, got %q", cfg.Kind.Name)
+	}
+}
+
+func TestLoad_EnvFunction(t *testing.T) {
+	t.Setenv("SEW_TEST_LOAD_DIR", "/custom/path")
+	dir := t.TempDir()
+	path := filepath.Join(dir, "sew.yaml")
+	if err := os.WriteFile(path, []byte(`builds:
+  - name: app
+    image: my-app:latest
+    dir: '{{ env "SEW_TEST_LOAD_DIR" }}/src'
+`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := Load(path, nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.Builds[0].Dir != "/custom/path/src" {
+		t.Fatalf("expected /custom/path/src, got %q", cfg.Builds[0].Dir)
 	}
 }
 

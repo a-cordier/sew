@@ -234,7 +234,7 @@ func TestApplyFlags_NoActiveFlags(t *testing.T) {
 			{Name: "disable-portal", Dir: "/some/dir"},
 		},
 	}
-	err := ApplyFlags(resolved, nil)
+	err := ApplyFlags(resolved, nil, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -249,7 +249,7 @@ func TestApplyFlags_UnknownFlag(t *testing.T) {
 			{Name: "disable-portal", Dir: "/some/dir"},
 		},
 	}
-	err := ApplyFlags(resolved, []string{"no-such-flag"})
+	err := ApplyFlags(resolved, []string{"no-such-flag"}, nil)
 	if err == nil {
 		t.Fatal("expected error for unknown flag")
 	}
@@ -293,7 +293,7 @@ components:
 		},
 	}
 
-	err := ApplyFlags(resolved, []string{"disable-portal"})
+	err := ApplyFlags(resolved, []string{"disable-portal"}, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -353,7 +353,7 @@ components:
 		},
 	}
 
-	err := ApplyFlags(resolved, []string{"disable-portal", "disable-es"})
+	err := ApplyFlags(resolved, []string{"disable-portal", "disable-es"}, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -388,7 +388,7 @@ components:
 		},
 	}
 
-	err := ApplyFlags(resolved, []string{"with-monitoring"})
+	err := ApplyFlags(resolved, []string{"with-monitoring"}, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -443,7 +443,7 @@ components:
 		},
 	}
 
-	err := ApplyFlags(resolved, []string{"disable-portal", "disable-ui"})
+	err := ApplyFlags(resolved, []string{"disable-portal", "disable-ui"}, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -565,7 +565,7 @@ components:
 		},
 	}
 
-	err := ApplyFlags(resolved, []string{"custom"})
+	err := ApplyFlags(resolved, []string{"custom"}, nil)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

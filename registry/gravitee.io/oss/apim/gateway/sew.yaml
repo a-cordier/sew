@@ -1,10 +1,14 @@
 from:
   - gravitee.io/oss/gko
+vars:
+  imageTag:
+    default: "latest"
+    description: "Docker image tag for the APIM gateway"
 images:
   preload:
     mode: replace
     refs:
-      - graviteeio/apim-gateway:latest-debian
+      - "graviteeio/apim-gateway:{{ .imageTag }}-debian"
       - graviteeio/kubernetes-operator:latest
 kind:
   name: gravitee-gateway
@@ -46,7 +50,7 @@ components:
                   spec:
                     containers:
                       - name: gateway
-                        image: graviteeio/apim-gateway:latest-debian
+                        image: "graviteeio/apim-gateway:{{ .imageTag }}-debian"
                     securityContext:
                       runAsNonRoot: true
                       runAsUser: 1001

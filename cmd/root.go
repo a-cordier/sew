@@ -25,12 +25,28 @@ var DefaultConfigData []byte
 var SchemaData []byte
 
 var (
-	cfgFile     string
-	registryURL string
-	fromPaths   []string
-	cfg         *config.Config
-	sewHome     string
+	cfgFile      string
+	registryURL  string
+	fromPaths    []string
+	setValues    []string
+	setOverrides map[string]string
+	cfg          *config.Config
+	sewHome      string
 )
+
+// parseSetValues converts the raw --set flag values (each "key=value") into a
+// map. It returns an error if any entry is missing the '=' separator.
+func parseSetValues(raw []string) (map[string]string, error) {
+	m := make(map[string]string, len(raw))
+	for _, entry := range raw {
+		k, v, ok := strings.Cut(entry, "=")
+		if !ok {
+			return nil, fmt.Errorf("invalid --set value %q: expected key=value", entry)
+		}
+		m[k] = v
+	}
+	return m, nil
+}
 
 var rootCmd = &cobra.Command{
 	Use:   "sew",
@@ -44,10 +60,16 @@ var rootCmd = &cobra.Command{
 			}
 			sewHome = filepath.Join(home, ".sew")
 		}
+
+		parsed, err := parseSetValues(setValues)
+		if err != nil {
+			return err
+		}
+		setOverrides = parsed
+
 		if cmd.Annotations["sew_skip_config"] == "true" {
 			return nil
 		}
-		var err error
 		cfg, err = resolveConfig(cfgFile)
 		if err != nil {
 			return fmt.Errorf("failed to load config: %w", err)
@@ -66,6 +88,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "path to config file (default: ./sew.yaml or ~/.sew/sew.yaml)")
 	rootCmd.PersistentFlags().StringVar(&registryURL, "registry", "", "registry URL to use (overrides config file)")
 	rootCmd.PersistentFlags().StringSliceVar(&fromPaths, "from", nil, "context paths to compose (repeatable, overrides config file)")
+	rootCmd.PersistentFlags().StringSliceVar(&setValues, "set", nil, "set template variables (key=value, repeatable)")
 }
 
 // Execute runs the root command.
@@ -84,7 +107,7 @@ func resolveConfig(explicit string) (*config.Config, error) {
 	var base *config.Config
 	if fileExists(basePath) {
 		var err error
-		base, err = config.Load(basePath)
+		base, err = config.Load(basePath, setOverrides)
 		if err != nil {
 			return nil, fmt.Errorf("loading base config %s: %w", basePath, err)
 		}
@@ -97,13 +120,13 @@ func resolveConfig(explicit string) (*config.Config, error) {
 	switch {
 	case explicit != "":
 		var err error
-		projectCfg, err = config.Load(explicit)
+		projectCfg, err = config.Load(explicit, setOverrides)
 		if err != nil {
 			return nil, err
 		}
 	case fileExists("sew.yaml"):
 		var err error
-		projectCfg, err = config.Load("sew.yaml")
+		projectCfg, err = config.Load("sew.yaml", setOverrides)
 		if err != nil {
 			return nil, err
 		}
@@ -160,7 +183,7 @@ func resolveContextConfig() (*config.ResolvedContext, error) {
 
 	acc := &config.ResolvedContext{}
 	for _, ref := range cfg.From {
-		resolver := registry.NewResolver(regURL, sewHome)
+		resolver := registry.NewResolver(regURL, sewHome, setOverrides)
 		resolved, err := resolver.Resolve(context.Background(), ref)
 		if err != nil {
 			return nil, fmt.Errorf("resolving context %q: %w", ref, err)
@@ -190,7 +213,7 @@ func applyContextFlags(cmd *cobra.Command, resolved *config.ResolvedContext) ([]
 	if err != nil {
 		return nil, err
 	}
-	if err := registry.ApplyFlags(resolved, active); err != nil {
+	if err := registry.ApplyFlags(resolved, active, setOverrides); err != nil {
 		return nil, err
 	}
 	return active, nil

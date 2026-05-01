@@ -31,6 +31,82 @@ func setupCfg(t *testing.T, registryRoot string, from []string) {
 	cfg.Kind.ApplyDefaults()
 }
 
+func TestParseSetValues_Valid(t *testing.T) {
+	m, err := parseSetValues([]string{"key=value", "a=b=c", "empty="})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if m["key"] != "value" {
+		t.Fatalf("expected key=value, got %q", m["key"])
+	}
+	if m["a"] != "b=c" {
+		t.Fatalf("expected a=b=c (split on first =), got %q", m["a"])
+	}
+	if m["empty"] != "" {
+		t.Fatalf("expected empty value, got %q", m["empty"])
+	}
+}
+
+func TestParseSetValues_MissingEquals(t *testing.T) {
+	_, err := parseSetValues([]string{"noequals"})
+	if err == nil {
+		t.Fatal("expected error for missing =")
+	}
+	if !strings.Contains(err.Error(), "noequals") {
+		t.Fatalf("expected error to mention the invalid value, got: %v", err)
+	}
+}
+
+func TestParseSetValues_Empty(t *testing.T) {
+	m, err := parseSetValues(nil)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(m) != 0 {
+		t.Fatalf("expected empty map, got %v", m)
+	}
+}
+
+func TestResolveContextConfig_TemplatedContext(t *testing.T) {
+	root := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "tmpl-ctx", "sew.yaml"), `vars:
+  imageTag: "latest"
+
+kind:
+  name: tmpl-cluster
+
+components:
+  - name: app
+    helm:
+      chart: repo/app
+      values:
+        image:
+          tag: "{{ .imageTag }}"
+`)
+
+	resetContextConfigCache()
+	sewHome = t.TempDir()
+	setOverrides = map[string]string{"imageTag": "4.12.0"}
+	cfg = &config.Config{
+		Registry: "file://" + root,
+		From:     []string{"tmpl-ctx"},
+	}
+	cfg.Kind.ApplyDefaults()
+
+	resolved, err := resolveContextConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if resolved == nil {
+		t.Fatal("expected non-nil resolved context")
+	}
+	tag := resolved.Components[0].Helm.Values["image"].(map[string]interface{})["tag"]
+	if tag != "4.12.0" {
+		t.Fatalf("expected --set override 4.12.0, got %v", tag)
+	}
+}
+
 func TestResolveContextConfig_MultiFrom_LeftToRightMerge(t *testing.T) {
 	root := t.TempDir()
 

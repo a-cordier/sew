@@ -10,5 +10,5 @@ components:
 images:
   preload:
     skip:
-      - graviteeio/apim-management-ui:latest
-      - graviteeio/apim-portal-ui:latest
+      - "graviteeio/apim-management-ui:{{ .imageTag }}"
+      - "graviteeio/apim-portal-ui:{{ .imageTag }}"

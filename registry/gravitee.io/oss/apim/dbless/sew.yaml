@@ -1,11 +1,18 @@
 from:
   - gravitee.io/oss/apim/base
   - gravitee.io/oss/gko
+vars:
+  helmVersion:
+    default: ""
+    description: "Helm chart version constraint"
+  imageTag:
+    default: "latest"
+    description: "Docker image tag for the APIM gateway"
 images:
   preload:
     mode: replace
     refs:
-      - graviteeio/apim-gateway:latest-debian
+      - "graviteeio/apim-gateway:{{ .imageTag }}-debian"
       - graviteeio/kubernetes-operator:latest
 kind:
   name: gravitee-dbless

@@ -1445,6 +1445,131 @@ components: []
 	}
 }
 
+func TestFSResolver_TemplatedContext(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "tmpl-ctx", "sew.yaml"), `vars:
+  helmVersion: ""
+  imageTag: "latest"
+
+components:
+  - name: app
+    helm:
+      chart: repo/app
+      version: "{{ .helmVersion }}"
+      values:
+        image:
+          tag: "{{ .imageTag }}-debian"
+`)
+
+	resolver := &FSResolver{
+		Root:         root,
+		SewHome:      sewHome,
+		SetOverrides: map[string]string{"imageTag": "4.12.0"},
+	}
+	resolved, err := resolver.Resolve(context.Background(), "tmpl-ctx")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(resolved.Components) != 1 {
+		t.Fatalf("expected 1 component, got %d", len(resolved.Components))
+	}
+	comp := resolved.Components[0]
+	if comp.Helm.Version != "" {
+		t.Fatalf("expected empty helmVersion (latest), got %q", comp.Helm.Version)
+	}
+	tag := comp.Helm.Values["image"].(map[string]interface{})["tag"]
+	if tag != "4.12.0-debian" {
+		t.Fatalf("expected 4.12.0-debian, got %v", tag)
+	}
+}
+
+func TestFSResolver_TemplatedContext_DefaultVars(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "default-ctx", "sew.yaml"), `vars:
+  imageTag: "latest"
+
+components:
+  - name: app
+    helm:
+      chart: repo/app
+      values:
+        image:
+          tag: "{{ .imageTag }}"
+`)
+
+	resolver := &FSResolver{Root: root, SewHome: sewHome}
+	resolved, err := resolver.Resolve(context.Background(), "default-ctx")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	tag := resolved.Components[0].Helm.Values["image"].(map[string]interface{})["tag"]
+	if tag != "latest" {
+		t.Fatalf("expected default latest, got %v", tag)
+	}
+}
+
+func TestFSResolver_TemplatedParentChild(t *testing.T) {
+	root := t.TempDir()
+	sewHome := t.TempDir()
+
+	writeFile(t, filepath.Join(root, "parent", "sew.yaml"), `vars:
+  dbVersion: "15"
+
+components:
+  - name: database
+    helm:
+      chart: bitnami/postgresql
+      version: "{{ .dbVersion }}"
+`)
+
+	writeFile(t, filepath.Join(root, "child", "sew.yaml"), `vars:
+  imageTag: "latest"
+
+from:
+  - parent
+
+components:
+  - name: app
+    helm:
+      chart: repo/app
+      values:
+        image:
+          tag: "{{ .imageTag }}"
+`)
+
+	resolver := &FSResolver{
+		Root:         root,
+		SewHome:      sewHome,
+		SetOverrides: map[string]string{"dbVersion": "16", "imageTag": "v2"},
+	}
+	resolved, err := resolver.Resolve(context.Background(), "child")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	compByName := make(map[string]config.Component)
+	for _, c := range resolved.Components {
+		compByName[c.Name] = c
+	}
+
+	db := compByName["database"]
+	if db.Helm.Version != "16" {
+		t.Fatalf("expected parent dbVersion overridden to 16, got %q", db.Helm.Version)
+	}
+
+	app := compByName["app"]
+	tag := app.Helm.Values["image"].(map[string]interface{})["tag"]
+	if tag != "v2" {
+		t.Fatalf("expected child imageTag overridden to v2, got %v", tag)
+	}
+}
+
 func TestFSResolver_ThreeLevelFlagInheritance(t *testing.T) {
 	root := t.TempDir()
 	sewHome := t.TempDir()

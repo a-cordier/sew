@@ -24,6 +24,9 @@ conventional path:
 $HOME/opt/gravitee/license.key
 ```
 
+> In sew.yaml files, reference this path using the `env` template function:
+> `{{ env "HOME" }}/opt/gravitee/license.key`.
+
 If you place your license at this location, there is nothing else to
 do -- sew will automatically mount it into the cluster as a Kubernetes
 Secret and wire it into the gateway and API components.
@@ -50,7 +53,7 @@ components:
     k8s:
       secrets:
         - name: gravitee-license
-          fromFile: '$HOME/opt/gravitee/license.key'
+          fromFile: '{{ env "HOME" }}/opt/gravitee/license.key'
           onMissing: ignore
 ```
 

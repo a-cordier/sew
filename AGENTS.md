@@ -53,6 +53,19 @@ When writing or updating documentation:
   ```
 - When a context flag disables a component, add `images.preload.skip` entries for that component's images so users who toggle the flag do not pay the pull cost. More broadly, design preload lists so every concrete context and flag combination preloads exactly the images it needs -- no more, no fewer.
 - Concrete context READMEs must be **self-contained**. Never link to an abstract parent's README — abstract contexts don't get pages on the site and those links will be broken. Inline any relevant documentation from the parent directly into each concrete variant's README.
+- The **Variables** table on registry pages is **auto-generated** by the site generator from `vars` blocks in `sew.yaml`. Do **not** add a `## Variables` section manually in READMEs. Instead, use the extended vars format to provide descriptions:
+
+  ```yaml
+  vars:
+    imageTag:
+      default: "latest"
+      description: "Docker image tag for all APIM components"
+    helmVersion:
+      default: ""
+      description: "Helm chart version constraint"
+  ```
+
+  The generator walks the `from` chain and collects all vars (child overrides parent for same key). Every concrete context page automatically shows the merged Variables table. When adding or modifying vars, always include a `description` so end users see useful documentation.
 - Any change that affects the user — new feature, changed behavior, new CLI flag, new config field, registry restructure, etc. — **must** come with matching documentation updates. Update the relevant pages under `site/content/docs/` (guides, reference, getting started) and, when applicable, the `README.md` and `CONTRIBUTING.md`. Documentation is not optional; a feature without docs is not complete.
 - When a feature or command requires `sudo`, the documentation **must** explain *why* elevated privileges are needed (e.g. which system directories are written to) and clarify which commands can run without `sudo` afterwards. Use a blockquote for this, for example:
 
