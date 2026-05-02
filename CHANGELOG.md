@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0](https://github.com/a-cordier/sew/compare/v0.14.0...v0.15.0) (2026-05-02)
+
+
+### Features
+
+* add apim mysql variant ([a49dccd](https://github.com/a-cordier/sew/commit/a49dccd9834e815ad01b1e0e8ce6a8a11ddb84f3))
+
 ## [0.14.0](https://github.com/a-cordier/sew/compare/v0.13.0...v0.14.0) (2026-05-02)
 
 
