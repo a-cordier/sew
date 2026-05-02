@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/a-cordier/sew/compare/v0.15.0...v0.16.0) (2026-05-02)
+
+
+### Features
+
+* add gravitee am contexts ([ecf5e33](https://github.com/a-cordier/sew/commit/ecf5e332bf2fe4208e1ae6e08f00e5b85fec5760))
+
 ## [0.15.0](https://github.com/a-cordier/sew/compare/v0.14.0...v0.15.0) (2026-05-02)
 
 
