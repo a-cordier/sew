@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.14.0](https://github.com/a-cordier/sew/compare/v0.13.0...v0.14.0) (2026-05-02)
+
+
+### Features
+
+* add templating support to sew context ([5e77c43](https://github.com/a-cordier/sew/commit/5e77c434489ebf986adbaa881a42b3c6ae3cdce3))
+
+
+### Bug Fixes
+
+* support extended var format in template engine ([c240051](https://github.com/a-cordier/sew/commit/c2400513c08ef0c3e33baaa52adcb4f45880685b))
+
 ## [0.13.0](https://github.com/a-cordier/sew/compare/v0.12.0...v0.13.0) (2026-04-30)
 
 
