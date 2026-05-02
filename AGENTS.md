@@ -89,6 +89,7 @@ When writing or updating documentation:
 | Product | Instructions | Applies to |
 |---|---|---|
 | Gravitee | [agents/gravitee-agent.md](agents/gravitee-agent.md) | `registry/gravitee.io/` |
+| Gravitee AM | [agents/gravitee-am-agent.md](agents/gravitee-am-agent.md) | `registry/gravitee.io/oss/am/`, `registry/gravitee.io/ee/am/` |
 | Gravitee APIM | [agents/gravitee-apim-agent.md](agents/gravitee-apim-agent.md) | `registry/gravitee.io/oss/apim/`, `registry/gravitee.io/ee/apim/` |
 | Gravitee Edge Stack | [agents/gravitee-edge-stack-agent.md](agents/gravitee-edge-stack-agent.md) | `registry/gravitee.io/ee/edge-stack/` |
 <!-- agents:end -->
