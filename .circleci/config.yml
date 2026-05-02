@@ -13,17 +13,17 @@ jobs:
       - go/install:
           version: "1.25.9"
       - run:
-          name: Install sew
-          command: go install github.com/a-cordier/sew@latest
+          name: Build sew
+          command: go build -o ./sew .
       - run:
           name: Create cluster
-          command: sew create --from gravitee.io/oss/apim/dbless
+          command: ./sew create --from gravitee.io/oss/apim/dbless
       - run:
           name: Verify
-          command: sew describe gravitee-dbless
+          command: ./sew describe gravitee-dbless
       - run:
           name: Delete cluster
-          command: sew delete gravitee-dbless
+          command: ./sew delete gravitee-dbless
           when: always
 
 workflows:

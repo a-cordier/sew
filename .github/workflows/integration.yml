@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go install github.com/a-cordier/sew@latest
+      - run: go build -o ./sew .
 
       - name: Restore mirror cache
         uses: actions/cache@v4
@@ -22,11 +22,11 @@ jobs:
           restore-keys: sew-mirrors-
 
       - name: Create cluster
-        run: sew create --from gravitee.io/oss/apim/dbless
+        run: ./sew create --from gravitee.io/oss/apim/dbless
 
       - name: Verify
-        run: sew describe gravitee-dbless
+        run: ./sew describe gravitee-dbless
 
       - name: Delete cluster
         if: always()
-        run: sew delete gravitee-dbless
+        run: ./sew delete gravitee-dbless
