@@ -1,18 +1,18 @@
 ---
-title: "APIM - Kafka PostgreSQL"
-description: "Gravitee APIM with Kafka Gateway and PostgreSQL backend"
+title: "APIM - Kafka JDBC MySQL"
+description: "Gravitee APIM with Kafka Gateway and MySQL JDBC backend"
 tags: [networking, messaging]
 ---
 
-# APIM Kafka PostgreSQL
+# APIM Kafka JDBC MySQL
 
 Deploys a full Gravitee API Management stack with Kafka Gateway enabled,
-backed by PostgreSQL for persistence and Elasticsearch for analytics.
+backed by MySQL via JDBC for persistence and Elasticsearch for analytics.
 
 ## Usage
 
 ```bash
-sew create --from gravitee.io/ee/apim/kafka/postgres
+sew create --from gravitee.io/ee/apim/kafka/jdbc/mysql
 ```
 
 ## Prerequisites
@@ -78,7 +78,7 @@ Optional flags you can pass to `sew create` to customize this deployment:
 | `--enable-redis`     | Deploy Redis and use it for gateway rate limiting             |
 
 ```bash
-sew create --from gravitee.io/ee/apim/kafka/postgres --disable-es
+sew create --from gravitee.io/ee/apim/kafka/jdbc/mysql --disable-es
 ```
 
 Use `sew info` to see the full list of flags and components for this context.
@@ -87,7 +87,7 @@ Use `sew info` to see the full list of flags and components for this context.
 
 This context composes from:
 
-- `gravitee.io/oss/apim/postgres` — full APIM stack with PostgreSQL backend
+- `gravitee.io/oss/apim/jdbc/mysql` — full APIM stack with MySQL JDBC backend
 - `gravitee.io/ee/apim/kafka/base` — Kafka Gateway configuration
 
 ## License

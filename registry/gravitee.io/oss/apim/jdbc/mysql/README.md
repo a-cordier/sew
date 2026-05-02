@@ -1,19 +1,19 @@
 ---
-title: "APIM - PostgreSQL"
-description: "Gravitee APIM with PostgreSQL backend and Elasticsearch"
+title: "APIM - JDBC MySQL"
+description: "Gravitee APIM with MySQL JDBC backend and Elasticsearch"
 tags: [networking]
 ---
 
-# APIM PostgreSQL
+# APIM JDBC MySQL
 
 Deploys a full Gravitee API Management stack (Console, Portal, Gateway, and
-Management API) backed by PostgreSQL for persistence and Elasticsearch for
-analytics. Management uses JDBC. Rate limiting is also stored in PostgreSQL.
+Management API) backed by MySQL via JDBC for persistence and Elasticsearch
+for analytics. Rate limiting is also stored in MySQL.
 
 ## Usage
 
 ```bash
-sew create --from gravitee.io/oss/apim/postgres
+sew create --from gravitee.io/oss/apim/jdbc/mysql
 ```
 
 ## Endpoints
@@ -38,7 +38,7 @@ Optional flags you can pass to `sew create` to customize this deployment:
 | `--enable-redis`     | Deploy Redis and use it for gateway rate limiting             |
 
 ```bash
-sew create --from gravitee.io/oss/apim/postgres --disable-es --disable-portal
+sew create --from gravitee.io/oss/apim/jdbc/mysql --disable-es --disable-portal
 ```
 
 Use `sew info` to see the full list of flags and components for this context.
@@ -47,6 +47,6 @@ Use `sew info` to see the full list of flags and components for this context.
 
 This context composes from:
 
-- `postgresql/standalone` — PostgreSQL 17 database
+- `mysql/standalone` — MySQL 9 database
 - `elastic/elasticsearch/standalone` — Elasticsearch for reporting
-- `gravitee.io/oss/apim/base` — shared APIM Helm configuration
+- `gravitee.io/oss/apim/jdbc/base` — shared APIM JDBC configuration

@@ -366,9 +366,9 @@ components:
 **When to use flags vs separate contexts**:
 
 - **Can a user toggle this on or off without changing the stack's identity?** Use a **flag**. Examples: `--disable-es` disables Elasticsearch, `--disable-portal` hides the portal UI, `--enable-hc-vault` adds a HashiCorp Vault instance. The stack is still "APIM with Postgres" regardless.
-- **Does this change the storage backend, networking model, or deployment topology?** Use a **separate context directory**. Examples: `mongodb/` vs `postgres/` (different databases), `dbless/` vs `gateway/` (fundamentally different gateway modes).
-- **Is there shared config used by multiple sibling variants?** Extract it into an **abstract base** (`abstract: true`) and have variants compose from it via `from`. Example: `oss/base/` holds the shared Helm repo, component skeleton, and port mappings; `oss/mongodb/` and `oss/postgres/` both extend it.
-- **Does a feature layer apply across multiple existing contexts?** Create a **composable abstract context** that stacks on top via `from`. Example: `ee/kafka/base/` adds Kafka and license handling; `ee/kafka/mongodb/` and `ee/kafka/postgres/` compose it with the corresponding OSS DB context.
+- **Does this change the storage backend, networking model, or deployment topology?** Use a **separate context directory**. Examples: `mongodb/` vs `jdbc/` (different persistence models), `dbless/` vs `gateway/` (fundamentally different gateway modes).
+- **Is there shared config used by multiple sibling variants?** Extract it into an **abstract base** (`abstract: true`) and have variants compose from it via `from`. Example: `oss/apim/base/` holds the shared Helm repo, component skeleton, and port mappings; `oss/apim/jdbc/base/` adds JDBC persistence; `oss/apim/jdbc/postgres/` and `oss/apim/jdbc/mysql/` extend it with database-specific config.
+- **Does a feature layer apply across multiple existing contexts?** Create a **composable abstract context** that stacks on top via `from`. Example: `ee/kafka/base/` adds Kafka and license handling; `ee/kafka/mongodb/` and `ee/kafka/jdbc/postgres/` compose it with the corresponding OSS DB context.
 - **When in doubt**: prefer a flag. Flags are cheaper to add, don't create new directories, and inherit automatically through `from`. A flag can always be promoted to a separate context later if the divergence grows.
 
 Users activate flags on the command line:

@@ -237,7 +237,7 @@ The `onMissing` field controls behavior when a source file or env var is missing
 Registry contexts can declare template variables with defaults using a `vars` block. As a user, you override these at deploy time with `--set` -- no files to edit:
 
 ```bash
-sew create --from gravitee.io/oss/apim/postgres --set imageTag=4.6.0 --set helmVersion=4.6.0
+sew create --from gravitee.io/oss/apim/jdbc/postgres --set imageTag=4.6.0 --set helmVersion=4.6.0
 ```
 
 This works because the APIM base context declares `vars` with defaults (`imageTag: "latest"`, `helmVersion: ""`), and `--set` values take precedence. Check a context's README or run `sew info` to discover which variables it supports.
