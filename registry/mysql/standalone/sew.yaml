@@ -1,0 +1,65 @@
+images:
+  preload:
+    refs:
+      - mysql:9
+kind:
+  name: mysql-standalone
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30306
+          hostPort: 30306
+components:
+  - name: mysql
+    type: k8s
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: mysql
+            labels:
+              app: mysql
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: mysql
+            template:
+              metadata:
+                labels:
+                  app: mysql
+              spec:
+                containers:
+                  - name: mysql
+                    image: mysql:9
+                    ports:
+                      - containerPort: 3306
+                        name: mysql
+                    env:
+                      - name: MYSQL_DATABASE
+                        value: gravitee
+                      - name: MYSQL_ROOT_PASSWORD
+                        value: mysql
+                    resources:
+                      requests:
+                        cpu: 250m
+                        memory: 256Mi
+                      limits:
+                        cpu: "1"
+                        memory: 512Mi
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: mysql
+            labels:
+              app: mysql
+          spec:
+            type: NodePort
+            ports:
+              - port: 3306
+                targetPort: 3306
+                nodePort: 30306
+                name: mysql
+            selector:
+              app: mysql

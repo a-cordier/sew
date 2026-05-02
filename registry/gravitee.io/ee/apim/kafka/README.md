@@ -11,7 +11,8 @@ allowing the APIM Gateway to act as a Kafka proxy. Clients connect to the
 gateway using the Kafka protocol via `*.kafka.sew.local:9092` with TLS.
 
 This is an abstract base context. Concrete variants combine it with a
-database-specific APIM OSS context. The default variant is **postgres**.
+database-specific APIM OSS context. The default variant is
+**jdbc/postgres**.
 
 ## Prerequisites
 
@@ -28,24 +29,28 @@ See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networkin
 ## Usage
 
 ```bash
-# Uses the default variant (postgres)
+# Uses the default variant (jdbc/postgres)
 sew create --from gravitee.io/ee/apim/kafka
 
-# Explicitly select a variant
-sew create --from gravitee.io/ee/apim/kafka/postgres
+# Explicitly select a JDBC variant
+sew create --from gravitee.io/ee/apim/kafka/jdbc/postgres
+sew create --from gravitee.io/ee/apim/kafka/jdbc/mysql
+
+# MongoDB variant
 sew create --from gravitee.io/ee/apim/kafka/mongodb
 ```
 
 ## Variants
 
-| Variant    | Database   | Context path                          |
-|------------|------------|---------------------------------------|
-| `postgres` | PostgreSQL | `gravitee.io/ee/apim/kafka/postgres`  |
-| `mongodb`  | MongoDB    | `gravitee.io/ee/apim/kafka/mongodb`   |
+| Variant        | Database   | Context path                               |
+|----------------|------------|--------------------------------------------|
+| `jdbc/postgres`| PostgreSQL | `gravitee.io/ee/apim/kafka/jdbc/postgres`  |
+| `jdbc/mysql`   | MySQL      | `gravitee.io/ee/apim/kafka/jdbc/mysql`     |
+| `mongodb`      | MongoDB    | `gravitee.io/ee/apim/kafka/mongodb`        |
 
-Each variant composes the corresponding `gravitee.io/oss/apim/*` context
-(which provides the full APIM stack) with the abstract kafka base (which
-adds Kafka Gateway configuration on top).
+JDBC variants compose from `gravitee.io/oss/apim/jdbc/*` (APIM with JDBC
+persistence) and the abstract kafka base (Kafka Gateway configuration).
+The MongoDB variant composes from `gravitee.io/oss/apim/mongodb`.
 
 ## Context flags
 

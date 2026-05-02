@@ -71,11 +71,12 @@ Registry contexts compose other contexts via the `from` field. sew resolves each
 ```mermaid
 flowchart TD
     A["Project sew.yaml"] -- from --> B["gravitee.io/oss/apim"]
-    B -- from --> C["mongodb"]
+    B -- from --> C["postgresql/standalone"]
     B -- from --> D["elastic/elasticsearch"]
-    B -- from --> E["gravitee.io/oss/apim/base\n(abstract)"]
+    B -- from --> E["gravitee.io/oss/apim/jdbc/base\n(abstract)"]
+    E -- from --> F["gravitee.io/oss/apim/base\n(abstract)"]
 ```
 
-Here the project pulls in `gravitee.io/oss/apim`, which resolves to the default concrete context (`gravitee.io/oss/apim/postgres` via `.default`). That context composes three dependencies: two standalone data stores and an abstract base that provides the APIM Helm chart and shared configuration. sew walks the full tree, merges every layer, and deduplicates overlapping components.
+Here the project pulls in `gravitee.io/oss/apim`, which resolves to the default concrete context (`gravitee.io/oss/apim/jdbc/postgres` via the `.default` chain). That context composes three dependencies: a standalone data store, Elasticsearch, and an abstract JDBC base that adds JDBC persistence on top of the shared APIM configuration. sew walks the full tree, merges every layer, and deduplicates overlapping components.
 
 Abstract contexts (`abstract: true`) cannot be deployed directly -- they exist to capture shared configuration that concrete contexts extend.

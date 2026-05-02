@@ -1110,8 +1110,8 @@ components: []
 //	kafka/standalone (type: k8s, no namespace)
 //	  ↑ from
 //	ee/kafka/base (abstract, sets kafka namespace: gravitee)
-//	  ↑ from (with oss/postgres)
-//	ee/kafka/postgres (concrete, via .default)
+//	  ↑ from (with oss/jdbc/postgres)
+//	ee/kafka/jdbc/postgres (concrete, via .default chain)
 //	  ↑ .default
 //	ee/kafka
 //
