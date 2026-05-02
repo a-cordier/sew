@@ -41,9 +41,10 @@ path](#overriding-the-license-path) below).
 The license must be mounted as a Kubernetes Secret with `onMissing: ignore`
 so the context still works (gracefully degraded) when the file is absent.
 
-Every EE context `sew.yaml` (or its abstract base) must include the
-following components exactly as shown, to ensure consistency across all
-EE contexts:
+Every Gravitee-platform EE context `sew.yaml` (APIM, AM, etc.) or its
+abstract base must include the following components exactly as shown.
+Products with their own license format (e.g. Edge Stack) document their
+own pattern in their product agent file.
 
 ```yaml
 components:

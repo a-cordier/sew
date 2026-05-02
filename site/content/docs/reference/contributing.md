@@ -94,23 +94,37 @@ registry/
 │   └── elasticsearch/          # standalone context
 ├── gravitee.io/
 │   ├── oss/
+│   │   ├── am/
+│   │   │   ├── base/           # abstract shared config
+│   │   │   ├── mongodb/        # concrete variant
+│   │   │   └── jdbc/
+│   │   │       ├── base/       # abstract JDBC config
+│   │   │       ├── postgres/   # concrete variant
+│   │   │       └── mysql/      # concrete variant
 │   │   ├── apim/
 │   │   │   ├── base/           # abstract shared config
 │   │   │   ├── dbless/
 │   │   │   ├── gateway/
 │   │   │   ├── mongodb/        # concrete variant
-│   │   │   └── postgres/       # concrete variant
+│   │   │   └── jdbc/
+│   │   │       ├── base/       # abstract JDBC config
+│   │   │       ├── postgres/   # concrete variant
+│   │   │       └── mysql/      # concrete variant
 │   │   └── gko/                # standalone GKO deployment
 │   └── ee/
 │       ├── apim/
 │       │   └── kafka/
 │       │       ├── base/       # abstract shared config
 │       │       ├── mongodb/
-│       │       └── postgres/
+│       │       └── jdbc/
+│       │           ├── postgres/
+│       │           └── mysql/
 │       └── edge-stack/         # Ambassador Edge Stack
 ├── kafka/
 │   └── standalone/
 ├── mongodb/
+│   └── standalone/
+├── mysql/
 │   └── standalone/
 └── postgresql/
     └── standalone/
@@ -223,6 +237,28 @@ Portal       http://localhost:30081
 (e.g. `--disable-portal`). It always returns `false` during `sew delete`
 (which has no flag context).
 
+### Port allocation
+
+Each product uses a dedicated NodePort range to avoid collisions when
+composing multiple products or running them side by side:
+
+| Product / Context     | NodePort range  |
+|-----------------------|-----------------|
+| APIM                  | 30080--30084    |
+| AM                    | 30090--30093    |
+| Standalone databases  | 30000 + standard port (e.g. PostgreSQL 30432, MySQL 30306, MongoDB 30017) |
+
+When adding a new product, pick the next available range and document it
+here. Last digits should match the internal container port where
+practical (e.g. AM Gateway listens on 8092 → NodePort 30092).
+
+### Kind cluster name
+
+Gravitee product contexts set `kind.name` to `gravitee-{product}` (e.g.
+`gravitee-apim`, `gravitee-am`). Variants inheriting from a base via
+`from` automatically get the base's `kind.name`, which is typically
+correct — only override it if the variant needs a separate cluster.
+
 ### Images
 
 - Use slim base images (Alpine, distroless) whenever possible.
@@ -235,6 +271,19 @@ images:
   preload:
     refs:
       - org/image:tag
+```
+
+- Use `images.preload.mode: replace` when a variant deploys a strict
+  subset of the parent's components and the inherited preload list
+  includes images that are no longer needed. This drops the inherited
+  refs and uses only the ones declared in the current context:
+
+```yaml
+images:
+  preload:
+    mode: replace
+    refs:
+      - org/subset-image:tag
 ```
 
 ### Startup optimization

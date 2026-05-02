@@ -1,0 +1,11 @@
+description: "Disable the AM Console UI"
+components:
+  - name: am
+    helm:
+      values:
+        ui:
+          enabled: false
+images:
+  preload:
+    skip:
+      - "graviteeio/am-management-ui:{{ .imageTag }}"
