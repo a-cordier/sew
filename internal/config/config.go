@@ -14,7 +14,7 @@ type HelmConfig struct {
 }
 
 type Config struct {
-	Vars        map[string]string `yaml:"vars,omitempty"`
+	Vars        yaml.Node `yaml:"vars,omitempty"`
 	Description string            `yaml:"description,omitempty"`
 	Registry    string            `yaml:"registry"`
 	From        []string          `yaml:"from,omitempty"`
@@ -90,7 +90,7 @@ func Load(path string, setOverrides map[string]string) (*Config, error) {
 		return nil, fmt.Errorf("parsing config file %s: %w", path, err)
 	}
 
-	cfg.Vars = nil
+	cfg.Vars = yaml.Node{}
 	cfg.Kind.ApplyDefaults()
 	cfg.Dir = filepath.Dir(path)
 	return &cfg, nil

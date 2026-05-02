@@ -995,7 +995,7 @@ components:
 	if cfg.Components[0].Helm.Values["image"].(map[string]interface{})["tag"] != "latest" {
 		t.Fatalf("expected default imageTag, got %v", cfg.Components[0].Helm.Values)
 	}
-	if cfg.Vars != nil {
+	if cfg.Vars.Kind != 0 {
 		t.Fatal("expected Vars to be cleared after Load")
 	}
 }
