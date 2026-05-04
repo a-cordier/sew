@@ -1,0 +1,3 @@
+from:
+  - gravitee-io/oss/apim/jdbc/mysql
+  - gravitee-io/ee/apim/kafka/base

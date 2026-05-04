@@ -23,7 +23,7 @@ go install github.com/a-cordier/sew@latest
 Pick a context from the registry and deploy it in one command:
 
 ```bash
-sew create --from gravitee.io/oss/apim
+sew create --from gravitee-io/oss/apim
 ```
 
 That's it — sew creates a Kind cluster, installs all components, and gives you a full Gravitee API Management stack. When you're done:

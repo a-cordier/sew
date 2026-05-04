@@ -43,6 +43,7 @@ type varInfo struct {
 	Name        string `yaml:"name"`
 	Default     string `yaml:"default"`
 	Description string `yaml:"description,omitempty"`
+	Origin      string `yaml:"origin,omitempty"`
 }
 
 type componentPage struct {
@@ -563,7 +564,7 @@ func resolveVars(relDir string, configs map[string]*sewConfig, registryDir strin
 			return
 		}
 		for _, d := range defs {
-			vi := varInfo{Name: d.Name, Default: d.Default, Description: d.Description}
+			vi := varInfo{Name: d.Name, Default: d.Default, Description: d.Description, Origin: dir}
 			if idx, ok := seen[d.Name]; ok {
 				result[idx] = vi
 			} else {

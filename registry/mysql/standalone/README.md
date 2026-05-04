@@ -30,4 +30,4 @@ From the host, connect to `localhost:30306`.
 
 This is a minimal, persistence-free MySQL suitable for development and
 testing. It is used as a dependency by higher-level contexts such as
-`gravitee.io/oss/apim/jdbc/mysql`.
+`gravitee-io/oss/apim/jdbc/mysql`.

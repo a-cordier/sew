@@ -11,7 +11,7 @@ This guide covers the basics of running sew in a CI pipeline, image caching stra
 A typical integration test pipeline creates a cluster, runs tests against it, and tears it down:
 
 ```bash
-sew create --from gravitee.io/oss/apim/dbless
+sew create --from gravitee-io/oss/apim/dbless
 make test
 sew delete gravitee-dbless
 ```
@@ -76,7 +76,7 @@ jobs:
           command: go install github.com/a-cordier/sew@latest
       - run:
           name: Create cluster
-          command: sew create --from gravitee.io/oss/apim/dbless
+          command: sew create --from gravitee-io/oss/apim/dbless
       - run:
           name: Verify
           command: sew describe gravitee-dbless
@@ -120,7 +120,7 @@ jobs:
           restore-keys: sew-mirrors-
 
       - name: Create cluster
-        run: sew create --from gravitee.io/oss/apim/dbless
+        run: sew create --from gravitee-io/oss/apim/dbless
 
       - name: Verify
         run: sew describe gravitee-dbless
@@ -134,7 +134,7 @@ The `sew.yaml` for this pipeline would use mirrors instead of preload:
 
 ```yaml
 from:
-  - gravitee.io/oss/apim/dbless
+  - gravitee-io/oss/apim/dbless
 
 images:
   mirrors: {}

@@ -248,7 +248,7 @@ components:
 Flag file names must follow the pattern `sew--{flag-name}.yaml` where `flag-name` is lowercase kebab-case: `^[a-z0-9]+(-[a-z0-9]+)*$`. Users activate flags with `--flag-name` on the CLI:
 
 ```bash
-sew create --from gravitee.io/oss/apim --disable-portal --disable-ui
+sew create --from gravitee-io/oss/apim --disable-portal --disable-ui
 ```
 
 ### Inheritance from abstract parents

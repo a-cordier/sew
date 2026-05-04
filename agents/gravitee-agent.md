@@ -1,17 +1,17 @@
 ---
 product: Gravitee
 paths:
-  - registry/gravitee.io/
+  - registry/gravitee-io/
 ---
 
 # Gravitee product rules
 
-These instructions apply when working on contexts under `registry/gravitee.io/`.
+These instructions apply when working on contexts under `registry/gravitee-io/`.
 
 ## OSS vs EE
 
-- Open-source products live under `oss/` (e.g. `gravitee.io/oss/apim/`).
-- Enterprise Edition products live under `ee/` (e.g. `gravitee.io/ee/apim/`).
+- Open-source products live under `oss/` (e.g. `gravitee-io/oss/apim/`).
+- Enterprise Edition products live under `ee/` (e.g. `gravitee-io/ee/apim/`).
 - Never place an EE-only feature in an `oss/` context.
 
 ## License handling (EE only)

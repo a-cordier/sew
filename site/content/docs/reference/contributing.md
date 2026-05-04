@@ -41,14 +41,14 @@ itself), run `task site:serve` to verify the site renders correctly.
 
 On the registry page, cards are displayed in a flat grid with same-org
 contexts grouped together. By default, orgs are sorted alphabetically by
-their first path segment (e.g. `elastic`, `kafka`, `gravitee.io`).
+their first path segment (e.g. `elastic`, `kafka`, `gravitee-io`).
 
 To pin an org to the top of the list, add its first path segment to the
 `pinnedGroups` array in `site/hugo.toml`:
 
 ```toml
 [params]
-  pinnedGroups = ["gravitee.io"]
+  pinnedGroups = ["gravitee-io"]
 ```
 
 Cards from pinned orgs are rendered first (in the order listed), followed
@@ -92,7 +92,7 @@ the convention `org/edition/product/variant`:
 registry/
 ├── elastic/
 │   └── elasticsearch/          # standalone context
-├── gravitee.io/
+├── gravitee-io/
 │   ├── oss/
 │   │   ├── am/
 │   │   │   ├── base/           # abstract shared config
@@ -142,12 +142,12 @@ registry/
 
 ### `.default` files
 
-When a user specifies a partial path (e.g. `gravitee.io/oss/apim`), sew walks
+When a user specifies a partial path (e.g. `gravitee-io/oss/apim`), sew walks
 `.default` files to resolve the full path. Each `.default` file contains a
 single line with the name of the default child directory:
 
 ```
-# registry/gravitee.io/oss/apim/.default
+# registry/gravitee-io/oss/apim/.default
 postgres
 ```
 
@@ -302,8 +302,13 @@ contexts:
 from:
   - mongodb/standalone
   - elastic/elasticsearch/standalone
-  - gravitee.io/oss/apim/base
+  - gravitee-io/oss/apim/base
 ```
+
+When a child needs a different default for a parent's variable (e.g. a
+different image tag), use a path-scoped override in the child's `vars`
+block instead of duplicating the parent's manifests. See the
+[Template variables](#template-variables) section for syntax.
 
 ### Abstract contexts
 
@@ -423,7 +428,7 @@ components:
 Users activate flags on the command line:
 
 ```bash
-sew create --from gravitee.io/oss/apim --disable-portal --enable-hc-vault
+sew create --from gravitee-io/oss/apim --disable-portal --enable-hc-vault
 ```
 
 ## Template variables
@@ -454,10 +459,50 @@ Users override defaults at deploy time with `--set`:
 sew create --set imageTag=4.12.0
 ```
 
+### Path-scoped overrides
+
+A child context can override a parent's variables by nesting them under
+the parent's registry path segments in its own `vars` block:
+
+```yaml
+# gravitee-io/oss/am/jdbc/mysql/sew.yaml
+from:
+  - mysql/standalone
+  - gravitee-io/oss/am/jdbc/base
+
+vars:
+  jdbcDriver:
+    default: "mysql"
+
+  # Override mysql/standalone's imageTag
+  mysql:
+    standalone:
+      imageTag:
+        default: "8"
+```
+
+The disambiguation rule: an entry with a `default` key is a var
+declaration; an entry without is a path segment leading to overrides.
+
+### Scoped `--set`
+
+Dotted `--set` keys target a specific context in the composition chain.
+The system matches dots against known context paths using longest-prefix
+matching:
+
+```bash
+# Override mysql/standalone's imageTag only
+sew create --from gravitee-io/oss/am/jdbc/mysql --set mysql.standalone.imageTag=8.4
+
+# Broadcast to all contexts declaring imageTag
+sew create --from gravitee-io/oss/am/jdbc/mysql --set imageTag=4.6.0
+```
+
 ### Conventions
 
 - Variable names use **camelCase** (`imageTag`, `helmVersion`).
-- `vars` is a flat string map -- no nesting.
+- Variable names must not contain dots.
+- Registry path segments must not contain dots (enforced by `sew validate`).
 - The `vars` block must not itself contain template expressions.
 - Undefined variables with no default cause a clear error
   (`missingkey=error`).
@@ -467,7 +512,7 @@ sew create --set imageTag=4.12.0
 | Variable | Controls | Default |
 |---|---|---|
 | `helmVersion` | `helm.version` (chart version) | `""` (latest) |
-| `imageTag` | Image tags in helm values | `"latest"` |
+| `imageTag` | Image tags in helm values / manifests | `"latest"` |
 | `imageRepository` | Image repository (optional) | chart default |
 
 ### Template functions
@@ -495,8 +540,10 @@ builds:
 
 Templating applies to every sew.yaml in the pipeline: user config,
 `$SEW_HOME/sew.yaml`, patch files, flag overlays, and registry context
-files. Each file is templated independently with its own `vars` defaults
-merged with the shared `--set` overrides.
+files. Each context is rendered with its effective vars: own defaults,
+overridden by child path-scoped overrides, overridden by `--set`
+(broadcast then scoped). Templates use short names (`{{ .imageTag }}`)
+-- a context's templates can only access its own vars.
 
 ## Schema
 

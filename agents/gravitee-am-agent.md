@@ -1,13 +1,13 @@
 ---
 product: Gravitee AM
 paths:
-  - registry/gravitee.io/oss/am/
-  - registry/gravitee.io/ee/am/
+  - registry/gravitee-io/oss/am/
+  - registry/gravitee-io/ee/am/
 ---
 
 # Gravitee AM product rules
 
-These instructions apply when working on contexts under `registry/gravitee.io/oss/am/` and `registry/gravitee.io/ee/am/`.
+These instructions apply when working on contexts under `registry/gravitee-io/oss/am/` and `registry/gravitee-io/ee/am/`.
 
 ## Upstream repository
 

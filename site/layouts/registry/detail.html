@@ -86,12 +86,13 @@
         {{ with .Params.vars }}
         <section class="registry-vars">
           <h2>Variables</h2>
-          <p class="vars-desc">Template variables overridable with <code>--set</code>:</p>
+          <p class="vars-desc">Template variables overridable with <code>--set</code>. Use <code>--set <em>path.segments</em>.var=value</code> to target a specific context in the composition chain.</p>
           <table class="vars-table">
             <thead>
               <tr>
                 <th>Variable</th>
                 <th>Default</th>
+                <th>Origin</th>
                 <th>Description</th>
               </tr>
             </thead>
@@ -100,6 +101,7 @@
               <tr>
                 <td><code>{{ .name }}</code></td>
                 <td>{{ if .default }}<code>{{ .default }}</code>{{ else }}<em>(empty)</em>{{ end }}</td>
+                <td>{{ with .origin }}<code>{{ . }}</code>{{ end }}</td>
                 <td>{{ .description }}</td>
               </tr>
               {{ end }}

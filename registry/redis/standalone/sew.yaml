@@ -1,7 +1,11 @@
+vars:
+  imageTag:
+    default: "7"
+    description: "Redis Docker image tag"
 images:
   preload:
     refs:
-      - redis:7
+      - "redis:{{ .imageTag }}"
 kind:
   name: redis-standalone
   nodes:
@@ -32,7 +36,7 @@ components:
               spec:
                 containers:
                   - name: redis
-                    image: redis:7
+                    image: "redis:{{ .imageTag }}"
                     ports:
                       - containerPort: 6379
                         name: redis

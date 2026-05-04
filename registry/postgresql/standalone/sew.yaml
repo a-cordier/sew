@@ -1,7 +1,11 @@
+vars:
+  imageTag:
+    default: "17"
+    description: "PostgreSQL Docker image tag"
 images:
   preload:
     refs:
-      - postgres:17
+      - "postgres:{{ .imageTag }}"
 kind:
   name: pg-standalone
   nodes:
@@ -32,7 +36,7 @@ components:
               spec:
                 containers:
                   - name: postgresql
-                    image: postgres:17
+                    image: "postgres:{{ .imageTag }}"
                     ports:
                       - containerPort: 5432
                         name: postgresql

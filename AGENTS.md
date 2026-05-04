@@ -36,10 +36,11 @@ When writing or updating documentation:
 - **Always use `go run .` with `--config sew.local.yaml`** when suggesting or running sew commands. The `sew.local.yaml` config points the registry at the local `./registry` directory, which is required for testing local changes. Every `sew <subcommand>` must be written as `go run . <subcommand> --config sew.local.yaml`. For example:
 
   ```bash
-  go run . create --config sew.local.yaml --from gravitee.io/oss/apim/jdbc/postgres
+  go run . create --config sew.local.yaml --from gravitee-io/oss/apim/jdbc/postgres
   go run . delete --config sew.local.yaml
   go run . status --config sew.local.yaml
   ```
+- When a context composes from a parent and needs a different image tag or version, use a path-scoped var override in `vars` instead of duplicating the parent's manifests.
 - When authoring or modifying `sew.yaml` files, validate against the schema.
 - Before adding a new context directory, follow the decision guide in CONTRIBUTING.md (section "Context flags"). The key test: if the change can be toggled without altering the stack's identity (same database, same networking model, same topology), it should be a flag. If it changes what the stack fundamentally *is*, it needs its own directory.
 - The generated files in `site/content/registry/` and `site/static/` are gitignored and rebuilt by CI. When changing registry contexts, layouts, templates, CSS, or the generator, run `task site:serve` to verify the site renders correctly.
@@ -88,8 +89,8 @@ When writing or updating documentation:
 <!-- agents:begin -->
 | Product | Instructions | Applies to |
 |---|---|---|
-| Gravitee | [agents/gravitee-agent.md](agents/gravitee-agent.md) | `registry/gravitee.io/` |
-| Gravitee AM | [agents/gravitee-am-agent.md](agents/gravitee-am-agent.md) | `registry/gravitee.io/oss/am/`, `registry/gravitee.io/ee/am/` |
-| Gravitee APIM | [agents/gravitee-apim-agent.md](agents/gravitee-apim-agent.md) | `registry/gravitee.io/oss/apim/`, `registry/gravitee.io/ee/apim/` |
-| Gravitee Edge Stack | [agents/gravitee-edge-stack-agent.md](agents/gravitee-edge-stack-agent.md) | `registry/gravitee.io/ee/edge-stack/` |
+| Gravitee | [agents/gravitee-agent.md](agents/gravitee-agent.md) | `registry/gravitee-io/` |
+| Gravitee AM | [agents/gravitee-am-agent.md](agents/gravitee-am-agent.md) | `registry/gravitee-io/oss/am/`, `registry/gravitee-io/ee/am/` |
+| Gravitee APIM | [agents/gravitee-apim-agent.md](agents/gravitee-apim-agent.md) | `registry/gravitee-io/oss/apim/`, `registry/gravitee-io/ee/apim/` |
+| Gravitee Edge Stack | [agents/gravitee-edge-stack-agent.md](agents/gravitee-edge-stack-agent.md) | `registry/gravitee-io/ee/edge-stack/` |
 <!-- agents:end -->

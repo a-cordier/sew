@@ -17,7 +17,7 @@ jobs:
           command: go build -o ./sew .
       - run:
           name: Create cluster
-          command: ./sew create --from gravitee.io/oss/apim/dbless
+          command: ./sew create --from gravitee-io/oss/apim/dbless
       - run:
           name: Verify
           command: ./sew describe gravitee-dbless

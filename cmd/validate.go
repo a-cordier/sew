@@ -60,6 +60,7 @@ func runValidate(_ *cobra.Command, args []string) error {
 
 	var configFiles []string
 	var flagFiles []string
+	var badSegments []string
 	for _, target := range targets {
 		info, err := os.Stat(target)
 		if err != nil {
@@ -78,6 +79,10 @@ func runValidate(_ *cobra.Command, args []string) error {
 				return err
 			}
 			if fi.IsDir() {
+				segment := fi.Name()
+				if strings.Contains(segment, ".") && segment != "." {
+					badSegments = append(badSegments, path)
+				}
 				return nil
 			}
 			name := fi.Name()
@@ -93,12 +98,16 @@ func runValidate(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	total := len(configFiles) + len(flagFiles)
-	if total == 0 {
-		return fmt.Errorf("no sew.yaml or flag files found")
+	var failed int
+	for _, seg := range badSegments {
+		logger.Error("%s: directory name contains a dot (registry path segments must not contain dots)", seg)
+		failed++
 	}
 
-	var failed int
+	total := len(configFiles) + len(flagFiles)
+	if total == 0 && failed == 0 {
+		return fmt.Errorf("no sew.yaml or flag files found")
+	}
 	for _, f := range configFiles {
 		if err := internalschema.ValidateFile(sch, f); err != nil {
 			logger.Error("%s: %v", f, err)

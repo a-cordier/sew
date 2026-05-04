@@ -6,7 +6,7 @@ title = "sew"
   description = "Your local Kubernetes tailor shop"
   tagline = "Pick a stack from the registry. Deploy it in one command."
   githubRepo = "https://github.com/a-cordier/sew"
-  pinnedGroups = ["gravitee.io"]
+  pinnedGroups = ["gravitee-io"]
 
 [menu]
   [[menu.main]]

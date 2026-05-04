@@ -1,7 +1,11 @@
+vars:
+  imageTag:
+    default: "9.3.1"
+    description: "Elasticsearch Docker image tag"
 images:
   preload:
     refs:
-      - docker.elastic.co/elasticsearch/elasticsearch:9.3.1
+      - "docker.elastic.co/elasticsearch/elasticsearch:{{ .imageTag }}"
 kind:
   name: es-standalone
   nodes:
@@ -20,7 +24,7 @@ components:
       chart: elastic/elasticsearch
       values:
         image: docker.elastic.co/elasticsearch/elasticsearch
-        imageTag: 9.3.1
+        imageTag: "{{ .imageTag }}"
         clusterName: elasticsearch
         nodeGroup: master
         replicas: 1

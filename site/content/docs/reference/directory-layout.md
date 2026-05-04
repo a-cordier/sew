@@ -67,7 +67,7 @@ Log files from cluster operations. Helm and kubectl output that isn't shown in t
 
 - **`build/build.log`** -- Output from the most recent `sew build`: pre-build commands, Docker builds, registry pushes, and workload restarts. Check this file first when a build step fails.
 - **`delete.log`** -- Output from the most recent `sew delete`.
-- **`<context-path>/install.log`** -- Output from `sew create` for a given context. The context path uses `_` as a separator (e.g. `gravitee.io_apim/install.log`).
+- **`<context-path>/install.log`** -- Output from `sew create` for a given context. The context path uses `_` as a separator (e.g. `gravitee-io_apim/install.log`).
 - **`<context-path>/patch.log`** -- Output from `sew patch` for a given context.
 
 When a component fails to install or times out, the log file usually contains the Helm or kubectl error that explains why. Check it first before diving into `kubectl` commands.

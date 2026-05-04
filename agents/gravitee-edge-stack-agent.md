@@ -1,12 +1,12 @@
 ---
 product: Gravitee Edge Stack
 paths:
-  - registry/gravitee.io/ee/edge-stack/
+  - registry/gravitee-io/ee/edge-stack/
 ---
 
 # Gravitee Edge Stack product rules
 
-These instructions apply when working on contexts under `registry/gravitee.io/ee/edge-stack/`.
+These instructions apply when working on contexts under `registry/gravitee-io/ee/edge-stack/`.
 
 ## Upstream repository
 

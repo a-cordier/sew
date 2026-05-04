@@ -232,15 +232,27 @@ components:
 
 The `onMissing` field controls behavior when a source file or env var is missing: `fail` (default) aborts the deployment, `ignore` skips the resource with a warning.
 
-## Template variable overrides
+## Overriding variables
 
 Registry contexts can declare template variables with defaults using a `vars` block. As a user, you override these at deploy time with `--set` -- no files to edit:
 
 ```bash
-sew create --from gravitee.io/oss/apim/jdbc/postgres --set imageTag=4.6.0 --set helmVersion=4.6.0
+sew create --from gravitee-io/oss/apim/jdbc/postgres --set imageTag=4.6.0 --set helmVersion=4.6.0
 ```
 
-This works because the APIM base context declares `vars` with defaults (`imageTag: "latest"`, `helmVersion: ""`), and `--set` values take precedence. Check a context's README or run `sew info` to discover which variables it supports.
+This works because the APIM base context declares `vars` with defaults (`imageTag: "latest"`, `helmVersion: ""`), and `--set` values take precedence. Check a context's Variables table on the registry site or run `sew info` to discover which variables it supports.
+
+When a composition chain includes multiple contexts that declare the same variable name (e.g. `imageTag`), a plain `--set` broadcasts to all of them. To target a specific context, use dotted path notation:
+
+```bash
+# Override MySQL's imageTag without affecting the product's imageTag
+sew create --from gravitee-io/oss/am/jdbc/mysql --set mysql.standalone.imageTag=8.4
+
+# This still broadcasts to every context declaring imageTag
+sew create --from gravitee-io/oss/am/jdbc/mysql --set imageTag=4.6.0
+```
+
+The system matches the dotted key against known context paths in the composition chain using longest-prefix matching: `mysql.standalone.imageTag` resolves to path `mysql/standalone`, variable `imageTag`.
 
 ### Declaring your own variables
 
@@ -268,9 +280,32 @@ Then deploy with:
 sew create --set appVersion=2.1.0
 ```
 
+### Overriding parent variables in the registry
+
+Context authors can override a parent's variable default by nesting it under the parent's path segments in the `vars` block:
+
+```yaml
+# gravitee-io/oss/am/jdbc/mysql/sew.yaml
+from:
+  - mysql/standalone
+  - gravitee-io/oss/am/jdbc/base
+
+vars:
+  jdbcDriver:
+    default: "mysql"
+
+  # Override mysql/standalone's imageTag (path segments as nested keys)
+  mysql:
+    standalone:
+      imageTag:
+        default: "8"
+```
+
+Entries with a `default` key are var declarations; entries without are path segments leading to overrides. This eliminates the need to duplicate a parent's manifests just to change a version.
+
 ### How --set flows through composition
 
-`--set` overrides are global -- they flow into every sew.yaml in the pipeline (user config, registry contexts, flag overlays). Each file is templated independently with its own `vars` defaults merged with the shared `--set` values. Parent contexts don't see child vars and vice versa; only `--set` bridges across levels.
+Each context in the composition chain is rendered with its own effective vars: own defaults, overridden by child path-scoped overrides, overridden by `--set` (broadcast then scoped). Templates use short names (`{{ .imageTag }}`) -- a context's templates can only access its own vars.
 
 ### Template functions
 

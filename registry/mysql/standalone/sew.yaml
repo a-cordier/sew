@@ -1,7 +1,11 @@
+vars:
+  imageTag:
+    default: "9"
+    description: "MySQL Docker image tag"
 images:
   preload:
     refs:
-      - mysql:9
+      - "mysql:{{ .imageTag }}"
 kind:
   name: mysql-standalone
   nodes:
@@ -32,7 +36,7 @@ components:
               spec:
                 containers:
                   - name: mysql
-                    image: mysql:9
+                    image: "mysql:{{ .imageTag }}"
                     ports:
                       - containerPort: 3306
                         name: mysql
