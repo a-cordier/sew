@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.0](https://github.com/a-cordier/sew/compare/v0.16.0...v0.17.0) (2026-05-04)
+
+
+### Features
+
+* support variable overrides in compound contexts ([49f8831](https://github.com/a-cordier/sew/commit/49f8831af842244c314e1d9c5d6cd84d8de84625))
+
 ## [0.16.0](https://github.com/a-cordier/sew/compare/v0.15.0...v0.16.0) (2026-05-02)
 
 
