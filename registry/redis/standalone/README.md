@@ -28,4 +28,4 @@ From the host, connect to `localhost:30379`.
 
 This is a minimal, persistence-free Redis suitable for development and
 testing. It is used as a dependency by higher-level contexts such as
-`gravitee.io/ee/edge-stack`.
+`gravitee-io/ee/edge-stack`.

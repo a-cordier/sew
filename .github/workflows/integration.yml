@@ -22,7 +22,7 @@ jobs:
           restore-keys: sew-mirrors-
 
       - name: Create cluster
-        run: ./sew create --from gravitee.io/oss/apim/dbless
+        run: ./sew create --from gravitee-io/oss/apim/dbless
 
       - name: Verify
         run: ./sew describe gravitee-dbless

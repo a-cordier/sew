@@ -211,5 +211,5 @@
 
 ### Performance
 
-* add mirrors for gravitee.io/apim/aio ([d781229](https://github.com/a-cordier/sew/commit/d7812293de18a29cb4758e7201fcfdd5cd0a66fb))
+* add mirrors for gravitee-io/apim/aio ([d781229](https://github.com/a-cordier/sew/commit/d7812293de18a29cb4758e7201fcfdd5cd0a66fb))
 * remove taint from kind control plane ([347fab4](https://github.com/a-cordier/sew/commit/347fab4a6761dde2485e64dcf987368bd577b0c2))

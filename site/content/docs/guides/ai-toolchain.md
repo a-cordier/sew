@@ -49,7 +49,7 @@ schema/sew.schema.yaml. Use it as the primary reference ...
 ## Product-specific instructions
 | Product  | Instructions                  | Applies to            |
 |----------|-------------------------------|-----------------------|
-| Gravitee | agents/gravitee-agent.md      | registry/gravitee.io/ |
+| Gravitee | agents/gravitee-agent.md      | registry/gravitee-io/ |
 ```
 
 ## Product-specific instructions

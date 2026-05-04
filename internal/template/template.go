@@ -23,6 +23,14 @@ func Render(raw []byte, setOverrides map[string]string) ([]byte, error) {
 		vars[k] = v
 	}
 
+	return RenderWithVars(raw, vars)
+}
+
+// RenderWithVars templates raw sew.yaml bytes using a pre-computed
+// variable map. Unlike Render, it does not extract vars from the document
+// or apply --set overrides — the caller is responsible for providing the
+// fully-merged effective vars.
+func RenderWithVars(raw []byte, vars map[string]string) ([]byte, error) {
 	tmpl, err := template.New("sew").
 		Option("missingkey=error").
 		Funcs(funcMap()).
@@ -46,14 +54,32 @@ type VarDef struct {
 	Description string
 }
 
-// ExtractVarDefs scans raw sew.yaml bytes for a top-level vars block and
-// returns structured metadata for each variable. Supports both simple
-// (key: "value") and extended (key: {default: "value", description: "..."})
-// forms.
-func ExtractVarDefs(raw []byte) ([]VarDef, error) {
+// VarOverride describes a variable override targeting a parent context's
+// variable via path-scoped nesting in the vars block.
+type VarOverride struct {
+	ContextPath string // e.g. "mysql/standalone"
+	Name        string // e.g. "imageTag"
+	Default     string // e.g. "8"
+}
+
+// VarsTree holds the result of parsing a vars block: own variable
+// declarations and path-scoped overrides for parent contexts.
+type VarsTree struct {
+	Defs      []VarDef
+	Overrides []VarOverride
+}
+
+// ExtractVarsTree scans raw sew.yaml bytes for a top-level vars block and
+// separates own var declarations from path-scoped overrides.
+//
+// Disambiguation: a mapping node with a "default" key is a var declaration
+// (or override leaf). A mapping node without "default" is a path segment
+// leading deeper toward override leaves. Scalar values are simple var
+// declarations.
+func ExtractVarsTree(raw []byte) (*VarsTree, error) {
 	varsYAML, ok := isolateVarsBlock(raw)
 	if !ok {
-		return nil, nil
+		return &VarsTree{}, nil
 	}
 
 	var wrapper struct {
@@ -65,32 +91,110 @@ func ExtractVarDefs(raw []byte) ([]VarDef, error) {
 
 	node := &wrapper.Vars
 	if node.Kind == 0 || node.Kind != yaml.MappingNode {
-		return nil, nil
+		return &VarsTree{}, nil
 	}
 
-	var defs []VarDef
+	tree := &VarsTree{}
 	for i := 0; i+1 < len(node.Content); i += 2 {
 		key := node.Content[i]
 		val := node.Content[i+1]
 
-		def := VarDef{Name: key.Value}
 		switch val.Kind {
 		case yaml.ScalarNode:
-			def.Default = val.Value
+			tree.Defs = append(tree.Defs, VarDef{
+				Name:    key.Value,
+				Default: val.Value,
+			})
 		case yaml.MappingNode:
-			var ext struct {
-				Default     string `yaml:"default"`
-				Description string `yaml:"description"`
+			if hasDefaultKey(val) {
+				var ext struct {
+					Default     string `yaml:"default"`
+					Description string `yaml:"description"`
+				}
+				if err := val.Decode(&ext); err != nil {
+					return nil, fmt.Errorf("parsing var %q: %w", key.Value, err)
+				}
+				tree.Defs = append(tree.Defs, VarDef{
+					Name:        key.Value,
+					Default:     ext.Default,
+					Description: ext.Description,
+				})
+			} else {
+				overrides, err := collectOverrides(val, key.Value)
+				if err != nil {
+					return nil, err
+				}
+				tree.Overrides = append(tree.Overrides, overrides...)
 			}
-			if err := val.Decode(&ext); err != nil {
-				return nil, fmt.Errorf("parsing var %q: %w", key.Value, err)
-			}
-			def.Default = ext.Default
-			def.Description = ext.Description
 		}
-		defs = append(defs, def)
 	}
-	return defs, nil
+	return tree, nil
+}
+
+// hasDefaultKey returns true if the mapping node has a direct child key named "default".
+func hasDefaultKey(node *yaml.Node) bool {
+	for i := 0; i+1 < len(node.Content); i += 2 {
+		if node.Content[i].Value == "default" {
+			return true
+		}
+	}
+	return false
+}
+
+// collectOverrides walks a mapping node that represents path segments,
+// collecting VarOverride entries. pathPrefix is the slash-joined path
+// built from parent keys (e.g. "mysql/standalone").
+func collectOverrides(node *yaml.Node, pathPrefix string) ([]VarOverride, error) {
+	var overrides []VarOverride
+	for i := 0; i+1 < len(node.Content); i += 2 {
+		key := node.Content[i]
+		val := node.Content[i+1]
+
+		switch val.Kind {
+		case yaml.ScalarNode:
+			overrides = append(overrides, VarOverride{
+				ContextPath: pathPrefix,
+				Name:        key.Value,
+				Default:     val.Value,
+			})
+		case yaml.MappingNode:
+			if hasDefaultKey(val) {
+				var ext struct {
+					Default string `yaml:"default"`
+				}
+				if err := val.Decode(&ext); err != nil {
+					return nil, fmt.Errorf("parsing override %s/%s: %w", pathPrefix, key.Value, err)
+				}
+				overrides = append(overrides, VarOverride{
+					ContextPath: pathPrefix,
+					Name:        key.Value,
+					Default:     ext.Default,
+				})
+			} else {
+				nested, err := collectOverrides(val, pathPrefix+"/"+key.Value)
+				if err != nil {
+					return nil, err
+				}
+				overrides = append(overrides, nested...)
+			}
+		}
+	}
+	return overrides, nil
+}
+
+// ExtractVarDefs scans raw sew.yaml bytes for a top-level vars block and
+// returns structured metadata for each variable. Supports both simple
+// (key: "value") and extended (key: {default: "value", description: "..."})
+// forms. Path-scoped override entries are excluded.
+func ExtractVarDefs(raw []byte) ([]VarDef, error) {
+	tree, err := ExtractVarsTree(raw)
+	if err != nil {
+		return nil, err
+	}
+	if tree == nil || len(tree.Defs) == 0 {
+		return nil, nil
+	}
+	return tree.Defs, nil
 }
 
 // extractVars scans raw YAML bytes for a top-level vars block and returns

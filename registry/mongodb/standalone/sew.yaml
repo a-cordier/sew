@@ -1,7 +1,11 @@
+vars:
+  imageTag:
+    default: "7"
+    description: "MongoDB Docker image tag"
 images:
   preload:
     refs:
-      - mongo:7
+      - "mongo:{{ .imageTag }}"
 kind:
   name: mongo-standalone
   nodes:
@@ -32,7 +36,7 @@ components:
               spec:
                 containers:
                   - name: mongodb
-                    image: mongo:7
+                    image: "mongo:{{ .imageTag }}"
                     ports:
                       - containerPort: 27017
                         name: mongodb

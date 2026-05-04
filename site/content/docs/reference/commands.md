@@ -32,7 +32,7 @@ When features like load balancers, Gateway API, or DNS are enabled, sew sets the
 Contexts can define optional flags that customize the deployment. These are extra `--flag-name` options defined by the context maintainer as `sew--{flag-name}.yaml` patch files.
 
 ```bash
-sew create --from gravitee.io/oss/apim --disable-portal --disable-ui --disable-es
+sew create --from gravitee-io/oss/apim --disable-portal --disable-ui --disable-es
 ```
 
 Each flag merges a patch on top of the resolved context before deployment. Flags are cumulative -- you can combine as many as needed. Passing an unknown flag produces an error listing the available flags for that context.
@@ -45,14 +45,14 @@ Show information about the resolved context without creating a cluster. Displays
 
 ```bash
 sew info
-sew info --from gravitee.io/oss/apim/jdbc/postgres
+sew info --from gravitee-io/oss/apim/jdbc/postgres
 ```
 
 ### Example output
 
 ```
 Context
-  Path: gravitee.io/oss/apim/jdbc/postgres
+  Path: gravitee-io/oss/apim/jdbc/postgres
 
 Components
   - postgresql
@@ -70,7 +70,7 @@ Features
   dns:     enabled (domain: sew.local, port: 15353)
 
 Usage
-  sew create --from gravitee.io/oss/apim/jdbc/postgres
+  sew create --from gravitee-io/oss/apim/jdbc/postgres
 ```
 
 ## sew build
@@ -179,7 +179,7 @@ When the registry context uses template variables (see [Composing Contexts -- Te
 
 ```bash
 # Create the cluster at version 4.10
-sew create --from gravitee.io/oss/apim/jdbc/postgres \
+sew create --from gravitee-io/oss/apim/jdbc/postgres \
   --set imageTag=4.10.0 --set helmVersion=4.10.0
 
 # Upgrade to 4.11 -- no patch file needed
@@ -297,8 +297,8 @@ Shows a table with the cluster name, creation date, context paths, active contex
 
 ```
 NAME                 CREATED            FROM                                  FLAGS              STATUS
-kind-gravitee-apim   2026-03-23 14:00   gravitee.io/oss/apim/jdbc/postgres    --disable-es       running
-kind-gravitee-kafka  2026-03-22 10:30   gravitee.io/ee/apim/kafka         -                  stopped
+kind-gravitee-apim   2026-03-23 14:00   gravitee-io/oss/apim/jdbc/postgres    --disable-es       running
+kind-gravitee-kafka  2026-03-22 10:30   gravitee-io/ee/apim/kafka         -                  stopped
 ```
 
 ## sew describe
@@ -331,7 +331,7 @@ When no name is given and only one cluster exists, it is selected automatically.
 Cluster
   Name:    gio-apim
   Created: 2026-03-23 14:00
-  From:    gravitee.io/oss/apim/jdbc/postgres
+  From:    gravitee-io/oss/apim/jdbc/postgres
   Flags:   --disable-es
 
 Features

@@ -12,7 +12,7 @@ Add a `builds` section to your `sew.yaml`. Each entry describes one image you bu
 
 ```yaml
 from:
-  - gravitee.io/ee/edge-stack
+  - gravitee-io/ee/edge-stack
 
 builds:
   - name: emissary

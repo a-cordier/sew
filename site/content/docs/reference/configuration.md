@@ -22,7 +22,7 @@ A `sew.yaml` file is a YAML document with the following top-level fields:
 | `images` | map | Container image management: preloading images into Kind nodes and configuring registry mirrors. |
 | `kind` | map | Configuration for the Kind (Kubernetes-in-Docker) cluster. |
 | `registry` | string | Registry path that identifies this configuration context (org/edition/product/variant convention). |
-| `vars` | map | Template variables with default values. Each key becomes available as {{ .key }} in the rest of the file. Values can be plain strings (default only) or objects with default and description fields. Defaults can be overridden at deploy time with --set key=value. |
+| `vars` | map | Template variables and path-scoped overrides. Top-level entries with a "default" key (or plain strings) are own var declarations, available as {{ .key }} in the rest of the file. Nested entries (keyed by parent context path segments) override parent vars. Defaults can be overridden at deploy time with --set key=value (broadcast) or --set path.segments.key=value (scoped). |
 
 ---
 
@@ -385,7 +385,7 @@ Registry path that identifies this configuration context (org/edition/product/va
 
 ## `vars`
 
-Template variables with default values. Each key becomes available as {{ .key }} in the rest of the file. Values can be plain strings (default only) or objects with default and description fields. Defaults can be overridden at deploy time with --set key=value.
+Template variables and path-scoped overrides. Top-level entries with a "default" key (or plain strings) are own var declarations, available as {{ .key }} in the rest of the file. Nested entries (keyed by parent context path segments) override parent vars. Defaults can be overridden at deploy time with --set key=value (broadcast) or --set path.segments.key=value (scoped).
 
 **Type:** `object`
 

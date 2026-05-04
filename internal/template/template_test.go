@@ -482,3 +482,157 @@ func TestExtractVarDefs_NoVars(t *testing.T) {
 		t.Errorf("expected nil, got: %v", defs)
 	}
 }
+
+func TestExtractVarsTree_OwnVarsOnly(t *testing.T) {
+	raw := []byte(`vars:
+  imageTag:
+    default: "latest"
+    description: "Docker image tag"
+  simple: "plain"
+
+other: stuff
+`)
+	tree, err := ExtractVarsTree(raw)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(tree.Defs) != 2 {
+		t.Fatalf("expected 2 defs, got %d", len(tree.Defs))
+	}
+	if tree.Defs[0].Name != "imageTag" || tree.Defs[0].Default != "latest" {
+		t.Errorf("unexpected first def: %+v", tree.Defs[0])
+	}
+	if tree.Defs[1].Name != "simple" || tree.Defs[1].Default != "plain" {
+		t.Errorf("unexpected second def: %+v", tree.Defs[1])
+	}
+	if len(tree.Overrides) != 0 {
+		t.Errorf("expected no overrides, got %d", len(tree.Overrides))
+	}
+}
+
+func TestExtractVarsTree_OverridesOnly(t *testing.T) {
+	raw := []byte(`vars:
+  mysql:
+    standalone:
+      imageTag:
+        default: "8"
+`)
+	tree, err := ExtractVarsTree(raw)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(tree.Defs) != 0 {
+		t.Errorf("expected no defs, got %d: %+v", len(tree.Defs), tree.Defs)
+	}
+	if len(tree.Overrides) != 1 {
+		t.Fatalf("expected 1 override, got %d", len(tree.Overrides))
+	}
+	o := tree.Overrides[0]
+	if o.ContextPath != "mysql/standalone" {
+		t.Errorf("expected context path mysql/standalone, got %q", o.ContextPath)
+	}
+	if o.Name != "imageTag" {
+		t.Errorf("expected var name imageTag, got %q", o.Name)
+	}
+	if o.Default != "8" {
+		t.Errorf("expected default 8, got %q", o.Default)
+	}
+}
+
+func TestExtractVarsTree_Mixed(t *testing.T) {
+	raw := []byte(`vars:
+  jdbcDriver:
+    default: "mysql"
+    description: "JDBC driver"
+  mysql:
+    standalone:
+      imageTag:
+        default: "8"
+`)
+	tree, err := ExtractVarsTree(raw)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(tree.Defs) != 1 {
+		t.Fatalf("expected 1 def, got %d", len(tree.Defs))
+	}
+	if tree.Defs[0].Name != "jdbcDriver" {
+		t.Errorf("unexpected def: %+v", tree.Defs[0])
+	}
+	if len(tree.Overrides) != 1 {
+		t.Fatalf("expected 1 override, got %d", len(tree.Overrides))
+	}
+	if tree.Overrides[0].ContextPath != "mysql/standalone" || tree.Overrides[0].Name != "imageTag" {
+		t.Errorf("unexpected override: %+v", tree.Overrides[0])
+	}
+}
+
+func TestExtractVarsTree_DeepPath(t *testing.T) {
+	raw := []byte(`vars:
+  gravitee-io:
+    oss:
+      apim:
+        base:
+          imageTag:
+            default: "4.6.0"
+`)
+	tree, err := ExtractVarsTree(raw)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(tree.Overrides) != 1 {
+		t.Fatalf("expected 1 override, got %d", len(tree.Overrides))
+	}
+	o := tree.Overrides[0]
+	if o.ContextPath != "gravitee-io/oss/apim/base" {
+		t.Errorf("expected path gravitee-io/oss/apim/base, got %q", o.ContextPath)
+	}
+	if o.Name != "imageTag" || o.Default != "4.6.0" {
+		t.Errorf("unexpected override: %+v", o)
+	}
+}
+
+func TestExtractVarsTree_NoVars(t *testing.T) {
+	raw := []byte(`name: foo
+`)
+	tree, err := ExtractVarsTree(raw)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(tree.Defs) != 0 || len(tree.Overrides) != 0 {
+		t.Errorf("expected empty tree, got defs=%d overrides=%d", len(tree.Defs), len(tree.Overrides))
+	}
+}
+
+func TestExtractVarsTree_ExtractVarDefsExcludesOverrides(t *testing.T) {
+	raw := []byte(`vars:
+  imageTag:
+    default: "latest"
+  mysql:
+    standalone:
+      imageTag:
+        default: "8"
+`)
+	defs, err := ExtractVarDefs(raw)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(defs) != 1 {
+		t.Fatalf("expected 1 def (overrides excluded), got %d", len(defs))
+	}
+	if defs[0].Name != "imageTag" {
+		t.Errorf("unexpected def: %+v", defs[0])
+	}
+}
+
+func TestRenderWithVars(t *testing.T) {
+	raw := []byte(`image: "mysql:{{ .imageTag }}"
+`)
+	out, err := RenderWithVars(raw, map[string]string{"imageTag": "8.0"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !strings.Contains(string(out), `image: "mysql:8.0"`) {
+		t.Errorf("expected rendered output, got:\n%s", string(out))
+	}
+}
