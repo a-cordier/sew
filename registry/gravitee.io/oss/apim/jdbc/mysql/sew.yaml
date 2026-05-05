@@ -3,8 +3,11 @@ from:
   - elastic/elasticsearch/standalone
   - gravitee.io/oss/apim/jdbc/base
 vars:
+  imageTag:
+    default: "8.0"
+    description: "MySQL Docker image tag"
   jdbcUrl:
-    default: "jdbc:mysql://mysql:3306/gravitee"
+    default: "jdbc:mysql://mysql:3306/apim"
     description: "JDBC connection URL"
   jdbcDriver:
     default: "https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.2.0/mysql-connector-j-9.2.0.jar"
@@ -15,6 +18,12 @@ vars:
   jdbcPassword:
     default: "mysql"
     description: "JDBC password"
+images:
+  preload:
+    skip:
+      - "mysql:9"
+    refs:
+      - "mysql:8.0"
 components:
   - name: mysql
     namespace: gravitee

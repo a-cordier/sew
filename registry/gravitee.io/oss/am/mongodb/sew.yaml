@@ -32,4 +32,4 @@ components:
     helm:
       values:
         mongo:
-          uri: mongodb://mongodb:27017/gravitee?connectTimeoutMS=30000
+          uri: mongodb://mongodb:27017/am?connectTimeoutMS=30000

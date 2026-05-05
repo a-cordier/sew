@@ -12,7 +12,7 @@ vars:
     default: "3306"
     description: "Database port"
   jdbcDatabase:
-    default: "gravitee"
+    default: "am"
     description: "Database name"
   jdbcUsername:
     default: "root"
