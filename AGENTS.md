@@ -59,6 +59,12 @@ When writing or updating documentation:
 
   See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns) for details.
   ```
+- **Cluster name must always be a var.** Every context that declares a `kind:` block must use `kind.name: "{{ .clusterName }}"` with a `clusterName` var. For Gravitee contexts (under `registry/gravitee-io/`), the default is `"gravitee"`. For all other contexts, the default is a short descriptive slug matching the current literal name (e.g. `"pg-standalone"`, `"kafka-standalone"`).
+- **Image repository must always be templated.** Every image reference — in both `images.preload.refs` and in manifests/Helm values — must template the repository path so users with private registries can redirect pulls via `--set`. Two patterns:
+  - **Single-image contexts** (data stores, standalone tools): use an `imageRepository` var containing the full image path before the tag (e.g. `"postgres"`, `"apache/kafka"`, `"docker.elastic.co/elasticsearch/elasticsearch"`). Both preload and manifest use `"{{ .imageRepository }}:{{ .imageTag }}"`.
+  - **Multi-image Gravitee contexts** (APIM, AM): use an `imagePrefix` var (default `"graviteeio"`) for the shared organization prefix. Preload and Helm values use `"{{ .imagePrefix }}/<component-name>:{{ .imageTag }}"`.
+  - Static images with no user-configurable variance (e.g. `alpine:latest`) are exempt.
+- **Preload and workload images must use the same template expression.** The rendered value of a preload ref must always match the container image deployed by the corresponding manifest or Helm chart. Never template one without the other — if a preload ref uses `{{ .imageRepository }}`, the Deployment or Helm `image.repository` value must too.
 - When a context flag disables a component, add `images.preload.skip` entries for that component's images so users who toggle the flag do not pay the pull cost. More broadly, design preload lists so every concrete context and flag combination preloads exactly the images it needs -- no more, no fewer.
 - Concrete context READMEs must be **self-contained**. Never link to an abstract parent's README — abstract contexts don't get pages on the site and those links will be broken. Inline any relevant documentation from the parent directly into each concrete variant's README.
 - The **Variables** table on registry pages is **auto-generated** by the site generator from `vars` blocks in `sew.yaml`. Do **not** add a `## Variables` section manually in READMEs. Instead, use the extended vars format to provide descriptions:

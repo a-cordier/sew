@@ -2,6 +2,12 @@ from:
   - gravitee-io/oss/apim/base
   - gravitee-io/oss/gko
 vars:
+  clusterName:
+    default: "gravitee"
+    description: "Name of the Kind cluster"
+  imagePrefix:
+    default: "graviteeio"
+    description: "Docker image prefix for Gravitee components"
   helmVersion:
     default: ""
     description: "Helm chart version constraint"
@@ -12,10 +18,10 @@ images:
   preload:
     mode: replace
     refs:
-      - "graviteeio/apim-gateway:{{ .imageTag }}-debian"
-      - graviteeio/kubernetes-operator:latest
+      - "{{ .imagePrefix }}/apim-gateway:{{ .imageTag }}-debian"
+      - "{{ .imagePrefix }}/kubernetes-operator:latest"
 kind:
-  name: gravitee-dbless
+  name: "{{ .clusterName }}"
 components:
   - name: tls-server
     enabled: false

@@ -20,10 +20,10 @@ jobs:
           command: ./sew create --config sew.local.yaml --from gravitee-io/oss/apim/dbless
       - run:
           name: Verify
-          command: ./sew describe gravitee-dbless
+          command: ./sew describe gravitee
       - run:
           name: Delete cluster
-          command: ./sew delete gravitee-dbless
+          command: ./sew delete gravitee
           when: always
 
 workflows:

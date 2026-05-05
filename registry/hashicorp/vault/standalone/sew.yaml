@@ -1,9 +1,19 @@
+vars:
+  clusterName:
+    default: "vault-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "hashicorp/vault"
+    description: "Vault Docker image repository"
+  imageTag:
+    default: "1.21.2"
+    description: "Vault Docker image tag"
 images:
   preload:
     refs:
-      - hashicorp/vault:1.21.2
+      - "{{ .imageRepository }}:{{ .imageTag }}"
 kind:
-  name: vault-standalone
+  name: "{{ .clusterName }}"
   nodes:
     - role: control-plane
       extraPortMappings:
@@ -20,6 +30,9 @@ components:
       chart: hashicorp/vault
       values:
         server:
+          image:
+            repository: "{{ .imageRepository }}"
+            tag: "{{ .imageTag }}"
           dev:
             enabled: true
             devRootToken: root

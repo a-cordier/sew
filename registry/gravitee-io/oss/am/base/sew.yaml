@@ -1,5 +1,11 @@
 abstract: true
 vars:
+  clusterName:
+    default: "gravitee"
+    description: "Name of the Kind cluster"
+  imagePrefix:
+    default: "graviteeio"
+    description: "Docker image prefix for all AM components"
   helmVersion:
     default: ""
     description: "Helm chart version constraint"
@@ -9,12 +15,12 @@ vars:
 images:
   preload:
     refs:
-      - "graviteeio/am-gateway:{{ .imageTag }}"
-      - "graviteeio/am-management-api:{{ .imageTag }}"
-      - "graviteeio/am-management-ui:{{ .imageTag }}"
+      - "{{ .imagePrefix }}/am-gateway:{{ .imageTag }}"
+      - "{{ .imagePrefix }}/am-management-api:{{ .imageTag }}"
+      - "{{ .imagePrefix }}/am-management-ui:{{ .imageTag }}"
       - alpine:latest
 kind:
-  name: gravitee-am
+  name: "{{ .clusterName }}"
   nodes:
     - role: control-plane
       extraPortMappings:
@@ -59,17 +65,20 @@ components:
       values:
         ui:
           image:
+            repository: "{{ .imagePrefix }}/am-management-ui"
             tag: "{{ .imageTag }}"
           baseURL: http://localhost:30093/management
           ingress:
             enabled: false
         gateway:
           image:
+            repository: "{{ .imagePrefix }}/am-gateway"
             tag: "{{ .imageTag }}"
           ingress:
             enabled: false
         api:
           image:
+            repository: "{{ .imagePrefix }}/am-management-api"
             tag: "{{ .imageTag }}"
           ingress:
             enabled: false

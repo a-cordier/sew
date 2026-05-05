@@ -1,6 +1,12 @@
 from:
   - gravitee-io/oss/gko
 vars:
+  clusterName:
+    default: "gravitee"
+    description: "Name of the Kind cluster"
+  imagePrefix:
+    default: "graviteeio"
+    description: "Docker image prefix for Gravitee components"
   imageTag:
     default: "latest"
     description: "Docker image tag for the APIM gateway"
@@ -8,10 +14,10 @@ images:
   preload:
     mode: replace
     refs:
-      - "graviteeio/apim-gateway:{{ .imageTag }}-debian"
-      - graviteeio/kubernetes-operator:latest
+      - "{{ .imagePrefix }}/apim-gateway:{{ .imageTag }}-debian"
+      - "{{ .imagePrefix }}/kubernetes-operator:latest"
 kind:
-  name: gravitee-gateway
+  name: "{{ .clusterName }}"
   nodes:
     - role: control-plane
       extraPortMappings:
@@ -50,7 +56,7 @@ components:
                   spec:
                     containers:
                       - name: gateway
-                        image: "graviteeio/apim-gateway:{{ .imageTag }}-debian"
+                        image: "{{ .imagePrefix }}/apim-gateway:{{ .imageTag }}-debian"
                     securityContext:
                       runAsNonRoot: true
                       runAsUser: 1001

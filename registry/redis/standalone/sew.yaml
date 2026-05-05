@@ -1,13 +1,19 @@
 vars:
+  clusterName:
+    default: "redis-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "redis"
+    description: "Redis Docker image repository"
   imageTag:
     default: "7"
     description: "Redis Docker image tag"
 images:
   preload:
     refs:
-      - "redis:{{ .imageTag }}"
+      - "{{ .imageRepository }}:{{ .imageTag }}"
 kind:
-  name: redis-standalone
+  name: "{{ .clusterName }}"
   nodes:
     - role: control-plane
       extraPortMappings:
@@ -36,7 +42,7 @@ components:
               spec:
                 containers:
                   - name: redis
-                    image: "redis:{{ .imageTag }}"
+                    image: "{{ .imageRepository }}:{{ .imageTag }}"
                     ports:
                       - containerPort: 6379
                         name: redis

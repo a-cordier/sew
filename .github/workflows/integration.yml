@@ -25,8 +25,8 @@ jobs:
         run: ./sew create --config sew.local.yaml --from gravitee-io/oss/apim/dbless
 
       - name: Verify
-        run: ./sew describe gravitee-dbless
+        run: ./sew describe gravitee
 
       - name: Delete cluster
         if: always()
-        run: ./sew delete gravitee-dbless
+        run: ./sew delete gravitee

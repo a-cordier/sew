@@ -1,13 +1,19 @@
 vars:
+  clusterName:
+    default: "kafka-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "apache/kafka"
+    description: "Apache Kafka Docker image repository"
   imageTag:
     default: "latest"
     description: "Apache Kafka Docker image tag"
 images:
   preload:
     refs:
-      - "apache/kafka:{{ .imageTag }}"
+      - "{{ .imageRepository }}:{{ .imageTag }}"
 kind:
-  name: kafka-standalone
+  name: "{{ .clusterName }}"
   nodes:
     - role: control-plane
       extraPortMappings:
@@ -36,7 +42,7 @@ components:
               spec:
                 containers:
                   - name: kafka
-                    image: "apache/kafka:{{ .imageTag }}"
+                    image: "{{ .imageRepository }}:{{ .imageTag }}"
                     ports:
                       - containerPort: 9092
                         name: internal

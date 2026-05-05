@@ -1,11 +1,21 @@
 from:
   - redis/standalone
+vars:
+  clusterName:
+    default: "gravitee"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "docker.io/datawire/aes"
+    description: "Ambassador Edge Stack Docker image repository"
+  imageTag:
+    default: "3.12.7"
+    description: "Ambassador Edge Stack Docker image tag"
 images:
   preload:
     refs:
-      - docker.io/datawire/aes:3.12.7
+      - "{{ .imageRepository }}:{{ .imageTag }}"
 kind:
-  name: gravitee-edge-stack
+  name: "{{ .clusterName }}"
   nodes:
     - role: control-plane
       extraPortMappings:
@@ -101,4 +111,5 @@ components:
                 targetPort: 8443
                 nodePort: 30443
           image:
-            tag: 3.12.7
+            repository: "{{ .imageRepository }}"
+            tag: "{{ .imageTag }}"
