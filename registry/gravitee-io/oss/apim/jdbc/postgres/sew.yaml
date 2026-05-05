@@ -4,7 +4,7 @@ from:
   - gravitee-io/oss/apim/jdbc/base
 vars:
   jdbcUrl:
-    default: "jdbc:postgresql://postgresql:5432/gravitee"
+    default: "jdbc:postgresql://postgresql:5432/apim"
     description: "JDBC connection URL"
   jdbcDriver:
     default: "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.4/postgresql-42.7.4.jar"
