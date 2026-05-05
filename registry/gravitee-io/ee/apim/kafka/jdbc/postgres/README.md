@@ -27,23 +27,15 @@ sew setup dns
 
 See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns) for details.
 
-## Endpoints
+## Quick Start
 
-| Service        | URL                            |
-|----------------|--------------------------------|
-| APIM Console   | http://localhost:30080          |
-| APIM Portal    | http://localhost:30081          |
-| APIM Gateway   | http://localhost:30082          |
-| Management API | http://localhost:30083          |
-| Kafka Gateway  | `*.kafka.sew.local:9092` (TLS) |
+Sign in to the APIM Console at [http://localhost:30080](http://localhost:30080)
+with the default admin account (`admin` / `admin`).
 
-## Kafka Gateway details
+To create your first API, follow the Gravitee
+[APIM quick start guide](https://documentation.gravitee.io/apim/getting-started/quickstart-guide).
 
-- **Routing mode:** host-based (`*.kafka.sew.local`)
-- **TLS:** enabled via a self-signed certificate stored as a Kubernetes Secret
-- **Upstream broker:** standalone Kafka at `kafka:9092` (ClusterIP)
-
-## Connecting a Kafka client
+### Connecting a Kafka client
 
 Extract the TLS certificate from the running cluster:
 
@@ -65,30 +57,15 @@ self-signed certificate covers `*.kafka.sew.local` but broker metadata
 addresses use two-level subdomains (e.g. `broker-0-acr.kafka.sew.local`)
 that don't match the single-level wildcard.
 
-## Context flags
+## Endpoints
 
-Optional flags you can pass to `sew create` to customize this deployment:
-
-| Flag                 | Description                                          |
-|----------------------|------------------------------------------------------|
-| `--disable-es`       | Disable Elasticsearch and analytics reporters        |
-| `--disable-ui`       | Disable both Console and Portal UIs                  |
-| `--disable-portal`   | Disable the developer portal UI                      |
-| `--enable-hc-vault`  | Deploy HashiCorp Vault and configure it as a secret provider |
-| `--enable-redis`     | Deploy Redis and use it for gateway rate limiting             |
-
-```bash
-sew create --from gravitee-io/ee/apim/kafka/jdbc/postgres --disable-es
-```
-
-Use `sew info` to see the full list of flags and components for this context.
-
-## Dependencies
-
-This context composes from:
-
-- `gravitee-io/oss/apim/jdbc/postgres` — full APIM stack with PostgreSQL JDBC backend
-- `gravitee-io/ee/apim/kafka/base` — Kafka Gateway configuration
+| Service        | URL                             |
+|----------------|---------------------------------|
+| APIM Console   | http://localhost:30080           |
+| APIM Portal    | http://localhost:30081           |
+| APIM Gateway   | http://localhost:30082           |
+| Management API | http://localhost:30083           |
+| Kafka Gateway  | `*.kafka.sew.local:9092` (TLS)  |
 
 ## License
 

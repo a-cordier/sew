@@ -7,8 +7,7 @@ tags: [networking]
 # Edge Stack
 
 Deploys Ambassador Edge Stack, a Kubernetes-native API gateway built on
-Envoy Proxy, into a local Kind cluster. Edge Stack provides advanced
-routing, rate limiting, authentication, and TLS termination.
+Envoy Proxy, into a local Kind cluster.
 
 ## Usage
 
@@ -16,31 +15,21 @@ routing, rate limiting, authentication, and TLS termination.
 sew create --from gravitee-io/ee/edge-stack
 ```
 
+## Quick Start
+
+Edge Stack is available at [http://localhost:30080](http://localhost:30080)
+(HTTP) and [https://localhost:30443](https://localhost:30443) (HTTPS).
+
+To configure routing, create `Mapping` resources in the `ambassador`
+namespace. For a guided walkthrough, see the
+[Edge Stack getting started tutorial](https://www.getambassador.io/docs/edge-stack/latest/tutorials/getting-started).
+
 ## Endpoints
 
-| Service | URL                    |
-|---------|------------------------|
-| HTTP    | http://localhost:30080  |
-| HTTPS   | https://localhost:30443 |
-
-## Details
-
-- **Kind cluster:** `gravitee-edge-stack`
-- **Namespace:** `ambassador`
-- **Helm chart:** `datawire/edge-stack`
-- **Image:** `docker.io/datawire/aes:3.12.7`
-- **Ports:** 30080 (HTTP), 30443 (HTTPS)
-
-The edge-stack component exposes HTTP and HTTPS via NodePort services.
-The Helm release uses the `emissary-ingress` sub-chart for the data
-plane (Envoy) and adds Edge Stack's authentication and rate limiting
-features on top.
-
-## Dependencies
-
-This context composes from:
-
-- `redis/standalone` — Redis instance for rate limiting and authentication
+| Service | URL                     |
+|---------|-------------------------|
+| HTTP    | http://localhost:30080   |
+| HTTPS   | https://localhost:30443  |
 
 ## License
 

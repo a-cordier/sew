@@ -28,19 +28,16 @@ sew setup dns
 
 See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns) for details.
 
-## Details
+## Quick Start
 
-- **Kind cluster:** `gravitee-gateway`
-- **Ports:** 80 (HTTP), 443 (HTTPS), 9092
-- **Features:** load balancer, DNS
-- **Components:** `gko` (Helm), `gateway-class-parameters` (CRD), `gateway-class` (GatewayClass)
+Create a `Gateway` and an `HTTPRoute` resource and let GKO provision
+Gravitee gateway instances automatically:
 
-This context enables the Kubernetes Gateway API flow: create `Gateway` and
-`HTTPRoute` resources and let GKO provision Gravitee gateway instances
-automatically.
+```bash
+kubectl apply -f my-gateway.yaml -n gravitee
+kubectl apply -f my-route.yaml -n gravitee
+```
 
-## Dependencies
-
-This context composes from:
-
-- `gravitee-io/oss/gko` — Gravitee Kubernetes Operator
+For details on the Gateway API model, see the
+[Kubernetes Gateway API documentation](https://gateway-api.sigs.k8s.io/)
+and the [GKO documentation](https://documentation.gravitee.io/gko).

@@ -6,8 +6,8 @@ tags: [database]
 
 # MongoDB Standalone
 
-Deploys a single-replica MongoDB instance as a Kubernetes Deployment with a
-NodePort Service on port 27017.
+Deploys a single-node MongoDB 7 instance into a local Kind cluster with
+host access on port 30017. Authentication is disabled.
 
 ## Usage
 
@@ -15,17 +15,16 @@ NodePort Service on port 27017.
 sew create --from mongodb/standalone
 ```
 
-## Details
+## Quick Start
 
-- **Image:** `mongo:7`
-- **Port:** 27017
-- **Resources:** 250m–1 CPU, 512Mi–1Gi memory
+Connect from your host:
 
-### Host access
+```bash
+mongosh mongodb://localhost:30017
+```
 
-Kind maps `hostPort 30017` → `containerPort 30017` (NodePort) → `targetPort 27017`.
-From the host, connect to `localhost:30017`.
-
-This is a minimal, persistence-free MongoDB suitable for development and
-testing. It is used as a dependency by higher-level contexts such as
-`gravitee-io/oss/apim/mongodb`.
+| Parameter | Value     |
+|-----------|-----------|
+| Host      | localhost |
+| Port      | 30017     |
+| Auth      | none      |

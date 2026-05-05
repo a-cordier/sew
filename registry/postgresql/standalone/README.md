@@ -6,8 +6,8 @@ tags: [database]
 
 # PostgreSQL Standalone
 
-Deploys a single-replica PostgreSQL 17 instance as a Kubernetes Deployment with
-a NodePort Service on port 5432.
+Deploys a single-node PostgreSQL 17 instance into a local Kind cluster with
+host access on port 30432.
 
 ## Usage
 
@@ -15,19 +15,18 @@ a NodePort Service on port 5432.
 sew create --from postgresql/standalone
 ```
 
-## Details
+## Quick Start
 
-- **Image:** `postgres:17`
-- **Port:** 5432
-- **Database:** `gravitee`
-- **Credentials:** `postgres` / `postgres`
-- **Resources:** 250m–1 CPU, 256Mi–512Mi memory
+Connect from your host:
 
-### Host access
+```bash
+PGPASSWORD=postgres psql -h localhost -p 30432 -U postgres -d gravitee
+```
 
-Kind maps `hostPort 30432` → `containerPort 30432` (NodePort) → `targetPort 5432`.
-From the host, connect to `localhost:30432`.
-
-This is a minimal, persistence-free PostgreSQL suitable for development and
-testing. It is used as a dependency by higher-level contexts such as
-`gravitee-io/oss/apim/jdbc/postgres`.
+| Parameter | Value      |
+|-----------|------------|
+| Host      | localhost  |
+| Port      | 30432      |
+| Database  | gravitee   |
+| User      | postgres   |
+| Password  | postgres   |

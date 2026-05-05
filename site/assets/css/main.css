@@ -1880,23 +1880,6 @@ h4:hover .heading-anchor {
   opacity: 0.6;
 }
 
-/* Post-deploy notes */
-
-.registry-notes {
-  margin-top: 3rem;
-  border-top: 1px solid var(--color-border-muted);
-  padding-top: 2.25rem;
-}
-
-.registry-notes h2 {
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-}
-
-.registry-notes-content pre {
-  margin: 0;
-}
-
 /* Sidebar */
 
 .registry-detail-sidebar {

@@ -6,10 +6,8 @@ tags: [security]
 
 # Vault Standalone
 
-Deploys a single-node HashiCorp Vault server in dev mode using the official
-HashiCorp Helm chart. The server starts pre-unsealed with an in-memory backend
-and a root token of `root`. The Agent Injector is disabled to keep the
-footprint minimal.
+Deploys a single-node HashiCorp Vault server in dev mode (pre-unsealed,
+in-memory backend) with host access on port 30820.
 
 ## Usage
 
@@ -17,25 +15,29 @@ footprint minimal.
 sew create --from hashicorp/vault/standalone
 ```
 
-## Details
+## Quick Start
 
-- **Image:** `hashicorp/vault:1.21.2`
-- **Helm chart:** `hashicorp/vault`
-- **Mode:** dev (in-memory, pre-unsealed)
-- **Root token:** `root`
-- **Resources:** 250m–500m CPU, 256Mi–512Mi memory
-
-### Host access
-
-Kind maps `hostPort 30820` → `containerPort 30820` (NodePort) → `targetPort 8200`.
-From the host, connect to `http://localhost:30820`.
+Configure the Vault CLI and check the server status:
 
 ```bash
-# Check Vault status
-curl http://localhost:30820/v1/sys/health
-
-# Authenticate (dev root token)
 export VAULT_ADDR=http://localhost:30820
 export VAULT_TOKEN=root
 vault status
 ```
+
+Write and read a test secret:
+
+```bash
+vault kv put secret/hello foo=bar
+vault kv get secret/hello
+```
+
+The Vault UI is available at [http://localhost:30820](http://localhost:30820) (token: `root`).
+
+For a guided introduction, see the [Vault Getting Started tutorials](https://developer.hashicorp.com/vault/tutorials/getting-started).
+
+| Parameter   | Value                     |
+|-------------|---------------------------|
+| URL         | http://localhost:30820     |
+| Root token  | root                      |
+| Mode        | dev (in-memory)           |

@@ -16,37 +16,19 @@ analytics.
 sew create --from gravitee-io/oss/apim/mongodb
 ```
 
+## Quick Start
+
+Sign in to the Console at [http://localhost:30080](http://localhost:30080)
+with the default admin account (`admin` / `admin`).
+
+To create your first API, follow the Gravitee
+[APIM quick start guide](https://documentation.gravitee.io/apim/getting-started/quickstart-guide).
+
 ## Endpoints
 
-| Service        | URL                        |
-|----------------|----------------------------|
-| APIM Console   | http://localhost:30080      |
-| APIM Portal    | http://localhost:30081      |
-| APIM Gateway   | http://localhost:30082      |
-| Management API | http://localhost:30083      |
-
-## Context flags
-
-Optional flags you can pass to `sew create` to customize this deployment:
-
-| Flag                 | Description                                          |
-|----------------------|------------------------------------------------------|
-| `--disable-es`       | Disable Elasticsearch and analytics reporters        |
-| `--disable-ui`       | Disable both Console and Portal UIs                  |
-| `--disable-portal`   | Disable the developer portal UI                      |
-| `--enable-hc-vault`  | Deploy HashiCorp Vault and configure it as a secret provider |
-| `--enable-redis`     | Deploy Redis and use it for gateway rate limiting             |
-
-```bash
-sew create --from gravitee-io/oss/apim/mongodb --disable-es --disable-portal
-```
-
-Use `sew info` to see the full list of flags and components for this context.
-
-## Dependencies
-
-This context composes from:
-
-- `mongodb/standalone` — MongoDB 7 database
-- `elastic/elasticsearch/standalone` — Elasticsearch for reporting
-- `gravitee-io/oss/apim/base` — shared APIM Helm configuration
+| Service        | URL                   |
+|----------------|-----------------------|
+| APIM Console   | http://localhost:30080 |
+| APIM Portal    | http://localhost:30081 |
+| APIM Gateway   | http://localhost:30082 |
+| Management API | http://localhost:30083 |
