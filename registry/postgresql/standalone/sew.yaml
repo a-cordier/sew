@@ -1,13 +1,19 @@
 vars:
+  clusterName:
+    default: "pg-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "postgres"
+    description: "PostgreSQL Docker image repository"
   imageTag:
     default: "17"
     description: "PostgreSQL Docker image tag"
 images:
   preload:
     refs:
-      - "postgres:{{ .imageTag }}"
+      - "{{ .imageRepository }}:{{ .imageTag }}"
 kind:
-  name: pg-standalone
+  name: "{{ .clusterName }}"
   nodes:
     - role: control-plane
       extraPortMappings:
@@ -36,7 +42,7 @@ components:
               spec:
                 containers:
                   - name: postgresql
-                    image: "postgres:{{ .imageTag }}"
+                    image: "{{ .imageRepository }}:{{ .imageTag }}"
                     ports:
                       - containerPort: 5432
                         name: postgresql

@@ -1,9 +1,19 @@
+vars:
+  clusterName:
+    default: "gravitee"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "graviteeio/kubernetes-operator"
+    description: "GKO Docker image repository"
+  imageTag:
+    default: "latest"
+    description: "GKO Docker image tag"
 images:
   preload:
     refs:
-      - graviteeio/kubernetes-operator:latest
+      - "{{ .imageRepository }}:{{ .imageTag }}"
 kind:
-  name: gravitee-gko
+  name: "{{ .clusterName }}"
 helm:
   repos:
     - name: graviteeio
@@ -14,3 +24,8 @@ components:
     namespace: gravitee
     helm:
       chart: graviteeio/gko
+      values:
+        manager:
+          image:
+            repository: "{{ .imageRepository }}"
+            tag: "{{ .imageTag }}"

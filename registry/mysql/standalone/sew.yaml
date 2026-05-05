@@ -1,13 +1,19 @@
 vars:
+  clusterName:
+    default: "mysql-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "mysql"
+    description: "MySQL Docker image repository"
   imageTag:
     default: "9"
     description: "MySQL Docker image tag"
 images:
   preload:
     refs:
-      - "mysql:{{ .imageTag }}"
+      - "{{ .imageRepository }}:{{ .imageTag }}"
 kind:
-  name: mysql-standalone
+  name: "{{ .clusterName }}"
   nodes:
     - role: control-plane
       extraPortMappings:
@@ -36,7 +42,7 @@ components:
               spec:
                 containers:
                   - name: mysql
-                    image: "mysql:{{ .imageTag }}"
+                    image: "{{ .imageRepository }}:{{ .imageTag }}"
                     ports:
                       - containerPort: 3306
                         name: mysql

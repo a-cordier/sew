@@ -1,13 +1,19 @@
 vars:
+  clusterName:
+    default: "mongo-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "mongo"
+    description: "MongoDB Docker image repository"
   imageTag:
     default: "7"
     description: "MongoDB Docker image tag"
 images:
   preload:
     refs:
-      - "mongo:{{ .imageTag }}"
+      - "{{ .imageRepository }}:{{ .imageTag }}"
 kind:
-  name: mongo-standalone
+  name: "{{ .clusterName }}"
   nodes:
     - role: control-plane
       extraPortMappings:
@@ -36,7 +42,7 @@ components:
               spec:
                 containers:
                   - name: mongodb
-                    image: "mongo:{{ .imageTag }}"
+                    image: "{{ .imageRepository }}:{{ .imageTag }}"
                     ports:
                       - containerPort: 27017
                         name: mongodb
