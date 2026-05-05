@@ -57,8 +57,7 @@ type componentPage struct {
 	Components  []string   `yaml:"components,omitempty"`
 	Flags       []flagInfo `yaml:"flags,omitempty"`
 	Vars        []varInfo  `yaml:"vars,omitempty"`
-	NotesCreate string     `yaml:"notes_create,omitempty"`
-	Icon        string     `yaml:"icon,omitempty"`
+	Icon string `yaml:"icon,omitempty"`
 	Type        string     `yaml:"type"`
 }
 
@@ -130,10 +129,6 @@ func main() {
 		if readmeTitle != "" {
 			title = readmeTitle
 		}
-		notesCreate := readOptionalFile(filepath.Join(dir, "notes.create"))
-		clusterName := resolveKindName(relDir, configs)
-		notesCreate = strings.ReplaceAll(notesCreate, "{{ .Kind.Name }}", clusterName)
-
 		page := componentPage{
 			Title:       title,
 			Layout:      "detail",
@@ -145,7 +140,6 @@ func main() {
 			Components:  resolveComponents(relDir, configs),
 			Flags:       resolveFlags(relDir, configs, registryDir),
 			Vars:        resolveVars(relDir, configs, registryDir),
-			NotesCreate: notesCreate,
 			Icon:        resolveIcon(registryDir, relDir),
 			Type:        "registry",
 		}
@@ -224,25 +218,6 @@ func resolveComponents(relDir string, configs map[string]*sewConfig) []string {
 	}
 	walk(relDir)
 	return result
-}
-
-func resolveKindName(relDir string, configs map[string]*sewConfig) string {
-	name := "sew"
-	var walk func(string)
-	walk = func(dir string) {
-		config, ok := configs[dir]
-		if !ok {
-			return
-		}
-		for _, parent := range config.From {
-			walk(parent)
-		}
-		if config.Kind.Name != "" {
-			name = config.Kind.Name
-		}
-	}
-	walk(relDir)
-	return name
 }
 
 func resolveIcon(registryDir, relDir string) string {

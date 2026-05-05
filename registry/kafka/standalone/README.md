@@ -7,8 +7,7 @@ tags: [messaging]
 # Kafka Standalone
 
 Deploys a single-node Apache Kafka broker running in KRaft combined mode
-(controller + broker in one process, no ZooKeeper). A NodePort Service exposes
-the broker to both in-cluster and host clients.
+(no ZooKeeper) with host access on port 9092.
 
 ## Usage
 
@@ -16,24 +15,22 @@ the broker to both in-cluster and host clients.
 sew create --from kafka/standalone
 ```
 
-## Details
+## Quick Start
 
-- **Image:** `apache/kafka:latest`
-- **Heap:** 256 MB (`-Xmx256m -Xms256m`)
-- **Resources:** 250m–1 CPU, 512Mi–1Gi memory
-- **Persistence:** disabled
+List topics from your host using [kcat](https://github.com/edenhill/kcat):
 
-### Listeners
+```bash
+kcat -b localhost:9092 -L
+```
 
-| Listener    | Port | Purpose                                       |
-| ----------- | ---- | --------------------------------------------- |
-| PLAINTEXT   | 9092 | In-cluster clients connect via `kafka:9092`   |
-| CONTROLLER  | 9093 | KRaft quorum (internal only)                  |
-| EXTERNAL    | 9094 | Host access via Kind NodePort 30092 → `localhost:9092` |
+Produce and consume a test message:
 
-### Host access
+```bash
+echo "hello" | kcat -b localhost:9092 -P -t test-topic
+kcat -b localhost:9092 -C -t test-topic -e
+```
 
-Kind maps `hostPort 9092` → `containerPort 30092` (NodePort) → `targetPort 9094`
-(EXTERNAL listener). From the host, connect to `localhost:9092`.
-
-This is a minimal, persistence-free Kafka suitable for development and testing.
+| Parameter | Value     |
+|-----------|-----------|
+| Bootstrap | localhost:9092 |
+| Protocol  | PLAINTEXT |

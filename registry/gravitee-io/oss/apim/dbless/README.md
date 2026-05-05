@@ -7,8 +7,8 @@ tags: [networking]
 # APIM DB-less
 
 Deploys the Gravitee API Management gateway in DB-less mode alongside the
-Gravitee Kubernetes Operator (GKO). No database involved — APIs are defined
-entirely through Kubernetes custom resources.
+Gravitee Kubernetes Operator (GKO). APIs are defined entirely through
+Kubernetes custom resources — no database is involved.
 
 ## Usage
 
@@ -16,41 +16,21 @@ entirely through Kubernetes custom resources.
 sew create --from gravitee-io/oss/apim/dbless
 ```
 
-## Endpoints
+## Quick Start
 
-| Service        | URL                        |
-|----------------|----------------------------|
-| APIM Gateway   | http://localhost:30082      |
-
-## Context flags
-
-Optional flags you can pass to `sew create` to customize this deployment:
-
-| Flag                 | Description                                          |
-|----------------------|------------------------------------------------------|
-| `--enable-hc-vault`  | Deploy HashiCorp Vault and configure it as a secret provider |
-| `--enable-redis`     | Deploy Redis and use it for gateway rate limiting             |
+The gateway is available at [http://localhost:30082](http://localhost:30082).
+Define APIs using GKO custom resources (`ApiV4Definition`, `ApiDefinition`):
 
 ```bash
-sew create --from gravitee-io/oss/apim/dbless --enable-hc-vault
+kubectl apply -f my-api.yaml -n gravitee
 ```
 
-Use `sew info` to see the full list of flags and components for this context.
+For a guided introduction, see the Gravitee
+[APIM quick start guide](https://documentation.gravitee.io/apim/getting-started/quickstart-guide)
+and the [GKO documentation](https://documentation.gravitee.io/gko).
 
-## Details
+## Endpoints
 
-- **Kind cluster:** `gravitee-dbless`
-- **Gateway port:** `http://localhost:30082`
-- **Components:** `apim` (Helm), `gko` (Helm)
-- **Database:** none (DB-less mode)
-- **Elasticsearch:** disabled
-
-This is the lightest Gravitee APIM setup, ideal for testing gateway
-functionality and GKO-managed API definitions without any persistence layer.
-
-## Dependencies
-
-This context composes from:
-
-- `gravitee-io/oss/apim/base` — shared APIM Helm configuration and flags
-- `gravitee-io/oss/gko` — Gravitee Kubernetes Operator
+| Service      | URL                   |
+|--------------|-----------------------|
+| APIM Gateway | http://localhost:30082 |

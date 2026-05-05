@@ -16,16 +16,13 @@ into other contexts (such as `dbless` or `gateway`) via `from:`.
 sew create --from gravitee-io/oss/gko
 ```
 
-## Details
-
-- **Kind cluster:** `gravitee-gko`
-- **Components:** `gko` (Helm)
-- **Namespace:** `gravitee`
+## Quick Start
 
 GKO reconciles Gravitee custom resources (`ApiDefinition`, `ApiV4Definition`,
-`ManagementContext`, etc.) into gateway configuration. Use this context when
-you need a minimal cluster with just the operator — for example, to iterate on
-GKO itself with a local build:
+`ManagementContext`, etc.) into gateway configuration. For details, see the
+[GKO documentation](https://documentation.gravitee.io/gko).
+
+To iterate on GKO itself with a local build, compose from this context:
 
 ```yaml
 from:

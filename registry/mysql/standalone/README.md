@@ -6,8 +6,8 @@ tags: [database]
 
 # MySQL Standalone
 
-Deploys a single-replica MySQL 9 instance as a Kubernetes Deployment with
-a NodePort Service on port 3306.
+Deploys a single-node MySQL 9 instance into a local Kind cluster with
+host access on port 30306.
 
 ## Usage
 
@@ -15,19 +15,18 @@ a NodePort Service on port 3306.
 sew create --from mysql/standalone
 ```
 
-## Details
+## Quick Start
 
-- **Image:** `mysql:9`
-- **Port:** 3306
-- **Database:** `gravitee`
-- **Credentials:** `root` / `mysql`
-- **Resources:** 250m–1 CPU, 256Mi–512Mi memory
+Connect from your host:
 
-### Host access
+```bash
+mysql -h 127.0.0.1 -P 30306 -u root -pmysql gravitee
+```
 
-Kind maps `hostPort 30306` → `containerPort 30306` (NodePort) → `targetPort 3306`.
-From the host, connect to `localhost:30306`.
-
-This is a minimal, persistence-free MySQL suitable for development and
-testing. It is used as a dependency by higher-level contexts such as
-`gravitee-io/oss/apim/jdbc/mysql`.
+| Parameter | Value      |
+|-----------|------------|
+| Host      | 127.0.0.1  |
+| Port      | 30306      |
+| Database  | gravitee   |
+| User      | root       |
+| Password  | mysql      |
