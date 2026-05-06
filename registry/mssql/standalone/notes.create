@@ -1,0 +1,9 @@
+Your cluster "{{ .Kind.Name }}" is ready.
+
+MSSQL Server is available at localhost:31433.
+
+  Database   gravitee
+  User       SA
+  Password   Password1!
+
+  sqlcmd -S localhost,31433 -U SA -P 'Password1!' -C

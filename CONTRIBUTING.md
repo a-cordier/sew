@@ -242,7 +242,7 @@ composing multiple products or running them side by side:
 |-----------------------|-----------------|
 | APIM                  | 30080--30084    |
 | AM                    | 30090--30093    |
-| Standalone databases  | 30000 + standard port (e.g. PostgreSQL 30432, MySQL 30306, MongoDB 30017) |
+| Standalone databases  | 30000 + standard port (e.g. PostgreSQL 30432, MySQL 30306, MongoDB 30017, MSSQL 31433) |
 
 When adding a new product, pick the next available range and document it
 here. Last digits should match the internal container port where

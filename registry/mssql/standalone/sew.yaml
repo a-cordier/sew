@@ -1,0 +1,122 @@
+vars:
+  clusterName:
+    default: "mssql-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "mcr.microsoft.com/mssql/server"
+    description: "MSSQL Server Docker image repository"
+  imageTag:
+    default: "2022-latest"
+    description: "MSSQL Server Docker image tag"
+  saPassword:
+    default: "Password1!"
+    description: "SA account password (must meet MSSQL complexity requirements)"
+images:
+  preload:
+    refs:
+      - "{{ .imageRepository }}:{{ .imageTag }}"
+kind:
+  name: "{{ .clusterName }}"
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 31433
+          hostPort: 31433
+components:
+  - name: mssql
+    type: k8s
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: mssql
+            labels:
+              app: mssql
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: mssql
+            template:
+              metadata:
+                labels:
+                  app: mssql
+              spec:
+                containers:
+                  - name: mssql
+                    image: "{{ .imageRepository }}:{{ .imageTag }}"
+                    ports:
+                      - containerPort: 1433
+                        name: mssql
+                    env:
+                      - name: ACCEPT_EULA
+                        value: "Y"
+                      - name: MSSQL_SA_PASSWORD
+                        value: "{{ .saPassword }}"
+                      - name: MSSQL_MEMORY_LIMIT_MB
+                        value: "1536"
+                    resources:
+                      requests:
+                        cpu: 500m
+                        memory: 1Gi
+                      limits:
+                        cpu: "1"
+                        memory: 2Gi
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: mssql
+            labels:
+              app: mssql
+          spec:
+            type: NodePort
+            ports:
+              - port: 1433
+                targetPort: 1433
+                nodePort: 31433
+                name: mssql
+            selector:
+              app: mssql
+  - name: mssql-init
+    type: k8s
+    requires:
+      - component: mssql
+        conditions:
+          ready: true
+        selector:
+          matchLabels:
+            app: mssql
+        timeout: 120s
+    k8s:
+      manifests:
+        - apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: mssql-init
+          spec:
+            backoffLimit: 3
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: init-db
+                    image: "{{ .imageRepository }}:{{ .imageTag }}"
+                    command: ["/opt/mssql-tools18/bin/sqlcmd"]
+                    args:
+                      - "-S"
+                      - "mssql"
+                      - "-U"
+                      - "SA"
+                      - "-P"
+                      - "{{ .saPassword }}"
+                      - "-C"
+                      - "-Q"
+                      - "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'gravitee') CREATE DATABASE gravitee"
+                    resources:
+                      requests:
+                        cpu: 50m
+                        memory: 64Mi
+                      limits:
+                        cpu: 100m
+                        memory: 128Mi
