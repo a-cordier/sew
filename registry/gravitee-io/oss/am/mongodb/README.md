@@ -1,7 +1,7 @@
 ---
 title: "AM - MongoDB"
 description: "Gravitee Access Management with MongoDB backend"
-tags: []
+tags: [security]
 ---
 
 # AM MongoDB
