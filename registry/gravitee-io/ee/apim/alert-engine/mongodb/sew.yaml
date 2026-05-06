@@ -1,0 +1,3 @@
+from:
+  - gravitee-io/oss/apim/mongodb
+  - gravitee-io/ee/apim/alert-engine/base

@@ -1,0 +1,14 @@
+Your cluster "{{ .Kind.Name }}" is ready.
+
+Everything has been deployed in the `gravitee` namespace.
+
+{{ if not (hasFlag "disable-ui") -}}
+APIM Console     http://localhost:30080
+{{ end -}}
+{{ if and (not (hasFlag "disable-portal")) (not (hasFlag "disable-ui")) -}}
+APIM Portal      http://localhost:30081
+{{ end -}}
+APIM Gateway     http://localhost:30082
+Management API   http://localhost:30083
+
+Alert Engine is running inside the cluster (ws://alert-engine:8072).
