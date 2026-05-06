@@ -1,0 +1,78 @@
+vars:
+  clusterName:
+    default: "keycloak-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "quay.io/keycloak/keycloak"
+    description: "Keycloak Docker image repository"
+  imageTag:
+    default: "26.2.5"
+    description: "Keycloak Docker image tag"
+images:
+  preload:
+    refs:
+      - "{{ .imageRepository }}:{{ .imageTag }}"
+kind:
+  name: "{{ .clusterName }}"
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30880
+          hostPort: 30880
+components:
+  - name: keycloak
+    type: k8s
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: keycloak
+            labels:
+              app: keycloak
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: keycloak
+            template:
+              metadata:
+                labels:
+                  app: keycloak
+              spec:
+                containers:
+                  - name: keycloak
+                    image: "{{ .imageRepository }}:{{ .imageTag }}"
+                    args: ["start-dev"]
+                    ports:
+                      - containerPort: 8080
+                        name: http
+                    env:
+                      - name: KEYCLOAK_ADMIN
+                        value: admin
+                      - name: KEYCLOAK_ADMIN_PASSWORD
+                        value: admin
+                      - name: JAVA_OPTS_APPEND
+                        value: "-Xmx256m"
+                    resources:
+                      requests:
+                        cpu: 250m
+                        memory: 512Mi
+                      limits:
+                        cpu: "1"
+                        memory: 1Gi
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: keycloak
+            labels:
+              app: keycloak
+          spec:
+            type: NodePort
+            ports:
+              - port: 8080
+                targetPort: 8080
+                nodePort: 30880
+                name: http
+            selector:
+              app: keycloak
