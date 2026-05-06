@@ -1,0 +1,95 @@
+vars:
+  clusterName:
+    default: "prometheus-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "prom/prometheus"
+    description: "Prometheus Docker image repository"
+  imageTag:
+    default: "v3.4.1"
+    description: "Prometheus Docker image tag"
+images:
+  preload:
+    refs:
+      - "{{ .imageRepository }}:{{ .imageTag }}"
+kind:
+  name: "{{ .clusterName }}"
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30909
+          hostPort: 30909
+components:
+  - name: prometheus
+    type: k8s
+    k8s:
+      manifests:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: prometheus-config
+            labels:
+              app: prometheus
+          data:
+            prometheus.yml: |
+              global:
+                scrape_interval: 15s
+              scrape_configs:
+                - job_name: prometheus
+                  static_configs:
+                    - targets: ["localhost:9090"]
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: prometheus
+            labels:
+              app: prometheus
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: prometheus
+            template:
+              metadata:
+                labels:
+                  app: prometheus
+              spec:
+                containers:
+                  - name: prometheus
+                    image: "{{ .imageRepository }}:{{ .imageTag }}"
+                    args:
+                      - "--config.file=/etc/prometheus/prometheus.yml"
+                      - "--storage.tsdb.retention.time=2h"
+                      - "--storage.tsdb.retention.size=256MB"
+                    ports:
+                      - containerPort: 9090
+                        name: http
+                    volumeMounts:
+                      - name: config
+                        mountPath: /etc/prometheus
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 256Mi
+                      limits:
+                        cpu: 500m
+                        memory: 512Mi
+                volumes:
+                  - name: config
+                    configMap:
+                      name: prometheus-config
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: prometheus
+            labels:
+              app: prometheus
+          spec:
+            type: NodePort
+            ports:
+              - port: 9090
+                targetPort: 9090
+                nodePort: 30909
+                name: http
+            selector:
+              app: prometheus
