@@ -1,0 +1,78 @@
+vars:
+  clusterName:
+    default: "mailhog-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "mailhog/mailhog"
+    description: "MailHog Docker image repository"
+  imageTag:
+    default: "latest"
+    description: "MailHog Docker image tag"
+images:
+  preload:
+    refs:
+      - "{{ .imageRepository }}:{{ .imageTag }}"
+kind:
+  name: "{{ .clusterName }}"
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30825
+          hostPort: 30825
+        - containerPort: 31025
+          hostPort: 31025
+components:
+  - name: mailhog
+    type: k8s
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: mailhog
+            labels:
+              app: mailhog
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: mailhog
+            template:
+              metadata:
+                labels:
+                  app: mailhog
+              spec:
+                containers:
+                  - name: mailhog
+                    image: "{{ .imageRepository }}:{{ .imageTag }}"
+                    ports:
+                      - containerPort: 8025
+                        name: ui
+                      - containerPort: 1025
+                        name: smtp
+                    resources:
+                      requests:
+                        cpu: 50m
+                        memory: 64Mi
+                      limits:
+                        cpu: 100m
+                        memory: 128Mi
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: mailhog
+            labels:
+              app: mailhog
+          spec:
+            type: NodePort
+            ports:
+              - port: 8025
+                targetPort: 8025
+                nodePort: 30825
+                name: ui
+              - port: 1025
+                targetPort: 1025
+                nodePort: 31025
+                name: smtp
+            selector:
+              app: mailhog

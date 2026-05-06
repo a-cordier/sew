@@ -1,0 +1,6 @@
+Your cluster "{{ .Kind.Name }}" is ready.
+
+MailHog is available at http://localhost:30825 (in-memory storage).
+
+  Web UI     http://localhost:30825
+  SMTP       localhost:31025
