@@ -189,6 +189,7 @@ variant's README.
 | `observability` | Logging, metrics, tracing |
 | `search` | Search and indexing engines |
 | `security` | Secrets management, auth, certificates |
+| `ai` | LLM, MCP, A2A |
 
 - `sew validate --tags registry/tags.yaml` enforces this vocabulary;
   CI rejects unknown tags.
