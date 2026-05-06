@@ -1,0 +1,52 @@
+vars:
+  clusterName:
+    default: "opensearch-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "opensearchproject/opensearch"
+    description: "OpenSearch Docker image repository"
+  imageTag:
+    default: "3.0.0"
+    description: "OpenSearch Docker image tag"
+images:
+  preload:
+    refs:
+      - "{{ .imageRepository }}:{{ .imageTag }}"
+kind:
+  name: "{{ .clusterName }}"
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30921
+          hostPort: 30921
+helm:
+  repos:
+    - name: opensearch
+      url: https://opensearch-project.github.io/helm-charts/
+components:
+  - name: opensearch
+    type: helm
+    helm:
+      chart: opensearch/opensearch
+      values:
+        image:
+          repository: "{{ .imageRepository }}"
+          tag: "{{ .imageTag }}"
+        singleNode: true
+        replicas: 1
+        opensearchJavaOpts: "-Xmx256m -Xms256m"
+        extraEnvs:
+          - name: DISABLE_SECURITY_PLUGIN
+            value: "true"
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        service:
+          type: NodePort
+          nodePort: 30921
+        persistence:
+          enabled: false
