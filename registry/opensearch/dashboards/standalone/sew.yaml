@@ -1,0 +1,88 @@
+vars:
+  clusterName:
+    default: "opensearch-dashboards-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "opensearchproject/opensearch-dashboards"
+    description: "OpenSearch Dashboards Docker image repository"
+  imageTag:
+    default: "3.0.0"
+    description: "OpenSearch Dashboards Docker image tag"
+  opensearchUrl:
+    default: "http://opensearch-cluster-master:9200"
+    description: "OpenSearch endpoint Dashboards connects to"
+from:
+  - opensearch/standalone
+images:
+  preload:
+    refs:
+      - "{{ .imageRepository }}:{{ .imageTag }}"
+kind:
+  name: "{{ .clusterName }}"
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30601
+          hostPort: 30601
+components:
+  - name: opensearch-dashboards
+    type: k8s
+    requires:
+      - component: opensearch
+        conditions:
+          ready: true
+        selector:
+          matchLabels:
+            app.kubernetes.io/name: opensearch
+        timeout: 5m
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: opensearch-dashboards
+            labels:
+              app: opensearch-dashboards
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: opensearch-dashboards
+            template:
+              metadata:
+                labels:
+                  app: opensearch-dashboards
+              spec:
+                containers:
+                  - name: dashboards
+                    image: "{{ .imageRepository }}:{{ .imageTag }}"
+                    ports:
+                      - containerPort: 5601
+                        name: http
+                    env:
+                      - name: OPENSEARCH_HOSTS
+                        value: '["{{ .opensearchUrl }}"]'
+                      - name: DISABLE_SECURITY_DASHBOARDS_PLUGIN
+                        value: "true"
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 256Mi
+                      limits:
+                        cpu: 500m
+                        memory: 512Mi
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: opensearch-dashboards
+            labels:
+              app: opensearch-dashboards
+          spec:
+            type: NodePort
+            ports:
+              - port: 5601
+                targetPort: 5601
+                nodePort: 30601
+                name: http
+            selector:
+              app: opensearch-dashboards
