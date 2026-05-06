@@ -10,3 +10,5 @@
   description: Search and indexing engines
 - name: security
   description: Secrets management, auth, certificates
+- name: sink
+  description: Test endpoints for email, webhooks, and other outputs
