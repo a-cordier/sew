@@ -1,10 +1,10 @@
 ---
-title: "MongoDB - Standalone"
-description: "Single-node MongoDB 7 deployment for Kubernetes"
+title: "MongoDB"
+description: "Single-node MongoDB deployment for Kubernetes"
 tags: [database]
 ---
 
-# MongoDB Standalone
+# MongoDB
 
 Deploys a single-node MongoDB 7 instance into a local Kind cluster with
 host access on port 30017. Authentication is disabled.

@@ -122,6 +122,8 @@ registry/
 │       └── edge-stack/         # Ambassador Edge Stack
 ├── kafka/
 │   └── standalone/
+├── keycloak/
+│   └── standalone/
 ├── mongodb/
 │   └── standalone/
 ├── mysql/
@@ -193,6 +195,7 @@ variant's README.
 | `observability` | Logging, metrics, tracing |
 | `search` | Search and indexing engines |
 | `security` | Secrets management, auth, certificates |
+| `ai` | LLM, MCP, A2A |
 
 - `sew validate --tags registry/tags.yaml` enforces this vocabulary;
   CI rejects unknown tags.
@@ -244,8 +247,10 @@ composing multiple products or running them side by side:
 
 | Product / Context     | NodePort range  |
 |-----------------------|-----------------|
-| APIM                  | 30080--30084    |
+| APIM                  | 30080--30085    |
 | AM                    | 30090--30093    |
+| Keycloak              | 30880           |
+| Prometheus            | 30909           |
 | Standalone databases  | 30000 + standard port (e.g. PostgreSQL 30432, MySQL 30306, MongoDB 30017, MSSQL 31433) |
 
 When adding a new product, pick the next available range and document it

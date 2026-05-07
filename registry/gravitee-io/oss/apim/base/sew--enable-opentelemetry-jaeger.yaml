@@ -1,0 +1,89 @@
+description: "Deploy Jaeger and enable OpenTelemetry tracing on the gateway"
+images:
+  preload:
+    refs:
+      - jaegertracing/all-in-one:1.60
+components:
+  - name: jaeger
+    type: k8s
+    namespace: gravitee
+    conditions:
+      ready: true
+    selector:
+      matchLabels:
+        app: jaeger
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: jaeger
+            labels:
+              app: jaeger
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: jaeger
+            template:
+              metadata:
+                labels:
+                  app: jaeger
+              spec:
+                containers:
+                  - name: jaeger
+                    image: jaegertracing/all-in-one:1.60
+                    env:
+                      - name: COLLECTOR_OTLP_ENABLED
+                        value: "true"
+                    ports:
+                      - containerPort: 16686
+                        name: ui
+                      - containerPort: 4317
+                        name: otlp-grpc
+                      - containerPort: 4318
+                        name: otlp-http
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 128Mi
+                      limits:
+                        cpu: 500m
+                        memory: 512Mi
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: jaeger
+            labels:
+              app: jaeger
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 16686
+                targetPort: 16686
+                name: ui
+              - port: 4317
+                targetPort: 4317
+                name: otlp-grpc
+              - port: 4318
+                targetPort: 4318
+                name: otlp-http
+            selector:
+              app: jaeger
+  - name: apim
+    requires:
+      - component: jaeger
+        conditions:
+          ready: true
+        selector:
+          matchLabels:
+            app: jaeger
+        timeout: 5m
+    helm:
+      values:
+        gateway:
+          env:
+            - name: gravitee_services_opentelemetry_enabled
+              value: "true"
+            - name: gravitee_services_opentelemetry_exporter_otlp_endpoint
+              value: "http://jaeger:4317"

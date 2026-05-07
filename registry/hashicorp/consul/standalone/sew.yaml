@@ -1,0 +1,57 @@
+vars:
+  clusterName:
+    default: "consul-standalone"
+    description: "Name of the Kind cluster"
+  imageRepository:
+    default: "hashicorp/consul"
+    description: "Consul Docker image repository"
+  imageTag:
+    default: "1.20.5"
+    description: "Consul Docker image tag"
+images:
+  preload:
+    refs:
+      - "{{ .imageRepository }}:{{ .imageTag }}"
+kind:
+  name: "{{ .clusterName }}"
+  nodes:
+    - role: control-plane
+      extraPortMappings:
+        - containerPort: 30500
+          hostPort: 30500
+helm:
+  repos:
+    - name: hashicorp
+      url: https://helm.releases.hashicorp.com
+components:
+  - name: consul
+    type: helm
+    helm:
+      chart: hashicorp/consul
+      values:
+        global:
+          image: "{{ .imageRepository }}:{{ .imageTag }}"
+          datacenter: dc1
+        server:
+          replicas: 1
+          bootstrapExpect: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          storage: 256Mi
+          storageClass: null
+        client:
+          enabled: false
+        ui:
+          enabled: true
+          service:
+            type: NodePort
+            nodePort:
+              http: 30500
+              https: null
+        connectInject:
+          enabled: false

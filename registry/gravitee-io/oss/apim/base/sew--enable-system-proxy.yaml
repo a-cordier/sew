@@ -1,0 +1,84 @@
+description: "Deploy mitmproxy and configure APIM HTTP client proxy"
+images:
+  preload:
+    refs:
+      - mitmproxy/mitmproxy:latest
+components:
+  - name: mitmproxy
+    type: k8s
+    namespace: gravitee
+    conditions:
+      ready: true
+    selector:
+      matchLabels:
+        app: mitmproxy
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: mitmproxy
+            labels:
+              app: mitmproxy
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: mitmproxy
+            template:
+              metadata:
+                labels:
+                  app: mitmproxy
+              spec:
+                containers:
+                  - name: mitmproxy
+                    image: mitmproxy/mitmproxy:latest
+                    command: ["mitmdump"]
+                    ports:
+                      - containerPort: 8080
+                        name: proxy
+                      - containerPort: 8081
+                        name: web
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 128Mi
+                      limits:
+                        cpu: 250m
+                        memory: 256Mi
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: mitmproxy
+            labels:
+              app: mitmproxy
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 8080
+                targetPort: 8080
+                name: proxy
+              - port: 8081
+                targetPort: 8081
+                name: web
+            selector:
+              app: mitmproxy
+  - name: apim
+    requires:
+      - component: mitmproxy
+        conditions:
+          ready: true
+        selector:
+          matchLabels:
+            app: mitmproxy
+        timeout: 5m
+    helm:
+      values:
+        gateway:
+          env:
+            - name: gravitee_httpClient_proxy_type
+              value: HTTP
+            - name: gravitee_httpClient_proxy_host
+              value: mitmproxy
+            - name: gravitee_httpClient_proxy_port
+              value: "8080"

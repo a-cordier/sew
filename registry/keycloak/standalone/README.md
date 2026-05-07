@@ -1,10 +1,10 @@
 ---
-title: "Keycloak - Standalone"
+title: "Keycloak"
 description: "Keycloak identity provider in dev mode"
 tags: [security]
 ---
 
-# Keycloak Standalone
+# Keycloak
 
 Deploys a Keycloak server in development mode into a local Kind cluster
 with host access on port 30880. Uses an embedded H2 database with no

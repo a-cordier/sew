@@ -95,24 +95,24 @@ components:
           metadata:
             name: mssql-init
           spec:
-            backoffLimit: 3
+            backoffLimit: 0
             template:
               spec:
                 restartPolicy: Never
                 containers:
                   - name: init-db
                     image: "{{ .imageRepository }}:{{ .imageTag }}"
-                    command: ["/opt/mssql-tools18/bin/sqlcmd"]
+                    command: ["/bin/bash", "-c"]
                     args:
-                      - "-S"
-                      - "mssql"
-                      - "-U"
-                      - "SA"
-                      - "-P"
-                      - "{{ .saPassword }}"
-                      - "-C"
-                      - "-Q"
-                      - "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'gravitee') CREATE DATABASE gravitee"
+                      - |
+                        for i in $(seq 1 30); do
+                          /opt/mssql-tools18/bin/sqlcmd -S mssql -U SA -P '{{ .saPassword }}' -C -Q \
+                            "IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'gravitee') CREATE DATABASE gravitee" \
+                            && exit 0
+                          echo "Attempt $i failed, retrying in 2s..."
+                          sleep 2
+                        done
+                        exit 1
                     resources:
                       requests:
                         cpu: 50m

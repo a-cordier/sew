@@ -1,0 +1,102 @@
+description: "Deploy Prometheus and enable APIM metrics"
+images:
+  preload:
+    refs:
+      - prom/prometheus:v3.4.1
+components:
+  - name: prometheus
+    type: k8s
+    namespace: gravitee
+    conditions:
+      ready: true
+    selector:
+      matchLabels:
+        app: prometheus
+    k8s:
+      manifests:
+        - apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: prometheus-config
+            labels:
+              app: prometheus
+          data:
+            prometheus.yml: |
+              global:
+                scrape_interval: 15s
+              scrape_configs:
+                - job_name: prometheus
+                  static_configs:
+                    - targets: ["localhost:9090"]
+                - job_name: apim-gateway
+                  static_configs:
+                    - targets: ["apim-apim-gateway:18082"]
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: prometheus
+            labels:
+              app: prometheus
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: prometheus
+            template:
+              metadata:
+                labels:
+                  app: prometheus
+              spec:
+                containers:
+                  - name: prometheus
+                    image: prom/prometheus:v3.4.1
+                    args:
+                      - "--config.file=/etc/prometheus/prometheus.yml"
+                      - "--storage.tsdb.retention.time=2h"
+                      - "--storage.tsdb.retention.size=256MB"
+                    ports:
+                      - containerPort: 9090
+                        name: http
+                    volumeMounts:
+                      - name: config
+                        mountPath: /etc/prometheus
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 256Mi
+                      limits:
+                        cpu: 500m
+                        memory: 512Mi
+                volumes:
+                  - name: config
+                    configMap:
+                      name: prometheus-config
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: prometheus
+            labels:
+              app: prometheus
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 9090
+                targetPort: 9090
+                name: http
+            selector:
+              app: prometheus
+  - name: apim
+    helm:
+      values:
+        gateway:
+          env:
+            - name: gravitee_services_metrics_enabled
+              value: "true"
+            - name: gravitee_services_metrics_prometheus_enabled
+              value: "true"
+            - name: gravitee_services_core_http_enabled
+              value: "true"
+            - name: gravitee_services_core_http_host
+              value: "0.0.0.0"
+            - name: gravitee_services_core_http_port
+              value: "18082"

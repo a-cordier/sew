@@ -1,0 +1,15 @@
+description: "Add a TCP protocol listener on the gateway"
+components:
+  - name: apim
+    helm:
+      values:
+        gateway:
+          servers:
+            - type: tcp
+              port: 4082
+              service:
+                type: NodePort
+                nodePort: 30085
+                externalPort: 85
+              ingress:
+                enabled: false

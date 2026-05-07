@@ -1,0 +1,5 @@
+Your cluster "{{ .Kind.Name }}" is ready.
+
+Consul is available at http://localhost:30500.
+
+  open http://localhost:30500

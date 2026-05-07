@@ -1,10 +1,10 @@
 ---
-title: "MySQL - Standalone"
-description: "Single-node MySQL 9 deployment for Kubernetes"
+title: "MySQL"
+description: "Single-node MySQL deployment for Kubernetes"
 tags: [database]
 ---
 
-# MySQL Standalone
+# MySQL
 
 Deploys a single-node MySQL 9 instance into a local Kind cluster with
 host access on port 30306.

@@ -1,10 +1,10 @@
 ---
-title: "Kibana - Standalone"
+title: "Kibana"
 description: "Kibana dashboard for Elasticsearch"
 tags: [observability]
 ---
 
-# Kibana Standalone
+# Kibana
 
 Deploys Kibana alongside a single-node Elasticsearch cluster into a
 local Kind cluster. Kibana UI is accessible on port 30601 and

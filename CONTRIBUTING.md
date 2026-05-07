@@ -243,8 +243,9 @@ composing multiple products or running them side by side:
 
 | Product / Context     | NodePort range  |
 |-----------------------|-----------------|
-| APIM                  | 30080--30084    |
+| APIM                  | 30080--30085    |
 | AM                    | 30090--30093    |
+| Consul                | 30500           |
 | Keycloak              | 30880           |
 | Prometheus            | 30909           |
 | Standalone databases  | 30000 + standard port (e.g. PostgreSQL 30432, MySQL 30306, MongoDB 30017, MSSQL 31433) |

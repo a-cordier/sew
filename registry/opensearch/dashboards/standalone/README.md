@@ -1,10 +1,10 @@
 ---
-title: "OpenSearch Dashboards - Standalone"
+title: "OpenSearch Dashboards"
 description: "OpenSearch Dashboards visualization UI"
 tags: [observability]
 ---
 
-# OpenSearch Dashboards Standalone
+# OpenSearch Dashboards
 
 Deploys OpenSearch Dashboards alongside a single-node OpenSearch cluster
 into a local Kind cluster. Dashboards UI is accessible on port 30601 and

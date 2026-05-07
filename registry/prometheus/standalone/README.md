@@ -1,10 +1,10 @@
 ---
-title: "Prometheus - Standalone"
+title: "Prometheus"
 description: "Prometheus metrics collection server"
 tags: [observability]
 ---
 
-# Prometheus Standalone
+# Prometheus
 
 Deploys a Prometheus server into a local Kind cluster with host access
 on port 30909. Configured with minimal retention (2h / 256MB) for

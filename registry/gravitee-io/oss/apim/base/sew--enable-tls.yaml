@@ -1,0 +1,15 @@
+description: "Enable TLS termination on the gateway"
+components:
+  - name: apim
+    helm:
+      values:
+        gateway:
+          env:
+            - name: gravitee_http_secured
+              value: "true"
+            - name: gravitee_http_ssl_keystore_type
+              value: pem
+            - name: gravitee_http_ssl_keystore_certificates_0_cert
+              value: /opt/graviteeio-gateway/tls/tls.crt
+            - name: gravitee_http_ssl_keystore_certificates_0_key
+              value: /opt/graviteeio-gateway/tls/tls.key

@@ -1,0 +1,16 @@
+abstract: true
+from:
+  - gravitee-io/oss/apim/base
+components:
+  - name: elasticsearch
+    enabled: false
+  - name: apim
+    helm:
+      values:
+        es:
+          endpoints:
+            - http://opensearch-cluster-master:9200
+        gateway:
+          reporters:
+            elasticsearch:
+              enabled: true

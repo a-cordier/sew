@@ -1,10 +1,10 @@
 ---
-title: "Kafka - Standalone"
+title: "Kafka"
 description: "Single-node Kafka broker in KRaft combined mode"
 tags: [messaging]
 ---
 
-# Kafka Standalone
+# Kafka
 
 Deploys a single-node Apache Kafka broker running in KRaft combined mode
 (no ZooKeeper) with host access on port 9092.

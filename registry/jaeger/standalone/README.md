@@ -1,10 +1,10 @@
 ---
-title: "Jaeger - Standalone"
+title: "Jaeger"
 description: "Jaeger all-in-one distributed tracing backend"
 tags: [observability]
 ---
 
-# Jaeger Standalone
+# Jaeger
 
 Deploys a Jaeger all-in-one instance into a local Kind cluster with
 host access on port 30686 (UI), 30317 (OTLP gRPC), and 30318 (OTLP HTTP).

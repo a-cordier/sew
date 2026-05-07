@@ -1,10 +1,10 @@
 ---
-title: "Vault - Standalone"
+title: "Vault"
 description: "Single-node HashiCorp Vault in dev mode"
 tags: [security]
 ---
 
-# Vault Standalone
+# Vault
 
 Deploys a single-node HashiCorp Vault server in dev mode (pre-unsealed,
 in-memory backend) with host access on port 30820.

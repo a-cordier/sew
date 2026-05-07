@@ -1,10 +1,10 @@
 ---
-title: "Elasticsearch - Standalone"
+title: "Elasticsearch"
 description: "Single-node Elasticsearch cluster"
-tags: [search]
+tags: [search, observability]
 ---
 
-# Elasticsearch Standalone
+# Elasticsearch
 
 Deploys a single-node Elasticsearch cluster into a local Kind cluster with
 host access on port 30920. Security is disabled for lightweight development.

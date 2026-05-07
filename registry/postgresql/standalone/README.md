@@ -1,10 +1,10 @@
 ---
-title: "PostgreSQL - Standalone"
-description: "Single-node PostgreSQL 17 deployment for Kubernetes"
+title: "PostgreSQL"
+description: "Single-node PostgreSQL deployment for Kubernetes"
 tags: [database]
 ---
 
-# PostgreSQL Standalone
+# PostgreSQL
 
 Deploys a single-node PostgreSQL 17 instance into a local Kind cluster with
 host access on port 30432.

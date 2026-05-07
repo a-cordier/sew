@@ -1,10 +1,10 @@
 ---
-title: "MSSQL Server - Standalone"
-description: "Single-node Microsoft SQL Server 2022 deployment for Kubernetes"
+title: "MSSQL Server"
+description: "Single-node Microsoft SQL Server deployment for Kubernetes"
 tags: [database]
 ---
 
-# MSSQL Server Standalone
+# MSSQL Server
 
 Deploys a single-node Microsoft SQL Server 2022 instance into a local Kind
 cluster with host access on port 31433. An init Job creates a `gravitee`

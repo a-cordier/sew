@@ -1,0 +1,62 @@
+description: "Deploy Eureka and configure APIM service discovery"
+images:
+  preload:
+    refs:
+      - springcloud/eureka:latest
+components:
+  - name: eureka
+    type: k8s
+    namespace: gravitee
+    conditions:
+      ready: true
+    selector:
+      matchLabels:
+        app: eureka
+    k8s:
+      manifests:
+        - apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: eureka
+            labels:
+              app: eureka
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: eureka
+            template:
+              metadata:
+                labels:
+                  app: eureka
+              spec:
+                containers:
+                  - name: eureka
+                    image: springcloud/eureka:latest
+                    ports:
+                      - containerPort: 8761
+                        name: http
+                    env:
+                      - name: JAVA_OPTS
+                        value: "-Xmx256m -Xms256m"
+                    resources:
+                      requests:
+                        cpu: 250m
+                        memory: 256Mi
+                      limits:
+                        cpu: 500m
+                        memory: 512Mi
+        - apiVersion: v1
+          kind: Service
+          metadata:
+            name: eureka
+            labels:
+              app: eureka
+          spec:
+            type: ClusterIP
+            ports:
+              - port: 8761
+                targetPort: 8761
+                name: http
+            selector:
+              app: eureka

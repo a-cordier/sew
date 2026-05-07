@@ -1,0 +1,10 @@
+description: "Configure gateway with sharding tags (internal/external)"
+components:
+  - name: apim
+    helm:
+      values:
+        gateway:
+          sharding_tags: external,internal
+          env:
+            - name: gravitee_tags
+              value: "external,internal"

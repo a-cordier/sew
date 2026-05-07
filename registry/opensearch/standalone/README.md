@@ -1,10 +1,10 @@
 ---
-title: "OpenSearch - Standalone"
+title: "OpenSearch"
 description: "Single-node OpenSearch cluster"
-tags: [search]
+tags: [search, observability]
 ---
 
-# OpenSearch Standalone
+# OpenSearch
 
 Deploys a single-node OpenSearch cluster into a local Kind cluster with
 host access on port 30921. Security is disabled for lightweight development.

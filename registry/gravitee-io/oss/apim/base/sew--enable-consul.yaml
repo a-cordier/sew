@@ -1,0 +1,45 @@
+description: "Deploy Consul and configure APIM service discovery"
+images:
+  preload:
+    refs:
+      - hashicorp/consul:1.20.5
+helm:
+  repos:
+    - name: hashicorp
+      url: https://helm.releases.hashicorp.com
+components:
+  - name: consul
+    type: helm
+    namespace: gravitee
+    conditions:
+      ready: true
+    selector:
+      matchLabels:
+        app: consul
+        component: server
+    helm:
+      chart: hashicorp/consul
+      values:
+        global:
+          image: hashicorp/consul:1.20.5
+          datacenter: dc1
+        server:
+          replicas: 1
+          bootstrapExpect: 1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          storage: 256Mi
+          storageClass: null
+        client:
+          enabled: false
+        ui:
+          enabled: true
+          service:
+            type: ClusterIP
+        connectInject:
+          enabled: false

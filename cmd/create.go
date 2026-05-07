@@ -63,6 +63,8 @@ func runUp(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
+	cfg.Kind.MergeWithContext(&resolved.Kind)
+
 	return createCluster(resolved, activeFlags)
 }
 
