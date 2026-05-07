@@ -28,6 +28,7 @@ When writing or updating documentation:
 - The target audience is experienced developers who work with Kubernetes daily. Do not document self-explanatory error messages or explain basic skills (starting Docker, fixing typos in paths, etc.). Troubleshooting entries should address problems where the cause or fix is genuinely non-obvious.
 - Every code block showing a command the user should run must be copyable (wrapped in a fenced code block).
 - Use blockquotes (`>`) for callouts and notes, not bold prefixes like "**Note:**" -- the styling already conveys that it's a note.
+- External links in Markdown content (READMEs, docs pages) must always use full `https://` URLs. The site's `render-link.html` hook automatically adds `target="_blank" rel="noopener"` to any link starting with `http`, so external links open in a new tab. Do not add raw HTML `<a>` tags to work around this -- standard Markdown links are sufficient.
 
 ## Agent-specific rules
 
