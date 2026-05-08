@@ -9,10 +9,26 @@ tags: [messaging]
 Deploys a single-node Apache Kafka broker running in KRaft combined mode
 (no ZooKeeper) with host access on port 9092.
 
+## Install sew
+
+```bash
+go install github.com/a-cordier/sew@latest
+```
+
+For other installation methods, see [Installation](https://a-cordier.github.io/sew/docs/getting-started/installation/).
+
 ## Usage
+
+### Create
 
 ```bash
 sew create --from kafka/standalone
+```
+
+### Cleanup
+
+```bash
+sew delete
 ```
 
 ## Quick Start

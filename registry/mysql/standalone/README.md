@@ -9,10 +9,26 @@ tags: [database]
 Deploys a single-node MySQL 9 instance into a local Kind cluster with
 host access on port 30306.
 
+## Install sew
+
+```bash
+go install github.com/a-cordier/sew@latest
+```
+
+For other installation methods, see [Installation](https://a-cordier.github.io/sew/docs/getting-started/installation/).
+
 ## Usage
+
+### Create
 
 ```bash
 sew create --from mysql/standalone
+```
+
+### Cleanup
+
+```bash
+sew delete
 ```
 
 ## Quick Start

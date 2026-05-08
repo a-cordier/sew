@@ -10,10 +10,26 @@ Deploys a single-node HashiCorp Consul server into a local Kind cluster
 with host access on port 30500 (UI). Useful for service discovery and
 key-value storage in development.
 
+## Install sew
+
+```bash
+go install github.com/a-cordier/sew@latest
+```
+
+For other installation methods, see [Installation](https://a-cordier.github.io/sew/docs/getting-started/installation/).
+
 ## Usage
+
+### Create
 
 ```bash
 sew create --from hashicorp/consul/standalone
+```
+
+### Cleanup
+
+```bash
+sew delete
 ```
 
 ## Quick Start

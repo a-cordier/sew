@@ -9,10 +9,26 @@ tags: [networking]
 Deploys Ambassador Edge Stack, a Kubernetes-native API gateway built on
 Envoy Proxy, into a local Kind cluster.
 
+## Install sew
+
+```bash
+go install github.com/a-cordier/sew@latest
+```
+
+For other installation methods, see [Installation](https://a-cordier.github.io/sew/docs/getting-started/installation/).
+
 ## Usage
+
+### Create
 
 ```bash
 sew create --from gravitee-io/ee/edge-stack
+```
+
+### Cleanup
+
+```bash
+sew delete
 ```
 
 ## Quick Start

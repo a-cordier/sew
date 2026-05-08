@@ -10,10 +10,26 @@ Deploys OpenSearch Dashboards alongside a single-node OpenSearch cluster
 into a local Kind cluster. Dashboards UI is accessible on port 30601 and
 OpenSearch on port 30921. Security is disabled for lightweight development.
 
+## Install sew
+
+```bash
+go install github.com/a-cordier/sew@latest
+```
+
+For other installation methods, see [Installation](https://a-cordier.github.io/sew/docs/getting-started/installation/).
+
 ## Usage
+
+### Create
 
 ```bash
 sew create --from opensearch/dashboards/standalone
+```
+
+### Cleanup
+
+```bash
+sew delete
 ```
 
 ## Quick Start

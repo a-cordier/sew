@@ -10,13 +10,13 @@ Deploys the Gravitee Kubernetes Operator (GKO) configured as a Kubernetes
 Gateway API controller. Sets up a `GatewayClass` and its parameters so that
 `Gateway` and `HTTPRoute` resources are reconciled by GKO.
 
-## Usage
+## Install sew
 
 ```bash
-sew create --from gravitee-io/oss/apim/gateway
+go install github.com/a-cordier/sew@latest
 ```
 
-## Prerequisites
+For other installation methods, see [Installation](https://a-cordier.github.io/sew/docs/getting-started/installation/).
 
 This context uses DNS to resolve in-cluster services by hostname. After
 creating the cluster, run the one-time OS setup so these hostnames resolve
@@ -27,6 +27,20 @@ sew setup dns
 ```
 
 See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns) for details.
+
+## Usage
+
+### Create
+
+```bash
+sew create --from gravitee-io/oss/apim/gateway
+```
+
+### Cleanup
+
+```bash
+sew delete
+```
 
 ## Quick Start
 

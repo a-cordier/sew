@@ -11,10 +11,26 @@ host access on port 30686 (UI), 30317 (OTLP gRPC), and 30318 (OTLP HTTP).
 Uses in-memory storage for lightweight development — traces are lost on
 restart.
 
+## Install sew
+
+```bash
+go install github.com/a-cordier/sew@latest
+```
+
+For other installation methods, see [Installation](https://a-cordier.github.io/sew/docs/getting-started/installation/).
+
 ## Usage
+
+### Create
 
 ```bash
 sew create --from jaeger/standalone
+```
+
+### Cleanup
+
+```bash
+sew delete
 ```
 
 ## Quick Start

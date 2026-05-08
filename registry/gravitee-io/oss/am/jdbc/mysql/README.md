@@ -9,10 +9,26 @@ tags: [networking, security]
 Deploys a full Gravitee Access Management stack (Console UI, Gateway, and
 Management API) backed by MySQL via JDBC for persistence.
 
+## Install sew
+
+```bash
+go install github.com/a-cordier/sew@latest
+```
+
+For other installation methods, see [Installation](https://a-cordier.github.io/sew/docs/getting-started/installation/).
+
 ## Usage
+
+### Create
 
 ```bash
 sew create --from gravitee-io/oss/am/jdbc/mysql
+```
+
+### Cleanup
+
+```bash
+sew delete
 ```
 
 ## Quick Start

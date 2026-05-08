@@ -13,13 +13,13 @@ is enabled by default, allowing the APIM Gateway to act as a Kafka
 proxy — clients connect using the Kafka protocol via
 `*.kafka.sew.local:9092` with TLS.
 
-## Usage
+## Install sew
 
 ```bash
-sew create --from gravitee-io/ee/apim/jdbc/mssql
+go install github.com/a-cordier/sew@latest
 ```
 
-## Prerequisites
+For other installation methods, see [Installation](https://a-cordier.github.io/sew/docs/getting-started/installation/).
 
 This context uses DNS for host-based Kafka routing (`*.kafka.sew.local`).
 After creating the cluster, run the one-time OS setup so these hostnames
@@ -35,6 +35,20 @@ sew setup dns
 > `sew delete` commands run without elevated privileges.
 
 See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns) for details.
+
+## Usage
+
+### Create
+
+```bash
+sew create --from gravitee-io/ee/apim/jdbc/mssql
+```
+
+### Cleanup
+
+```bash
+sew delete
+```
 
 ## Quick Start
 
