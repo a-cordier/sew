@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.0](https://github.com/a-cordier/sew/compare/v0.17.0...v0.18.0) (2026-05-08)
+
+
+### Features
+
+* enhance and polish registry ([adb16a0](https://github.com/a-cordier/sew/commit/adb16a0052b79be9509f81a55c83909f58fa42ba))
+
 ## [0.17.0](https://github.com/a-cordier/sew/compare/v0.16.0...v0.17.0) (2026-05-04)
 
 
