@@ -1,0 +1,3 @@
+from:
+  - gravitee-io/oss/apim/jdbc/mssql
+  - gravitee-io/ee/apim/base

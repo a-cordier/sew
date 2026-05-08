@@ -1,5 +1,5 @@
 ---
-title: "APIM - MongoDB"
+title: "APIM OSS - MongoDB"
 description: "Gravitee APIM with MongoDB backend and Elasticsearch"
 tags: [networking]
 ---

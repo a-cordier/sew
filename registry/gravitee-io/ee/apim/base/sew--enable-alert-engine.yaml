@@ -1,4 +1,4 @@
-abstract: true
+description: "Deploy Alert Engine and wire APIM gateway + management API to send alerts"
 vars:
   alertEngineImageRepository:
     default: "graviteeio/ae-engine"
@@ -11,14 +11,6 @@ images:
     refs:
       - "{{ .alertEngineImageRepository }}:{{ .alertEngineImageTag }}"
 components:
-  - name: license
-    type: k8s
-    namespace: gravitee
-    k8s:
-      secrets:
-        - name: gravitee-license
-          fromFile: '{{ env "HOME" }}/opt/gravitee/license.key'
-          onMissing: ignore
   - name: alert-engine
     type: k8s
     namespace: gravitee
@@ -101,37 +93,7 @@ components:
         timeout: 10m
     helm:
       values:
-        license:
-          name: gravitee-license
-        gateway:
-          extraVolumes: |
-            - name: graviteeio-license
-              secret:
-                secretName: gravitee-license
-          extraVolumeMounts: |
-            - name: graviteeio-license
-              mountPath: /opt/graviteeio-gateway/license
-              readOnly: true
-          env:
-            - name: gravitee_alerts_alert-engine_enabled
-              value: "true"
-            - name: gravitee_alerts_alert-engine_ws_discovery
-              value: "true"
-            - name: gravitee_alerts_alert-engine_ws_endpoints_0
-              value: "ws://alert-engine:8072"
-        api:
-          extraVolumes: |
-            - name: graviteeio-license
-              secret:
-                secretName: gravitee-license
-          extraVolumeMounts: |
-            - name: graviteeio-license
-              mountPath: /opt/graviteeio-management-api/license
-              readOnly: true
-          env:
-            - name: gravitee_alerts_alert-engine_enabled
-              value: "true"
-            - name: gravitee_alerts_alert-engine_ws_discovery
-              value: "true"
-            - name: gravitee_alerts_alert-engine_ws_endpoints_0
-              value: "ws://alert-engine:8072"
+        alerts:
+          enabled: true
+          endpoints:
+            - ws://alert-engine:8072

@@ -1,29 +1,37 @@
 ---
-title: "APIM - Kafka MongoDB"
-description: "Gravitee APIM with Kafka Gateway and MongoDB backend"
+title: "APIM EE - MongoDB"
+description: "Gravitee APIM Enterprise Edition with MongoDB backend"
 tags: [networking, messaging]
 ---
 
-# APIM Kafka MongoDB
+# APIM EE MongoDB
 
-Deploys a full Gravitee API Management stack with Kafka Gateway enabled,
-backed by MongoDB for persistence and Elasticsearch for analytics.
+Deploys a full Gravitee API Management Enterprise Edition stack (Console,
+Portal, Gateway, and Management API) backed by MongoDB for persistence
+and Elasticsearch for analytics. The Kafka Gateway is enabled by default,
+allowing the APIM Gateway to act as a Kafka proxy — clients connect using
+the Kafka protocol via `*.kafka.sew.local:9092` with TLS.
 
 ## Usage
 
 ```bash
-sew create --from gravitee-io/ee/apim/kafka/mongodb
+sew create --from gravitee-io/ee/apim/mongodb
 ```
 
 ## Prerequisites
 
-This context uses DNS for host-based routing (`*.kafka.sew.local`). After
-creating the cluster, run the one-time OS setup so these hostnames resolve
-on your machine (may require `sudo`):
+This context uses DNS for host-based Kafka routing (`*.kafka.sew.local`).
+After creating the cluster, run the one-time OS setup so these hostnames
+resolve on your machine:
 
 ```bash
 sew setup dns
 ```
+
+> The setup command requires `sudo` because it writes to system
+> directories: `/etc/resolver/` on macOS, and `systemd-resolved`
+> configuration on Linux. Once done, day-to-day `sew create` and
+> `sew delete` commands run without elevated privileges.
 
 See the [Networking guide](https://a-cordier.github.io/sew/docs/guides/networking/#local-dns) for details.
 

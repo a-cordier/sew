@@ -1,5 +1,5 @@
 ---
-title: "APIM - JDBC MySQL"
+title: "APIM OSS - JDBC MySQL"
 description: "Gravitee APIM with MySQL JDBC backend and Elasticsearch"
 tags: [networking]
 ---

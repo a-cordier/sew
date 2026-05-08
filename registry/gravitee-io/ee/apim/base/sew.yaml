@@ -1,6 +1,12 @@
 abstract: true
 from:
   - kafka/standalone
+vars:
+  clusterName:
+    default: "gravitee"
+    description: "Name of the Kind cluster"
+kind:
+  name: "{{ .clusterName }}"
 features:
   lb:
     enabled: true

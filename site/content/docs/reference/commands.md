@@ -298,7 +298,7 @@ Shows a table with the cluster name, creation date, context paths, active contex
 ```
 NAME                 CREATED            FROM                                  FLAGS              STATUS
 kind-gravitee-apim   2026-03-23 14:00   gravitee-io/oss/apim/jdbc/postgres    --disable-es       running
-kind-gravitee-kafka  2026-03-22 10:30   gravitee-io/ee/apim/kafka         -                  stopped
+kind-gravitee-apim   2026-03-22 10:30   gravitee-io/ee/apim/jdbc/postgres     -                  stopped
 ```
 
 ## sew describe

@@ -1,5 +1,5 @@
 ---
-title: "APIM - JDBC MSSQL"
+title: "APIM OSS - JDBC MSSQL"
 description: "Gravitee APIM with MSSQL JDBC backend and Elasticsearch"
 tags: [networking]
 ---

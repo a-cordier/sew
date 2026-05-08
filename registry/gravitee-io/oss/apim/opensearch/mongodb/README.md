@@ -1,5 +1,5 @@
 ---
-title: "APIM - OpenSearch MongoDB"
+title: "APIM OSS - OpenSearch MongoDB"
 description: "Gravitee APIM with MongoDB backend and OpenSearch"
 tags: [networking]
 ---

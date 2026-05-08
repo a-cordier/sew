@@ -1,5 +1,5 @@
 ---
-title: "APIM - JDBC PostgreSQL"
+title: "APIM OSS - JDBC PostgreSQL"
 description: "Gravitee APIM with PostgreSQL JDBC backend and Elasticsearch"
 tags: [networking]
 ---

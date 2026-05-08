@@ -1,3 +1,3 @@
 from:
   - gravitee-io/oss/apim/jdbc/postgres
-  - gravitee-io/ee/apim/kafka/base
+  - gravitee-io/ee/apim/base

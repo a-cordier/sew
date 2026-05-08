@@ -71,8 +71,7 @@ components:
         ratelimit:
           type: redis
         gateway:
-          env:
-            - name: gravitee_ratelimit_redis_host
-              value: redis
-            - name: gravitee_ratelimit_redis_port
-              value: "6379"
+          ratelimit:
+            redis:
+              host: redis
+              port: 6379

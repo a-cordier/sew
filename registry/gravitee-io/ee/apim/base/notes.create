@@ -16,8 +16,9 @@ Vault is deployed in dev mode (root token: root).
 To access the Vault API/UI from your host:
 
   kubectl port-forward svc/vault -n gravitee 8200:8200
-
 {{ end -}}
+{{ if not (hasFlag "disable-kafka") -}}
+
 Kafka Gateway    *.kafka.sew.local:9092 (TLS)
 
 To connect a Kafka client to the gateway, extract the TLS certificate:
@@ -30,3 +31,8 @@ Then use these client properties:
   ssl.truststore.type=PEM
   ssl.truststore.location=/path/to/kafka-tls.crt
   ssl.endpoint.identification.algorithm=
+{{ end -}}
+{{ if hasFlag "enable-alert-engine" -}}
+
+Alert Engine is running inside the cluster (ws://alert-engine:8072).
+{{ end -}}

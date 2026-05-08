@@ -1,5 +1,5 @@
 ---
-title: "APIM - DB-less"
+title: "APIM OSS - DB-less"
 description: "Gravitee APIM gateway in DB-less mode with the Gravitee Kubernetes Operator"
 tags: [networking]
 ---
