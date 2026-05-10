@@ -2,6 +2,10 @@ from:
   - postgresql/standalone
   - gravitee-io/oss/am/jdbc/base
 vars:
+  postgresql:
+    standalone:
+      postgresDatabase:
+        default: "am"
   jdbcDriver:
     default: "postgresql"
     description: "JDBC driver identifier"

@@ -8,6 +8,9 @@ vars:
   imageTag:
     default: "17"
     description: "PostgreSQL Docker image tag"
+  postgresDatabase:
+    default: "gravitee"
+    description: "Database to create on first startup"
 images:
   preload:
     refs:
@@ -48,7 +51,7 @@ components:
                         name: postgresql
                     env:
                       - name: POSTGRES_DB
-                        value: gravitee
+                        value: "{{ .postgresDatabase }}"
                       - name: POSTGRES_USER
                         value: postgres
                       - name: POSTGRES_PASSWORD

@@ -2,6 +2,10 @@ from:
   - mysql/standalone
   - gravitee-io/oss/am/jdbc/base
 vars:
+  mysql:
+    standalone:
+      mysqlDatabase:
+        default: "am"
   jdbcDriver:
     default: "mysql"
     description: "JDBC driver identifier"
