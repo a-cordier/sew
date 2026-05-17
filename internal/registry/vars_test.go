@@ -84,6 +84,23 @@ func TestComputeEffectiveVars(t *testing.T) {
 	}
 }
 
+func TestComputeEffectiveVars_PathOverrideBlocksBroadcast(t *testing.T) {
+	own := map[string]string{"imageTag": "7", "clusterName": "mongo-standalone"}
+	overrides := map[string]string{"imageTag": "7"}
+	set := SetOverrides{
+		Broadcast: map[string]string{"imageTag": "master-latest"},
+		Scoped:    map[string]string{},
+	}
+
+	vars := computeEffectiveVars(own, overrides, set)
+	if vars["imageTag"] != "7" {
+		t.Errorf("path-scoped override should block broadcast; expected imageTag=7, got %q", vars["imageTag"])
+	}
+	if vars["clusterName"] != "mongo-standalone" {
+		t.Errorf("expected clusterName=mongo-standalone, got %q", vars["clusterName"])
+	}
+}
+
 func TestComputeEffectiveVars_BroadcastOnlyForDeclaredVars(t *testing.T) {
 	own := map[string]string{"imageTag": "9"}
 	set := SetOverrides{

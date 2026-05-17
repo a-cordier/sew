@@ -2,6 +2,19 @@ from:
   - mongodb/standalone
   - opensearch/standalone
   - gravitee-io/oss/apim/opensearch/base
+vars:
+  mongodb:
+    standalone:
+      imageTag:
+        default: "7"
+      imageRepository:
+        default: "mongo"
+  opensearch:
+    standalone:
+      imageTag:
+        default: "3.0.0"
+      imageRepository:
+        default: "opensearchproject/opensearch"
 images:
   preload:
     skip:

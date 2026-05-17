@@ -3,9 +3,19 @@ from:
   - elastic/elasticsearch/standalone
   - gravitee-io/oss/apim/jdbc/base
 vars:
-  imageTag:
-    default: "8.0"
-    description: "MySQL Docker image tag"
+  mysql:
+    standalone:
+      imageTag:
+        default: "8.0"
+      imageRepository:
+        default: "mysql"
+  elastic:
+    elasticsearch:
+      standalone:
+        imageTag:
+          default: "9.3.1"
+        imageRepository:
+          default: "docker.elastic.co/elasticsearch/elasticsearch"
   jdbcUrl:
     default: "jdbc:mysql://mysql:3306/gravitee"
     description: "JDBC connection URL"

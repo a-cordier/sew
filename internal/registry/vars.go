@@ -52,7 +52,13 @@ func resolveScopedOverride(dottedKey string, knownPaths map[string]bool) (contex
 }
 
 // computeEffectiveVars builds the final var map for a context by applying
-// the priority chain: own defaults < path-scoped overrides < broadcast --set < scoped --set.
+// the priority chain: own defaults < broadcast --set < path-scoped overrides < scoped --set.
+//
+// Path-scoped overrides (set by a child context targeting this parent) take
+// priority over broadcast --set because they express specific intent from
+// the composition author. Without this, a broadcast like --set imageTag=X
+// would leak into datastores composed alongside a product context that also
+// declares imageTag.
 func computeEffectiveVars(
 	ownDefaults map[string]string,
 	pathOverrides map[string]string,
@@ -64,14 +70,14 @@ func computeEffectiveVars(
 		vars[k] = v
 	}
 
-	for k, v := range pathOverrides {
-		vars[k] = v
-	}
-
 	for k, v := range set.Broadcast {
 		if _, declared := ownDefaults[k]; declared {
 			vars[k] = v
 		}
+	}
+
+	for k, v := range pathOverrides {
+		vars[k] = v
 	}
 
 	// Scoped --set overrides are applied by the caller after resolving

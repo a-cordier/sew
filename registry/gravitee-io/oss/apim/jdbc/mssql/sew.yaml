@@ -3,6 +3,19 @@ from:
   - elastic/elasticsearch/standalone
   - gravitee-io/oss/apim/jdbc/base
 vars:
+  mssql:
+    standalone:
+      imageTag:
+        default: "2022-latest"
+      imageRepository:
+        default: "mcr.microsoft.com/mssql/server"
+  elastic:
+    elasticsearch:
+      standalone:
+        imageTag:
+          default: "9.3.1"
+        imageRepository:
+          default: "docker.elastic.co/elasticsearch/elasticsearch"
   jdbcUrl:
     default: "jdbc:sqlserver://mssql:1433;databaseName=gravitee;encrypt=false"
     description: "JDBC connection URL"

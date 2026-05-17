@@ -6,6 +6,10 @@ vars:
     standalone:
       postgresDatabase:
         default: "am"
+      imageTag:
+        default: "17"
+      imageRepository:
+        default: "postgres"
   jdbcDriver:
     default: "postgresql"
     description: "JDBC driver identifier"

@@ -1,6 +1,13 @@
 from:
   - mongodb/standalone
   - gravitee-io/oss/am/base
+vars:
+  mongodb:
+    standalone:
+      imageTag:
+        default: "7"
+      imageRepository:
+        default: "mongo"
 components:
   - name: mongodb
     namespace: gravitee

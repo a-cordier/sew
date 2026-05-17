@@ -5,6 +5,12 @@ vars:
   clusterName:
     default: "gravitee"
     description: "Name of the Kind cluster"
+  kafka:
+    standalone:
+      imageTag:
+        default: "latest"
+      imageRepository:
+        default: "apache/kafka"
 kind:
   name: "{{ .clusterName }}"
 features:

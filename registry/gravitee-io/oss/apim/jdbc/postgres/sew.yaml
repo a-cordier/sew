@@ -3,6 +3,19 @@ from:
   - elastic/elasticsearch/standalone
   - gravitee-io/oss/apim/jdbc/base
 vars:
+  postgresql:
+    standalone:
+      imageTag:
+        default: "17"
+      imageRepository:
+        default: "postgres"
+  elastic:
+    elasticsearch:
+      standalone:
+        imageTag:
+          default: "9.3.1"
+        imageRepository:
+          default: "docker.elastic.co/elasticsearch/elasticsearch"
   jdbcUrl:
     default: "jdbc:postgresql://postgresql:5432/gravitee"
     description: "JDBC connection URL"

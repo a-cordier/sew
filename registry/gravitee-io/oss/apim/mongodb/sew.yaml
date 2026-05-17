@@ -2,6 +2,20 @@ from:
   - mongodb/standalone
   - elastic/elasticsearch/standalone
   - gravitee-io/oss/apim/base
+vars:
+  mongodb:
+    standalone:
+      imageTag:
+        default: "7"
+      imageRepository:
+        default: "mongo"
+  elastic:
+    elasticsearch:
+      standalone:
+        imageTag:
+          default: "9.3.1"
+        imageRepository:
+          default: "docker.elastic.co/elasticsearch/elasticsearch"
 components:
   - name: mongodb
     namespace: gravitee

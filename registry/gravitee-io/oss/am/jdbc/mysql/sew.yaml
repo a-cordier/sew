@@ -6,6 +6,10 @@ vars:
     standalone:
       mysqlDatabase:
         default: "am"
+      imageTag:
+        default: "8.0"
+      imageRepository:
+        default: "mysql"
   jdbcDriver:
     default: "mysql"
     description: "JDBC driver identifier"
@@ -24,10 +28,6 @@ vars:
   jdbcPassword:
     default: "mysql"
     description: "JDBC password"
-  mysql:
-    standalone:
-      imageTag:
-        default: "8.0"
 images:
   preload:
     skip:

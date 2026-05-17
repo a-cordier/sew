@@ -10,6 +10,12 @@ vars:
   imageTag:
     default: "3.12.7"
     description: "Ambassador Edge Stack Docker image tag"
+  redis:
+    standalone:
+      imageTag:
+        default: "7"
+      imageRepository:
+        default: "redis"
 images:
   preload:
     refs:
