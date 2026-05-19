@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.1](https://github.com/a-cordier/sew/compare/v0.18.0...v0.18.1) (2026-05-19)
+
+
+### Bug Fixes
+
+* fix image tag variables in gravitee contexts ([ed1a490](https://github.com/a-cordier/sew/commit/ed1a490a1781a560e76279617ebb9568311ca50d))
+
 ## [0.18.0](https://github.com/a-cordier/sew/compare/v0.17.0...v0.18.0) (2026-05-08)
 
 
