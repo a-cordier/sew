@@ -36,17 +36,17 @@ sew delete
 List topics from your host using [kcat](https://github.com/edenhill/kcat):
 
 ```bash
-kcat -b localhost:30092 -L
+kcat -b 127.0.0.1:30092 -L
 ```
 
 Produce and consume a test message:
 
 ```bash
-echo "hello" | kcat -b localhost:30092 -P -t test-topic
-kcat -b localhost:30092 -C -t test-topic -e
+echo "hello" | kcat -b 127.0.0.1:30092 -P -t test-topic
+kcat -b 127.0.0.1:30092 -C -t test-topic -e
 ```
 
 | Parameter | Value     |
 |-----------|-----------|
-| Bootstrap | localhost:30092 |
+| Bootstrap | 127.0.0.1:30092 |
 | Protocol  | PLAINTEXT |
